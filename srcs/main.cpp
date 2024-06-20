@@ -1,18 +1,31 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Parsing/ServerSettings.hpp"
+#include "Server/Socket.hpp"
 #include <exception>
 #include <iostream>
 
+void socketTest()
+{
+	Socket firstSocket(8080);
+	std::cout << firstSocket.getSocketFd() << std::endl;
+}
+
+void serverInfoTest()
+{
+	ServersInfo servers;
+
+		
+	std::vector<ServerSettings> serveri = servers.getAllServers();
+	servers.printAllServersInfo();
+}
+
 int main()
 {
+	//
 
 	try
 	{
-		ServersInfo servers;
-
-		
-		std::vector<ServerSettings> serveri = servers.getAllServers();
-		servers.printAllServersInfo();
+		socketTest();
 
 	}
 	catch(std::exception &e)

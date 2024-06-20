@@ -33,6 +33,7 @@ SRCS =		srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
+			srcs/Server/Socket.cpp \
 			#srcs/main.cpp
 
 
@@ -45,6 +46,7 @@ HEADERS =	srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/Configuration.hpp \
 			srcs/Parsing/ParsingUtils.hpp \
 			srcs/Parsing/ServerSettings.hpp \
+			srcs/Server/Socket.hpp \
 
 OBJDIR =	obj
 OBJS =		$(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
@@ -57,7 +59,7 @@ RM =		rm -fr
 
 all:			$(NAME)
 
-$(NAME):		$(OBJS) $(HEADERS)
+$(NAME):		$(OBJS) $(HEADERS) srcs/main.cpp 
 					@$(CXX) $(OBJS) $(CXXFLAGS) srcs/main.cpp -o $(NAME)
 					@echo "$(GREEN)Compilation successful.$(RESET) Executable name: ./$(NAME)"
 
