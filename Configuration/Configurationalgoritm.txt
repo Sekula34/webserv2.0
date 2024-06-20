@@ -1,0 +1,52 @@
+Input : only one path to config file 
+
+
+DONE
+1.Check if you can open file, and if file is normal (no udevrandom an shit like that)
+	-file should be opened only in read mode, since no writing on this file will be document
+
+2.Read file line by line and store line and line number in vector;
+
+3. Construct directivePaths like
+http{server{listen 80;
+http{server{directive_name param, param;
+http{server{location /{proxy HOST nesto;
+//encounters } that means delete one thing from path 
+http{server{LOCATION SOMETHING{
+}
+http{server
+http{
+http{server{lsiten : 8080;
+http {server
+http {
+EMPTY
+
+Ako linija ne sadrzi ; i } spremi ju kompletno 
+
+2. Read file and store all information in class variables
+	- at the same time check if sytax is valid
+		- valid syntax means that directive name is knows (store valid few that we support in some kind of const array)
+			and that context have valid name and opening and closing brackets
+
+
+tokkens : http { server 1 { liste 80;} directive name 90; 
+location / { proxy Host; }
+
+goes through every token 
+{
+	token nex = curent + 1;
+	//set current Token path
+	if(next == { )
+	{
+		if(current is not directive )
+			error
+		tokenPath += curent;
+		continue;
+	}
+	if(next == })
+	{
+		if(tokenPath is 0)
+			closing unopend bracket error;
+		remove last from TokenPath;
+	}
+}

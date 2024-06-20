@@ -1,0 +1,198 @@
+OSI- Open systems Interconnection model is conceptual model that
+	characterrizes and standardizes the communication functions of
+	telecommunication or computing system withot regard to its 
+	underlying internan structure and technology. Original version 7 layers
+
+Transport layer - primarly resposible for ensuring that data is transferred
+	from one point to another realiably and without errors. Common example
+	TCP (Transmission Control Protocol), User Datagram Protocol (UDP)
+
+RFC - Request for CommentsAn RFC is authored by engineers and 
+	computer scientists in the form of a memorandum describing methods, 
+	behaviors, research, or innovations applicable to the working of the 
+	Internet and Internet-connected systems
+
+Relevant RFC for HTTP 1.1/ 7230, 7231, 7232, 7233, 7234, 7235
+
+Socket - mechanism that OS provide to give program access to the network.
+	It allows messages to be sent and received betweem applications
+	(different processes) on different networked machines. 
+
+TCP/IP sockets steps : create socket, identify socket, ON SERVER wait for incoming connection, send and receive message, close the socket
+
+
+create socket : int serverFD = socket(domain, type, protocol)  in <sys/socket.h>
+	domain is AF_INET, type is SOCK_STREAM
+
+AF_INET - Adress Family Internet IP, IPv4 adress 
+
+SOCK_STREAM - socket type, Setting up socket that uses Transmission Cotnrol Protocol for data transmisson
+			Connection oriented- connection must be esatblished between client and server 
+			Reliable -TCP guarantees that data sent from one end of the connection will arrive at the other 
+				end in the same order it was sent without errors. If any data is lost or corrupted it will be retrasmitted
+			ByteStream- data is read as a continous stream of bytes, no message limit
+
+
+part of identifying(naming) socket is bind 
+int bind(int socket, const struct sockaddr *address, socklen_t address_len);
+0 success, -1 error and errno
+
+
+
+bind - assigning a transport address to the socket
+		analogy, socket is mailbox and with bind we give it address
+		transport address is defined in socket address structure. There is different types of communication interfaces that use socket
+		that is why it take sockaddr structure. Format of that structure is determined on the address family ()
+
+To allow your server to restart quickly and reuse the same port, you can set the `SO_REUSEADDR` socket option before you bind the socket. This option allows the socket to reuse the address even if it's in a `TIME_WAIT` state.
+SO_REUSEADDR: Allow reuse of local addresses.
+SO_REUSEPORT: Allow multiple sockets to bind to the same port.
+Here's how you can modify your code:
+
+	```cpp
+	int opt = 1;
+	if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+		perror("setsockopt");
+		return 1;
+	}
+
+	// Now bind the socket
+	// bindVal = bind(serverFd, const struct sockaddr *addr, socklen_t len)
+
+	// Rest of your code...
+```
+
+This code sets the `SO_REUSEADDR` and `SO_REUSEPORT` options on the socket before binding it. If `setsockopt` fails, it prints an error message and returns 1.
+
+Please note that `SO_REUSEPORT` is not available on all platforms. If you're not planning to bind multiple sockets to the same port, you can remove `SO_REUSEPORT` from the `setsockopt` call.
+	int opt = 1;
+	if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+		perror("setsockopt");
+		return 1;
+	}
+
+	// Now bind the socket
+	// bindVal = bind(serverFd, const struct sockaddr *addr, socklen_t len)
+
+	// Rest of your code...
+
+
+defined in netinet/in.h
+struct sockaddr_in 
+{ 
+    __uint8_t         sin_len; 
+    sa_family_t       sin_family; 
+    in_port_t         sin_port; 
+    struct in_addr    sin_addr; 
+    char              sin_zero[8]; 
+};
+
+you need to fill up these before bind
+
+sin_family - socket internet family, here goe AF_INET
+
+sin_port - socket internet Port, you dont need to set this for Client but you need one for server def 
+
+sin_addr - socket internet address, address for this socket. Machine Ip address. 
+	machine have one IP for each network interface. if you have WIFI and ethernet machine have two address, one for each interface.
+	Usually we dont want to specify a specifit interface and let OS do whatever he wants. That is speciall adress 
+	0.0.0.0 defined as INNADDR_ANY - Interned address any. Bindig socket to all available network interfaces.
+
+sizeof(struct sokaddr_in) lenght of structure 
+
+htonl - host to network long. It is used to convert 32 bit integer(example address) 
+	from host byte to network byte orderd. 
+	HOST byte order can be either little endian or bign endian
+	Network byte order is standardized and it is big endian. (most siginificatn byte is at smalles address)
+	
+	#include <arpa/inet.h>
+	uint32_t htonl(uint32_t hostlong);
+
+ntohl - network to host long. Reverse action of htonl. 
+
+htons - host to network short. convert 16 bit integer (example port);
+	#include <arpa/inet.h>
+	uint16_t htons(uint16_t hostshort);
+
+ntohs - networkd to host short. Reverse action of htons;
+
+3. Part of serve wait for an incoming connection 
+
+Before client can connect to a server server should have socket that is prepared
+	to accept the connections. listen system call tells a socket that it should 
+	be capable of accepting connections 
+
+#include <sys/socket.h> 
+int listen(int socket, int backlog);
+0 sucesss, -1 error and errno
+
+backglog defines the maximum number of pending connections that can be queed up
+before connections are refused. 
+
+accept system call grabs first connection request on the queue of pending connections
+	(set up) in listen and creates a new socket for that connection
+
+The original socket that was set up for listening is used only for accepting connections,
+	not for exchanging data. By default socket operations are synchronous, or blocking,
+	and accept will block until a connection is presetn on the queue.
+
+#include <sys/socket.h> 
+int accept(int socket, struct sockaddr *restrict address, socklen_t *restrict address_len);
+
+first param socket is the socket that was set for accepting connections with listen.
+	second param is the address structure that gets filed in with the address of the client that is doing the connect
+	This allows us to examine the address and port number of the connecting socket if we want to.
+	The third parameter is filled in with the length of the address structure.
+	return success nonNegative filedescriptor, error -1 and errno 
+
+
+So, if you type www.example.com in the web browser, the web browser 
+re-constructs the URL/Address as:
+http://www.example.com:80
+80 is default port for http
+
+
+select in c 
+	 Upon return, each of the file descriptor sets is
+       modified in place to indicate which file descriptors are
+       currently "ready".  Thus, if using select() within a loop, the
+       sets must be reinitialized before each call.
+	Whenever you use select and before it return it decler all socket 
+	descripptors set
+
+	int select(int nfds, fd_set *_Nullable restrict readfds,
+		fd_set *_Nullable restrict writefds,
+		fd_set *_Nullable restrict exceptfds,
+		struct timeval *_Nullable restrict timeout);
+
+       void FD_CLR(int fd, fd_set *set);
+       int  FD_ISSET(int fd, fd_set *set);
+       void FD_SET(int fd, fd_set *set);
+       void FD_ZERO(fd_set *set);
+
+
+       The contents of a file descriptor set can be manipulated using
+       the following macros:
+
+       FD_ZERO()
+              This macro clears (removes all file descriptors from) set.
+              It should be employed as the first step in initializing a
+              file descriptor set.
+
+       FD_SET()
+              This macro adds the file descriptor fd to set.  Adding a
+              file descriptor that is already present in the set is a
+              no-op, and does not produce an error.
+
+       FD_CLR()
+              This macro removes the file descriptor fd from set.
+              Removing a file descriptor that is not present in the set
+              is a no-op, and does not produce an error.
+
+       FD_ISSET()
+              select() modifies the contents of the sets according to
+              the rules described below.  After calling select(), the
+              FD_ISSET() macro can be used to test if a file descriptor
+              is still present in a set.  FD_ISSET() returns nonzero if
+              the file descriptor fd is present in set, and zero if it
+              is not.
