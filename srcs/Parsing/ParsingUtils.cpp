@@ -59,7 +59,7 @@ size_t ParsingUtils::stringToSizeT(std::string string)
 	}
 	std::istringstream iss(string);
 	size_t sizeTValue;
-	if((iss >> sizeTValue) == false)
+	if(!(iss >> sizeTValue))
 	{
 		std::cerr << "Cannot convert string: " << string << " to number" << std::endl; 
 		throw std::runtime_error("istringstrream to size_t failed. Number does not fit in size_t probably");
