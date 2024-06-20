@@ -5,8 +5,12 @@
 
 const int backlog(10); //max of 10 connection on listen que
 
-//contains all necessery information to create socket that will listen on portNumber
-//only importat is public function that returns socket file descriptor;
+
+/**
+ * @brief contains all necessery information to create socket that will listen on portNumber
+ only importat is public function that returns socket file descriptor getSocketFd
+ * 
+ */
 class Socket 
 {
 	private :
