@@ -89,3 +89,15 @@ const int& Socket::getSocketFd(void) const
 {
 	return(_socketFD);
 }
+
+int Socket::getCommunicationSocket(void)
+{
+	int communicationSocket;
+	communicationSocket =  accept(_socketFD, (struct sockaddr *) &_adress, (socklen_t *) &_addrlen);
+	if(communicationSocket == -1)
+	{
+		perror("accept failed");
+		throw std::runtime_error("system function accept failed");
+	}
+	return communicationSocket;
+}

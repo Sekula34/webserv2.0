@@ -27,6 +27,14 @@ class Socket
 		~Socket();
 
 		const int& getSocketFd(void) const;
+		
+		/**
+		* @brief accept connection on this Socket an return communication socket
+		* 
+		* @return int new filedescriptor that is used to communicate with client
+		* @note you must close this
+		*/ 
+		int getCommunicationSocket(void);
 };
 
 #endif
