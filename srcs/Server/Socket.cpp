@@ -77,7 +77,7 @@ Socket& Socket::operator=(const Socket& source)
 
 Socket::~Socket()
 {
-	close(_socketFD);
+	//close(_socketFD);
 }
 
 /**
