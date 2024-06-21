@@ -78,6 +78,7 @@ Socket& Socket::operator=(const Socket& source)
 
 Socket::~Socket()
 {
+	//this is move to SocketManager
 	//close(_socketFD);
 }
 
