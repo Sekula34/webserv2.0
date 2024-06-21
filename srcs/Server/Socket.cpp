@@ -1,5 +1,6 @@
 #include "Socket.hpp"
 #include <asm-generic/socket.h>
+#include <cstddef>
 #include <cstdio>
 #include <netinet/in.h>
 #include <stdexcept>
@@ -11,7 +12,9 @@
 
 
 #include <iostream>
+#include <vector>
 
+std::vector<Socket> Socket::allSockets;
 
 Socket::Socket() : _port(8080)
 {
@@ -20,7 +23,7 @@ Socket::Socket() : _port(8080)
 
 /**
  * @brief Construct a new Socket:: Socket object with port number 
- * 
+ * socket is add to static vector allSockets that need to be close with Socket::closeAllsockets
  * @param portNumber port Number on which socket will listen
  * @throw runtime_error if some of system calls : socket, setsockopt, bind or listen failed
  */
@@ -60,7 +63,8 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		perror("listen systemcall failed");
 		throw std::runtime_error("System call listen failed");
 	}
-	std::cout << "Socket is listening on port " << _port << std::endl; 
+	std::cout << "Socket is listening on port " << _port << std::endl;
+	Socket::allSockets.push_back(*this);
 }
 
 Socket::Socket(const Socket& source) : 
@@ -100,4 +104,12 @@ int Socket::getCommunicationSocket(void)
 		throw std::runtime_error("system function accept failed");
 	}
 	return communicationSocket;
+}
+
+void Socket::closeAllSockets(void)
+{
+	for(size_t i = 0; i < allSockets.size(); i++)
+	{
+		close(allSockets[i]._socketFD);
+	}
 }
