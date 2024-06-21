@@ -10,7 +10,7 @@ SocketManager::SocketManager()
 
 }
 
-SocketManager::SocketManager(std::vector<int>& uniquePorts)
+SocketManager::SocketManager(const std::vector<int>& uniquePorts)
 {
 	for(size_t i = 0; i < uniquePorts.size(); i++)
 	{

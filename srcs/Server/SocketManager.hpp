@@ -11,15 +11,15 @@ class SocketManager
 {
 	private :
 		std::vector<Socket> _allSockets;
+		SocketManager();
 
 	public : 
-		SocketManager();
 		/**
 		 * @brief Construct a new Socket Manager object with all socket from uniqe Ports
 		 * 
 		 * @param uniquePorts 
 		 */
-		SocketManager(std::vector<int>& uniquePorts);
+		SocketManager(const std::vector<int>& uniquePorts);
 		SocketManager(const SocketManager& source);
 		SocketManager& operator=(const SocketManager& source);
 		~SocketManager();
