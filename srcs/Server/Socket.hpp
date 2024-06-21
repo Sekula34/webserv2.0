@@ -2,7 +2,7 @@
 # define SOCKET_HPP
 # include <sys/socket.h>
 # include <netinet/in.h>
-# include <vector>
+
 
 const int backlog(10); //max of 10 connection on listen que
 
@@ -26,9 +26,6 @@ class Socket
 		Socket(const Socket& source);
 		Socket& operator=(const Socket& source);
 		~Socket();
-
-		static std::vector<Socket> allSockets;
-		static void closeAllSockets();
 
 		const int& getSocketFd(void) const;
 		

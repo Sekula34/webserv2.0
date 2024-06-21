@@ -34,6 +34,7 @@ SRCS =		srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
 			srcs/Server/Socket.cpp \
+			srcs/Server/SocketManager.cpp \
 			#srcs/main.cpp
 
 
@@ -47,6 +48,7 @@ HEADERS =	srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ParsingUtils.hpp \
 			srcs/Parsing/ServerSettings.hpp \
 			srcs/Server/Socket.hpp \
+			srcs/Server/SocketManager.hpp \
 
 OBJDIR =	obj
 OBJS =		$(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
