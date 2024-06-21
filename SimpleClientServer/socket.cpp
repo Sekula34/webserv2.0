@@ -81,8 +81,15 @@ int main()
 		{ 
 			printf("No bytes are there to read");
 		}
+		   const char *http_response = 
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html\r\n"
+        "Content-Length: 46\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "<html><body><h1>Hello, World!</h1></body></html>";
 		const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
-		write(communicationSocket , hello , strlen(hello));
+		write(communicationSocket , http_response , strlen(http_response));
 		close(communicationSocket);
 	}
 
