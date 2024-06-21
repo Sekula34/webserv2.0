@@ -25,6 +25,7 @@ class SocketManager
 		~SocketManager();
 
 		std::vector<Socket>& getAllSockets(void);
+		std::vector<int> getAllListenFd(void) const;
 };
 
 #endif

@@ -42,3 +42,14 @@ std::vector<Socket>& SocketManager::getAllSockets(void)
 {
 	return (_allSockets);
 }
+
+std::vector<int> SocketManager::getAllListenFd(void) const
+{
+	std::vector<int> listenFds;
+	for(size_t i = 0; i < _allSockets.size(); i++)
+	{
+		int oneFd = _allSockets[i].getSocketFd();
+		listenFds.push_back(oneFd);
+	}
+	return listenFds;
+}
