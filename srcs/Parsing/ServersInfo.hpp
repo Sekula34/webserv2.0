@@ -25,6 +25,13 @@ class ServersInfo
 		void printAllServersInfo(void) const;
 		const std::vector<ServerSettings>& getAllServers(void) const;
 		const ServerSettings& getOneServer(int serverIndex) const;
+		
+		/**
+		 * @brief Get the Unique Ports number for creating listeningSockets
+		 * 
+		 * @return const std::vector<int> 
+		 */
+		const std::vector<int> getUniquePorts(void) const;
 
 };
 

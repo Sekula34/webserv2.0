@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -99,4 +100,23 @@ const ServerSettings& ServersInfo::getOneServer(int serverIndex) const
 		std::runtime_error("Will segfault. There is not enough servers");
 	}
 	return(_servers[serverIndex]);
+}
+
+//goes through vector of servers
+//get server Port, check if port is in unique vector if not add it
+//return unique ports;
+const std::vector<int> ServersInfo::getUniquePorts() const 
+{
+	std::vector<int> uniquePorts;
+	for(size_t i = 0; i < _servers.size(); i++)
+	{
+		const int serverPort = _servers[i].getPort();
+		std::vector<int>::iterator it;
+		it = std::find(uniquePorts.begin(), uniquePorts.end(), serverPort);
+		if(it == uniquePorts.end())
+		{
+			uniquePorts.push_back(serverPort);
+		}
+	}
+	return uniquePorts;
 }
