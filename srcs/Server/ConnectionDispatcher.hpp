@@ -50,6 +50,13 @@ class ConnectionDispatcher
 		 */
 		void _handleAllReadySockets(std::vector<Socket>& readySockets);
 
+		/**
+		 * @brief read CommunictaionFd
+		 * 
+		 * @param readReadyClientFds fd that are ready to read
+		 */
+		void _handleAllReadyToReadCommunicationFds(std::vector<int>& readReadyClientFds);
+
 		//ConnectionDispatcher();
 	public :
 		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);

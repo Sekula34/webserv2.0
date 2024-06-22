@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <csignal>
+#include <algorithm>
 //#include "../Parsing/ParsingUtils.hpp"
 
 volatile sig_atomic_t flag = 0 ;
@@ -123,6 +124,37 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 	}
 }
 
+void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
+(std::vector<int>& readReadyClientFds)
+{
+	if(readReadyClientFds.empty() == true)
+	{
+		std::cout << "0 Ready clients to read" << std::endl;
+		return;
+	}
+	for(size_t i = 0; i < readReadyClientFds.size(); i++)
+	{
+		int communicationSocket = readReadyClientFds[i];
+		char buffer[1024] = {0};
+		int valread = read( communicationSocket , buffer, 1024);
+		if(valread == -1)
+		{
+			close(communicationSocket);
+			std::vector<int>::iterator it = std::find(_communicationFds.begin(),
+			_communicationFds.end(), communicationSocket);
+			_communicationFds.erase(it);
+		}
+		std::cout << buffer << std::endl;
+		FD_CLR(communicationSocket, &_readSetMaster);
+		
+		// close(communicationSocket);
+		// std::vector<int>::iterator it = std::find(_communicationFds.begin(),
+		// _communicationFds.end(), communicationSocket);
+		// _communicationFds.erase(it);
+	}
+
+}
+
 /*
 	findwhichfd is ready
 	if one of socket fd is ready
@@ -144,7 +176,7 @@ void ConnectionDispatcher::_handleReadyFd(void)
 	std::vector<int> readyReadClientFd = _getReadyToReadCommunicationFds();
 	if(readyReadClientFd.size() != 0)
 	{
-
+		_handleAllReadyToReadCommunicationFds(readyReadClientFd);
 		//ParsingUtils::printVector(readyReadClientFd);
 	}
 
