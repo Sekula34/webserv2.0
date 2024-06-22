@@ -14,6 +14,7 @@ class ConnectionDispatcher
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 		struct timeval _selectTimeout;
+		std::vector<int> _communicationFds;
 		
 		/**
 		 * @brief temp goes in select and will be destroyed every time
@@ -32,13 +33,21 @@ class ConnectionDispatcher
 		 * @return std::vector<Socket> which can be empty if nothing is ready 
 		 */
 		std::vector<Socket> _getAllReadyToReadSockets();
+		std::vector<int> _getReadyToReadCommunicationFds();
 		void _setAllServerListenSocketsForRead(void);
+		int _getMaxFd(void) const;
 
 		/**
 		 * @brief function that handles Ready File Descriptor when select return > 0
 		 * 
 		 */
 		void _handleReadyFd(void);
+		/**
+		 * @brief accept all connection and put communication socket in _communicatonFds
+		 * this should be closed after writing
+		 * 
+		 * @param readySockets 
+		 */
 		void _handleAllReadySockets(std::vector<Socket>& readySockets);
 
 		//ConnectionDispatcher();

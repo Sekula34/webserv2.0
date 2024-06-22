@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <csignal>
+//#include "../Parsing/ParsingUtils.hpp"
 
 volatile sig_atomic_t flag = 0 ;
 
@@ -59,6 +60,21 @@ std::vector<Socket> ConnectionDispatcher::_getAllReadyToReadSockets()
 	
 }
 
+std::vector<int> ConnectionDispatcher::_getReadyToReadCommunicationFds()
+{
+	std::vector<int> toReturn;
+	for(size_t i = 0 ; i < _communicationFds.size(); i++)
+	{
+		//std::cout << "I am here with fd "  <<_communicationFds[i] << std::endl;
+		if(FD_ISSET(_communicationFds[i], &_readSetTemp))
+		{
+			//std::cout << "Putting " << _communicationFds[i] << "to read set" << std::endl;
+			toReturn.push_back(_communicationFds[i]);
+		}
+	}
+	return toReturn;
+}
+
 
 
 /**
@@ -87,19 +103,23 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 		std::cout << "Ready socket is " << std::endl;
 		std::cout << ready << std::endl;
 		int communicationSocket = ready.getCommunicationSocket();
-		char buffer[1024] = {0};
-		int valread = read( communicationSocket , buffer, 1024);
-		(void) valread;
-		std::cout << buffer << std::endl;
-		const char *http_response = 
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/html\r\n"
-		"Content-Length: 46\r\n"
-		"Connection: close\r\n"
-		"\r\n"
-		"<html><body><h1>Hello, World!</h1></body></html>";
-		write(communicationSocket , http_response , strlen(http_response));
-		close(communicationSocket);
+		FD_SET(communicationSocket, &_readSetMaster);
+		std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
+		_communicationFds.push_back(communicationSocket);
+
+		// char buffer[1024] = {0};
+		// int valread = read( communicationSocket , buffer, 1024);
+		// (void) valread;
+		// std::cout << buffer << std::endl;
+		// const char *http_response = 
+		// "HTTP/1.1 200 OK\r\n"
+		// "Content-Type: text/html\r\n"
+		// "Content-Length: 46\r\n"
+		// "Connection: close\r\n"
+		// "\r\n"
+		// "<html><body><h1>Hello, World!</h1></body></html>";
+		// write(communicationSocket , http_response , strlen(http_response));
+		//close(communicationSocket);
 	}
 }
 
@@ -121,6 +141,12 @@ void ConnectionDispatcher::_handleReadyFd(void)
 		_handleAllReadySockets(readySockets);
 		//handle all Sockets;
 	}
+	std::vector<int> readyReadClientFd = _getReadyToReadCommunicationFds();
+	if(readyReadClientFd.size() != 0)
+	{
+
+		//ParsingUtils::printVector(readyReadClientFd);
+	}
 
 	//ready.getCommunicationSocket();
 	// std::cout << "Ready socket is " << std::endl;
@@ -140,6 +166,17 @@ void ConnectionDispatcher::_handleReadyFd(void)
 	// write(communicationSocket , http_response , strlen(http_response));
 	// close(communicationSocket);
 
+}
+
+int ConnectionDispatcher::_getMaxFd(void) const 
+{
+	int maxFD = _sockets.getMaxSocketFd();
+	for(size_t i = 0 ; i<_communicationFds.size(); i++)
+	{
+		if(_communicationFds[i] > maxFD)
+			maxFD = _communicationFds[i];
+	}
+	return maxFD;
 }
 
 void ConnectionDispatcher::mainLoop(void)
@@ -165,7 +202,7 @@ void ConnectionDispatcher::mainLoop(void)
 
 		//find maxFD
 		//ADD communication socket here as well
-		int selectMaxFD = _sockets.getMaxSocketFd();
+		int selectMaxFD = _getMaxFd();
 		int retVal = select(selectMaxFD + 1, &_readSetTemp, &_writeSetTemp, &_errorSetTemp, &_selectTimeout);
 		if(retVal == -1)
 		{
