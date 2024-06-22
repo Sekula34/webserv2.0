@@ -2,6 +2,7 @@
 #include <asm-generic/socket.h>
 #include <cstdio>
 #include <netinet/in.h>
+#include <ostream>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <cstring>
@@ -102,4 +103,12 @@ int Socket::getCommunicationSocket(void)
 		throw std::runtime_error("system function accept failed");
 	}
 	return communicationSocket;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Socket& socket)
+{
+	os<< "Socket with port: " << socket._port << std::endl;
+	os<< "Socket fd is :" << socket._socketFD << std::endl;
+	return os;
 }

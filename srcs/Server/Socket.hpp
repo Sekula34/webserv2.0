@@ -1,5 +1,6 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
+#include <ostream>
 # include <sys/socket.h>
 # include <netinet/in.h>
 
@@ -36,6 +37,10 @@ class Socket
 		* @note you must close this
 		*/ 
 		int getCommunicationSocket(void);
+
+		void printSocketInfo(void);
+
+		friend std::ostream& operator<<(std::ostream& os, const Socket& socket);
 };
 
 #endif
