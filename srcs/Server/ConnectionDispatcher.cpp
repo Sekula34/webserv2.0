@@ -2,7 +2,7 @@
 #include "Socket.hpp"
 #include "SocketManager.hpp"
 #include <cstddef>
-#include <stdexcept>
+#include <cstring>
 #include <sys/select.h>
 #include <unistd.h>
 #include <vector>
@@ -24,7 +24,8 @@ ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& 
 	_selectTimeout.tv_usec = 0;
 }
 ConnectionDispatcher::ConnectionDispatcher(ConnectionDispatcher& source)
-:_sockets(source._sockets), _serversInfo(source._serversInfo), _selectTimeout(source._selectTimeout)
+:_sockets(source._sockets), _serversInfo(source._serversInfo), _selectTimeout(source._selectTimeout),
+_readSetMaster(source._readSetMaster), _writeSetMaster(source._writeSetMaster), _errorSetMaster(source._errorSetMaster)
 {
 
 }
@@ -42,19 +43,23 @@ ConnectionDispatcher::~ConnectionDispatcher()
 
 }
 
-Socket& ConnectionDispatcher::_findwhichSocketIsReady()
+std::vector<Socket> ConnectionDispatcher::_getAllReadyToReadSockets()
 {
+	std::vector<Socket> toReturn;
 	std::vector<int> listenFD = _sockets.getAllListenFd();
 	for(size_t i = 0 ; i < listenFD.size(); i++)
 	{
 		if(FD_ISSET(listenFD[i], &_readSetTemp))
 		{
-			Socket &toREturn = _sockets.getSocketByFd(listenFD[i]);
-			return (toREturn);
+			Socket &oneSocket = _sockets.getSocketByFd(listenFD[i]);
+			toReturn.push_back(oneSocket);
 		}
 	}
-	throw std::runtime_error("0 SOCKETS ARE READY");
+	return toReturn;
+	
 }
+
+
 
 /**
  * @brief FD_SET all filedescriptor of socket for select later
@@ -67,6 +72,74 @@ void ConnectionDispatcher::_setAllServerListenSocketsForRead(void)
 	{
 		FD_SET(listenFd[i], &_readSetMaster);
 	}
+}
+
+void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySockets)
+{
+	if(readySockets.empty() == true)
+	{
+		std::cerr<< "No ReadySockets to handle" << std::endl;
+		return;
+	}
+	for(size_t i =0; i < readySockets.size(); i++)
+	{
+		Socket& ready = readySockets[i];
+		std::cout << "Ready socket is " << std::endl;
+		std::cout << ready << std::endl;
+		int communicationSocket = ready.getCommunicationSocket();
+		char buffer[1024] = {0};
+		int valread = read( communicationSocket , buffer, 1024);
+		(void) valread;
+		std::cout << buffer << std::endl;
+		const char *http_response = 
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Type: text/html\r\n"
+		"Content-Length: 46\r\n"
+		"Connection: close\r\n"
+		"\r\n"
+		"<html><body><h1>Hello, World!</h1></body></html>";
+		write(communicationSocket , http_response , strlen(http_response));
+		close(communicationSocket);
+	}
+}
+
+/*
+	findwhichfd is ready
+	if one of socket fd is ready
+		//socket ready Function
+		//accept connection
+		//store it somewhere
+		//set it to readFDMaseter
+*/
+void ConnectionDispatcher::_handleReadyFd(void)
+{
+	
+
+	std::vector<Socket> readySockets = _getAllReadyToReadSockets();
+	if(readySockets.size() != 0)
+	{
+		_handleAllReadySockets(readySockets);
+		//handle all Sockets;
+	}
+
+	//ready.getCommunicationSocket();
+	// std::cout << "Ready socket is " << std::endl;
+	// std::cout << ready << std::endl;
+	// int communicationSocket = ready.getCommunicationSocket();
+	// char buffer[1024] = {0};
+	// int valread = read( communicationSocket , buffer, 1024);
+	// (void) valread;
+	// std::cout << buffer << std::endl;
+	// const char *http_response = 
+	// "HTTP/1.1 200 OK\r\n"
+	// "Content-Type: text/html\r\n"
+	// "Content-Length: 46\r\n"
+	// "Connection: close\r\n"
+	// "\r\n"
+	// "<html><body><h1>Hello, World!</h1></body></html>";
+	// write(communicationSocket , http_response , strlen(http_response));
+	// close(communicationSocket);
+
 }
 
 void ConnectionDispatcher::mainLoop(void)
@@ -105,16 +178,7 @@ void ConnectionDispatcher::mainLoop(void)
 		}
 		else 
 		{
-			Socket ready = _findwhichSocketIsReady();
-			//ready.getCommunicationSocket();
-			std::cout << "Ready socket is " << std::endl;
-			std::cout << ready << std::endl;
-			int communicationSocket = ready.getCommunicationSocket();
-			char buffer[1024] = {0};
-			int valread = read( communicationSocket , buffer, 1024);
-			(void) valread;
-			std::cout << buffer << std::endl;
-			close(communicationSocket);
+			_handleReadyFd();
 			// std::vector<int> toREad = _sockets.getAllListenFd();
 			// void *buffer[1024];
 			// read(toREad[0], buffer, 1024);
@@ -122,24 +186,5 @@ void ConnectionDispatcher::mainLoop(void)
 			// read
 			// move it from current read to next write
 		}
-		//select(int nfds, fd_set *__restrict readfds, fd_set *__restrict writefds, fd_set *__restrict exceptfds, struct timeval *__restrict timeout)
-		/*
-			select
-			{
-			}
-
-			//if listen fd is ready accept it
-				// add fd to next set
-
-			// after read add fd to next write
-
-			// after write handle fd sets depending on keep alive or not, maybe i will skip this 
-
-
-			//check FDISINSEt
-		*/
-
-		//read = next;
-
 	}
 }

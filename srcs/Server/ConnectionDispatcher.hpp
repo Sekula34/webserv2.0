@@ -14,18 +14,32 @@ class ConnectionDispatcher
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 		struct timeval _selectTimeout;
+		
+		/**
+		 * @brief temp goes in select and will be destroyed every time
+		 * 
+		 */
 		fd_set _readSetTemp, _writeSetTemp, _errorSetTemp;
+		/**
+		 * @brief master is permanent 
+		 * 
+		 */
 		fd_set _readSetMaster, _writeSetMaster, _errorSetMaster;
 
 		/**
-		 * @brief use FD_ISSET to find which socket is ready ro read
-		 * listen FD socket
+		 * @brief fill vector with all socket that have something to read and are ready
 		 * 
-		 * @return Socket& 
-		 * @throw  0 Sockets are ready if cannot find any ready to read 
+		 * @return std::vector<Socket> which can be empty if nothing is ready 
 		 */
-		Socket& _findwhichSocketIsReady();
+		std::vector<Socket> _getAllReadyToReadSockets();
 		void _setAllServerListenSocketsForRead(void);
+
+		/**
+		 * @brief function that handles Ready File Descriptor when select return > 0
+		 * 
+		 */
+		void _handleReadyFd(void);
+		void _handleAllReadySockets(std::vector<Socket>& readySockets);
 
 		//ConnectionDispatcher();
 	public :
