@@ -7,6 +7,15 @@
 #include <unistd.h>
 #include <vector>
 #include <iostream>
+#include <csignal>
+
+volatile sig_atomic_t flag = 0 ;
+
+void handle_sigint(int sig)
+{
+	flag = 1;
+	(void) sig;
+}
 
 ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo)
 :_sockets(sockets), _serversInfo(serversInfo)
@@ -66,11 +75,17 @@ void ConnectionDispatcher::mainLoop(void)
 	FD_ZERO(&_errorSetMaster);
 	FD_ZERO(&_readSetMaster);
 	FD_ZERO(&_writeSetMaster);
+	signal(SIGINT, handle_sigint); 
 
 	_setAllServerListenSocketsForRead();
 	//FD_SET all socketListen fds to those
 	while(true)
 	{
+		if(flag)
+		{
+			std::cout << "Ctrl + c pressed" << std::endl;
+			break;
+		}
 		_readSetTemp = _readSetMaster;
 		_writeSetTemp = _writeSetMaster;
 		_errorSetTemp = _errorSetMaster;
