@@ -53,3 +53,16 @@ std::vector<int> SocketManager::getAllListenFd(void) const
 	}
 	return listenFds;
 }
+
+int SocketManager::getMaxSocketFd() const
+{
+	int maxFD(-1);
+
+	for(size_t i = 0; i <_allSockets.size(); i++)
+	{
+		int currentFd = _allSockets[i].getSocketFd();
+		if(currentFd > maxFD)
+			maxFD = currentFd;
+	}
+	return maxFD;
+}

@@ -26,6 +26,12 @@ class SocketManager
 
 		std::vector<Socket>& getAllSockets(void);
 		std::vector<int> getAllListenFd(void) const;
+		/**
+		 * @brief Get the Max Socket Fd for select, 3, 4 ex will return 4
+		 * 
+		 * @return const int 
+		 */
+		 int getMaxSocketFd() const;
 };
 
 #endif
