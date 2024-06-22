@@ -26,6 +26,15 @@ class SocketManager
 
 		std::vector<Socket>& getAllSockets(void);
 		std::vector<int> getAllListenFd(void) const;
+		
+		/**
+		 * @brief Get the Socket By Fd object
+		 * 
+		 * @param socketFd file descriptor number that should find Socket that have that fd
+		 * @return Socket& 
+		 */
+		Socket& getSocketByFd(int socketFd);
+
 		/**
 		 * @brief Get the Max Socket Fd for select, 3, 4 ex will return 4
 		 * 

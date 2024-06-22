@@ -1,8 +1,10 @@
 #include "SocketManager.hpp"
 #include "Socket.hpp"
 #include <cstddef>
+#include <stdexcept>
 #include <unistd.h>
 #include <vector>
+#include <iostream>
 
 
 SocketManager::SocketManager()
@@ -52,6 +54,19 @@ std::vector<int> SocketManager::getAllListenFd(void) const
 		listenFds.push_back(oneFd);
 	}
 	return listenFds;
+}
+
+Socket& SocketManager::getSocketByFd(int socketFD)
+{
+	for(size_t i = 0; i < _allSockets.size(); i++)
+	{
+		if(_allSockets[i].getSocketFd() == socketFD)
+		{
+			return _allSockets[i];
+		}
+	}
+	std::cerr << "Cannot find socket with " << socketFD << std::endl;
+	throw std::runtime_error("NO SUCH SOCKET");
 }
 
 int SocketManager::getMaxSocketFd() const
