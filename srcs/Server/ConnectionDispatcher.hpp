@@ -14,8 +14,8 @@ class ConnectionDispatcher
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 		struct timeval _selectTimeout;
-		fd_set _readSet, _writeSet, _errorSet;
-		fd_set _nextReadSet, _nextWriteSet, _nextErrorSet;
+		fd_set _readSetTemp, _writeSetTemp, _errorSetTemp;
+		fd_set _readSetMaster, _writeSetMaster, _errorSetMaster;
 
 		/**
 		 * @brief use FD_ISSET to find which socket is ready ro read

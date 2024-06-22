@@ -38,7 +38,7 @@ Socket& ConnectionDispatcher::_findwhichSocketIsReady()
 	std::vector<int> listenFD = _sockets.getAllListenFd();
 	for(size_t i = 0 ; i < listenFD.size(); i++)
 	{
-		if(FD_ISSET(listenFD[i], &_readSet))
+		if(FD_ISSET(listenFD[i], &_readSetTemp))
 		{
 			Socket &toREturn = _sockets.getSocketByFd(listenFD[i]);
 			return (toREturn);
@@ -56,34 +56,29 @@ void ConnectionDispatcher::_setAllServerListenSocketsForRead(void)
 	std::vector<int> listenFd = _sockets.getAllListenFd();
 	for(size_t i = 0; i < listenFd.size(); i++)
 	{
-		FD_SET(listenFd[i], &_readSet);
+		FD_SET(listenFd[i], &_readSetMaster);
 	}
 }
 
 void ConnectionDispatcher::mainLoop(void)
 {
-	FD_ZERO(&_errorSet);
-	FD_ZERO(&_readSet);
-	FD_ZERO(&_writeSet);
 	//only those go in select 
-
-	FD_ZERO(&_nextErrorSet);
-	FD_ZERO(&_nextReadSet);
-	FD_ZERO(&_nextWriteSet);
+	FD_ZERO(&_errorSetMaster);
+	FD_ZERO(&_readSetMaster);
+	FD_ZERO(&_writeSetMaster);
 
 	_setAllServerListenSocketsForRead();
 	//FD_SET all socketListen fds to those
 	while(true)
 	{
-		_nextReadSet = _readSet;
-		_nextWriteSet = _writeSet;
-		_nextErrorSet = _errorSet;
-		
+		_readSetTemp = _readSetMaster;
+		_writeSetTemp = _writeSetMaster;
+		_errorSetTemp = _errorSetMaster;
 
 		//find maxFD
 		//ADD communication socket here as well
 		int selectMaxFD = _sockets.getMaxSocketFd();
-		int retVal = select(selectMaxFD + 1, &_readSet, &_writeSet, &_errorSet, &_selectTimeout);
+		int retVal = select(selectMaxFD + 1, &_readSetTemp, &_writeSetTemp, &_errorSetTemp, &_selectTimeout);
 		if(retVal == -1)
 		{
 			std::cout << "Select Failed" << std::endl;
@@ -99,7 +94,12 @@ void ConnectionDispatcher::mainLoop(void)
 			//ready.getCommunicationSocket();
 			std::cout << "Ready socket is " << std::endl;
 			std::cout << ready << std::endl;
-			ready.getCommunicationSocket();
+			int communicationSocket = ready.getCommunicationSocket();
+			char buffer[1024] = {0};
+			int valread = read( communicationSocket , buffer, 1024);
+			(void) valread;
+			std::cout << buffer << std::endl;
+			close(communicationSocket);
 			// std::vector<int> toREad = _sockets.getAllListenFd();
 			// void *buffer[1024];
 			// read(toREad[0], buffer, 1024);
@@ -107,9 +107,6 @@ void ConnectionDispatcher::mainLoop(void)
 			// read
 			// move it from current read to next write
 		}
-		_readSet = _nextReadSet;
-		_errorSet = _nextErrorSet;
-		_writeSet = _nextWriteSet;
 		//select(int nfds, fd_set *__restrict readfds, fd_set *__restrict writefds, fd_set *__restrict exceptfds, struct timeval *__restrict timeout)
 		/*
 			select
