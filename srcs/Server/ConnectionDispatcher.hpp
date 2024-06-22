@@ -17,6 +17,14 @@ class ConnectionDispatcher
 		fd_set _readSet, _writeSet, _errorSet;
 		fd_set _nextReadSet, _nextWriteSet, _nextErrorSet;
 
+		/**
+		 * @brief use FD_ISSET to find which socket is ready ro read
+		 * listen FD socket
+		 * 
+		 * @return Socket& 
+		 * @throw  0 Sockets are ready if cannot find any ready to read 
+		 */
+		Socket& _findwhichSocketIsReady();
 		void _setAllServerListenSocketsForRead(void);
 
 		//ConnectionDispatcher();

@@ -1,7 +1,10 @@
 #include "ConnectionDispatcher.hpp"
+#include "Socket.hpp"
 #include "SocketManager.hpp"
 #include <cstddef>
+#include <stdexcept>
 #include <sys/select.h>
+#include <unistd.h>
 #include <vector>
 #include <iostream>
 
@@ -28,6 +31,20 @@ ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& sour
 ConnectionDispatcher::~ConnectionDispatcher()
 {
 
+}
+
+Socket& ConnectionDispatcher::_findwhichSocketIsReady()
+{
+	std::vector<int> listenFD = _sockets.getAllListenFd();
+	for(size_t i = 0 ; i < listenFD.size(); i++)
+	{
+		if(FD_ISSET(listenFD[i], &_readSet))
+		{
+			Socket &toREturn = _sockets.getSocketByFd(listenFD[i]);
+			return (toREturn);
+		}
+	}
+	throw std::runtime_error("0 SOCKETS ARE READY");
 }
 
 /**
@@ -78,8 +95,17 @@ void ConnectionDispatcher::mainLoop(void)
 		}
 		else 
 		{
-			std::cout << "Something is ready" << std::endl;
+			Socket ready = _findwhichSocketIsReady();
+			//ready.getCommunicationSocket();
+			std::cout << "Ready socket is " << std::endl;
+			std::cout << ready << std::endl;
+			ready.getCommunicationSocket();
+			// std::vector<int> toREad = _sockets.getAllListenFd();
+			// void *buffer[1024];
+			// read(toREad[0], buffer, 1024);
 			//something is ready
+			// read
+			// move it from current read to next write
 		}
 		_readSet = _nextReadSet;
 		_errorSet = _nextErrorSet;
