@@ -19,7 +19,12 @@
 
 void clientRequestTest()
 {
-	ClientRequest curlRequest("GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/7.XX.X\r\nAccept: */*\r\n\r\n");
+	ClientRequest curlRequest
+		("GET / HTTP/1.1\r\n"
+		"Host: localhost:8080\r\n"
+		"User-Agent: curl/7.XX.X\r\n"
+		"Accept: */*\r\n"
+		"\r\n");
 	std::cout << curlRequest << std::endl;
 }
 
