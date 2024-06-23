@@ -24,7 +24,8 @@ ParsingObjects/%.o: srcs/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-SRCS =		srcs/Parsing/LocationSettings.cpp \
+SRCS =		srcs/Client/ClientRequest.cpp\
+			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
 			srcs/Parsing/DefaultSettings.cpp \
@@ -39,7 +40,8 @@ SRCS =		srcs/Parsing/LocationSettings.cpp \
 			#srcs/main.cpp
 
 
-HEADERS =	srcs/Parsing/LocationSettings.hpp \
+HEADERS =	srcs/Client/ClientRequest.hpp\
+			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
 			srcs/Parsing/Token.hpp \
 			srcs/Parsing/DefaultSettings.hpp \

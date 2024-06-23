@@ -1,4 +1,5 @@
 #include "./Parsing/ServersInfo.hpp"
+#include "Client/ClientRequest.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -14,6 +15,13 @@
 
 
 
+
+
+void clientRequestTest()
+{
+	ClientRequest curlRequest("GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/7.XX.X\r\nAccept: */*\r\n\r\n");
+	std::cout << curlRequest << std::endl;
+}
 
 
 void socketTest()
@@ -107,8 +115,9 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+		//ConnectionDispatcherTest();
 		//SocketManagerTest();
+		clientRequestTest();
 	}
 	catch(std::exception &e)
 	{
