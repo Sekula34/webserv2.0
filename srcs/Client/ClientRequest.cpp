@@ -2,14 +2,13 @@
 #include <cstddef>
 #include <iostream>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include "../Parsing/ParsingUtils.hpp"
 
 ClientRequest::ClientRequest()
 {
 	std::cerr<<"Client Request should not be created like this" << std::endl;
-	throw std::runtime_error("Invalid class");
+	throw InvalidClientRequestException(400, "BAD REQUEST");
 }
 
 ClientRequest::ClientRequest(std::string fullContent)
@@ -43,7 +42,7 @@ void ClientRequest::_setRequestLine(void)
 	size_t firstLineEnd =_request.find("\r\n");
 	if(firstLineEnd == std::string::npos)
 	{
-		throw InvalidClientRequestException();
+		throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	firstLine = _request.substr(0,firstLineEnd);
 	_requestLine = firstLine;
@@ -54,7 +53,7 @@ void ClientRequest::_fillRequestStruct(void)
 	std::vector<std::string> firstLineStrings = ParsingUtils::splitString(_requestLine, ' ');
 	if(firstLineStrings.size() != 3)
 	{
-		throw InvalidClientRequestException();
+		throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	_requestLineElements.requestMethod = firstLineStrings[0];
 	_requestLineElements.requestTarget = firstLineStrings[1];
@@ -70,13 +69,13 @@ void ClientRequest::_checkRequestStruct(void)
 		//TODO:
 		//Implement later to give this response to client since server
 		//only implements those 3 methods
-		throw std::runtime_error("405 Method Not Allowed");
+		throw InvalidClientRequestException(405, "METHOD NOT ALLOWED");
 	}
 	if(_requestLineElements.protocolVersion != "HTTP/1.1")
 	{
 		//TODO:
 		//Implement later to give this response to client
-		throw std::runtime_error("A server can send a 505(HTTP Version Not Supported");
+		throw InvalidClientRequestException(505, "HTTP Version Not Supported");
 	}
 }
 
@@ -88,7 +87,18 @@ std::ostream& operator<<(std::ostream &os, const ClientRequest& object)
 	return os;
 }
 
+ClientRequest::
+InvalidClientRequestException::InvalidClientRequestException(int errorCode, const std::string& errorMessage)
+:_errorCode(errorCode), _errorMessage(errorMessage)
+{
+
+}
+int ClientRequest::InvalidClientRequestException::getErrorCode() const 
+{
+	return _errorCode;
+}
+
 const char* ClientRequest::InvalidClientRequestException::what() const throw ()
 {
-	return ("Invalid Client Request Recieved");
+	return (_errorMessage.c_str());
 }
