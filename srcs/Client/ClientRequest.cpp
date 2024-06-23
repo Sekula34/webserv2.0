@@ -17,6 +17,7 @@ ClientRequest::ClientRequest(std::string fullContent)
 	_setRequestLine();
 	_fillRequestStruct();
 	_checkRequestStruct();
+	_setHost();
 	std::cout << "Request line is [" << _requestLine << "]" << std::endl;
 }
 
@@ -76,6 +77,37 @@ void ClientRequest::_checkRequestStruct(void)
 		//TODO:
 		//Implement later to give this response to client
 		throw InvalidClientRequestException(505, "HTTP Version Not Supported");
+	}
+}
+
+void ClientRequest::_setHost(void)
+{
+	std::string HostLine;
+	size_t hosPos = _request.find("Host:");
+	if(hosPos == std::string::npos)
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
+	}
+	size_t endHos = _request.find("\r\n", hosPos);
+	if(endHos == std::string::npos)
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
+	}
+	HostLine = _request.substr(hosPos, endHos - hosPos);
+	std::string plainHost(HostLine.substr(HostLine.find(" ") + 1));
+	std::vector<std::string> strings  = ParsingUtils::splitString(plainHost, ':');
+	_host.name = strings[0];
+	if(strings.size() == 1)
+	{
+		_host.port = 80;
+	}
+	else if(strings.size() == 2)
+	{
+		_host.port = ParsingUtils::stringToSizeT(strings[1]);
+	}
+	else 
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
 	}
 }
 

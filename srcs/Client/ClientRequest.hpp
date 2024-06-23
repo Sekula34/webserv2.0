@@ -17,9 +17,18 @@ struct RequestLine
 };
 
 /**
+ * @brief struct that contains example localhost as name and 8080 as port
+ * 
+ */
+struct Host 
+{
+	std::string name;
+	int port;
+};
+
+/**
  * @brief class that contains information for client requst
- * if _error is settet server should immmediatily send that code response to client
- * @throw InvalidClientRequest exception if request is invalid and set _error
+ * @throw InvalidClientRequest exception if request is invalid and set _error that you can get with e.getErrorCode
  */
 class ClientRequest
 {
@@ -27,11 +36,13 @@ class ClientRequest
 		std::string _request;
 		std::string _requestLine;
 		RequestLine _requestLineElements;
-		int _error;
+		Host _host;
 
 		void _setRequestLine(void);
 		void _fillRequestStruct();
 		void _checkRequestStruct(void);
+
+		void _setHost(void);
 		ClientRequest();
 
 	public:
