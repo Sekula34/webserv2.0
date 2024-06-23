@@ -224,3 +224,23 @@ using curl to send request to specific domain host
 	Host: specific-domain.com
 	User-Agent: curl/7.81.0
 	Accept: */*
+
+
+int socket;
+fd_set read;
+fd_set readTemp;
+
+FD_ZERO(read);
+FD_SET(socket, &read);
+while(true)
+{
+	readTemp = read;
+	select()
+
+	
+
+}
+
+minimum HTTP 1.1 request
+	GET / HTTP/1.1
+	Host: example.com
