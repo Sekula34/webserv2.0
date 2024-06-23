@@ -4,13 +4,27 @@
 #include <ostream>
 #include <string>
 
+/**
+ * @brief struct that contains all info about requstLine
+ * 
+ */
+struct RequestLine
+{
+	std::string requestMethod;
+	std::string requestTarget;
+	std::string protocolVersion;
+};
+
 class ClientRequest
 {
 	private :
 		std::string _request;
 		std::string _requestLine;
+		RequestLine _requestLineElements;
 
 		void _setRequestLine(void);
+		void _fillRequestStruct();
+		void _checkRequestStruct(void);
 		ClientRequest();
 
 	public:
