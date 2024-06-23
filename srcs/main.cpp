@@ -4,6 +4,7 @@
 #include "Server/ConnectionDispatcher.hpp"
 #include "Server/Socket.hpp"
 #include "Server/SocketManager.hpp"
+
 #include <exception>
 #include <iostream>
 #include <sys/socket.h>
@@ -12,9 +13,13 @@
 
 
 
+
+
+
 void socketTest()
 {
 	Socket firstSocket(8080);
+	std::cout << firstSocket << std::endl;
 	//int serverSocket = firstSocket.getSocketFd();
 	std::cout << firstSocket.getSocketFd() << std::endl;
 	while(true)
@@ -100,7 +105,7 @@ int main()
 	try
 	{
 		//serverInfoTest();
-		//socketTest();
+	//	socketTest();
 		//multipleSocketTesting();
 		ConnectionDispatcherTest();
 		//SocketManagerTest();

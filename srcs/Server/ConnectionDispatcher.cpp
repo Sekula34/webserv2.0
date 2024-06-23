@@ -134,6 +134,10 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 	}
 	for(size_t i = 0; i < readReadyClientFds.size(); i++)
 	{
+		//procitaj fd i spremi ga u request
+		//ocitaj host i nadi odgovarajuci server 
+		//pospremi Serve i commmunication socket u klasu il negdje
+		//makni taj communication iz readReady i metni ga u write ready
 		int communicationSocket = readReadyClientFds[i];
 		char buffer[1024] = {0};
 		int valread = read( communicationSocket , buffer, 1024);
@@ -147,7 +151,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		std::cout << buffer << std::endl;
 		FD_CLR(communicationSocket, &_readSetMaster);
 		
-		// close(communicationSocket);
+		close(communicationSocket);
 		// std::vector<int>::iterator it = std::find(_communicationFds.begin(),
 		// _communicationFds.end(), communicationSocket);
 		// _communicationFds.erase(it);
