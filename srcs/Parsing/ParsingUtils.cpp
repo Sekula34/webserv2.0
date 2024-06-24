@@ -67,6 +67,20 @@ size_t ParsingUtils::stringToSizeT(std::string string)
 	return sizeTValue;
 }
 
+std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
+{
+	std::string PlainValue(fieldValue);
+	if(PlainValue[0] == ' ' || PlainValue[0] == '\t')
+	{
+		PlainValue.erase(0, 1);
+	}
+	if(*PlainValue.rbegin() == ' ' || *PlainValue.rbegin() == '\t')
+	{
+		PlainValue.erase(PlainValue.size() - 1);
+	}
+	return PlainValue;
+}
+
 const char * ParsingUtils::InvalidConversion::what() const throw()
 {
 	return("Exception: Invalid Converion");

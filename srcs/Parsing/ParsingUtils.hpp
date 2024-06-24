@@ -40,6 +40,15 @@ class ParsingUtils
 		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
 		static bool isStringNumber(std::string toCheck);
 		static size_t stringToSizeT(std::string string);
+		
+		/**
+		 * @brief Get the Http Plain Value object
+		 * 
+		 * 
+		 * @param filedValue value that may have one leading and/or one trailing space
+		 * @return std::string  fieldValue without leadin and trailing space;
+		 */
+		static std::string getHttpPlainValue(std::string fieldValue);
 
 		class InvalidConversion : public std::exception
 		{
