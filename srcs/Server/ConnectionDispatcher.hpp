@@ -44,12 +44,21 @@ class ConnectionDispatcher
 		void _handleReadyFd(void);
 		/**
 		 * @brief accept all connection and put communication socket in _communicatonFds
-		 * this should be closed after writing
+		 * this should be closed after writing. Put socket to be ready to read
 		 * 
 		 * @param readySockets 
 		 */
 		void _handleAllReadySockets(std::vector<Socket>& readySockets);
 
+
+		/**
+		 * @brief read readyCleint fds and reutrn string
+		 * 
+		 * @param clientFd 
+		 * @return std::string 
+		 */
+		std::string _readClientFd(int clientFd);
+		
 		/**
 		 * @brief read CommunictaionFd
 		 * 

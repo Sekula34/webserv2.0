@@ -19,6 +19,8 @@
 
 void clientRequestTest()
 {
+	std::string plainValue = ParsingUtils::getHttpPlainValue(" localhost:8080 ");
+	//std::cout << "plain value is [" << plainValue <<"]" << std::endl; 
 	ClientRequest curlRequest
 		("GET / HTTP/1.1\r\n"
 		"Host: localhost:8080\r\n"
@@ -120,9 +122,9 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		//ConnectionDispatcherTest();
+		ConnectionDispatcherTest();
 		//SocketManagerTest();
-		clientRequestTest();
+		//clientRequestTest();
 	}
 	catch(std::exception &e)
 	{
