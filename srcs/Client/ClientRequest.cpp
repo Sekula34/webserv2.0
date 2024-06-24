@@ -94,7 +94,7 @@ void ClientRequest::_setHost(void)
 		throw InvalidClientRequestException(400, "Bad Request");
 	}
 	HostLine = _request.substr(hosPos, endHos - hosPos);
-	std::string plainHost(HostLine.substr(HostLine.find(" ") + 1));
+	std::string plainHost = ParsingUtils::getHttpPlainValue(HostLine.substr(HostLine.find(':') + 1));
 	std::vector<std::string> strings  = ParsingUtils::splitString(plainHost, ':');
 	_host.name = strings[0];
 	if(strings.size() == 1)
