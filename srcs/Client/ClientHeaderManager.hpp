@@ -33,6 +33,14 @@ class ClientHeaderManager
 		 */
 		ClientHeader& getClientHeader(int clientFd);
 
+		/**
+		 * @brief try to read ClientHeader with clientFd
+		 * if there is no object with client FD create one and then try to read 
+		 * @param clientFD
+		 * @return ReadStatus 
+		 */
+		ReadStatus readClientHeader(int& clientFD);
+
 
 		class ClientHeaderNotFound : public std::exception
 		{
