@@ -1,4 +1,5 @@
 #include "./Parsing/ServersInfo.hpp"
+#include "Client/ClientHeader.hpp"
 #include "Client/ClientRequest.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
@@ -15,6 +16,20 @@
 
 
 
+
+void clientMessageTest()
+{
+	Socket mySocket(8080);
+	int clientFD = mySocket.getCommunicationSocket();
+	ClientHeader message(clientFD);
+	std::cout << message << std::endl;
+	message.readOnce();
+	message.readOnce();
+	message.readOnce();
+	std::cout << message << std::endl;
+	close(clientFD);
+	close(mySocket.getSocketFd());
+}
 
 
 void clientRequestTest()
@@ -122,9 +137,10 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+		//ConnectionDispatcherTest();
 		//SocketManagerTest();
 		//clientRequestTest();
+		clientMessageTest();
 	}
 	catch(std::exception &e)
 	{
