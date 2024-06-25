@@ -24,6 +24,15 @@ class ClientHeaderManager
 		 */
 		void createNewClientHeader(int& clientFd);
 
+
+		/**
+		 * @brief removes clientHeader form both _unread and _read vector
+		 * usually called when something went wrong
+		 * 
+		 * @param clientFd 
+		 */
+		void removeClient(int& clientFd);
+
 		/**
 		 * @brief Get the Client Header object
 		 * 
@@ -37,7 +46,9 @@ class ClientHeaderManager
 		 * @brief try to read ClientHeader with clientFd
 		 * if there is no object with client FD create one and then try to read 
 		 * @param clientFD
-		 * @return ReadStatus 
+		 * @return ReadStatus ERROR if error occurs, delete that client Header from class, should close that client FD
+		 * DONE if clientFD is moved from unread to read, that means you have client header that you can further process
+		 * CONTINUE - client FD is not fully read in this iteration
 		 */
 		ReadStatus readClientHeader(int& clientFD);
 

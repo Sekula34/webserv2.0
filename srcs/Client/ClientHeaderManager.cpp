@@ -46,6 +46,21 @@ void ClientHeaderManager::createNewClientHeader(int& clientFd)
 	return;
 }
 
+void ClientHeaderManager::removeClient(int& clientFd)
+{
+	std::vector<ClientHeader>::iterator it = std::find_if(_readHeaders.begin(),
+			_readHeaders.end(), FindClientByFd(clientFd));
+	if(it != _readHeaders.end())
+	{
+		_readHeaders.erase(it);
+	}
+	it = std::find_if(_unreadHeaders.begin(),_unreadHeaders.end(), FindClientByFd(clientFd));
+	if(it != _unreadHeaders.end())
+	{
+		_unreadHeaders.erase(it);
+	}
+}
+
 ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
 {
 	for(size_t i = 0; i < _unreadHeaders.size(); i++)
@@ -69,13 +84,20 @@ ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
 	throw ClientHeaderNotFound();
 }
 
-/*void mark_client_done(int client_id) {
-        auto it = std::find_if(active_clients.begin(),
-			active_clients.end(), [client_id](const Client& client) {
-            return client.id == client_id;
-        });
-		*/
 
+/*
+	TRY TO FIND communication Socket inside ClientHeader Unreadvector
+	if it doesnt exist 
+		//creatin new object put it in UnreadVector 
+	if it exist 
+		readOnce
+			if read once == DONE 
+				remove commSocket from read readyFD and removed it FROM UNreadVector
+			if read once == error
+				close connection?? removeid from client fd completely and from UNREAD vector
+			if read once == continue
+				//should read again //nothihg special?? 
+*/
 ReadStatus ClientHeaderManager::readClientHeader(int& clientFD)
 {
 	createNewClientHeader(clientFD);
