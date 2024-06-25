@@ -20,12 +20,19 @@
 
 void ClientHeaderManagerTester()
 {
+	Socket mySocket(8080);
 	ClientHeaderManager cm;
 	std::cout << "Created ClientHeaderManager " << std::endl;
-	int fd(3);
-	cm.createNewClientHeader(fd);
-	ClientHeader& header = cm.getClientHeader(3);
-	std::cout << header << std::endl;
+	int fd = mySocket.getCommunicationSocket();
+	//int readfd(4);
+	//cm.createNewClientHeader(fd);
+	//ClientHeader header(fd);
+	//ClientHeader& header = cm.getClientHeader(3);
+	ReadStatus status = cm.readClientHeader(fd);
+	std::cout <<"Status is " << status << std::endl;
+	cm.readClientHeader(fd);
+	//cm.readClientHeader(fd);
+	//std::cout <<"Status is " << status << std::endl;
 
 }
 
