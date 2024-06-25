@@ -44,7 +44,23 @@ class ClientHeader
 		ReadStatus readOnce();
 
 		const int& getClientFd() const;
+		bool isFullyRead() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
+};
+
+
+class FindClientByFd {
+
+private:
+    int search_fd;
+public:
+    FindClientByFd(int fd) : search_fd(fd) {}
+
+	//this make class a functor(class that defines () method )
+    bool operator()(const ClientHeader& clientheader) const
+	{
+        return clientheader.getClientFd() == search_fd;
+    }
 };
 #endif

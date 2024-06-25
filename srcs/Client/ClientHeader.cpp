@@ -84,6 +84,11 @@ const int& ClientHeader::getClientFd() const
 	return(_clientFd);
 }
 
+bool ClientHeader::isFullyRead() const
+{
+	return (_fullyRead);
+}
+
 std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 {
 	os<< "Client message data" << std::endl;
