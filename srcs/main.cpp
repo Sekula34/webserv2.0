@@ -156,11 +156,11 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		//ConnectionDispatcherTest();
+		ConnectionDispatcherTest();
 		//SocketManagerTest();
 		//clientRequestTest();
 		//clientMessageTest();
-		ClientHeaderManagerTester();
+		//ClientHeaderManagerTester();
 	}
 	catch(std::exception &e)
 	{
