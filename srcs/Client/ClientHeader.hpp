@@ -43,6 +43,8 @@ class ClientHeader
 		 */
 		ReadStatus readOnce();
 
+		const int& getClientFd() const;
+
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 };
 #endif

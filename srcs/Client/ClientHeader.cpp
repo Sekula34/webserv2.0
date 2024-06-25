@@ -15,7 +15,7 @@ ClientHeader::ClientHeader(int& clientFD)
 }
 
 ClientHeader::ClientHeader(const ClientHeader& source)
-:_clientFd(source._clientFd), _message(source._message)
+:_clientFd(source._clientFd), _message(source._message), _fullyRead(source._fullyRead)
 {
 
 
@@ -32,14 +32,6 @@ ClientHeader::~ClientHeader()
 	
 }
 
-std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
-{
-	os<< "Client message data" << std::endl;
-	os<< "FD is :" << obj._clientFd << std::endl;
-	os<< "IS fully read is " << obj._fullyRead << std::endl;
-	os<< "Message is :[" << obj._message << "]";
-	return os;
-}
 
 ReadStatus ClientHeader::readOnce()
 {
@@ -85,4 +77,18 @@ ReadStatus ClientHeader::readOnce()
 		return DONE;
 	}
 	return CONTINUE_READING;
+}
+
+const int& ClientHeader::getClientFd() const 
+{
+	return(_clientFd);
+}
+
+std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
+{
+	os<< "Client message data" << std::endl;
+	os<< "FD is :" << obj._clientFd << std::endl;
+	os<< "IS fully read is " << obj._fullyRead << std::endl;
+	os<< "Message is :[" << obj._message << "]";
+	return os;
 }
