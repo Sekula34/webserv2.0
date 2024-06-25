@@ -26,6 +26,7 @@ ParsingObjects/%.o: srcs/%.cpp
 
 SRCS =		srcs/Client/ClientRequest.cpp\
 			srcs/Client/ClientHeader.cpp \
+			srcs/Client/ClientHeaderManager.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
@@ -43,6 +44,7 @@ SRCS =		srcs/Client/ClientRequest.cpp\
 
 HEADERS =	srcs/Client/ClientRequest.hpp\
 			srcs/Client/ClientHeader.hpp \
+			srcs/Client/ClientHeaderManager.hpp \
 			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
 			srcs/Parsing/Token.hpp \

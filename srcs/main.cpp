@@ -1,5 +1,6 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Client/ClientHeader.hpp"
+#include "Client/ClientHeaderManager.hpp"
 #include "Client/ClientRequest.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
@@ -16,6 +17,17 @@
 
 
 
+
+void ClientHeaderManagerTester()
+{
+	ClientHeaderManager cm;
+	std::cout << "Created ClientHeaderManager " << std::endl;
+	int fd(3);
+	cm.createNewClientHeader(fd);
+	ClientHeader& header = cm.getClientHeader(3);
+	std::cout << header << std::endl;
+
+}
 
 void clientMessageTest()
 {
@@ -140,7 +152,8 @@ int main()
 		//ConnectionDispatcherTest();
 		//SocketManagerTest();
 		//clientRequestTest();
-		clientMessageTest();
+		//clientMessageTest();
+		ClientHeaderManagerTester();
 	}
 	catch(std::exception &e)
 	{

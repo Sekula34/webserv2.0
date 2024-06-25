@@ -192,6 +192,20 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 
 
 		int communicationSocket = readReadyClientFds[i];
+		/*
+			TRY TO FIND communication Socket inside ClientHeader Unreadvector
+			if it doesnt exist 
+				//creatin new object put it in UnreadVector 
+			if it exist 
+				readOnce
+					if read once == DONE 
+						remove commSocket from read readyFD and removed it FROM UNreadVector
+					if read once == error
+						close connection?? removeid from client fd completely and from UNREAD vector
+					if read once == continue
+						//should read again //nothihg special?? 
+		*/
+
 		_readClientFd(communicationSocket);
 		// char buffer[1024] = {0};
 		// int valread = read( communicationSocket , buffer, 1024);
