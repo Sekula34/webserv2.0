@@ -9,8 +9,8 @@
 #include <vector>
 #include <iostream>
 #include <csignal>
-#include <algorithm>
 #include <fcntl.h>
+#include <algorithm>
 //#include "../Parsing/ParsingUtils.hpp"
 
 volatile sig_atomic_t flag = 0 ;
@@ -106,9 +106,9 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 		std::cout << "Ready socket is " << std::endl;
 		std::cout << ready << std::endl;
 		int communicationSocket = ready.getCommunicationSocket();
+		_communicationFds.push_back(communicationSocket);
 		FD_SET(communicationSocket, &_readSetMaster);
 		std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
-		_communicationFds.push_back(communicationSocket);
 
 		// char buffer[1024] = {0};
 		// int valread = read( communicationSocket , buffer, 1024);
@@ -127,53 +127,54 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 }
 
 
-std::string ConnectionDispatcher::_readClientFd(int communicationFd)
-{
-	//fcntl(communicationFd, F_SETFL, O_NONBLOCK);
-	if(FD_ISSET(communicationFd, &_readSetTemp))
-	{
-		std::cout << "Reay to read" << std::endl;
-	}
-	std::string fullRequest;
-	const int BUFFER_SIZE = 4096;
-	char buffer[BUFFER_SIZE];
-	while(true)
-	{
-		if(fullRequest.find("\r\n\r\n") != std::string::npos)
-		{
-			std::cout << "Data is full" << std::endl;
-			break;
-		}
-		memset(buffer, 0, sizeof(buffer));
-		int retVal = recv(communicationFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
-		std::cout << "Ret val is " << retVal << std::endl;
-		if(retVal > 0)
-		{
+// std::string ConnectionDispatcher::_readClientFd(int communicationFd)
+// {
+// 	//fcntl(communicationFd, F_SETFL, O_NONBLOCK);
+// 	if(FD_ISSET(communicationFd, &_readSetTemp))
+// 	{
+// 		std::cout << "Reay to read" << std::endl;
+// 	}
+// 	std::string fullRequest;
+// 	const int BUFFER_SIZE = 4096;
+// 	char buffer[BUFFER_SIZE];
+// 	while(true)
+// 	{
+// 		if(fullRequest.find("\r\n\r\n") != std::string::npos)
+// 		{
+// 			std::cout << "Data is full" << std::endl;
+// 			break;
+// 		}
+// 		memset(buffer, 0, sizeof(buffer));
+// 		int retVal = recv(communicationFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
+// 		std::cout << "Ret val is " << retVal << std::endl;
+// 		if(retVal > 0)
+// 		{
 			
-			fullRequest.append(buffer, retVal);
-			//retval is how many bytes are read
-		}
-		else if(retVal == -1)
-		{
-			//TODO server error of reading client request remove cerr
-			close(communicationFd);
-			std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-					_communicationFds.end(), communicationFd);
-			_communicationFds.erase(it);
-			std::cerr<<"Read failed while trying to read client req" << std::endl;
-			perror("read");
-			break;
-		}
-		else if(retVal == 0 )
-		{
-			std::cout << "End of file " << std::endl;
-			break;
-		}
-	}
-	FD_CLR(communicationFd, &_readSetMaster);
-	std::cout << "fullRequest is [" << fullRequest << "]" << std::endl;
-	return fullRequest;
-}
+// 			fullRequest.append(buffer, retVal);
+// 			//retval is how many bytes are read
+// 		}
+// 		else if(retVal == -1)
+// 		{
+// 			//TODO server error of reading client request remove cerr
+// 			close(communicationFd);
+// 			std::vector<int>::iterator it = std::find(_communicationFds.begin(),
+// 					_communicationFds.end(), communicationFd);
+// 			_communicationFds.erase(it);
+// 			std::cerr<<"Read failed while trying to read client req" << std::endl;
+// 			perror("read");
+// 			break;
+// 		}
+// 		else if(retVal == 0 )
+// 		{
+// 			std::cout << "End of file " << std::endl;
+// 			break;
+// 		}
+// 	}
+// 	FD_CLR(communicationFd, &_readSetMaster);
+// 	std::cout << "fullRequest is [" << fullRequest << "]" << std::endl;
+// 	return fullRequest;
+// }
+
 
 void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 (std::vector<int>& readReadyClientFds)
@@ -192,37 +193,15 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 
 
 		int communicationSocket = readReadyClientFds[i];
-		/*
-			TRY TO FIND communication Socket inside ClientHeader Unreadvector
-			if it doesnt exist 
-				//creatin new object put it in UnreadVector 
-			if it exist 
-				readOnce
-					if read once == DONE 
-						remove commSocket from read readyFD and removed it FROM UNreadVector
-					if read once == error
-						close connection?? removeid from client fd completely and from UNREAD vector
-					if read once == continue
-						//should read again //nothihg special?? 
-		*/
-
-		_readClientFd(communicationSocket);
-		// char buffer[1024] = {0};
-		// int valread = read( communicationSocket , buffer, 1024);
-		// if(valread == -1)
-		// {
-		// 	close(communicationSocket);
-		// 	std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-		// 	_communicationFds.end(), communicationSocket);
-		// 	_communicationFds.erase(it);
-		// }
-		// std::cout << buffer << std::endl;
-		// FD_CLR(communicationSocket, &_readSetMaster);
+		ReadStatus status =  _clientHeaders.readClientHeader(communicationSocket);
+		if(status == ERROR)
+		{
+			std::cout << "ERROR while reading" << std::endl;
+			_removeClient(communicationSocket);
+		}
 		std::cout << "FERTIG" << std::endl;
-		close(communicationSocket);
-		// std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-		// _communicationFds.end(), communicationSocket);
-		// _communicationFds.erase(it);
+		_removeClient(communicationSocket);
+		//close(communicationSocket);
 	}
 
 }
@@ -281,6 +260,21 @@ int ConnectionDispatcher::_getMaxFd(void) const
 			maxFD = _communicationFds[i];
 	}
 	return maxFD;
+}
+
+void ConnectionDispatcher::_removeClient(int clientFd)
+{
+	std::vector<int>::iterator it = std::find(_communicationFds.begin(),
+			_communicationFds.end(), clientFd);
+	_clientHeaders.removeClient(clientFd);
+	if(it != _communicationFds.end())
+	{
+		_communicationFds.erase(it);
+	}
+	FD_CLR(clientFd, &_readSetMaster);
+	FD_CLR(clientFd, &_writeSetMaster);
+	FD_CLR(clientFd, &_errorSetMaster);
+	close(clientFd);
 }
 
 void ConnectionDispatcher::mainLoop(void)

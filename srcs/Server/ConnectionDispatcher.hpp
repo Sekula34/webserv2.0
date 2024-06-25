@@ -3,6 +3,7 @@
 #include "SocketManager.hpp"
 #include "../Parsing/ServersInfo.hpp"
 #include <sys/select.h>
+#include "../Client/ClientHeaderManager.hpp"
 
 /**
  * @brief class for handling select creating servers and give them tasks
@@ -13,7 +14,14 @@ class ConnectionDispatcher
 	private :
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
+		ClientHeaderManager _clientHeaders;
 		struct timeval _selectTimeout;
+
+		/**
+		 * @brief all clientcommunication FDs, if fd is close it should be 
+		 * removed from this
+		 * 
+		 */
 		std::vector<int> _communicationFds;
 		
 		/**
@@ -56,8 +64,8 @@ class ConnectionDispatcher
 		 * 
 		 * @param clientFd 
 		 * @return std::string 
-		 */
 		std::string _readClientFd(int clientFd);
+		 */
 		
 		/**
 		 * @brief read CommunictaionFd
@@ -66,6 +74,13 @@ class ConnectionDispatcher
 		 */
 		void _handleAllReadyToReadCommunicationFds(std::vector<int>& readReadyClientFds);
 
+
+		/**
+		 * @brief remoeves client from _communicationfd and close connection
+		 * 
+		 * @param clientFD fd to find, close and forget from everything
+		 */
+		void _removeClient(int clientFD);
 		//ConnectionDispatcher();
 	public :
 		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
