@@ -104,6 +104,9 @@ ReadStatus ClientHeaderManager::readClientHeader(int& clientFD)
 	ClientHeader& toRead = getClientHeader(clientFD);
 	if(toRead.isFullyRead() == true)
 	{
+		ReadStatus closed = toRead.readOnce();
+		if(closed == CLIENT_CLOSE)
+			return ERROR;
 		return DONE;
 	}
 	ReadStatus status = toRead.readOnce();

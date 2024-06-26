@@ -199,8 +199,12 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 			std::cout << "ERROR while reading" << std::endl;
 			_removeClient(communicationSocket);
 		}
+		if(status == DONE)
+		{
+			//FD_CLR(communicationSocket, &_readSetMaster);
+		}
 		std::cout << "FERTIG" << std::endl;
-		_removeClient(communicationSocket);
+		//_removeClient(communicationSocket);
 		//close(communicationSocket);
 	}
 

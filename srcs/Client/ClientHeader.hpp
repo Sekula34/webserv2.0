@@ -8,9 +8,10 @@
  */
 enum ReadStatus
 {
+	CLIENT_CLOSE = -2,
+	ERROR = -1,
 	DONE,
-	CONTINUE_READING,
-	ERROR = -1
+	CONTINUE_READING
 };
 
 
@@ -28,6 +29,8 @@ class ClientHeader
 		std::string _message;
 		bool _fullyRead;
 		ClientHeader();
+
+		bool _isConnectionClosedByClient(void);
 
 	public :
 		ClientHeader(int& clientFd);

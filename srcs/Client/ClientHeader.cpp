@@ -32,11 +32,22 @@ ClientHeader::~ClientHeader()
 	
 }
 
+bool ClientHeader::_isConnectionClosedByClient(void)
+{
+	char buffer[16];
+	int bytes_read = recv(_clientFd, buffer, sizeof(buffer), MSG_PEEK);
+	if(bytes_read == 0)
+		return true;
+	return false;
+}
 
 ReadStatus ClientHeader::readOnce()
 {
 	if(_fullyRead == true)
 	{
+		if(_isConnectionClosedByClient() == true)
+			return CLIENT_CLOSE;
+		//check if it is close by client
 		std::cout << "NO need to read anymore" << std::endl;
 		return DONE;
 	}
