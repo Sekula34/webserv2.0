@@ -40,10 +40,12 @@ void clientMessageTest()
 	Socket mySocket(8080);
 	int clientFD = mySocket.getCommunicationSocket();
 	ClientHeader message(clientFD);
-	std::cout << message << std::endl;
+	//std::cout << message << std::endl;
 	ReadStatus status = message.readOnce();
-	message.setCHVarivables();
 	std::cout << status << std::endl;
+	//status = message.readOnce();
+	std::cout << status << std::endl;
+	message.setCHVarivables();
 	//message.readOnce();
 	//message.readOnce();
 	std::cout << message << std::endl;

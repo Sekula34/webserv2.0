@@ -196,6 +196,11 @@ std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 	os<< "Client message data" << std::endl;
 	os<< "FD is :" << obj._clientFd << std::endl;
 	os<< "IS fully read is " << obj._fullyRead << std::endl;
+	if(obj._fullyRead == false)
+	{
+		os<<"CH dont have fully set all variables, valgrind read" << std::endl;
+		return os;
+	}
 	os<< "Request method is :" << obj._requestLineElements.requestMethod << std::endl;
 	os<< "Request target is :" << obj._requestLineElements.requestTarget << std::endl;
 	os<< "Request protocol Version is :" << obj._requestLineElements.protocolVersion << std::endl;
