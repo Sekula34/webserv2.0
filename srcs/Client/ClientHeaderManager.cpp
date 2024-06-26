@@ -114,6 +114,13 @@ ReadStatus ClientHeaderManager::readClientHeader(int& clientFD)
 			_unreadHeaders.end(), FindClientByFd(clientFD));
 	if(status == DONE)
 	{
+		//TODO
+		/*
+			try(toread.setCHVariables)
+			if error hapens
+			get error number and create response accordining to number
+		*/
+		toRead.setCHVarivables();
 		_readHeaders.push_back(toRead);
 		if(it != _unreadHeaders.end())
 		{

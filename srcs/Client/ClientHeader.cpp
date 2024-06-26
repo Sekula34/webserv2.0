@@ -17,7 +17,9 @@ ClientHeader::ClientHeader(int& clientFD)
 }
 
 ClientHeader::ClientHeader(const ClientHeader& source)
-:_clientFd(source._clientFd), _message(source._message), _fullyRead(source._fullyRead)
+:_clientFd(source._clientFd), _message(source._message), _fullyRead(source._fullyRead),
+_requestLine(source._requestLine), _requestLineElements(source._requestLineElements),
+_host(source._host)
 {
 
 
@@ -26,6 +28,10 @@ ClientHeader::ClientHeader(const ClientHeader& source)
 ClientHeader&::ClientHeader::operator=(const ClientHeader& source)
 {
 	_message = source._message;
+	_fullyRead = source._fullyRead;
+	_requestLine = source._requestLine;
+	_requestLineElements = source._requestLineElements;
+	_host = source._host;
 	return(*this);
 }
 
