@@ -17,6 +17,29 @@ enum ReadStatus
 
 const int BUFFER_SIZE = 4096;
 
+
+/**
+ * @brief struct that contains all info about requstLine
+ * 
+ */
+struct RequestLine
+{
+	std::string requestMethod;
+	std::string requestTarget;
+	std::string protocolVersion;
+};
+
+/**
+ * @brief struct that contains example localhost as name and 8080 as port
+ * 
+ */
+struct Host 
+{
+	std::string name;
+	int port;
+};
+
+
 /**
  * @brief class for reading and storing client Message, one read at the time
  * 
@@ -28,9 +51,17 @@ class ClientHeader
 		int& _clientFd;
 		std::string _message;
 		bool _fullyRead;
+
+		std::string _requestLine;
+		RequestLine _requestLineElements;
+		Host _host;
 		ClientHeader();
 
 		bool _isConnectionClosedByClient(void);
+		void _setRequestLine(void);
+		void _fillRequestStruct();
+		void _checkRequestStruct(void);
+		void _setHost(void);
 
 	public :
 		ClientHeader(int& clientFd);
@@ -49,7 +80,27 @@ class ClientHeader
 		const int& getClientFd() const;
 		bool isFullyRead() const;
 
+		/**
+		 * @brief sets requstLine, requestLineElements, host and check if request is valid
+		 * throw INVALIDCLIENTREQUESTEXCEPTIOn with code if something went wrong
+		 * 
+		 */
+		void setCHVarivables();
+
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
+
+		class InvalidClientRequestException : public std::exception
+		{
+			public :
+				InvalidClientRequestException(int errorCode, const std::string& errorMessage);
+				~InvalidClientRequestException() throw() {}
+				int getErrorCode() const;
+				const char * what() const throw();
+			private :
+				int _errorCode;
+				std::string _errorMessage;
+		};
+
 };
 
 

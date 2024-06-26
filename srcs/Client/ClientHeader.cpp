@@ -6,6 +6,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <stdio.h>
+#include <vector>
+#include "../Parsing/ParsingUtils.hpp"
 
 
 ClientHeader::ClientHeader(int& clientFD)
@@ -30,6 +32,81 @@ ClientHeader&::ClientHeader::operator=(const ClientHeader& source)
 ClientHeader::~ClientHeader()
 {
 	
+}
+
+
+void ClientHeader::_setRequestLine(void) 
+{
+	std::string firstLine;
+	size_t firstLineEnd =_message.find("\r\n");
+	if(firstLineEnd == std::string::npos)
+	{
+		throw InvalidClientRequestException(400, "BAD REQUEST");
+	}
+	firstLine = _message.substr(0,firstLineEnd);
+	_requestLine = firstLine;
+}
+
+void ClientHeader::_fillRequestStruct(void)
+{
+	std::vector<std::string> firstLineStrings = ParsingUtils::splitString(_requestLine, ' ');
+	if(firstLineStrings.size() != 3)
+	{
+		throw InvalidClientRequestException(400, "BAD REQUEST");
+	}
+	_requestLineElements.requestMethod = firstLineStrings[0];
+	_requestLineElements.requestTarget = firstLineStrings[1];
+	_requestLineElements.protocolVersion = firstLineStrings[2];
+}
+
+void ClientHeader::_checkRequestStruct(void)
+{
+	const std::string validMethods[] = {"GET", "POST", "DELETE"};
+	bool valid = ParsingUtils::isStringValid(_requestLineElements.requestMethod, validMethods, 3);
+	if(valid == false)
+	{
+		//TODO:
+		//Implement later to give this response to client since server
+		//only implements those 3 methods
+		throw InvalidClientRequestException(405, "METHOD NOT ALLOWED");
+	}
+	if(_requestLineElements.protocolVersion != "HTTP/1.1")
+	{
+		//TODO:
+		//Implement later to give this response to client
+		throw InvalidClientRequestException(505, "HTTP Version Not Supported");
+	}
+}
+
+void ClientHeader::_setHost(void)
+{
+	std::string HostLine;
+	size_t hosPos = _message.find("Host:");
+	if(hosPos == std::string::npos)
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
+	}
+	size_t endHos = _message.find("\r\n", hosPos);
+	if(endHos == std::string::npos)
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
+	}
+	HostLine = _message.substr(hosPos, endHos - hosPos);
+	std::string plainHost = ParsingUtils::getHttpPlainValue(HostLine.substr(HostLine.find(':') + 1));
+	std::vector<std::string> strings  = ParsingUtils::splitString(plainHost, ':');
+	_host.name = strings[0];
+	if(strings.size() == 1)
+	{
+		_host.port = 80;
+	}
+	else if(strings.size() == 2)
+	{
+		_host.port = ParsingUtils::stringToSizeT(strings[1]);
+	}
+	else 
+	{
+		throw InvalidClientRequestException(400, "Bad Request");
+	}
 }
 
 bool ClientHeader::_isConnectionClosedByClient(void)
@@ -90,6 +167,20 @@ ReadStatus ClientHeader::readOnce()
 	return CONTINUE_READING;
 }
 
+
+void ClientHeader::setCHVarivables()
+{
+	if(_fullyRead == false)
+	{
+		std::cout << "Cannot set client Header Variables (yet)" << std::endl;
+		return;
+	}
+	_setRequestLine();
+	_fillRequestStruct();
+	_setHost();
+	_checkRequestStruct();
+	std::cout << "ALL header variables are setted and request is valid" << std::endl;
+}
 const int& ClientHeader::getClientFd() const 
 {
 	return(_clientFd);
@@ -105,6 +196,28 @@ std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 	os<< "Client message data" << std::endl;
 	os<< "FD is :" << obj._clientFd << std::endl;
 	os<< "IS fully read is " << obj._fullyRead << std::endl;
-	os<< "Message is :[" << obj._message << "]";
+	os<< "Request method is :" << obj._requestLineElements.requestMethod << std::endl;
+	os<< "Request target is :" << obj._requestLineElements.requestTarget << std::endl;
+	os<< "Request protocol Version is :" << obj._requestLineElements.protocolVersion << std::endl;
+	os<< "Host name is :" << obj._host.name << std::endl;
+	os<< "Host port is :" << obj._host.port << std::endl;
+	//os<< "Message is :[" << obj._message << "]";
 	return os;
+}
+
+
+ClientHeader::
+InvalidClientRequestException::InvalidClientRequestException(int errorCode, const std::string& errorMessage)
+:_errorCode(errorCode), _errorMessage(errorMessage)
+{
+
+}
+int ClientHeader::InvalidClientRequestException::getErrorCode() const 
+{
+	return _errorCode;
+}
+
+const char* ClientHeader::InvalidClientRequestException::what() const throw ()
+{
+	return (_errorMessage.c_str());
 }
