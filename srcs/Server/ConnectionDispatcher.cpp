@@ -196,7 +196,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		ReadStatus status =  _clientHeaders.readClientHeader(communicationSocket);
 		if(status == ERROR)
 		{
-			std::cout << "ERROR while reading" << std::endl;
+			std::cout << "ERROR while reading. CLIENT CLOSED connection OR ERRRO" << std::endl;
 			_removeClient(communicationSocket);
 		}
 		if(status == DONE)
@@ -204,7 +204,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 			//FD_CLR(communicationSocket, &_readSetMaster);
 		}
 		std::cout << "FERTIG" << std::endl;
-		//_removeClient(communicationSocket);
+		_removeClient(communicationSocket);
 		//close(communicationSocket);
 	}
 

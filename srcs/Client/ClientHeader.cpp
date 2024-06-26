@@ -73,7 +73,7 @@ ReadStatus ClientHeader::readOnce()
 	else if(retVal == -1)
 	{
 		//TODO server error of reading client request remove cerr
-		close(_clientFd);
+		//close(_clientFd);
 		// std::vector<int>::iterator it = std::find(_communicationFds.begin(),
 		// 		_communicationFds.end(), communicationFd);
 		// _communicationFds.erase(it);
@@ -85,7 +85,7 @@ ReadStatus ClientHeader::readOnce()
 	{
 		std::cout << "End of file " << std::endl;
 		_fullyRead = true;
-		return DONE;
+		return CLIENT_CLOSE;
 	}
 	return CONTINUE_READING;
 }
