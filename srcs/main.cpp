@@ -1,7 +1,6 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
-#include "Client/ClientRequest.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -42,27 +41,29 @@ void clientMessageTest()
 	int clientFD = mySocket.getCommunicationSocket();
 	ClientHeader message(clientFD);
 	std::cout << message << std::endl;
-	message.readOnce();
-	message.readOnce();
-	message.readOnce();
+	ReadStatus status = message.readOnce();
+	message.setCHVarivables();
+	std::cout << status << std::endl;
+	//message.readOnce();
+	//message.readOnce();
 	std::cout << message << std::endl;
 	close(clientFD);
 	close(mySocket.getSocketFd());
 }
 
 
-void clientRequestTest()
-{
-	std::string plainValue = ParsingUtils::getHttpPlainValue(" localhost:8080 ");
-	//std::cout << "plain value is [" << plainValue <<"]" << std::endl; 
-	ClientRequest curlRequest
-		("GET / HTTP/1.1\r\n"
-		"Host: localhost:8080\r\n"
-		"User-Agent: curl/7.XX.X\r\n"
-		"Accept: */*\r\n"
-		"\r\n");
-	std::cout << curlRequest << std::endl;
-}
+// void clientRequestTest()
+// {
+// 	std::string plainValue = ParsingUtils::getHttpPlainValue(" localhost:8080 ");
+// 	//std::cout << "plain value is [" << plainValue <<"]" << std::endl; 
+// 	ClientRequest curlRequest
+// 		("GET / HTTP/1.1\r\n"
+// 		"Host: localhost:8080\r\n"
+// 		"User-Agent: curl/7.XX.X\r\n"
+// 		"Accept: */*\r\n"
+// 		"\r\n");
+// 	std::cout << curlRequest << std::endl;
+// }
 
 
 void socketTest()
@@ -156,10 +157,10 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+		//ConnectionDispatcherTest();
 		//SocketManagerTest();
 		//clientRequestTest();
-		//clientMessageTest();
+		clientMessageTest();
 		//ClientHeaderManagerTester();
 	}
 	catch(std::exception &e)
