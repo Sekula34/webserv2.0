@@ -45,6 +45,7 @@ class ConnectionDispatcher
 		void _setAllServerListenSocketsForRead(void);
 		int _getMaxFd(void) const;
 
+
 		/**
 		 * @brief function that handles Ready File Descriptor when select return > 0
 		 * 
@@ -81,6 +82,11 @@ class ConnectionDispatcher
 		 * @param clientFD fd to find, close and forget from everything
 		 */
 		void _removeClient(int clientFD);
+		/**
+		 * @brief closes all client fds;
+		 * 
+		 */
+		void _removeAllClients(void);
 		//ConnectionDispatcher();
 	public :
 		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);

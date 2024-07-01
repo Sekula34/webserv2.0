@@ -266,6 +266,14 @@ int ConnectionDispatcher::_getMaxFd(void) const
 	return maxFD;
 }
 
+void ConnectionDispatcher::_removeAllClients(void)
+{
+	for(size_t i=0; i < _communicationFds.size(); i++)
+	{
+		_removeClient(_communicationFds[i]);
+	}
+}
+
 void ConnectionDispatcher::_removeClient(int clientFd)
 {
 	std::vector<int>::iterator it = std::find(_communicationFds.begin(),
@@ -326,4 +334,7 @@ void ConnectionDispatcher::mainLoop(void)
 			// move it from current read to next write
 		}
 	}
+	_removeAllClients();
+	
+
 }
