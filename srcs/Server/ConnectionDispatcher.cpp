@@ -175,6 +175,14 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 // 	return fullRequest;
 // }
 
+void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
+{
+	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
+	std::cout << "Generating response for client " << communictaionFD << std::endl;
+	std::cout <<"header of client is " << header << std::endl;
+	_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()).printServerSettings();
+	
+}
 
 void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 (std::vector<int>& readReadyClientFds)
@@ -202,6 +210,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		if(status == DONE)
 		{
 			std::cout << "Client " << communicationSocket << "is fully procitan" << std::endl;
+			_generateClientResponse(communicationSocket);
 			//generate response 
 			//save response to vector
 			//add fd to ready to write
@@ -209,7 +218,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 			FD_CLR(communicationSocket, &_readSetMaster);
 		}
 		std::cout << "FERTIG" << std::endl;
-		//_removeClient(communicationSocket);
+		_removeClient(communicationSocket);
 		//close(communicationSocket);
 	}
 
