@@ -191,6 +191,18 @@ void ClientHeader::setCHVarivables()
 	_checkRequestStruct();
 	std::cout << "ALL header variables are setted and request is valid" << std::endl;
 }
+
+const int& ClientHeader::getHostPort(void) const 
+{
+	return(_host.port);
+}
+
+const std::string& ClientHeader::getHostName(void) const 
+{
+	return(_host.name);
+}
+
+
 const int& ClientHeader::getClientFd() const 
 {
 	return(_clientFd);

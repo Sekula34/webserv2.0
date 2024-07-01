@@ -87,6 +87,9 @@ class ClientHeader
 		 */
 		void setCHVarivables();
 
+		const int& getHostPort(void) const;
+		const std::string& getHostName(void) const;
+
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 
 		class InvalidClientRequestException : public std::exception
