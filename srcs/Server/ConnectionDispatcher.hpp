@@ -23,7 +23,6 @@ class ConnectionDispatcher
 		 * 
 		 */
 		std::vector<int> _communicationFds;
-		
 		/**
 		 * @brief temp goes in select and will be destroyed every time
 		 * 
@@ -36,6 +35,13 @@ class ConnectionDispatcher
 		fd_set _readSetMaster, _writeSetMaster, _errorSetMaster;
 
 		/**
+		 * @brief check if cliend fd already exit in _communictaionFDs
+		 * this function is called before i want to add new communication
+		 * if clienCommuncationFd is alredy in vector that means that some browser/curl closed that fd so i need to remove it. Remove it from all client structutres like headers aswell
+		 * @param clientCommunicationSocket new fd that system return and need check
+		 */
+		void _clientFdCheck(int clientCommunicationFd);
+		/**
 		 * @brief fill vector with all socket that have something to read and are ready
 		 * 
 		 * @return std::vector<Socket> which can be empty if nothing is ready 
@@ -44,8 +50,6 @@ class ConnectionDispatcher
 		std::vector<int> _getReadyToReadCommunicationFds();
 		void _setAllServerListenSocketsForRead(void);
 		int _getMaxFd(void) const;
-
-
 		/**
 		 * @brief function that handles Ready File Descriptor when select return > 0
 		 * 
@@ -58,8 +62,6 @@ class ConnectionDispatcher
 		 * @param readySockets 
 		 */
 		void _handleAllReadySockets(std::vector<Socket>& readySockets);
-
-
 		/**
 		 * @brief read readyCleint fds and reutrn string
 		 * 
@@ -74,8 +76,6 @@ class ConnectionDispatcher
 		 * @param readReadyClientFds fd that are ready to read
 		 */
 		void _handleAllReadyToReadCommunicationFds(std::vector<int>& readReadyClientFds);
-
-
 		/**
 		 * @brief remoeves client from _communicationfd and close connection
 		 * 

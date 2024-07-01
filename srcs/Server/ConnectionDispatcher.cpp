@@ -93,6 +93,16 @@ void ConnectionDispatcher::_setAllServerListenSocketsForRead(void)
 	}
 }
 
+void ConnectionDispatcher::_clientFdCheck(int communicationFd)
+{
+	std::vector<int>::iterator it = std::find(_communicationFds.begin(), _communicationFds.end(), communicationFd);
+	if(it != _communicationFds.end())
+	{
+		_clientHeaders.removeClient(communicationFd);
+		_communicationFds.erase(it);
+	}
+}
+
 void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySockets)
 {
 	if(readySockets.empty() == true)
@@ -106,23 +116,12 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 		std::cout << "Ready socket is " << std::endl;
 		std::cout << ready << std::endl;
 		int communicationSocket = ready.getCommunicationSocket();
+		//check if communication socket already exist in vector, if 
+		//it exist that means that client closed connection and i should removed that client first
+		_clientFdCheck(communicationSocket); 
 		_communicationFds.push_back(communicationSocket);
 		FD_SET(communicationSocket, &_readSetMaster);
 		std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
-
-		// char buffer[1024] = {0};
-		// int valread = read( communicationSocket , buffer, 1024);
-		// (void) valread;
-		// std::cout << buffer << std::endl;
-		// const char *http_response = 
-		// "HTTP/1.1 200 OK\r\n"
-		// "Content-Type: text/html\r\n"
-		// "Content-Length: 46\r\n"
-		// "Connection: close\r\n"
-		// "\r\n"
-		// "<html><body><h1>Hello, World!</h1></body></html>";
-		// write(communicationSocket , http_response , strlen(http_response));
-		//close(communicationSocket);
 	}
 }
 
