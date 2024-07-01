@@ -66,6 +66,18 @@ bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
 	return true;
 }
 
+std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port)
+{
+	std::vector<ServerSettings> serversPort;
+	for(size_t i = 0; i < _servers.size(); i++)
+	{
+		ServerSettings& oneServer(_servers[i]);
+		if(oneServer.getPort() == port)
+			serversPort.push_back(oneServer);
+	}
+	return serversPort;
+}
+
 void ServersInfo::_setHttpDirectives(void)
 {
 	for(size_t i = 0; i < _allTokens.size(); i++)
@@ -93,13 +105,38 @@ const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
 	return(_servers);
 }
 
-const ServerSettings& ServersInfo::getOneServer(int serverIndex) const 
+const ServerSettings& ServersInfo::getServerById(int serverId) const 
 {
-	if(serverIndex > _numberOfServers)
+	int serverIndex = serverId - 1;
+	if(serverIndex > _numberOfServers || serverIndex < 0)
 	{
-		std::runtime_error("Will segfault. There is not enough servers");
+		throw std::runtime_error("Will segfault. There is not enough servers or index is less than 0");
 	}
 	return(_servers[serverIndex]);
+}
+
+
+
+const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string serverName)
+{
+	int serverId;
+	std::vector<ServerSettings> ServersId = _getAllServersIdWithPort(portNumber);
+	if(ServersId.size() == 1 || serverName == "")
+	{
+		serverId = ServersId[0].getServerId();
+		return getServerById(serverId);
+	}
+	for(size_t i = 0; i< ServersId.size(); i++)
+	{
+		ServerSettings& oneServer(ServersId[i]);
+		if(oneServer.getServerName() == serverName)
+		{
+			serverId = oneServer.getServerId();
+			return getServerById(serverId);
+		}
+	}
+	serverId = ServersId[0].getServerId();
+	return getServerById(serverId);
 }
 
 //goes through vector of servers

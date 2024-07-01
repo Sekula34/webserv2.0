@@ -19,6 +19,7 @@ class ServersInfo
 
 		void _setHttpDirectives(void);
 		bool _isTokenHttpDirective(const Token& toCheck) const;
+		std::vector<ServerSettings> _getAllServersIdWithPort(int port);
 
 	public :
 		ServersInfo(std::string configPath = "Configuration/config_files/simple_nginx_conf.conf");
@@ -28,7 +29,23 @@ class ServersInfo
 
 		void printAllServersInfo(void) const;
 		const std::vector<ServerSettings>& getAllServers(void) const;
-		const ServerSettings& getOneServer(int serverIndex) const;
+		/**
+		 * @brief Get the Server By Id object
+		 * 
+		 * @param serverId id = index + 1;
+		 * @return const ServerSettings& 
+		 */
+		const ServerSettings& getServerById(int serverId) const;
+		
+		/**
+		 * @brief Get the Server By PortNuber 
+		 * 
+		 * @param portNumber 
+		 * @param serverName 
+		 * @return const ServerSettings& first server that have port == PortNumber 
+		 *if serverName is specified find return first Server with port == portNumber and name == serverName, if not again first with port is retured
+		 */
+		const ServerSettings& getServerByPort(int portNumber, std::string serverName ="");
 		
 		/**
 		 * @brief Get the Unique Ports number for creating listeningSockets
