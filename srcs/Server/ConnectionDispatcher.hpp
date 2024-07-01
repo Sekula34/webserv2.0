@@ -50,6 +50,13 @@ class ConnectionDispatcher
 		std::vector<int> _getReadyToReadCommunicationFds();
 		void _setAllServerListenSocketsForRead(void);
 		int _getMaxFd(void) const;
+
+		/**
+		 * @brief communictaionFD header is fully read and now it should generate Client Response
+		 * 
+		 * @param communicationFd fd that has fully read client header
+		 */
+		void _generateClientResponse(int communicationFd);
 		/**
 		 * @brief function that handles Ready File Descriptor when select return > 0
 		 * 

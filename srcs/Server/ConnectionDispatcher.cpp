@@ -201,6 +201,10 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		if(status == DONE)
 		{
 			std::cout << "Client " << communicationSocket << "is fully procitan" << std::endl;
+			//generate response 
+			//save response to vector
+			//add fd to ready to write
+			//
 			//FD_CLR(communicationSocket, &_readSetMaster);
 		}
 		std::cout << "FERTIG" << std::endl;
