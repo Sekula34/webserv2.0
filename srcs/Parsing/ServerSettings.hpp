@@ -33,6 +33,7 @@ class ServerSettings : public DefaultSettings
 		std::vector<Token> getServerTokens(void) const;
 		std::vector<Directive> getServerDirectives(void) const;
 		std::vector<LocationSettings> getServerLocations() const;
+		const int& getServerId() const;
 		void printServerSettings(void) const;
 		void printServerTokens(void) const;
 		void addDirectiveToServer(Directive directive);

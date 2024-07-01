@@ -95,6 +95,11 @@ std::vector<LocationSettings> ServerSettings::getServerLocations() const
 	return (_serverLocations);
 }
 
+const int& ServerSettings::getServerId() const 
+{
+	return(_serverId);
+}
+
 void ServerSettings::printServerTokens(void) const 
 {
 	std::cout << "Server id: " << _serverId << " tokens are: "<< std::endl;
