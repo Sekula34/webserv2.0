@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cstring>
+#include <csignal>
+#include <iostream>
 
 
 
@@ -150,10 +152,18 @@ void SocketManagerTest()
 	std:: cout << sockets.getMaxSocketFd() << std::endl;
 }
 
+void signalHandler(int signum) {
+    std::cout << "Interrupt signal (" << signum << ") received.\n";
+
+    // cleanup and close up stuff here  
+    // terminate program  
+
+    //exit(signum);  
+}
 int main()
 {
 	//
-
+	signal(SIGINT, signalHandler);
 	try
 	{
 		//serverInfoTest();

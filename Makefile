@@ -86,7 +86,7 @@ fclean:			clean
 re:				fclean all
 
 valgrind:		
-					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all ./$(NAME)
+					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(NAME)
 		
 conf: $(CONFNAME)
 
