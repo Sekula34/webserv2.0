@@ -4,6 +4,10 @@
 # include "ServerSettings.hpp"
 #include <vector>
 
+/**
+ * @brief class that contains all ServerSetting in vector _servers
+ * 
+ */
 class ServersInfo 
 {
 	private :

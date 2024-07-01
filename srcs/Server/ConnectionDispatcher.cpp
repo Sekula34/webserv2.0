@@ -200,6 +200,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		}
 		if(status == DONE)
 		{
+			std::cout << "Client " << communicationSocket << "is fully procitan" << std::endl;
 			//FD_CLR(communicationSocket, &_readSetMaster);
 		}
 		std::cout << "FERTIG" << std::endl;
