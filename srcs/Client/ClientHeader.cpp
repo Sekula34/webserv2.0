@@ -13,7 +13,11 @@
 ClientHeader::ClientHeader(int& clientFD)
 :_clientFd(clientFD), _fullyRead(false)
 {
-
+	_host.name ="";
+	_host.port = -1;
+	_requestLineElements.requestMethod ="";
+	_requestLineElements.requestTarget ="";
+	_requestLineElements.protocolVersion = "";
 }
 
 ClientHeader::ClientHeader(const ClientHeader& source)
