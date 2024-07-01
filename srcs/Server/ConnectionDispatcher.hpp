@@ -93,7 +93,7 @@ class ConnectionDispatcher
 		 * @brief closes all client fds;
 		 * 
 		 */
-		void _removeAllClients(void);
+		void _closeAllClients(void);
 		//ConnectionDispatcher();
 	public :
 		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);

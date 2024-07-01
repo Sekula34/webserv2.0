@@ -19,6 +19,7 @@ void handle_sigint(int sig)
 {
 	flag = 1;
 	(void) sig;
+	std::cout << "Called custom ctrl + c function" << std::endl;
 }
 
 ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo)
@@ -205,7 +206,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 			//save response to vector
 			//add fd to ready to write
 			//
-			//FD_CLR(communicationSocket, &_readSetMaster);
+			FD_CLR(communicationSocket, &_readSetMaster);
 		}
 		std::cout << "FERTIG" << std::endl;
 		//_removeClient(communicationSocket);
@@ -270,12 +271,21 @@ int ConnectionDispatcher::_getMaxFd(void) const
 	return maxFD;
 }
 
-void ConnectionDispatcher::_removeAllClients(void)
+void ConnectionDispatcher::_closeAllClients(void)
 {
-	for(size_t i=0; i < _communicationFds.size(); i++)
+	std::cout << "Call function _removeAllClients" << std::endl;
+	//size_t vectorSize = _communicationFds.size();
+	for(size_t i = 0; i < _communicationFds.size(); i++)
 	{
-		_removeClient(_communicationFds[i]);
+		int fdToClose = _communicationFds[i];
+		close(fdToClose);
 	}
+	//_removeClient(5);
+	// for(size_t i=0; i < _communicationFds.size(); i++)
+	// {
+	// 	std::cout << "Removing client" << _communicationFds[i] << std::endl;
+	// 	_removeClient(_communicationFds[i]);
+	// }
 }
 
 void ConnectionDispatcher::_removeClient(int clientFd)
@@ -338,7 +348,8 @@ void ConnectionDispatcher::mainLoop(void)
 			// move it from current read to next write
 		}
 	}
-	_removeAllClients();
+	_closeAllClients();
+	std::cout << "I am here" << std::endl;
 	
 
 }
