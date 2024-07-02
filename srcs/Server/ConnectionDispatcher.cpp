@@ -11,6 +11,7 @@
 #include <csignal>
 #include <fcntl.h>
 #include <algorithm>
+#include "../Client/ClientResponse.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
 
 volatile sig_atomic_t flag = 0 ;
@@ -178,9 +179,14 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 {
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
-	std::cout << "Generating response for client " << communictaionFD << std::endl;
-	std::cout <<"header of client is " << header << std::endl;
-	_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()).printServerSettings();
+	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
+	ClientResponse oneResponse(header, responseServer);
+	oneResponse.sendSimpleResponse();
+	std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
+	std::cout << oneResponse << std::endl;
+	// std::cout << "Generating response for client " << communictaionFD << std::endl;
+	// std::cout <<"header of client is " << header << std::endl;
+	// std::cout <<"Server wiht id: " <<responseServer.getServerId() << " will be used to generate respose to " << communictaionFD << std::endl;;
 	
 }
 
@@ -209,7 +215,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		}
 		if(status == DONE)
 		{
-			std::cout << "Client " << communicationSocket << "is fully procitan" << std::endl;
+			std::cout << "Client " << communicationSocket << " is fully procitan" << std::endl;
 			_generateClientResponse(communicationSocket);
 			//generate response 
 			//save response to vector

@@ -7,6 +7,7 @@
 #include "Server/ConnectionDispatcher.hpp"
 #include "Server/Socket.hpp"
 #include "Server/SocketManager.hpp"
+#include "Utils/Logger.hpp"
 
 #include <exception>
 #include <iostream>
@@ -167,6 +168,13 @@ void clientResponseTest()
 	close(socket.getSocketFd());
 }
 
+void loggerTester()
+{
+	Logger::info("First Info");
+	Logger::warning("some Warning");
+	Logger::error("critical thing");
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -184,12 +192,13 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		//ConnectionDispatcherTest();
-		clientResponseTest();
+		ConnectionDispatcherTest();
+		//clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
 		//clientMessageTest();
 		//ClientHeaderManagerTester();
+		//loggerTester();
 	}
 	catch(std::exception &e)
 	{
