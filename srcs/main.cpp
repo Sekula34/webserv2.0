@@ -1,6 +1,7 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
+#include "Client/ClientResponse.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -152,6 +153,20 @@ void SocketManagerTest()
 	std:: cout << sockets.getMaxSocketFd() << std::endl;
 }
 
+void clientResponseTest()
+{
+	Socket socket(8080);
+	int clientFD = socket.getCommunicationSocket();
+	ClientHeader header(clientFD);
+	ServersInfo info;
+	const ServerSettings& server(info.getServerByPort(8080));
+
+	ClientResponse response(header,server);
+	std::cout << response << std::endl;
+	close(clientFD);
+	close(socket.getSocketFd());
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -169,7 +184,8 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+		//ConnectionDispatcherTest();
+		clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
 		//clientMessageTest();
