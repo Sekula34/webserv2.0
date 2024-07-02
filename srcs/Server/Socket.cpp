@@ -8,6 +8,7 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include "../Utils/Logger.hpp"
 
 
 
@@ -62,7 +63,8 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		perror("listen systemcall failed");
 		throw std::runtime_error("System call listen failed");
 	}
-	std::cout << "Socket is listening on port " << _port << std::endl;
+	Logger::info("Socket is listening on port :");
+	std::cout << _port << std::endl;
 }
 
 Socket::Socket(const Socket& source) : 

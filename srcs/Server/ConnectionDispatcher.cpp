@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <algorithm>
 #include "../Client/ClientResponse.hpp"
+#include "../Utils/Logger.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
 
 volatile sig_atomic_t flag = 0 ;
@@ -20,7 +21,8 @@ void handle_sigint(int sig)
 {
 	flag = 1;
 	(void) sig;
-	std::cout << "Called custom ctrl + c function" << std::endl;
+	Logger::warning("CTRL + C cathced, Server is turning off"); std::cout <<std::endl;
+	//std::cout << "Called custom ctrl + c function" << std::endl;
 }
 
 ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo)
@@ -115,7 +117,8 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 	for(size_t i =0; i < readySockets.size(); i++)
 	{
 		Socket& ready = readySockets[i];
-		std::cout << "Ready socket is " << std::endl;
+		Logger::info("Ready socket is ");
+		//std::cout << "Ready socket is " << std::endl;
 		std::cout << ready << std::endl;
 		int communicationSocket = ready.getCommunicationSocket();
 		//check if communication socket already exist in vector, if 
@@ -123,7 +126,7 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 		_clientFdCheck(communicationSocket); 
 		_communicationFds.push_back(communicationSocket);
 		FD_SET(communicationSocket, &_readSetMaster);
-		std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
+		//std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
 	}
 }
 
@@ -182,8 +185,8 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
 	ClientResponse oneResponse(header, responseServer);
 	oneResponse.sendSimpleResponse();
-	std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
-	std::cout << oneResponse << std::endl;
+	//std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
+	//std::cout << oneResponse << std::endl;
 	// std::cout << "Generating response for client " << communictaionFD << std::endl;
 	// std::cout <<"header of client is " << header << std::endl;
 	// std::cout <<"Server wiht id: " <<responseServer.getServerId() << " will be used to generate respose to " << communictaionFD << std::endl;;
@@ -215,7 +218,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		}
 		if(status == DONE)
 		{
-			std::cout << "Client " << communicationSocket << " is fully procitan" << std::endl;
+			Logger::info("Fully read client with fd: "); std::cout << communicationSocket << std::endl;
 			_generateClientResponse(communicationSocket);
 			//generate response 
 			//save response to vector
@@ -332,7 +335,8 @@ void ConnectionDispatcher::mainLoop(void)
 	{
 		if(flag)
 		{
-			std::cout << "Ctrl + c pressed" << std::endl;
+			Logger::info("Turn off procedure triggered"); std::cout<<std::endl;
+			//std::cout << "Ctrl + c pressed" << std::endl;
 			break;
 		}
 		_readSetTemp = _readSetMaster;
@@ -364,7 +368,8 @@ void ConnectionDispatcher::mainLoop(void)
 		}
 	}
 	_closeAllClients();
-	std::cout << "I am here" << std::endl;
+	Logger::warning("SERVER IS TURNED OFF"); std::cout<<std::endl;
+	//std::cout << "I am here" << std::endl;
 	
 
 }

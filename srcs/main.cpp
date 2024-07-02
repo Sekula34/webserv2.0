@@ -130,6 +130,7 @@ void multipleSocketTesting()
 void ConnectionDispatcherTest()
 {
 	ServersInfo serverInfo;
+	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	SocketManager sockets(serverInfo.getUniquePorts());
 	ConnectionDispatcher dispatcher(sockets, serverInfo);
 	dispatcher.mainLoop();

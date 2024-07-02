@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <vector>
 #include "../Parsing/ParsingUtils.hpp"
+#include "../Utils/Logger.hpp"
 
 
 ClientHeader::ClientHeader(int& clientFD)
@@ -140,7 +141,7 @@ ReadStatus ClientHeader::readOnce()
 	}
 	char buffer[BUFFER_SIZE];
 	int retVal = recv(_clientFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
-	std::cout << "Ret val is " << retVal << std::endl;
+	//std::cout << "Ret val is " << retVal << std::endl;
 	if(retVal > 0)
 	{
 		_message.append(buffer, retVal);
@@ -189,7 +190,8 @@ void ClientHeader::setCHVarivables()
 	_fillRequestStruct();
 	_setHost();
 	_checkRequestStruct();
-	std::cout << "ALL header variables are setted and request is valid" << std::endl;
+	Logger::info("ALL header variables are setted and request is valid");std::cout<<std::endl;
+	//std::cout << "ALL header variables are setted and request is valid" << std::endl;
 }
 
 const int& ClientHeader::getHostPort(void) const 

@@ -4,6 +4,7 @@
 #include <ostream>
 #include <iostream>
 #include <unistd.h>
+#include "../Utils/Logger.hpp"
 
 
 ClientResponse::ClientResponse(ClientHeader& header,
@@ -35,7 +36,7 @@ ClientResponse::~ClientResponse()
 
 void ClientResponse::sendSimpleResponse()const 
 {
-	std::cout << "INFO: i am sending response" << std::endl;
+	//std::cout << "INFO: i am sending response" << std::endl;
 	const char *http_response = 
 	"HTTP/1.1 200 OK\r\n"
 	"Content-Type: text/html\r\n"
@@ -44,6 +45,7 @@ void ClientResponse::sendSimpleResponse()const
 	"\r\n"
 	"<html><body><h1>Hello, World!</h1></body></html>";
 	write(_clientHeader.getClientFd() , http_response , strlen(http_response));
+	Logger::info("Response is sent to client: "); std::cout <<_clientHeader.getClientFd() << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& os, const ClientResponse& response)

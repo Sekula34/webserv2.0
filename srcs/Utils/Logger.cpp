@@ -35,18 +35,18 @@ void Logger::info(std::string message)
 {
 	std::cout << GREEN;
 	_printCurrentTime();
-	std::cout <<"INFO: " << message << std::endl << RESET;
+	std::cout <<"INFO: " << message << RESET;
 }
 
 void Logger::warning(std::string message)
 {
 	std::cout << YELLOW;
 	_printCurrentTime();
-	std::cout <<"WARNING: " << message << std::endl << RESET;
+	std::cout <<"WARNING: " << message << RESET;
 }
 void Logger::error(std::string message)
 {
 	std::cout << RED;
 	_printCurrentTime();
-	std::cerr <<"ERROR: " << message << std::endl << RESET;
+	std::cerr <<"ERROR: " << message  << RESET;
 }

@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
-
+#include "../Utils/Logger.hpp"
 ClientHeaderManager::ClientHeaderManager()
 {
 
@@ -39,7 +39,8 @@ void ClientHeaderManager::createNewClientHeader(int& clientFd)
 	{
 		ClientHeader oneHeader(clientFd);
 		_unreadHeaders.push_back(oneHeader);
-		std::cout << "New header Created and addded to _unreadHeaders" << std::endl;
+		Logger::info("New header Created and addded to _unreadHeaders"); std::cout<<std::endl;
+		//std::cout << "New header Created and addded to _unreadHeaders" << std::endl;
 		return;
 	}
 	std::cout << "Client Header with this fd already exist threfore it is not created" << std::endl;
@@ -67,7 +68,8 @@ ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
 	{
 		if(clientFd == _unreadHeaders[i].getClientFd())
 		{
-			std::cout << "Client found in unreadHeaders" << std::endl;
+			Logger::info("Client found in unreadHeaders"); std::cout<< std::endl;
+			//std::cout << "Client found in unreadHeaders" << std::endl;
 			ClientHeader& toReturn(_unreadHeaders[i]);
 			return toReturn;
 		}
@@ -76,7 +78,8 @@ ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
 	{
 		if(clientFd == _readHeaders[i].getClientFd())
 		{
-			std::cout << "Client found in readHeaders" << std::endl;
+			Logger::info("Client found in readHeaders"); std::cout<< std::endl;
+			//std::cout << "Client found in readHeaders" << std::endl;
 			ClientHeader& toReturn(_readHeaders[i]);
 			return toReturn;
 		}
