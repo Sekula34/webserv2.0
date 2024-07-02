@@ -15,6 +15,10 @@ ClientResponse::ClientResponse(ClientHeader& header,
 	{
 		std::cout << "WARNING: Client Response is created with header that is not read yet" << std::endl;
 	}
+	Logger::info("Server setting of client"); std::cout << std::endl;
+	std::cout << server << std::endl;
+	Logger::info("Header of client"); std::cout<<std::endl;
+	std::cout << header << std::endl;
 }
 
 ClientResponse::ClientResponse(const ClientResponse& source)
