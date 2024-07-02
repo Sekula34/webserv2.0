@@ -78,6 +78,12 @@ class ClientHeader
 		ReadStatus readOnce();
 
 		const int& getClientFd() const;
+		/**
+		 * @brief return true if clientRequestHeader is fully read, return false if not
+		 * 
+		 * @return true 
+		 * @return false 
+		 */
 		bool isFullyRead() const;
 
 		/**
