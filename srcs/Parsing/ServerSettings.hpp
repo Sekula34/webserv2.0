@@ -2,6 +2,7 @@
 #define SERVERSETTINGS_HPP
 #include "DefaultSettings.hpp"
 #include "Directive.hpp"
+#include <ostream>
 #include <vector>
 #include "LocationSettings.hpp"
 
@@ -37,6 +38,8 @@ class ServerSettings : public DefaultSettings
 		void printServerSettings(void) const;
 		void printServerTokens(void) const;
 		void addDirectiveToServer(Directive directive);
+
+		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);
 };
 
 #endif

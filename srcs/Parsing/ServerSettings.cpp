@@ -4,6 +4,7 @@
 #include "LocationSettings.hpp"
 #include <cstddef>
 #include <iostream>
+#include <ostream>
 #include <vector>
 
 ServerSettings::ServerSettings()
@@ -124,4 +125,27 @@ void ServerSettings::printServerSettings(void) const
 		_serverLocations[i].printLocationSettings();
 	}
 	std::cout << "___________________________________________________"<<std::endl;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
+{
+	os << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
+	os << "Server id: " << server._serverId << std::endl;
+	os << "Server name :" << server._serverName << std::endl;
+	os << "Server listen port:" << server._listenPort << std::endl;
+	os << "Defautl host: " << server._host << std::endl;
+	//os << "Server directives: "<< std::endl;
+	// for(size_t i = 0; i < _serverDirectives.size(); i++)
+	// {
+	// 	_serverDirectives[i].printDirectiveInfor();
+	// }
+	os <<"Server locations are :" << std::endl;
+	os << "\t" << std::endl;
+	for(size_t i = 0; i < server._serverLocations.size(); i++)
+	{
+		server._serverLocations[i].printLocationSettings();
+	}
+	os << "___________________________________________________"<<std::endl;
+	return os;
 }
