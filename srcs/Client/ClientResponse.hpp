@@ -23,6 +23,8 @@ class ClientResponse
 		ClientResponse& operator=(const ClientResponse& source);
 		~ClientResponse();
 
+		void sendSimpleResponse(void) const;
+
 		friend std::ostream& operator<<(std::ostream& os, const ClientResponse& response);
 		
 };

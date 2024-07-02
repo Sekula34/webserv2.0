@@ -1,7 +1,9 @@
 #include "ClientResponse.hpp"
 #include "ClientHeader.hpp"
+#include <cstring>
 #include <ostream>
 #include <iostream>
+#include <unistd.h>
 
 
 ClientResponse::ClientResponse(ClientHeader& header,
@@ -29,6 +31,19 @@ ClientResponse& ClientResponse::operator=(const ClientResponse& source)
 ClientResponse::~ClientResponse()
 {
 
+}
+
+void ClientResponse::sendSimpleResponse()const 
+{
+	std::cout << "INFO: i am sending response" << std::endl;
+	const char *http_response = 
+	"HTTP/1.1 200 OK\r\n"
+	"Content-Type: text/html\r\n"
+	"Content-Length: 46\r\n"
+	"Connection: close\r\n"
+	"\r\n"
+	"<html><body><h1>Hello, World!</h1></body></html>";
+	write(_clientHeader.getClientFd() , http_response , strlen(http_response));
 }
 
 std::ostream& operator<<(std::ostream& os, const ClientResponse& response)
