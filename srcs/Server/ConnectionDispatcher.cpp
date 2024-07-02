@@ -184,6 +184,8 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
 	ClientResponse oneResponse(header, responseServer);
+	_clientResponses.addResponse(oneResponse);
+	Logger::info("Response added to clientResponse manager");
 	oneResponse.sendSimpleResponse();
 	//std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
 	//std::cout << oneResponse << std::endl;

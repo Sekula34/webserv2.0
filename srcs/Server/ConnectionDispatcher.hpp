@@ -4,6 +4,7 @@
 #include "../Parsing/ServersInfo.hpp"
 #include <sys/select.h>
 #include "../Client/ClientHeaderManager.hpp"
+#include "../Client/ClientResponseManager.hpp"
 
 /**
  * @brief class for handling select creating servers and give them tasks
@@ -15,6 +16,7 @@ class ConnectionDispatcher
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 		ClientHeaderManager _clientHeaders;
+		ClientResponseManager _clientResponses;
 		struct timeval _selectTimeout;
 
 		/**
