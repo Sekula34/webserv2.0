@@ -212,6 +212,8 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 
 
 		int communicationSocket = readReadyClientFds[i];
+		//TO DO. Maybe should try catch _clientHeader readClientHeader
+		//cath INVALID HEADER EXCEPTION AND GENERATE ERROR RESPONSE
 		ReadStatus status =  _clientHeaders.readClientHeader(communicationSocket);
 		if(status == ERROR)
 		{
