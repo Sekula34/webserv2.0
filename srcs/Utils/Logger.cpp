@@ -31,22 +31,28 @@ void  Logger::_printCurrentTime() {
 }
 
 
-void Logger::info(std::string message)
+void Logger::info(std::string message, bool newline)
 {
 	std::cout << GREEN;
 	_printCurrentTime();
 	std::cout <<"INFO: " << message << RESET;
+    if(newline == true)
+        std::cout << std::endl;
 }
 
-void Logger::warning(std::string message)
+void Logger::warning(std::string message, bool newline)
 {
 	std::cout << YELLOW;
 	_printCurrentTime();
 	std::cout <<"WARNING: " << message << RESET;
+    if(newline == true)
+        std::cout << std::endl;
 }
-void Logger::error(std::string message)
+void Logger::error(std::string message, bool newline)
 {
 	std::cout << RED;
 	_printCurrentTime();
 	std::cerr <<"ERROR: " << message  << RESET;
+    if(newline == true)
+        std::cout << std::endl;
 }
