@@ -314,6 +314,8 @@ Status Line
 	status-line = HTTP-version SP status-code SP reason-phrase CRLF
 	status-code = 3DIGIT
 
+	example : [HTTP/1.1 200 OK\r\n]
+
 Header Fields 
 	Each header field consists of a case-insensitive field name followed
 	by a colon (":"), optional leading whitespace, the field value, and
@@ -359,3 +361,11 @@ An HTTP/1.1 user agent MUST NOT preface
  or follow a request with an extra CRLF. If terminating the request
  message body with a line-ending is desired, then the user agent MUST
  count the terminating CRLF octets as part of the message body length
+
+ The presence of a message body in a request is signaled by a
+ Content-Length or Transfer-Encoding header field.
+
+A server that receives a request message with a transfer coding it
+ does not understand SHOULD respond with 501 (Not Implemented).
+
+example : Transfer-Encoding: gzip, chunked
