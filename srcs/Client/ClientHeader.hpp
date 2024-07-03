@@ -51,6 +51,7 @@ class ClientHeader
 		int& _clientFd;
 		std::string _message;
 		bool _fullyRead;
+		int _errorCode;
 
 		std::string _requestLine;
 		RequestLine _requestLineElements;
@@ -60,30 +61,37 @@ class ClientHeader
 		bool _isConnectionClosedByClient(void);
 
 		/**
-		 * @brief set request line
-		 * @throw InvalidClientRequestException(400, "BAD request") if cannot find one
+		 * @brief tries to set request line.
 		 * 
+		 * @return true if there is no error
+		 * @return false if there is error, _error code is setted
 		 */
-		void _setRequestLine(void);
+		bool _setRequestLine(void);
 
 		/**
-		 * @brief fill the request method, request target(location) and protocol
-		 * @throw InvalidClientRequestException(400, BAD REQUEST) if cannot split line in 3 elements
+		 * @brief fill Request struct
+		 * 
+		 * @return true if request struct is setted
+		 * @return false if error occures, _error code is setted
 		 */
-		void _fillRequestStruct();
+		bool _fillRequestStruct();
 
-		/**
-		 * @brief check if method in Request is GET POST or delete
-		 * @throw InvalidClientRequestException(405, "Method NOT ALLOWED")
-		 * @throw InvalidClientRequestException(505, "HTTP version NOT SUPPORTED")
-		 */
-		void _checkRequestStruct(void);
 
-		/**
-		 * @brief set host structure, PORT and name 
-		 * @throw InvalidClientRequsetExcpetion(400, "Bad request")
-		 */
-		void _setHost(void);
+		 /**
+		  * @brief check request struct
+		  * 
+		  * @return true if everyhing ok
+		  * @return false if not and set _error
+		  */
+		bool _checkRequestStruct(void);
+
+		 /**
+		  * @brief set host
+		  * 
+		  * @return true if succesfull
+		  * @return false and set _error code if not
+		  */
+		bool _setHost(void);
 
 	public :
 		ClientHeader(int& clientFd);
@@ -109,15 +117,17 @@ class ClientHeader
 		bool isFullyRead() const;
 
 		/**
-		 * @brief sets requstLine, requestLineElements, host and check if request is valid
-		 * throw InvalidClientRequestException with code if something went wrong
+		 * @brief set Client header variables
 		 * 
+		 * @return true if evertyhing is settet
+		 * @return false and _error code is 0 if it needs to be read more, false and _error code differnt than 0 if bad request
 		 */
-		void setCHVarivables();
+		bool setCHVarivables();
 
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
 		const std::string& getFullMessage(void) const;
+		const int& getErrorCode(void) const ;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 

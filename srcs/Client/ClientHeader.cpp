@@ -19,11 +19,12 @@ ClientHeader::ClientHeader(int& clientFD)
 	_requestLineElements.requestMethod ="";
 	_requestLineElements.requestTarget ="";
 	_requestLineElements.protocolVersion = "";
+	_errorCode = 0;
 }
 
 ClientHeader::ClientHeader(const ClientHeader& source)
 :_clientFd(source._clientFd), _message(source._message), _fullyRead(source._fullyRead),
-_requestLine(source._requestLine), _requestLineElements(source._requestLineElements),
+_errorCode(source._errorCode) ,_requestLine(source._requestLine), _requestLineElements(source._requestLineElements),
 _host(source._host)
 {
 
@@ -34,6 +35,7 @@ ClientHeader&::ClientHeader::operator=(const ClientHeader& source)
 {
 	_message = source._message;
 	_fullyRead = source._fullyRead;
+	_errorCode = source._errorCode;
 	_requestLine = source._requestLine;
 	_requestLineElements = source._requestLineElements;
 	_host = source._host;
@@ -46,61 +48,82 @@ ClientHeader::~ClientHeader()
 }
 
 
-void ClientHeader::_setRequestLine(void) 
+bool ClientHeader::_setRequestLine(void) 
 {
 	std::string firstLine;
 	size_t firstLineEnd =_message.find("\r\n");
 	if(firstLineEnd == std::string::npos)
 	{
-		throw InvalidClientRequestException(400, "BAD REQUEST");
+		Logger::warning("Cannot find CRLF in clientHeader", true);
+		_errorCode = 400;
+		return false;
+		//throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	firstLine = _message.substr(0,firstLineEnd);
 	_requestLine = firstLine;
+	return true;
 }
 
-void ClientHeader::_fillRequestStruct(void)
+bool ClientHeader::_fillRequestStruct(void)
 {
 	std::vector<std::string> firstLineStrings = ParsingUtils::splitString(_requestLine, ' ');
 	if(firstLineStrings.size() != 3)
 	{
-		throw InvalidClientRequestException(400, "BAD REQUEST");
+		Logger::warning("there is no 3 elements in _requestLine", true);
+		_errorCode = 400;
+		return false;
+		//throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	_requestLineElements.requestMethod = firstLineStrings[0];
 	_requestLineElements.requestTarget = firstLineStrings[1];
 	_requestLineElements.protocolVersion = firstLineStrings[2];
+	return true;
 }
 
-void ClientHeader::_checkRequestStruct(void)
+bool ClientHeader::_checkRequestStruct(void)
 {
 	const std::string validMethods[] = {"GET", "POST", "DELETE"};
 	bool valid = ParsingUtils::isStringValid(_requestLineElements.requestMethod, validMethods, 3);
 	if(valid == false)
 	{
+		Logger::warning("Not valid method found", true);
+		_errorCode = 405;
+		return false;
 		//TODO:
 		//Implement later to give this response to client since server
 		//only implements those 3 methods
-		throw InvalidClientRequestException(405, "METHOD NOT ALLOWED");
+		//throw InvalidClientRequestException(405, "METHOD NOT ALLOWED");
 	}
 	if(_requestLineElements.protocolVersion != "HTTP/1.1")
 	{
+		Logger::warning("Not valid protocol", true);
+		_errorCode = 505;
+		return false;
 		//TODO:
 		//Implement later to give this response to client
-		throw InvalidClientRequestException(505, "HTTP Version Not Supported");
+		//throw InvalidClientRequestException(505, "HTTP Version Not Supported");
 	}
+	return true;
 }
 
-void ClientHeader::_setHost(void)
+bool ClientHeader::_setHost(void)
 {
 	std::string HostLine;
 	size_t hosPos = _message.find("Host:");
 	if(hosPos == std::string::npos)
 	{
-		throw InvalidClientRequestException(400, "Bad Request");
+		Logger::warning("Invalid header", true);
+		_errorCode = 400;
+		return false;
+		//throw InvalidClientRequestException(400, "Bad Request");
 	}
 	size_t endHos = _message.find("\r\n", hosPos);
 	if(endHos == std::string::npos)
 	{
-		throw InvalidClientRequestException(400, "Bad Request");
+		Logger::warning("Invalid header end of host", true);
+		_errorCode = 400;
+		return false;
+		//throw InvalidClientRequestException(400, "Bad Request");
 	}
 	HostLine = _message.substr(hosPos, endHos - hosPos);
 	std::string plainHost = ParsingUtils::getHttpPlainValue(HostLine.substr(HostLine.find(':') + 1));
@@ -116,8 +139,12 @@ void ClientHeader::_setHost(void)
 	}
 	else 
 	{
-		throw InvalidClientRequestException(400, "Bad Request");
+		Logger::warning("Found more than one port", true);
+		_errorCode = 400;
+		return false;
+		//throw InvalidClientRequestException(400, "Bad Request");
 	}
+	return true;
 }
 
 bool ClientHeader::_isConnectionClosedByClient(void)
@@ -178,18 +205,23 @@ ReadStatus ClientHeader::readOnce()
 	return CONTINUE_READING;
 }
 
-void ClientHeader::setCHVarivables()
+bool ClientHeader::setCHVarivables()
 {
 	if(_fullyRead == false)
 	{
 		std::cout << "Cannot set client Header Variables (yet)" << std::endl;
-		return;
+		return false;
 	}
-	_setRequestLine();
-	_fillRequestStruct();
-	_setHost();
-	_checkRequestStruct();
-	Logger::info("ALL header variables are setted and request is valid");std::cout<<std::endl;
+	if(_setRequestLine() == false)
+		return false;
+	if(_fillRequestStruct() == false)
+		return false;
+	if(_setHost() == false)
+		return false;
+	if(_checkRequestStruct() == false)
+		return false;
+	return true;
+	//Logger::info("ALL header variables are setted and request is valid");std::cout<<std::endl;
 	//std::cout << "ALL header variables are setted and request is valid" << std::endl;
 }
 
@@ -216,6 +248,11 @@ const int& ClientHeader::getClientFd() const
 bool ClientHeader::isFullyRead() const
 {
 	return (_fullyRead);
+}
+
+const int& ClientHeader::getErrorCode(void) const 
+{
+	return _errorCode;
 }
 
 std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
