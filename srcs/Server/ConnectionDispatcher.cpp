@@ -182,11 +182,22 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 {
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
-	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
-	ClientResponse oneResponse(header, responseServer);
-	_clientResponses.addResponse(oneResponse);
-	Logger::info("Response added to clientResponse manager");
-	oneResponse.sendSimpleResponse();
+	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
+	if(header.getErrorCode() == 0)
+	{
+		const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
+		ClientResponse oneResponse(header, responseServer);
+		_clientResponses.addResponse(oneResponse);
+		Logger::info("Response added to clientResponse manager");
+		oneResponse.sendSimpleResponse();
+		//normal response
+	}
+	else
+	{
+		Logger::warning("This was triggering segfault", true);
+		//error Response
+	}
+
 	//std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
 	//std::cout << oneResponse << std::endl;
 	// std::cout << "Generating response for client " << communictaionFD << std::endl;

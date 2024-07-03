@@ -99,7 +99,8 @@ class ConnectionDispatcher
 
 		/**
 		 * @brief printing something so i know i am not stuck somewhere, and deleteing in immidietly.
-		 * commnet this function when doing stress test cuz this is blocking
+		 * commnet this function when doing stress test cuz this is blocking.
+		 * commnet this while using valgrind cuz it allocates a lot in long run
 		 */
 		void _notStuckMessage(void) const;
 		//ConnectionDispatcher();
