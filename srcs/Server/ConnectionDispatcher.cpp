@@ -323,6 +323,32 @@ void ConnectionDispatcher::_removeClient(int clientFd)
 	close(clientFd);
 }
 
+void ConnectionDispatcher::_notStuckMessage(void) const
+{
+		static size_t counter = 0;
+		if(counter < 10000)
+	   		std::cout << "Waiting for new request." << std::flush;
+		else if(counter < 20000)
+			std::cout << "Waiting for new request.." << std::flush;
+		else  
+			std::cout << "Waiting for new request..." << std::flush;
+
+        // Sleep for a short duration
+		usleep(1);
+
+        // Move the cursor back to the beginning of the line
+        std::cout << "\r";
+
+        // Clear the line (by overwriting with spaces)
+        std::cout << std::string(27, ' ') << std::flush;
+
+        // Move the cursor back to the beginning of the line again
+        std::cout << "\r";
+		counter++;
+		if(counter > 30000)
+			counter = 0;
+}
+
 void ConnectionDispatcher::mainLoop(void)
 {
 	//only those go in select 
@@ -368,6 +394,7 @@ void ConnectionDispatcher::mainLoop(void)
 			// read
 			// move it from current read to next write
 		}
+		_notStuckMessage();
 	}
 	_closeAllClients();
 	Logger::warning("SERVER IS TURNED OFF"); std::cout<<std::endl;

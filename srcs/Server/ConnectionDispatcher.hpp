@@ -96,6 +96,12 @@ class ConnectionDispatcher
 		 * 
 		 */
 		void _closeAllClients(void);
+
+		/**
+		 * @brief printing something so i know i am not stuck somewhere, and deleteing in immidietly.
+		 * commnet this function when doing stress test cuz this is blocking
+		 */
+		void _notStuckMessage(void) const;
 		//ConnectionDispatcher();
 	public :
 		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
