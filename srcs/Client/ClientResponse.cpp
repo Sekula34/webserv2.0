@@ -19,6 +19,7 @@ ClientResponse::ClientResponse(ClientHeader& header,
 	std::cout << server << std::endl;
 	Logger::info("Header of client"); std::cout<<std::endl;
 	std::cout << header << std::endl;
+	Logger::info("Full message of client: "); std::cout << header.getFullMessage() << std::endl;
 }
 
 ClientResponse::ClientResponse(const ClientResponse& source)

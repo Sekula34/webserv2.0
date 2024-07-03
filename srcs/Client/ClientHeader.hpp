@@ -95,6 +95,7 @@ class ClientHeader
 
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
+		const std::string& getFullMessage(void) const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 

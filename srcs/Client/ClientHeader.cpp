@@ -204,6 +204,10 @@ const std::string& ClientHeader::getHostName(void) const
 	return(_host.name);
 }
 
+const std::string& ClientHeader::getFullMessage(void) const
+{
+	return (_message);
+}
 
 const int& ClientHeader::getClientFd() const 
 {
