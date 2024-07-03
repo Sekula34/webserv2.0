@@ -10,6 +10,7 @@ class ClientHeaderManager
 	private :
 		std::vector<ClientHeader> _unreadHeaders;
 		std::vector<ClientHeader> _readHeaders;
+		std::vector<ClientHeader> _errorHeaders;
 
 	public :
 		ClientHeaderManager();

@@ -60,6 +60,11 @@ void ClientHeaderManager::removeClient(int& clientFd)
 	{
 		_unreadHeaders.erase(it);
 	}
+	it = std::find_if(_errorHeaders.begin(),_errorHeaders.end(), FindClientByFd(clientFd));
+	if(it != _errorHeaders.end())
+	{
+		_errorHeaders.erase(it);
+	}
 }
 
 ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
@@ -81,6 +86,16 @@ ClientHeader& ClientHeaderManager::getClientHeader(int clientFd)
 			Logger::info("Client found in readHeaders"); std::cout<< std::endl;
 			//std::cout << "Client found in readHeaders" << std::endl;
 			ClientHeader& toReturn(_readHeaders[i]);
+			return toReturn;
+		}
+	}
+	for(size_t i = 0; i < _errorHeaders.size(); i++)
+	{
+		if(clientFd == _errorHeaders[i].getClientFd())
+		{
+			Logger::info("Client found in ErrorHeadrs"); std::cout<< std::endl;
+			//std::cout << "Client found in readHeaders" << std::endl;
+			ClientHeader& toReturn(_errorHeaders[i]);
 			return toReturn;
 		}
 	}
@@ -117,30 +132,27 @@ ReadStatus ClientHeaderManager::readClientHeader(int& clientFD)
 			_unreadHeaders.end(), FindClientByFd(clientFD));
 	if(status == DONE)
 	{
-		//TODO
-		/*
-			try(toread.setCHVariables)
-			if error hapens
-			get error number and create response accordining to number
-		*/
-		toRead.setCHVarivables();
-		_readHeaders.push_back(toRead);
+		bool settedCH = toRead.setCHVarivables();
+		if(settedCH == false && toRead.getErrorCode() != 0)
+		{
+			_errorHeaders.push_back(toRead);
+			Logger::warning("Client with error in header is added to _errorHeaders", true);
+		}
+		else if (settedCH == true)
+		{
+			_readHeaders.push_back(toRead);
+			Logger::warning("Client header is good and requst is valid", true);
+		}
 		if(it != _unreadHeaders.end())
-		{
 			_unreadHeaders.erase(it);
-		}
 		else
-		{
 			std::cerr << "I didnt find clientHeader with that fd" << std::endl;
-		}
 		return DONE;
 	}
 	else if(status == ERROR)
 	{
 		if(it != _unreadHeaders.end())
-		{
 			_unreadHeaders.erase(it);
-		}
 		return ERROR;
 	}
 	return CONTINUE_READING;
