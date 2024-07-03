@@ -178,7 +178,6 @@ ReadStatus ClientHeader::readOnce()
 	return CONTINUE_READING;
 }
 
-
 void ClientHeader::setCHVarivables()
 {
 	if(_fullyRead == false)

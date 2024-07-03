@@ -58,9 +58,31 @@ class ClientHeader
 		ClientHeader();
 
 		bool _isConnectionClosedByClient(void);
+
+		/**
+		 * @brief set request line
+		 * @throw InvalidClientRequestException(400, "BAD request") if cannot find one
+		 * 
+		 */
 		void _setRequestLine(void);
+
+		/**
+		 * @brief fill the request method, request target(location) and protocol
+		 * @throw InvalidClientRequestException(400, BAD REQUEST) if cannot split line in 3 elements
+		 */
 		void _fillRequestStruct();
+
+		/**
+		 * @brief check if method in Request is GET POST or delete
+		 * @throw InvalidClientRequestException(405, "Method NOT ALLOWED")
+		 * @throw InvalidClientRequestException(505, "HTTP version NOT SUPPORTED")
+		 */
 		void _checkRequestStruct(void);
+
+		/**
+		 * @brief set host structure, PORT and name 
+		 * @throw InvalidClientRequsetExcpetion(400, "Bad request")
+		 */
 		void _setHost(void);
 
 	public :
@@ -88,7 +110,7 @@ class ClientHeader
 
 		/**
 		 * @brief sets requstLine, requestLineElements, host and check if request is valid
-		 * throw INVALIDCLIENTREQUESTEXCEPTIOn with code if something went wrong
+		 * throw InvalidClientRequestException with code if something went wrong
 		 * 
 		 */
 		void setCHVarivables();
