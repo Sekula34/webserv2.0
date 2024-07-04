@@ -8,7 +8,7 @@
 #include <string>
 #include <sys/stat.h> //for checking if file is regular, not udevRandom
 #include <vector>
-
+#include "../Utils/Logger.hpp"
 
 int Configuration::_serverId = 0;
 //either will stay private or will call Configuration(std::string path) where 
@@ -89,7 +89,7 @@ void Configuration::_checkFileAccessType() const
 		std::cerr<<"File at location:[" << _filePath << "] is not regular file." << std::endl;
 		throw InvalidConfigFileException();
 	}
-	std::cout <<"Configuration file is regular file that can be opened" << std::endl;
+	Logger::info("Configuration file is regular file that can be opened", true);
 }
 
 
