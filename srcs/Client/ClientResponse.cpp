@@ -45,7 +45,7 @@ void ClientResponse::sendSimpleResponse()const
 	const char *http_response = 
 	"HTTP/1.1 200 OK\r\n"
 	"Content-Type: text/html\r\n"
-	"Content-Length: 46\r\n"
+	"Content-Length: 48\r\n"
 	"Connection: close\r\n"
 	"\r\n"
 	"<html><body><h1>Hello, World!</h1></body></html>";
