@@ -2,7 +2,12 @@
 # define LOGGER_HPP
 #include <string>
 
-
+/**
+ * @brief static class for printing info, warning and error.
+ * _printCurrentTime that this function does is in c and should change that to c++ way.
+ * MAYBE YOU SHOULD DELETE THIS BEFORE SUBMITING BECASE OF WRITING TO ANY FILE DESCRIPTOR
+ * 
+ */
 class Logger 
 {
 
