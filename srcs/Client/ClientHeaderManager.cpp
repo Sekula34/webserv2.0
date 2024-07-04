@@ -141,7 +141,7 @@ ReadStatus ClientHeaderManager::readClientHeader(int& clientFD)
 		else if (settedCH == true)
 		{
 			_readHeaders.push_back(toRead);
-			Logger::warning("Client header is good and requst is valid", true);
+			Logger::info("Client header is good and requst is valid", true);
 		}
 		if(it != _unreadHeaders.end())
 			_unreadHeaders.erase(it);
