@@ -248,6 +248,12 @@ minimum HTTP 1.1 request
 CR LF - carriage return line feed, \r\n 
 
 
+
+
+-----------------7230-------------------------------
+
+
+
 A server can send a 505
  (HTTP Version Not Supported) response if it wishes, for any reason,
  to refuse service of the client’s major protocol version.
@@ -369,3 +375,85 @@ A server that receives a request message with a transfer coding it
  does not understand SHOULD respond with 501 (Not Implemented).
 
 example : Transfer-Encoding: gzip, chunked
+
+
+Content-Length = 1*DIGIT
+ An example is
+ Content-Length: 3495
+
+ Any Content-Length field value greater than or equal to zero is
+ valid. Since there is no predefined limit to the length of a
+ payload, a recipient MUST anticipate potentially large decimal
+ numerals and prevent parsing errors due to integer conversion
+ overflows (Section 9.3).
+
+Response Content-Length
+	All 1xx (Informational), 204 (No Content), and 304 (Not Modified)
+	responses do not include a message body. All other responses do
+	include a message body, although the body might be of zero length.
+
+Request Content-Length
+	For example, a Content-Length header
+	field is normally sent in a POST request even when the value is 0
+	(indicating an empty payload body). A user agent SHOULD NOT send a
+	Content-Length header field when the request message does not contain
+	a payload body and the method semantics do not anticipate such a
+	body.
+
+If a valid Content-Length header field is present without
+ Transfer-Encoding, its decimal value defines the expected message
+ body length in octets. If the sender closes the connection or
+ the recipient times out before the indicated number of octets are
+ received, the recipient MUST consider the message to be
+ incomplete and close the connection.
+
+A server MAY reject a request that contains a message body but not a
+Content-Length by responding with 411 (Length Required).
+
+message that uses a valid Content-Length is incomplete
+if the size of the message body received (in octets) is less than the
+value given by Content-Length.
+
+
+Request Target 
+	can have 4 forms if i understand this correctly in this case i can only receive origin form
+
+
+
+If the target URI’s path component is
+ empty, the client MUST send "/" as the path within the origin-form of
+ request-target. A Host header field is also sent, as defined in
+ Section 5.4.
+ For example, a client wishing to retrieve a representation of the
+ resource identified as
+ http://www.example.org/where?q=now
+ directly from the origin server would open (or reuse) a TCP
+ connection to port 80 of the host "www.example.org" and send the
+ lines:
+ GET /where?q=now HTTP/1.1
+ Host: www.example.org
+ followed by the remainder of the request message.
+
+A client MUST send a Host header field in all HTTP/1.1 request
+ messages
+
+
+A server MUST respond with a 400 (Bad Request) status code to any
+ HTTP/1.1 request message that lacks a Host header field and to any
+ request message that contains more than one Host header field or a
+ Host header field with an invalid field-value.
+
+
+Connection: close
+ in either the request or the response header fields indicates that
+ the sender is going to close the connection after the current
+ request/response is complete (Section 6.6).
+ A client that does not support persistent connections MUST send the
+ "close" connection option in every request message.
+ A server that does not support persistent connections MUST send the
+ "close" connection option in every response message that does not
+ have a 1xx (Informational) status code.
+
+
+ -----7230 END--------
+ 
