@@ -86,7 +86,7 @@ bool ClientHeader::_checkRequestStruct(void)
 	bool valid = ParsingUtils::isStringValid(_requestLineElements.requestMethod, validMethods, 3);
 	if(valid == false)
 	{
-		Logger::warning("Not valid method found", true);
+		Logger::warning("Not valid method found: ", false); std::cerr << _requestLineElements.requestMethod << std::endl;
 		_errorCode = 405;
 		return false;
 		//TODO:
