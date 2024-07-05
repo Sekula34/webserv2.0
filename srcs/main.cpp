@@ -8,6 +8,7 @@
 #include "Server/Socket.hpp"
 #include "Server/SocketManager.hpp"
 #include "Utils/Logger.hpp"
+#include "Utils/HttpStatusCode.hpp"
 
 #include <exception>
 #include <iostream>
@@ -176,6 +177,14 @@ void loggerTester()
 	Logger::error("critical thing");
 }
 
+void errorMapTester()
+{
+	//ParsingUtils::printMap(HttpStatusCode::_statusCode);
+	int code(405);
+	std::string reasonMessage = HttpStatusCode::getReasonPhrase(code);
+	std::cout << "Reason phrase behind " << code << " is " << reasonMessage << std::endl;
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -193,13 +202,14 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+	//	ConnectionDispatcherTest();
 		//clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
 		//clientMessageTest();
 		//ClientHeaderManagerTester();
 		//loggerTester();
+		errorMapTester();
 	}
 	catch(std::exception &e)
 	{
