@@ -202,14 +202,14 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-	//	ConnectionDispatcherTest();
+		ConnectionDispatcherTest();
 		//clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
 		//clientMessageTest();
 		//ClientHeaderManagerTester();
 		//loggerTester();
-		errorMapTester();
+		//errorMapTester();
 	}
 	catch(std::exception &e)
 	{
