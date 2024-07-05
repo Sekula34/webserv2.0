@@ -1,6 +1,6 @@
 #ifndef CLIENTRESPONSE_HPP
 # define CLIENTRESPONSE_HPP
-#include "ClientHeader.hpp"
+#include "../Client/ClientHeader.hpp"
 #include "../Parsing/ServerSettings.hpp"
 #include <ostream>
 

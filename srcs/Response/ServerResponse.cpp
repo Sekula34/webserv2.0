@@ -1,5 +1,5 @@
 #include "ServerResponse.hpp"
-#include "ClientHeader.hpp"
+#include "../Client/ClientHeader.hpp"
 #include <cstring>
 #include <ostream>
 #include <iostream>

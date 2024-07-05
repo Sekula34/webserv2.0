@@ -4,7 +4,7 @@
 #include "../Parsing/ServersInfo.hpp"
 #include <sys/select.h>
 #include "../Client/ClientHeaderManager.hpp"
-#include "../Client/ClientResponseManager.hpp"
+#include "../Response/ClientResponseManager.hpp"
 
 /**
  * @brief class for handling select creating servers and give them tasks

@@ -26,8 +26,6 @@ ParsingObjects/%.o: srcs/%.cpp
 
 SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Client/ClientHeaderManager.cpp \
-			srcs/Client/ServerResponse.cpp\
-			srcs/Client/ClientResponseManager.cpp\
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
@@ -37,6 +35,8 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
+			srcs/Response/ClientResponseManager.cpp\
+			srcs/Response/ServerResponse.cpp\
 			srcs/Server/ConnectionDispatcher.cpp \
 			srcs/Server/Socket.cpp \
 			srcs/Server/SocketManager.cpp \
@@ -47,8 +47,6 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 
 HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Client/ClientHeaderManager.hpp \
-			srcs/Client/ServerResponse.hpp\
-			srcs/Client/ClientResponseManager.cpp\
 			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
 			srcs/Parsing/Token.hpp \
@@ -58,6 +56,8 @@ HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Parsing/Configuration.hpp \
 			srcs/Parsing/ParsingUtils.hpp \
 			srcs/Parsing/ServerSettings.hpp \
+			srcs/Response/ClientResponseManager.cpp\
+			srcs/Response/ServerResponse.hpp\
 			srcs/Server/ConnectionDispatcher.hpp \
 			srcs/Server/Socket.hpp \
 			srcs/Server/SocketManager.hpp \

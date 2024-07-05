@@ -11,7 +11,7 @@
 #include <csignal>
 #include <fcntl.h>
 #include <algorithm>
-#include "../Client/ServerResponse.hpp"
+#include "../Response/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
 
