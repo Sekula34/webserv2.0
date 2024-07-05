@@ -44,8 +44,9 @@ std::map<int, std::string> HttpStatusCode::_getFilledMap()
     filledMap[414] = "URI Too Long";
     filledMap[415] = "Unsupported Media Type";
     filledMap[416] = "Range Not Satisfiable";
-    
 	filledMap[417] = "Expectation Failed";
+	filledMap[426] = "Upgrade Required";
+
     filledMap[500] = "Internal Server Error";
     filledMap[501] = "Not Implemented";
     filledMap[502] = "Bad Gateway";
