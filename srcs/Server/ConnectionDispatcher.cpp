@@ -11,7 +11,7 @@
 #include <csignal>
 #include <fcntl.h>
 #include <algorithm>
-#include "../Client/ClientResponse.hpp"
+#include "../Client/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
 
@@ -186,9 +186,9 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 	if(header.getErrorCode() == 0)
 	{
 		const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
-		ClientResponse oneResponse(header, responseServer);
+		ServerResponse oneResponse(header, responseServer);
 		_clientResponses.addResponse(oneResponse);
-		Logger::info("Response added to clientResponse manager");
+		Logger::info("Response added to ServerResponse manager");
 		oneResponse.sendSimpleResponse();
 		//normal response
 	}

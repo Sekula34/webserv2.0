@@ -1,7 +1,7 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
-#include "Client/ClientResponse.hpp"
+#include "Client/ServerResponse.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -164,7 +164,7 @@ void clientResponseTest()
 	ServersInfo info;
 	const ServerSettings& server(info.getServerByPort(8080));
 
-	ClientResponse response(header,server);
+	ServerResponse response(header,server);
 	std::cout << response << std::endl;
 	close(clientFD);
 	close(socket.getSocketFd());

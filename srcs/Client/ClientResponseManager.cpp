@@ -1,5 +1,5 @@
 #include "ClientResponseManager.hpp"
-#include "ClientResponse.hpp"
+#include "ServerResponse.hpp"
 
 ClientResponseManager::ClientResponseManager()
 {
@@ -24,7 +24,7 @@ ClientResponseManager::~ClientResponseManager()
 
 }
 
-void ClientResponseManager::addResponse(ClientResponse& clientResponse)
+void ClientResponseManager::addResponse(ServerResponse& ServerResponse)
 {
-	_responses.push_back(clientResponse);
+	_responses.push_back(ServerResponse);
 }

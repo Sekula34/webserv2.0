@@ -1,6 +1,6 @@
-#ifndef CLIENTRESPONSEMANAGER_HPP
-# define CLIENTRESPONSEMANAGER_HPP
-#include "ClientResponse.hpp"
+#ifndef SERVERRESPONSE_HPP
+# define SERVERRESPONSE_HPP
+#include "ServerResponse.hpp"
 #include <vector>
 
 /**
@@ -10,7 +10,7 @@
 class ClientResponseManager
 {
 	private :
-		std::vector<ClientResponse> _responses;
+		std::vector<ServerResponse> _responses;
 
 	public :
 		ClientResponseManager();
@@ -18,7 +18,7 @@ class ClientResponseManager
 		ClientResponseManager& operator=(const ClientResponseManager& source);
 		~ClientResponseManager();
 
-		void addResponse(ClientResponse& clientResponse);
+		void addResponse(ServerResponse& ServerResponse);
 
 };
 
