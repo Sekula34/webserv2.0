@@ -9,6 +9,7 @@
 #include "Server/SocketManager.hpp"
 #include "Utils/Logger.hpp"
 #include "Utils/HttpStatusCode.hpp"
+#include "Response/Response.hpp"
 
 #include <exception>
 #include <iostream>
@@ -185,6 +186,13 @@ void errorMapTester()
 	std::cout << "Reason phrase behind " << code << " is " << reasonMessage << std::endl;
 }
 
+void ResponseTest()
+{
+	int fd(5);
+	Response oneResponse(fd);
+	std::cout << oneResponse << std::endl;
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -202,7 +210,7 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		ConnectionDispatcherTest();
+		//ConnectionDispatcherTest();
 		//clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
@@ -210,6 +218,7 @@ int main()
 		//ClientHeaderManagerTester();
 		//loggerTester();
 		//errorMapTester();
+		ResponseTest();
 	}
 	catch(std::exception &e)
 	{
