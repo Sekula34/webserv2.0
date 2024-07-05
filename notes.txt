@@ -518,3 +518,10 @@ Fielding & Reschke Standards Track [Page 47]
 RFC 7231 HTTP/1.1 Semantics and Content June 2014
  o 5xx (Server Error): The server failed to fulfill an apparently
  valid request
+
+
+curl -i www.google.com   
+
+
+Date: Fri, 05 Jul 2024 13:41:24 GMT
+Sun, 06 Nov 1994 08:49:37 GMT
