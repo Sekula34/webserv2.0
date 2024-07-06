@@ -1,5 +1,6 @@
 #include "ResponseBody.hpp"
 #include <iostream>
+#include <sstream>
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 
@@ -40,13 +41,12 @@ ResponseBody::~ResponseBody()
 
 std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 {
-	std::string errorPage =
+	std::ostringstream errorPage;
+	errorPage << 
 	"<!DOCTYPE html>\n"
     "<html>\n"
     "<head>\n"
-    "    <title>";
-	errorPage += ParsingUtils::intToString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode);
-	errorPage += "</title>\n"
+    "    <title>" << ParsingUtils::intToString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode) << "</title>\n"
     "    <style>\n"
     "        body {\n"
     "            text-align: center;\n"
@@ -62,13 +62,9 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
     "    </style>\n"
     "</head>\n"
     "<body>\n"
-    "    <h1>";
-	errorPage += ParsingUtils::intToString(httpErrorCode);
-	errorPage += "</h1>\n"
-    "    <p>";
-	errorPage += HttpStatusCode::getReasonPhrase(httpErrorCode);
-	errorPage +="</p>\n"
+    "    <h1>" <<ParsingUtils::intToString(httpErrorCode) << "</h1>\n"
+    "    <p>" << HttpStatusCode::getReasonPhrase(httpErrorCode) << "</p>\n"
     "</body>\n"
     "</html>\n";
-	return errorPage;
+	return  errorPage.str();
 }
