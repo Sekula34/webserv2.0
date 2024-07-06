@@ -215,6 +215,11 @@ void responseBodyTest()
 
 }
 
+void toStringtest()
+{
+	std::cout << ParsingUtils::toString(-8999.67);
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -240,9 +245,10 @@ int main()
 		//ClientHeaderManagerTester();
 		//loggerTester();
 		//errorMapTester();
-		ResponseTest();
+		//ResponseTest();
 		//responseHeaderTest(404);
 		//responseBodyTest();
+		toStringtest();
 	}
 	catch(std::exception &e)
 	{
