@@ -2,7 +2,6 @@
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
 #include "Response/ResponseBody.hpp"
-#include "Response/ResponseHeader.hpp"
 #include "Response/ServerResponse.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
@@ -190,19 +189,22 @@ void errorMapTester()
 
 void ResponseTest()
 {
-	int clientfd(5);
-	int httpCode(200);
-	ResponseHeader header(httpCode);
-	Response response(clientfd);
-	//Response response(clientfd, header);
-	std::cout << response << std::endl;
+	Socket socket(7070);
+	int clientFD = socket.getCommunicationSocket();
+	ClientHeader header(clientFD);
+	header.readOnce();
+	Response response(header);
+	response.sendSimpleResponse();
+	close(clientFD);
+	close(socket.getSocketFd());
 }
 
 void responseHeaderTest(int status)
 {
-	ResponseHeader header(status);
+	(void) status;
+	//ResponseHeader header(status);
 	//std::cout << header.turnResponseHeaderToString();
-	std::cout << header << std::endl;
+	//std::cout << header << std::endl;
 }
 
 void responseBodyTest()
@@ -210,7 +212,6 @@ void responseBodyTest()
 	int fd(5);
 	ClientHeader header(fd);
 	ResponseBody body(header);
-	std::cout << body._generateErrorPage(100);
 
 }
 
@@ -239,12 +240,13 @@ int main()
 		//ClientHeaderManagerTester();
 		//loggerTester();
 		//errorMapTester();
-		//ResponseTest();
+		ResponseTest();
 		//responseHeaderTest(404);
-		responseBodyTest();
+		//responseBodyTest();
 	}
 	catch(std::exception &e)
 	{
+		Logger::error("Exception Happeed", true);
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
