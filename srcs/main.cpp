@@ -189,15 +189,19 @@ void errorMapTester()
 
 void ResponseTest()
 {
-	int fd(5);
-	Response oneResponse(fd);
-	std::cout << oneResponse << std::endl;
+	int clientfd(5);
+	int httpCode(200);
+	ResponseHeader header(httpCode);
+	Response response(clientfd);
+	//Response response(clientfd, header);
+	std::cout << response << std::endl;
 }
 
 void responseHeaderTest(int status)
 {
 	ResponseHeader header(status);
-	std::cout << header.turnResponseHeaderToString();
+	//std::cout << header.turnResponseHeaderToString();
+	std::cout << header << std::endl;
 }
 
 void signalHandler(int signum) {
@@ -225,8 +229,8 @@ int main()
 		//ClientHeaderManagerTester();
 		//loggerTester();
 		//errorMapTester();
-		//ResponseTest();
-		responseHeaderTest(404);
+		ResponseTest();
+		//responseHeaderTest(404);
 	}
 	catch(std::exception &e)
 	{

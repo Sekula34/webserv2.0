@@ -44,7 +44,21 @@ RUN SERVER
 				3. ELSE 
 					4. GENERATE SERVER RESPONSE
 				5. STORE RESPONSE
-				6. SET client to be ready to write 
+				6. SET client to be ready to write
+
+				GENERATE ERROR Response 
+					1. Find which error is in CLIENTHEADER
+					2. CREATE BODY MESSAGE (RESPONSE BODY)
+					3. CREATE RESPONSE HEADER
+
+				GENERATE SERVER RESPONSE
+					1.READ CLIENT HEADER FIND WHAT HE WANTS 
+					2.IF (GET)
+						3. HANDLE GET
+					4. IF (POST)
+						5.HANDLE POST 
+					6. IF (DELETE)
+						7. HANDLE DELETE
 
 	PROCESS READY TO WRITE 
 		1. GET all Ready to write fds / Respones 
