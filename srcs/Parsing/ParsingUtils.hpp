@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 class ParsingUtils 
 {
@@ -36,11 +37,30 @@ class ParsingUtils
 			std::cout <<std::endl <<"________end of vector ____" << std::endl;
 		}
 
+		template<typename Type>
+		static std::string toString(Type number)
+		{
+			std::stringstream ss;
+			std::string stringValue;
+			ss << number;
+			if(ss.fail())
+			{
+				std::cerr << "StringStreamFailed" << std::endl;
+				throw std::runtime_error("StringStreamfailed");
+			}
+			stringValue = ss.str();
+			if(ss.fail())
+			{
+				std::cerr << "StringStreamFailed2" << std::endl;
+				throw std::runtime_error("StringStreamfailed2");
+			}
+			return stringValue;
+		}
+
 		static std::vector<std::string> splitString(std::string fullString, char delimiter);
 		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
 		static bool isStringNumber(std::string toCheck);
 		static size_t stringToSizeT(std::string string);
-		static std::string intToString(int value);
 		
 		/**
 		 * @brief Get the Http Plain Value object

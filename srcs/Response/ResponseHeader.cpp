@@ -47,7 +47,7 @@ std::string ResponseHeader::_getStatusLineAsString() const
 	std::string statusLine;
 	statusLine += _statusLine.HttpVersion;
 	statusLine += " ";
-	statusLine += ParsingUtils::intToString(_statusLine.statusCode);
+	statusLine += ParsingUtils::toString(_statusLine.statusCode);
 	statusLine += " ";
 	statusLine += _statusLine.ReasonPhrase;
 	statusLine += "\r\n";

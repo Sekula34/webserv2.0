@@ -53,7 +53,7 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 	"<!DOCTYPE html>\n"
     "<html>\n"
     "<head>\n"
-    "    <title>" << ParsingUtils::intToString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode) << "</title>\n"
+    "    <title>" << ParsingUtils::toString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode) << "</title>\n"
     "    <style>\n"
     "        body {\n"
     "            text-align: center;\n"
@@ -69,7 +69,7 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
     "    </style>\n"
     "</head>\n"
     "<body>\n"
-    "    <h1>" <<ParsingUtils::intToString(httpErrorCode) << "</h1>\n"
+    "    <h1>" <<ParsingUtils::toString(httpErrorCode) << "</h1>\n"
     "    <p>" << HttpStatusCode::getReasonPhrase(httpErrorCode) << "</p>\n"
     "</body>\n"
     "</html>\n";

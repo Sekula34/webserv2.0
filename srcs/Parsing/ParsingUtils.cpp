@@ -67,24 +67,7 @@ size_t ParsingUtils::stringToSizeT(std::string string)
 	return sizeTValue;
 }
 
-std::string ParsingUtils::intToString(int value)
-{
-	std::stringstream ss;
-	std::string stringValue;
-	ss << value;
-	if(ss.fail())
-	{
-		std::cerr << "StringStreamFailed" << std::endl;
-		throw std::runtime_error("StringStreamfailed");
-	}
-	stringValue = ss.str();
-	if(ss.fail())
-	{
-		std::cerr << "StringStreamFailed2" << std::endl;
-		throw std::runtime_error("StringStreamfailed2");
-	}
-	return stringValue;
-}
+
 
 std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 {
