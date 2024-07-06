@@ -1,5 +1,6 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
+#include <ostream>
 #include <string>
 #include <map>
 
@@ -29,6 +30,8 @@ class ResponseHeader
 		~ResponseHeader();
 
 		std::string turnResponseHeaderToString(void) const;
+
+		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
 
 		/*void setContentLength(int contentLength);
 		void setDate(void);

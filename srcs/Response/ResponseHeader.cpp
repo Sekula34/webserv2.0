@@ -1,6 +1,7 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include <ostream>
 
 ResponseHeader::ResponseHeader(int& httpCode)
 :_httpCode(httpCode)
@@ -81,4 +82,11 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 	fullHeader += _getStatusLineAsString();
 	fullHeader += _getAllHeaderFieldsAsString();
 	return fullHeader;
+}
+
+std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj)
+{
+	os << "Response header is " << std::endl;
+	os << obj.turnResponseHeaderToString();
+	return os;
 }
