@@ -1,26 +1,30 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 #include <ostream>
-#include <string>
 #include "ResponseHeader.hpp"
+#include "../Client/ClientHeader.hpp"
+#include "ResponseBody.hpp"
 //#include "../Parsing/ServerSettings.hpp"
 
 class Response 
 {
 	private :
-		int& _clientFd;
-		ResponseHeader* _header;
-		//const ServerSettings* server;
-		int _code;
+		ClientHeader& _clientHeader;
+		const ServerSettings* _server;
+		ResponseHeader* _responseHeader;
 		//CLASS HEADER;
-		std::string _body; 
+		ResponseBody _responseBody;
+		
+		//std::string _body; 
 		//Response();
 
 	public :
-		Response(int& _clientFd);
+		Response(ClientHeader& clientHeader, const ServerSettings* server = NULL);
 		Response(const Response& source);
 		Response& operator=(const Response& source);
 		~Response();
+
+		void sendSimpleResponse() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const Response& obj);
 };
