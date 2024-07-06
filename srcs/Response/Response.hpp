@@ -3,12 +3,14 @@
 #include <ostream>
 #include <string>
 #include "ResponseHeader.hpp"
+//#include "../Parsing/ServerSettings.hpp"
 
 class Response 
 {
 	private :
 		int& _clientFd;
 		ResponseHeader* _header;
+		//const ServerSettings* server;
 		int _code;
 		//CLASS HEADER;
 		std::string _body; 
