@@ -1,6 +1,7 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
+#include "Response/ResponseHeader.hpp"
 #include "Response/ServerResponse.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
@@ -193,6 +194,12 @@ void ResponseTest()
 	std::cout << oneResponse << std::endl;
 }
 
+void responseHeaderTest(int status)
+{
+	ResponseHeader header(status);
+	std::cout << header.turnResponseHeaderToString();
+}
+
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
 
@@ -218,7 +225,8 @@ int main()
 		//ClientHeaderManagerTester();
 		//loggerTester();
 		//errorMapTester();
-		ResponseTest();
+		//ResponseTest();
+		responseHeaderTest(404);
 	}
 	catch(std::exception &e)
 	{
