@@ -37,6 +37,7 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Parsing/ServerSettings.cpp \
 			srcs/Response/ClientResponseManager.cpp\
 			srcs/Response/Response.cpp\
+			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
 			srcs/Response/ServerResponse.cpp\
 			srcs/Server/ConnectionDispatcher.cpp \
@@ -60,6 +61,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Parsing/ServerSettings.hpp \
 			srcs/Response/ClientResponseManager.hpp\
 			srcs/Response/Response.hpp\
+			srcs/Response/ResponseBody.hpp\
 			srcs/Response/ResponseHeader.hpp\
 			srcs/Response/ServerResponse.hpp\
 			srcs/Server/ConnectionDispatcher.hpp \
