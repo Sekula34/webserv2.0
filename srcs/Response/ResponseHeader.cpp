@@ -1,13 +1,17 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include <cstddef>
 #include <ostream>
 
-ResponseHeader::ResponseHeader(int& httpCode)
+ResponseHeader::ResponseHeader(int& httpCode, size_t contentLength)
 :_httpCode(httpCode)
 {
 	_fillStatusLineElements();
 	_headerFields["Connection"] = "close";
+	_headerFields["Content-Length"] = contentLength;
+	if(contentLength != 0)
+		_headerFields["Content_Language"] = "en";
 }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)

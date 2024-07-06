@@ -1,5 +1,6 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <map>
@@ -24,7 +25,7 @@ class ResponseHeader
 		std::string _getAllHeaderFieldsAsString() const;
 
 	public:
-		ResponseHeader(int& httpCode);
+		ResponseHeader(int& httpCode, size_t contentLength);
 		ResponseHeader(const ResponseHeader& source);
 		ResponseHeader& operator=(const ResponseHeader& source);
 		~ResponseHeader();
