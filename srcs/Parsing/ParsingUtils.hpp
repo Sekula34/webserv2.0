@@ -40,6 +40,7 @@ class ParsingUtils
 		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
 		static bool isStringNumber(std::string toCheck);
 		static size_t stringToSizeT(std::string string);
+		static std::string intToString(int value);
 		
 		/**
 		 * @brief Get the Http Plain Value object
