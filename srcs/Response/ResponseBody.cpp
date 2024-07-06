@@ -1,13 +1,18 @@
 #include "ResponseBody.hpp"
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 
 ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings* server)
-:_clientHeader(clientHeader), _server(server)
+:_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
 {
-	std::cout << "Created Response body:" << std::endl;
+    if(clientHeader.isFullyRead() == false)
+    {
+        throw std::runtime_error("Trying to create Resonse body without fully read header");
+    }
+    std::cout << "Created Response body:" << std::endl;
 	std::cout << clientHeader << std::endl;
 	if(_server != NULL)
 		std::cout << _server << std::endl;
@@ -15,6 +20,8 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 		std::cout << "Server is NULL" << std::endl;
 	if(clientHeader.getErrorCode() != 0)
 	{
+        _response = _generateErrorPage(clientHeader.getErrorCode());
+        _httpStatusCode = clientHeader.getErrorCode();
 		//std::cout << _generateErrorPage(clientHeader.getErrorCode());
 	}
 	else   
@@ -24,7 +31,7 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 }
 
 ResponseBody::ResponseBody(const ResponseBody& source)
-:_clientHeader(source._clientHeader), _server(source._server)
+:_clientHeader(source._clientHeader), _server(source._server), _response(source._response)
 {
 
 }
@@ -67,4 +74,15 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
     "</body>\n"
     "</html>\n";
 	return  errorPage.str();
+}
+
+const std::string& ResponseBody::getResponse(void) const 
+{
+    return (_response);
+}
+
+
+const int& ResponseBody::getHttpStatusCode(void) const 
+{
+    return (_httpStatusCode);
 }

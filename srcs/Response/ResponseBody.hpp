@@ -8,15 +8,21 @@ class ResponseBody
 	private :
 		const ClientHeader& _clientHeader;
 		const ServerSettings* _server; //do not delete here
+		std::string _response;
+		int _httpStatusCode;
+		
+		std::string _generateErrorPage(const int httpErrorCode);
 
 
 	public :
-		std::string _generateErrorPage(const int httpErrorCode);
 		//ResponseBody();
 		ResponseBody(const ClientHeader& clientHeader, const ServerSettings* server = NULL);
 		ResponseBody(const ResponseBody& source);
 		ResponseBody& operator=(const ResponseBody& source);
 		~ResponseBody();
+
+		const std::string& getResponse(void) const;
+		const int& getHttpStatusCode(void) const;
 
 };
 
