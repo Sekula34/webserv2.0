@@ -11,7 +11,8 @@
 #include <csignal>
 #include <fcntl.h>
 #include <algorithm>
-#include "../Response/ServerResponse.hpp"
+//#include "../Response/Response.hpp"
+//#include "../Response/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
 
@@ -183,20 +184,21 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 {
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
 	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
-	if(header.getErrorCode() == 0)
-	{
-		const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
-		ServerResponse oneResponse(header, responseServer);
-		_clientResponses.addResponse(oneResponse);
-		Logger::info("Response added to ServerResponse manager");
-		oneResponse.sendSimpleResponse();
-		//normal response
-	}
-	else
-	{
-		Logger::warning("This was triggering segfault", true);
-		//error Response
-	}
+	// Response respones()
+	// if(header.getErrorCode() == 0)
+	// {
+	// 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
+	// 	ServerResponse oneResponse(header, responseServer);
+	// 	_clientResponses.addResponse(oneResponse);
+	// 	Logger::info("Response added to ServerResponse manager");
+	// 	oneResponse.sendSimpleResponse();
+	// 	//normal response
+	// }
+	// else
+	// {
+	// 	Logger::warning("This was triggering segfault", true);
+	// 	//error Response
+	// }
 
 	//std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
 	//std::cout << oneResponse << std::endl;
