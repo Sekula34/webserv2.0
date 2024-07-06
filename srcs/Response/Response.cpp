@@ -2,8 +2,8 @@
 #include "ResponseHeader.hpp"
 #include <ostream>
 
-Response::Response(int& clientFd, const ResponseHeader& header)
-:_clientFd(clientFd),_header(header), _code(-1), _body("")
+Response::Response(int& clientFd)
+:_clientFd(clientFd),_header(NULL), _code(-1), _body("")
 {
 
 }
@@ -22,7 +22,7 @@ Response&  Response::operator=(const Response& source)
 
 Response::~Response()
 {
-
+	delete _header;
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)
@@ -30,7 +30,10 @@ std::ostream& operator<<(std::ostream& os, const Response& obj)
 	os << "Response for client: " << obj._clientFd << std::endl;
 	os << "Code of response is: " << obj._code << std::endl;
 	os << "Response header is :" << std::endl;
-	os << obj._header.turnResponseHeaderToString();
+	if(obj._header != NULL)
+		os << obj._header->turnResponseHeaderToString();
+	else   
+		os<< "Header is NULL" << std::endl;
 	os << "Body of response is : " << obj._body << std::endl;
 	return os;
 }
