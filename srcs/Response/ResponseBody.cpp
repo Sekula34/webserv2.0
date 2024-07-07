@@ -5,7 +5,7 @@
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 
-ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings* server)
+ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
 {
     if(clientHeader.isFullyRead() == false)
@@ -14,10 +14,6 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
     }
     std::cout << "Created Response body:" << std::endl;
 	std::cout << clientHeader << std::endl;
-	if(_server != NULL)
-		std::cout << _server << std::endl;
-	else 
-		std::cout << "Server is NULL" << std::endl;
 	if(clientHeader.getErrorCode() != 0)
 	{
         _response = _generateErrorPage(clientHeader.getErrorCode());

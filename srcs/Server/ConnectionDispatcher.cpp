@@ -11,7 +11,7 @@
 #include <csignal>
 #include <fcntl.h>
 #include <algorithm>
-//#include "../Response/Response.hpp"
+#include "../Response/Response.hpp"
 //#include "../Response/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
 //#include "../Parsing/ParsingUtils.hpp"
@@ -132,59 +132,14 @@ void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySock
 }
 
 
-// std::string ConnectionDispatcher::_readClientFd(int communicationFd)
-// {
-// 	//fcntl(communicationFd, F_SETFL, O_NONBLOCK);
-// 	if(FD_ISSET(communicationFd, &_readSetTemp))
-// 	{
-// 		std::cout << "Reay to read" << std::endl;
-// 	}
-// 	std::string fullRequest;
-// 	const int BUFFER_SIZE = 4096;
-// 	char buffer[BUFFER_SIZE];
-// 	while(true)
-// 	{
-// 		if(fullRequest.find("\r\n\r\n") != std::string::npos)
-// 		{
-// 			std::cout << "Data is full" << std::endl;
-// 			break;
-// 		}
-// 		memset(buffer, 0, sizeof(buffer));
-// 		int retVal = recv(communicationFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
-// 		std::cout << "Ret val is " << retVal << std::endl;
-// 		if(retVal > 0)
-// 		{
-			
-// 			fullRequest.append(buffer, retVal);
-// 			//retval is how many bytes are read
-// 		}
-// 		else if(retVal == -1)
-// 		{
-// 			//TODO server error of reading client request remove cerr
-// 			close(communicationFd);
-// 			std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-// 					_communicationFds.end(), communicationFd);
-// 			_communicationFds.erase(it);
-// 			std::cerr<<"Read failed while trying to read client req" << std::endl;
-// 			perror("read");
-// 			break;
-// 		}
-// 		else if(retVal == 0 )
-// 		{
-// 			std::cout << "End of file " << std::endl;
-// 			break;
-// 		}
-// 	}
-// 	FD_CLR(communicationFd, &_readSetMaster);
-// 	std::cout << "fullRequest is [" << fullRequest << "]" << std::endl;
-// 	return fullRequest;
-// }
 
 void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 {
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
 	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
-	// Response respones()
+	//const ServerSettings& serverRef = _serversInfo.getServerByPort(header.getHostPort(), header.getHostName());
+
+	//Response respones(header,)
 	// if(header.getErrorCode() == 0)
 	// {
 	// 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));

@@ -7,7 +7,7 @@
 #include <cstring>
 #include <unistd.h>
 
-Response::Response(ClientHeader& clientHeader, const ServerSettings* server)
+Response::Response(ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server) ,_responseHeader(NULL)
 ,_responseBody(_clientHeader, _server)
 {

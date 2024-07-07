@@ -7,7 +7,7 @@ class ResponseBody
 {
 	private :
 		const ClientHeader& _clientHeader;
-		const ServerSettings* _server; //do not delete here
+		const ServerSettings& _server; //do not delete here
 		std::string _response;
 		int _httpStatusCode;
 		
@@ -16,7 +16,7 @@ class ResponseBody
 
 	public :
 		//ResponseBody();
-		ResponseBody(const ClientHeader& clientHeader, const ServerSettings* server = NULL);
+		ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server);
 		ResponseBody(const ResponseBody& source);
 		ResponseBody& operator=(const ResponseBody& source);
 		~ResponseBody();

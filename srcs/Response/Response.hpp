@@ -10,7 +10,7 @@ class Response
 {
 	private :
 		ClientHeader& _clientHeader;
-		const ServerSettings* _server;
+		const ServerSettings& _server;
 		ResponseHeader* _responseHeader;
 		//CLASS HEADER;
 		ResponseBody _responseBody;
@@ -19,7 +19,7 @@ class Response
 		//Response();
 
 	public :
-		Response(ClientHeader& clientHeader, const ServerSettings* server = NULL);
+		Response(ClientHeader& clientHeader, const ServerSettings& server);
 		Response(const Response& source);
 		Response& operator=(const Response& source);
 		~Response();
