@@ -15,7 +15,7 @@ struct StatusLineElements
 class ResponseHeader
 {
 	private:
-		int& _httpCode;
+		const int& _httpCode;
 		StatusLineElements _statusLine;
 		std::map<std::string, std::string> _headerFields;
 
@@ -25,7 +25,7 @@ class ResponseHeader
 		std::string _getAllHeaderFieldsAsString() const;
 
 	public:
-		ResponseHeader(int& httpCode, size_t contentLength);
+		ResponseHeader(const int& httpCode, size_t contentLength);
 		ResponseHeader(const ResponseHeader& source);
 		ResponseHeader& operator=(const ResponseHeader& source);
 		~ResponseHeader();

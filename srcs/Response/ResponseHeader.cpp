@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <ostream>
 
-ResponseHeader::ResponseHeader(int& httpCode, size_t contentLength)
+ResponseHeader::ResponseHeader(const int& httpCode, size_t contentLength)
 :_httpCode(httpCode)
 {
 	_fillStatusLineElements();

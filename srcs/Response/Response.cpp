@@ -12,14 +12,17 @@ Response::Response(ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server) ,_responseHeader(NULL)
 ,_responseBody(_clientHeader, _server)
 {
-
+	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
 
 Response::Response(const Response& source)
 :_clientHeader(source._clientHeader), _server(source._server),
- _responseHeader(source._responseHeader), _responseBody(source._responseBody)
+_responseBody(source._responseBody)
 {
-	
+	if(source._responseHeader == NULL)
+		_responseHeader = NULL;
+	else  
+		_responseHeader = new ResponseHeader(*source._responseHeader);
 }
 
 Response&  Response::operator=(const Response& source)
