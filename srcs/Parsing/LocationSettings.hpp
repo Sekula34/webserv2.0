@@ -27,10 +27,23 @@ class LocationSettings : public DefaultSettings
 
 
 		std::vector<Directive> getLocationDirectives(void) const;
+		const std::string& getLocationUri(void) const;
 		void printLocationSettings(void) const;
 		static void printAllLocationSettings(std::vector<LocationSettings>& allLocations);
 
+};
 
+class FindByUri
+{
+	private : 
+		std::string uri;
+	public :
+		FindByUri(const std::string& u) : uri(u) {}
+
+		bool operator()(const LocationSettings& location) const
+		{
+			return (location.getLocationUri() == uri);
+		}
 };
 
 #endif

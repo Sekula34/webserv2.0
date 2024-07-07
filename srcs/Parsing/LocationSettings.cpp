@@ -115,6 +115,11 @@ std::vector<Directive> LocationSettings::getLocationDirectives(void) const
 	return(_locationDirectives);
 }
 
+const std::string& LocationSettings::getLocationUri() const 
+{
+	return(_uri);
+}
+
 void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &allLocations)
 {
 	for(size_t i = 0; i < allLocations.size(); i++)
