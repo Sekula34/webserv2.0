@@ -245,6 +245,11 @@ const int& ClientHeader::getClientFd() const
 	return(_clientFd);
 }
 
+const RequestLine& ClientHeader::getRequestLine() const 
+{
+	return (_requestLineElements);
+}
+
 bool ClientHeader::isFullyRead() const
 {
 	return (_fullyRead);

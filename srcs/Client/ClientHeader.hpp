@@ -127,7 +127,8 @@ class ClientHeader
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
 		const std::string& getFullMessage(void) const;
-		const int& getErrorCode(void) const ;
+		const int& getErrorCode(void) const;
+		const RequestLine& getRequestLine() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 
