@@ -70,8 +70,8 @@ void Response::sendSimpleResponse()const
 bool Response::sendResponse()
 {
 	std::string response = _createResponseString();
-	Logger::info("String Response created", true);
-	std::cout << "["<<response << "]" << std::endl;
+	Logger::info("String Response created: ", true);
+	std::cout <<response<< std::endl;
 	int writeValue;
 	writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
 	if(writeValue == -1)
