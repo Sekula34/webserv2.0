@@ -17,6 +17,7 @@ class Response
 		
 		//std::string _body; 
 		//Response();
+		std::string _createResponseString(void);
 
 	public :
 		Response(ClientHeader& clientHeader, const ServerSettings& server);
@@ -25,6 +26,7 @@ class Response
 		~Response();
 
 		void sendSimpleResponse() const;
+		bool sendResponse();
 
 		friend std::ostream& operator<<(std::ostream& os, const Response& obj);
 };

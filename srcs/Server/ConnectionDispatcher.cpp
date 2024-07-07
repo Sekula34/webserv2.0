@@ -141,6 +141,7 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 
 	Response respones(header, serverRef);
 	Logger::info("Created Response with client header and serverRef", true);
+	respones.sendResponse();
 	// if(header.getErrorCode() == 0)
 	// {
 	// 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));

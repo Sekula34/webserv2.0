@@ -5,6 +5,7 @@
 #include <iostream>
 #include "../Utils/Logger.hpp"
 #include <cstring>
+#include <sstream>
 #include <unistd.h>
 
 Response::Response(ClientHeader& clientHeader, const ServerSettings& server)
@@ -32,6 +33,25 @@ Response::~Response()
 	delete _responseHeader;
 }
 
+std::string Response::_createResponseString(void) 
+{
+	std::ostringstream oss;
+	int httpCode = _responseBody.getHttpStatusCode();
+	if(httpCode == 0)
+	{
+		Logger::error("Response body is not Created", true);
+	}
+	//created header
+	if(_responseHeader == NULL)
+	{
+		_responseHeader = new ResponseHeader(httpCode, _responseBody.getResponse().size());
+	}
+	oss << _responseHeader->turnResponseHeaderToString();
+	oss << "\r\n";
+	oss << _responseBody.getResponse();
+	return oss.str();
+}
+
 //for testing only
 void Response::sendSimpleResponse()const 
 {
@@ -45,6 +65,17 @@ void Response::sendSimpleResponse()const
 	"<html><body><h1>Hello, World!</h1></body></html>";
 	write(_clientHeader.getClientFd() , http_response , strlen(http_response));
 	Logger::info("Response is sent to client: "); std::cout <<_clientHeader.getClientFd() << std::endl;
+}
+
+bool Response::sendResponse()
+{
+	std::string response = _createResponseString();
+	int writeValue;
+	writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
+	if(writeValue == -1)
+		return false;
+	return true;
+	//send it
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)
