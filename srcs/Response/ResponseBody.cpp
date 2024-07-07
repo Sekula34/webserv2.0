@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
@@ -77,7 +78,21 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 
 int ResponseBody::_handlerGetMethod()
 {
-    
+    Logger::info("Handling GET, ServerLocation", true);
+    std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
+    Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
+    bool found = true;
+    std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(clientRequestUri, found);
+    if(found == true)
+    {
+        Logger::info("Location found");
+        it->printAllSettings();
+    }
+    else
+    {
+        Logger::warning("Location not found");
+    }
+    return 200;
 }
 
 std::string ResponseBody::_generateServerResponse()
@@ -88,6 +103,7 @@ std::string ResponseBody::_generateServerResponse()
     if(requstedMethod == "GET")
     {
         std::cout << "Calling Get handler" << std::endl;
+        _handlerGetMethod();
     }
     else if(requstedMethod == "GET")
     {

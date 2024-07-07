@@ -62,7 +62,14 @@ RUN SERVER
 
 						HANDLER GET METHOD 
 							1. FIND WHICH LOCATION CLIENT WANTS 
-							2. CHECK IF
+							2. CHECK IF IT IS REDIRECTED
+								3.HANDLE REDIRECT 
+									return NNGINX RETURN
+							4. TRY TO ACCESS SITE(CONSTRUCR root/index.html)
+							5. IF SUCCESS 
+								return 200
+							6. GENERTE SERVER ERROR PAGE
+							
 
 	PROCESS READY TO WRITE 
 		1. GET all Ready to write fds / Respones 
