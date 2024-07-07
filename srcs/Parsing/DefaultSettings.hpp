@@ -52,6 +52,7 @@ class DefaultSettings
 		const int& getPort(void) const;
 		const std::string& getRoot(void) const;
 		const std::string& getServerName(void) const;
+		const std::string getErrorPagePath(const int errorCode) const;
 };
 
 #endif

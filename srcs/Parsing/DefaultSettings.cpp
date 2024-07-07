@@ -1,6 +1,7 @@
 #include "DefaultSettings.hpp"
 #include <cstddef>
 #include <iostream>
+#include <map>
 #include <vector>
 #include "ParsingUtils.hpp"
 DefaultSettings::DefaultSettings()
@@ -150,4 +151,16 @@ const std::string& DefaultSettings::getRoot(void) const
 const std::string& DefaultSettings::getServerName(void) const
 {
 	return(_serverName);
+}
+
+const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
+{
+	std::string path = "";
+	std::map<int, std::string>::const_iterator it;
+	it = _errorPages.find(errorCode);
+	if(it != _errorPages.end())
+	{
+		path = it->second;
+	}
+	return path;
 }
