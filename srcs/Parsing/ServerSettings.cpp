@@ -2,6 +2,7 @@
 #include "DefaultSettings.hpp"
 #include "Directive.hpp"
 #include "LocationSettings.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <ostream>
@@ -91,7 +92,7 @@ std::vector<Token> ServerSettings::getServerTokens(void) const
 	return (_serverTokens);
 }
 
-std::vector<LocationSettings> ServerSettings::getServerLocations() const 
+const std::vector<LocationSettings>& ServerSettings::getServerLocations() const 
 {
 	return (_serverLocations);
 }
@@ -99,6 +100,16 @@ std::vector<LocationSettings> ServerSettings::getServerLocations() const
 const int& ServerSettings::getServerId() const 
 {
 	return(_serverId);
+}
+
+std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithUri(const std::string uri, bool& found) const
+{
+	std::vector<LocationSettings>::const_iterator it = std::find_if(_serverLocations.begin(), _serverLocations.end(), FindByUri(uri));
+	if(it == _serverLocations.end())
+	{
+		found = false;
+	}
+	return (it);
 }
 
 void ServerSettings::printServerTokens(void) const 

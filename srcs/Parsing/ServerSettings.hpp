@@ -33,7 +33,9 @@ class ServerSettings : public DefaultSettings
 
 		std::vector<Token> getServerTokens(void) const;
 		std::vector<Directive> getServerDirectives(void) const;
-		std::vector<LocationSettings> getServerLocations() const;
+		const std::vector<LocationSettings>& getServerLocations() const;
+		std::vector<LocationSettings>::const_iterator fetchLocationWithUri(const std::string uri, bool& found) const;
+		//LocationSettings& fetchLocationFromServer(std::string requestedLocation);
 		const int& getServerId() const;
 		void printServerSettings(void) const;
 		void printServerTokens(void) const;
