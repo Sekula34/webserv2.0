@@ -12,6 +12,7 @@ class ResponseBody
 		int _httpStatusCode;
 		
 		std::string _generateErrorPage(const int httpErrorCode);
+		std::string _generateServerResponse();
 
 
 	public :

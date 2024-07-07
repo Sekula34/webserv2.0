@@ -18,14 +18,13 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 	if(clientHeader.getErrorCode() != 0)
 	{
         _response = _generateErrorPage(clientHeader.getErrorCode());
-        _httpStatusCode = clientHeader.getErrorCode();
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
 		//std::cout << _generateErrorPage(clientHeader.getErrorCode());
 	}
 	else   
 	{
         Logger::error("GENERATING SERVER RESPONSE NOT IMPLEMENTED YET", true);
-		//generateServerResponse
+		_response =_generateServerResponse();
 	}
 }
 
@@ -72,7 +71,17 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
     "    <p>" << HttpStatusCode::getReasonPhrase(httpErrorCode) << "</p>\n"
     "</body>\n"
     "</html>\n";
+    _httpStatusCode = httpErrorCode;
 	return  errorPage.str();
+}
+
+std::string ResponseBody::_generateServerResponse()
+{
+    Logger::info("Generating server reponse with ");
+    std::cout << _clientHeader.getRequestLine().requestMethod << std::endl;
+    std::cout << _clientHeader.getRequestLine().requestTarget << std::endl;
+    std::cout << _clientHeader.getRequestLine().protocolVersion << std::endl;
+    return "";
 }
 
 const std::string& ResponseBody::getResponse(void) const 
