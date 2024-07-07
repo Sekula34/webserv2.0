@@ -14,6 +14,8 @@ class ResponseBody
 		std::string _generateErrorPage(const int httpErrorCode);
 		std::string _generateServerResponse();
 
+		int _handlerGetMethod();
+
 
 	public :
 		//ResponseBody();

@@ -75,12 +75,28 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 	return  errorPage.str();
 }
 
+int ResponseBody::_handlerGetMethod()
+{
+    
+}
+
 std::string ResponseBody::_generateServerResponse()
 {
-    Logger::info("Generating server reponse with ");
-    std::cout << _clientHeader.getRequestLine().requestMethod << std::endl;
-    std::cout << _clientHeader.getRequestLine().requestTarget << std::endl;
-    std::cout << _clientHeader.getRequestLine().protocolVersion << std::endl;
+    if(_clientHeader.getRequestLine().protocolVersion != "HTTP/1.1")
+        return _generateErrorPage(505);
+    std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
+    if(requstedMethod == "GET")
+    {
+        std::cout << "Calling Get handler" << std::endl;
+    }
+    else if(requstedMethod == "GET")
+    {
+        Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
+    }
+    else if(requstedMethod == "GET")
+    {
+        Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
+    }
     return "";
 }
 
