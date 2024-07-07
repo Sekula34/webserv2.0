@@ -137,9 +137,10 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 {
 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
 	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
-	//const ServerSettings& serverRef = _serversInfo.getServerByPort(header.getHostPort(), header.getHostName());
+	const ServerSettings& serverRef = _serversInfo.getServerByPort(header.getHostPort(), header.getHostName());
 
-	//Response respones(header,)
+	Response respones(header, serverRef);
+	Logger::info("Created Response with client header and serverRef", true);
 	// if(header.getErrorCode() == 0)
 	// {
 	// 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));

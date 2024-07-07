@@ -189,11 +189,13 @@ void errorMapTester()
 
 void ResponseTest()
 {
+	ServersInfo info;
+	ServerSettings server = info.getServerById(1);
 	Socket socket(7070);
 	int clientFD = socket.getCommunicationSocket();
 	ClientHeader header(clientFD);
 	header.readOnce();
-	Response response(header);
+	Response response(header, server);
 	response.sendSimpleResponse();
 	close(clientFD);
 	close(socket.getSocketFd());
@@ -209,9 +211,16 @@ void responseHeaderTest(int status)
 
 void responseBodyTest()
 {
-	int fd(5);
-	ClientHeader header(fd);
-	ResponseBody body(header);
+	Socket socket(8080);
+	int clientFD = socket.getCommunicationSocket();
+	ClientHeader header(clientFD);
+	ServersInfo info;
+	ServerSettings server = info.getServerById(1);
+	header.readOnce();
+	header.setCHVarivables();
+	
+	ResponseBody body(header, server);
+	std::cout << "Response body is " << body.getResponse() << std::endl;
 
 }
 
@@ -237,7 +246,7 @@ int main()
 		//serverInfoTest();
 	//	socketTest();
 		//multipleSocketTesting();
-		//ConnectionDispatcherTest();
+		ConnectionDispatcherTest();
 		//clientResponseTest();
 		//SocketManagerTest();
 		//clientRequestTest();
@@ -248,7 +257,7 @@ int main()
 		//ResponseTest();
 		//responseHeaderTest(404);
 		//responseBodyTest();
-		toStringtest();
+		//toStringtest();
 	}
 	catch(std::exception &e)
 	{

@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include "../Utils/Logger.hpp"
 
 ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
@@ -12,16 +13,18 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
     {
         throw std::runtime_error("Trying to create Resonse body without fully read header");
     }
-    std::cout << "Created Response body:" << std::endl;
+    Logger::info("Called response body constructor: ");
 	std::cout << clientHeader << std::endl;
 	if(clientHeader.getErrorCode() != 0)
 	{
         _response = _generateErrorPage(clientHeader.getErrorCode());
         _httpStatusCode = clientHeader.getErrorCode();
+        Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
 		//std::cout << _generateErrorPage(clientHeader.getErrorCode());
 	}
 	else   
 	{
+        Logger::error("GENERATING SERVER RESPONSE NOT IMPLEMENTED YET", true);
 		//generateServerResponse
 	}
 }
