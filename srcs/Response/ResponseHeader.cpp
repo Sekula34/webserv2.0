@@ -9,9 +9,9 @@ ResponseHeader::ResponseHeader(int& httpCode, size_t contentLength)
 {
 	_fillStatusLineElements();
 	_headerFields["Connection"] = "close";
-	_headerFields["Content-Length"] = contentLength;
+	_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
 	if(contentLength != 0)
-		_headerFields["Content_Language"] = "en";
+		_headerFields["Content-Language"] = "en";
 }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)
