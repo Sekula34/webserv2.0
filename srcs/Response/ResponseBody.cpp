@@ -76,6 +76,28 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 	return  errorPage.str();
 }
 
+void ResponseBody::_renderServerErrorPage(int errorCode)
+{
+    std::string errorPagePath = _server.getErrorPagePath(errorCode);
+    if(errorPagePath != "")
+    {
+        Logger::info("Server have that page and path to it is "); std::cout << errorPagePath << std::endl;
+    }
+    else 
+    {
+        Logger::info("Server dont have page for error code "); std::cout << errorCode << std::endl;
+    }
+    /*
+        check if server have that error page 
+        if yes 
+            put that file in string 
+            if that fails 
+                generate errorPage(500) 
+        if not 
+            generate that ServerErrorPage
+    */
+}
+
 int ResponseBody::_handlerGetMethod()
 {
     Logger::info("Handling GET, ServerLocation", true);
@@ -90,6 +112,8 @@ int ResponseBody::_handlerGetMethod()
     }
     else
     {
+        _renderServerErrorPage(199);
+        //Generate Server Error(code)
         Logger::warning("Location not found");
     }
     return 200;
