@@ -104,6 +104,8 @@ int ResponseBody::_handlerGetMethod()
     std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
     Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
     bool found = true;
+    Logger::info("Server that is responding is: "); std::cout << std::endl;
+    _server.printServerSettings();
     std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(clientRequestUri, found);
     if(found == true)
     {
@@ -112,7 +114,7 @@ int ResponseBody::_handlerGetMethod()
     }
     else
     {
-        _renderServerErrorPage(199);
+        _renderServerErrorPage(404);
         //Generate Server Error(code)
         Logger::warning("Location not found");
     }

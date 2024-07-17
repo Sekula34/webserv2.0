@@ -9,7 +9,7 @@ DefaultSettings::DefaultSettings()
 	_serverName = "[Default Server Name]";
 	_listenPort = 8080;
 	_host = "[Default HOST]";
-	_errorPages[404] = "/html/404.html";
+	//_errorPages[404] = "/html/404.html";
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	_clientMaxBody = 1000000;
