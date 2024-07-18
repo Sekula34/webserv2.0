@@ -231,25 +231,6 @@ void ConnectionDispatcher::_handleReadyFd(void)
 		_handleAllReadyToReadCommunicationFds(readyReadClientFd);
 		//ParsingUtils::printVector(readyReadClientFd);
 	}
-
-	//ready.getCommunicationSocket();
-	// std::cout << "Ready socket is " << std::endl;
-	// std::cout << ready << std::endl;
-	// int communicationSocket = ready.getCommunicationSocket();
-	// char buffer[1024] = {0};
-	// int valread = read( communicationSocket , buffer, 1024);
-	// (void) valread;
-	// std::cout << buffer << std::endl;
-	// const char *http_response = 
-	// "HTTP/1.1 200 OK\r\n"
-	// "Content-Type: text/html\r\n"
-	// "Content-Length: 46\r\n"
-	// "Connection: close\r\n"
-	// "\r\n"
-	// "<html><body><h1>Hello, World!</h1></body></html>";
-	// write(communicationSocket , http_response , strlen(http_response));
-	// close(communicationSocket);
-
 }
 
 int ConnectionDispatcher::_getMaxFd(void) const 
