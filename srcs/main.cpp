@@ -2,7 +2,6 @@
 #include "Client/ClientHeader.hpp"
 #include "Client/ClientHeaderManager.hpp"
 #include "Response/ResponseBody.hpp"
-#include "Response/ServerResponse.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -158,19 +157,7 @@ void SocketManagerTest()
 	std:: cout << sockets.getMaxSocketFd() << std::endl;
 }
 
-void clientResponseTest()
-{
-	Socket socket(8080);
-	int clientFD = socket.getCommunicationSocket();
-	ClientHeader header(clientFD);
-	ServersInfo info;
-	const ServerSettings& server(info.getServerByPort(8080));
 
-	ServerResponse response(header,server);
-	std::cout << response << std::endl;
-	close(clientFD);
-	close(socket.getSocketFd());
-}
 
 void loggerTester()
 {
