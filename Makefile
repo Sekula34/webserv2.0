@@ -42,6 +42,7 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Server/ConnectionDispatcher.cpp \
 			srcs/Server/Socket.cpp \
 			srcs/Server/SocketManager.cpp \
+			srcs/Utils/FileUtils.cpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.cpp\
 			#srcs/main.cpp
@@ -65,6 +66,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Server/ConnectionDispatcher.hpp \
 			srcs/Server/Socket.hpp \
 			srcs/Server/SocketManager.hpp \
+			srcs/Utils/FileUtils.hpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.hpp\
 

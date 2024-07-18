@@ -6,6 +6,7 @@
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
+#include "../Utils/FileUtils.hpp"
 
 ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
@@ -76,20 +77,6 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
 	return  errorPage.str();
 }
 
-void ResponseBody::_renderServerErrorPage(int errorCode)
-{
-    std::string errorPagePath = _server.getErrorPagePath(errorCode);
-    if(errorPagePath != "")
-    {
-        Logger::info("Server have that page and path to it is "); std::cout << errorPagePath << std::endl;
-    }
-    else 
-    {
-        Logger::info("Server dont have page for error code "); std::cout << errorCode << std::endl;
-        _response = _generateErrorPage(errorCode);
-        Logger::info("Response body is generated and it is", true);
-        std::cout << _response << std::endl;
-    }
     /*
         check if server have that error page 
         if yes 
@@ -99,6 +86,29 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
         if not 
             generate that ServerErrorPage
     */
+void ResponseBody::_renderServerErrorPage(int errorCode)
+{
+    std::string errorPagePath = _server.getErrorPagePath(errorCode);
+    if(errorPagePath != "")
+    {
+        std::string relativePath = "./" + errorPagePath;
+        Logger::info("Server have that page and path to it is "); std::cout << errorPagePath << std::endl;
+        Logger::info("Constructed relative path is "); std::cout << relativePath << std::endl;
+        bool success = FileUtils::putFileInString(relativePath, _response);
+        if(success == true)
+            _httpStatusCode = errorCode;
+        else
+        {
+            _response = _generateErrorPage(500);
+        }
+    }
+    else 
+    {
+        Logger::info("Server dont have page for error code "); std::cout << errorCode << std::endl;
+        _response = _generateErrorPage(errorCode);
+        Logger::info("Response body is generated and it is", true);
+        std::cout << _response << std::endl;
+    }
 }
 
 int ResponseBody::_handlerGetMethod()
