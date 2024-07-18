@@ -12,7 +12,7 @@ class ResponseBody
 		int _httpStatusCode;
 		
 		std::string _generateErrorPage(const int httpErrorCode);
-		std::string _generateServerResponse();
+		void _generateServerResponse();
 		void _renderServerErrorPage(int errorCode);
 
 		int _handlerGetMethod();

@@ -26,7 +26,7 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 	else   
 	{
         Logger::error("GENERATING SERVER RESPONSE NOT IMPLEMENTED YET", true);
-		_response =_generateServerResponse();
+		_generateServerResponse();
 	}
 }
 
@@ -137,12 +137,12 @@ int ResponseBody::_handlerGetMethod()
     return httpcode;
 }
 
-std::string ResponseBody::_generateServerResponse()
+void ResponseBody::_generateServerResponse()
 {
-    std::string bodyString("DEFAULT BODY STRING");
     if(_clientHeader.getRequestLine().protocolVersion != "HTTP/1.1")
     {
-        bodyString = _generateErrorPage(505);
+        _renderServerErrorPage(505);
+        //_generateErrorPage(505);
     }
     // return _generateErrorPage(505);
     std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
@@ -150,7 +150,6 @@ std::string ResponseBody::_generateServerResponse()
     {
         std::cout << "Calling Get handler" << std::endl;
         _handlerGetMethod();
-        bodyString = _response;
     }
     else if(requstedMethod == "POST")
     {
@@ -160,7 +159,6 @@ std::string ResponseBody::_generateServerResponse()
     {
         Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
     }
-    return bodyString;
 }
 
 const std::string& ResponseBody::getResponse(void) const 
