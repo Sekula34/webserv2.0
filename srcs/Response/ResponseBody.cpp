@@ -86,6 +86,9 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
     else 
     {
         Logger::info("Server dont have page for error code "); std::cout << errorCode << std::endl;
+        _response = _generateErrorPage(errorCode);
+        Logger::info("Response body is generated and it is", true);
+        std::cout << _response << std::endl;
     }
     /*
         check if server have that error page 
@@ -100,6 +103,7 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
 
 int ResponseBody::_handlerGetMethod()
 {
+    int httpcode(0);
     Logger::info("Handling GET, ServerLocation", true);
     std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
     Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
@@ -111,35 +115,42 @@ int ResponseBody::_handlerGetMethod()
     {
         Logger::info("Location found");
         it->printAllSettings();
+        Logger::warning("MORE TO IMPELEMT HERE", true);
     }
     else
     {
         _renderServerErrorPage(404);
+        httpcode = 404;
         //Generate Server Error(code)
         Logger::warning("Location not found");
     }
-    return 200;
+    return httpcode;
 }
 
 std::string ResponseBody::_generateServerResponse()
 {
+    std::string bodyString("DEFAULT BODY STRING");
     if(_clientHeader.getRequestLine().protocolVersion != "HTTP/1.1")
-        return _generateErrorPage(505);
+    {
+        bodyString = _generateErrorPage(505);
+    }
+    // return _generateErrorPage(505);
     std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
     if(requstedMethod == "GET")
     {
         std::cout << "Calling Get handler" << std::endl;
         _handlerGetMethod();
+        bodyString = _response;
     }
-    else if(requstedMethod == "GET")
+    else if(requstedMethod == "POST")
     {
         Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
     }
-    else if(requstedMethod == "GET")
+    else if(requstedMethod == "DELETE")
     {
         Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
     }
-    return "";
+    return bodyString;
 }
 
 const std::string& ResponseBody::getResponse(void) const 
