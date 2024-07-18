@@ -29,22 +29,57 @@ ClientHeaderManager::~ClientHeaderManager()
 
 }
 
+//18.07.2024 new algo
+/*
+	instead of getClientHeader fucntion call functio to check if that Header with 
+	client fd exist, if not create it and put it in unread headers
+	otherwise just returns
+	Before was stupid try and catch which was hell to debug
+*/
 void ClientHeaderManager::createNewClientHeader(int& clientFd)
 {
-	try 
-	{
-		getClientHeader(clientFd);
-	}
-	catch(ClientHeaderNotFound &e)
+	bool found = isClientHeaderFound(clientFd);
+	if(found == false)
 	{
 		ClientHeader oneHeader(clientFd);
 		_unreadHeaders.push_back(oneHeader);
 		Logger::info("New header Created and addded to _unreadHeaders"); std::cout<<std::endl;
-		//std::cout << "New header Created and addded to _unreadHeaders" << std::endl;
-		return;
 	}
-	std::cout << "Client Header with this fd already exist threfore it is not created" << std::endl;
+	else 
+	{
+		Logger::info("Client Header with this fd already exist threfore it is not created", true);
+	}
 	return;
+}
+
+
+bool ClientHeaderManager::isClientHeaderFound(int& clientFd) const
+{
+	for(size_t i = 0; i < _unreadHeaders.size(); i++)
+	{
+		if(clientFd == _unreadHeaders[i].getClientFd())
+		{
+			Logger::info("Client found in unreadHeaders"); std::cout<< std::endl;
+			return true;
+		}
+	}
+	for(size_t i = 0; i < _readHeaders.size(); i++)
+	{
+		if(clientFd == _readHeaders[i].getClientFd())
+		{
+			Logger::info("Client found in readHeaders"); std::cout<< std::endl;
+			return true;
+		}
+	}
+	for(size_t i = 0; i < _errorHeaders.size(); i++)
+	{
+		if(clientFd == _errorHeaders[i].getClientFd())
+		{
+			Logger::info("Client found in ErrorHeadrs"); std::cout<< std::endl;
+			return true;
+		}
+	}
+	return false;
 }
 
 void ClientHeaderManager::removeClient(int& clientFd)

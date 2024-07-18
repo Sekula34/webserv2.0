@@ -19,11 +19,21 @@ class ClientHeaderManager
 		~ClientHeaderManager();
 		
 		/**
-		 * @brief Create a New Client Header object and add it to _unreadHeadersVector
+		 * @brief Create a New Client Header object and add it to _unreadHeadersVector.
+		 Only if CleintHeader with that client fd is not found 
 		 * 
 		 * @param clientFd 
 		 */
 		void createNewClientHeader(int& clientFd);
+
+		/**
+		 * @brief function that checks all vector and try to find clienHeader with clientFD.
+		 * 
+		 * @param clientFd 
+		 * @return true if such clienHeader exist
+		 * @return false if there is no such clientHeader
+		 */
+		bool isClientHeaderFound(int& clientFd) const;
 
 
 		/**
