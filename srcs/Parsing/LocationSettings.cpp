@@ -3,9 +3,12 @@
 #include "Directive.hpp"
 #include "ServerSettings.hpp"
 #include "Token.hpp"
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include "ParsingUtils.hpp"
+#include "../Utils/Logger.hpp"
+#include "../Utils/FileUtils.hpp"
 LocationSettings::LocationSettings()
 {
 
@@ -126,4 +129,26 @@ void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &a
 	{
 		allLocations[i].printLocationSettings();
 	}
+}
+
+bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
+{
+	pathToIndex.erase();
+	for(size_t i = 0; i < _index.size(); i++)
+	{
+		std::string path = this->_root + "/" + _index[i];
+		Logger::info("path is "); std::cout << path<< std::endl;
+		bool found = FileUtils::isPathValid(path);
+		if(found == true)
+		{
+			Logger::info("FIle found");
+			pathToIndex = path;
+			return true;
+		}
+		else
+		{
+			Logger::warning("Filo not found");
+		}
+	}
+	return false;
 }

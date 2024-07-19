@@ -31,6 +31,14 @@ class LocationSettings : public DefaultSettings
 		void printLocationSettings(void) const;
 		static void printAllLocationSettings(std::vector<LocationSettings>& allLocations);
 
+		/**
+		 * @brief Set the Index Page Path object
+		 * 
+		 * @param pathToIndex where the path will be setted
+		 * @return true if file exist and put path to index in param
+		 * @return false if file dont exist, path to index will be ""
+		 */
+		bool setIndexPagePath(std::string& pathToIndex) const;
 };
 
 class FindByUri
