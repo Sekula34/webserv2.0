@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 #include "NginxReturn.hpp"
 #include "ParsingUtils.hpp"
@@ -41,6 +42,14 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 DefaultSettings::~DefaultSettings()
 {
 
+}
+
+bool DefaultSettings::isMethodAllowed(std::string method) const
+{
+	std::map<std::string, bool>::const_iterator it = _acceptedMethods.find(method);
+	if(it != _acceptedMethods.end() && it->second == true)
+		return true;
+	return false;
 }
 
 void DefaultSettings::printAllSettings(void) const 

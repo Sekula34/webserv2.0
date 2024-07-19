@@ -35,6 +35,8 @@ class DefaultSettings
 		~DefaultSettings();
 
 
+		bool isMethodAllowed(std::string method) const;
+
 		void setListenPort(int listenPort);
 		void setErrorPage(int errorCode, std::string path);
 		void setAllAcceptedMethodsToFalse(void);
