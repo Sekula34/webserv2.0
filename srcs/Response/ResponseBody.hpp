@@ -16,6 +16,9 @@ class ResponseBody
 		void _renderServerErrorPage(int errorCode);
 
 		void _handlerGetMethod();
+		void _handleRedirect(const NginnxReturn& redirect);
+
+		void _processRequestedLocation(const LocationSettings& location);
 
 
 	public :

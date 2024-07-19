@@ -92,10 +92,8 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
     std::string errorPagePath = _server.getErrorPagePath(errorCode);
     if(errorPagePath != "")
     {
-        std::string relativePath = "./" + errorPagePath;
         Logger::info("Server have that page and path to it is "); std::cout << errorPagePath << std::endl;
-        Logger::info("Constructed relative path is "); std::cout << relativePath << std::endl;
-        bool success = FileUtils::putFileInString(relativePath, _response);
+        bool success = FileUtils::putFileInString(errorPagePath, _response);
         if(success == true)
             _httpStatusCode = errorCode;
         else
@@ -123,9 +121,11 @@ void ResponseBody::_handlerGetMethod()
     std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(clientRequestUri, found);
     if(found == true)
     {
-        Logger::info("Location found");
-        it->printAllSettings();
-        Logger::warning("MORE TO IMPELEMT HERE", true);
+        const LocationSettings& location = *it;
+        Logger::info("Location found", true);
+       // it->printAllSettings();
+       // Logger::warning("MORE TO IMPELEMT HERE", true);
+       _processRequestedLocation(location);
     }
     else
     {
@@ -134,14 +134,53 @@ void ResponseBody::_handlerGetMethod()
     }
 }
 
+
+void ResponseBody::_handleRedirect(const NginnxReturn& redirect)
+{
+    Logger::info("Handling redirect: ");
+    redirect.printNginxReturnInfo();
+    bool success = FileUtils::putFileInString(redirect.getRedirectPath(), _response);
+    if(success == true)
+    {
+        Logger::info("Succesfully redirected", true);
+        _httpStatusCode = redirect.getStatus();
+    }
+    else
+    {
+        Logger::warning("Redirection is not succesfull, not sure which code so 410 is generated", true);
+        _renderServerErrorPage(410);
+    }
+}
+/*
+HANDLER GET METHOD 
+    1. FIND WHICH LOCATION CLIENT WANTS 
+    2. CHECK IF IT IS REDIRECTED
+        3.HANDLE REDIRECT 
+            return NNGINX RETURN
+    4. TRY TO ACCESS SITE(CONSTRUCR root/index.html)
+    5. IF SUCCESS 
+        return 200
+    6. GENERTE SERVER ERROR PAGE
+*/
+void ResponseBody::_processRequestedLocation(const LocationSettings& location)
+{
+    Logger::info("I am processing location: ");
+    location.printLocationSettings();
+    const NginnxReturn& redirect = location.getNginxReturn();
+    if(redirect.getFlag() == true)
+    {
+        _handleRedirect(redirect);
+        //handle redirect
+    }
+    //access this site
+}
+
 void ResponseBody::_generateServerResponse()
 {
     if(_clientHeader.getRequestLine().protocolVersion != "HTTP/1.1")
     {
         _renderServerErrorPage(505);
-        //_generateErrorPage(505);
     }
-    // return _generateErrorPage(505);
     std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
     if(requstedMethod == "GET")
     {
