@@ -52,6 +52,13 @@ class DefaultSettings
 		const int& getPort(void) const;
 		const std::string& getRoot(void) const;
 		const std::string& getServerName(void) const;
+
+		/**
+		 * @brief Get the Error Page Path
+		 * 
+		 * @param errorCode which error are you searching for
+		 * @return const std::string path of errorPage path or "" if there is no such path
+		 */
 		const std::string getErrorPagePath(const int errorCode) const;
 };
 
