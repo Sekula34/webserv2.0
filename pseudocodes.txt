@@ -40,7 +40,7 @@ RUN SERVER
 
 			GENERATE CLIENT RESPONSE 
 				1. IF (Client Header have error code )
-					2. GENERATE ERROR Response 
+					2. GENERATE SERVER ERROR Response 
 				3. ELSE 
 					4. GENERATE SERVER RESPONSE
 				5. STORE RESPONSE
