@@ -131,7 +131,6 @@ int ResponseBody::_handlerGetMethod()
     else
     {
         _renderServerErrorPage(404);
-        httpcode = 404;
         //Generate Server Error(code)
         Logger::warning("Location not found");
     }
