@@ -26,7 +26,7 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 	}
 	else   
 	{
-        Logger::error("GENERATING SERVER RESPONSE NOT IMPLEMENTED YET", true);
+        Logger::warning("GENERATING SERVER RESPONSE NOT fully IMPLEMENTED YET", true);
 		_generateServerResponse();
 	}
 }
@@ -116,8 +116,8 @@ void ResponseBody::_handlerGetMethod()
     std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
     Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
     bool found = true;
-    Logger::info("Server that is responding is: "); std::cout << std::endl;
-    _server.printServerSettings();
+ //   Logger::info("Server that is responding is: "); std::cout << std::endl;
+    //_server.printServerSettings();
     std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(clientRequestUri, found);
     if(found == true)
     {
@@ -164,8 +164,8 @@ HANDLER GET METHOD
 */
 void ResponseBody::_processRequestedLocation(const LocationSettings& location)
 {
-    Logger::info("I am processing location: ");
-    location.printLocationSettings();
+    Logger::info("I am processing location: "); std::cout << location.getLocationUri() << std::endl;
+   // location.printLocationSettings();
     const NginnxReturn& redirect = location.getNginxReturn();
     if(redirect.getFlag() == true)
     {
@@ -183,7 +183,7 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
 void ResponseBody::_fetchServerPage(const LocationSettings& location)
 {
     Logger::info("Called fetching page", true);
-    location.printLocationSettings();
+   // location.printLocationSettings();
     std::string path;
     bool found = location.setIndexPagePath(path);
     if(found == true)
@@ -209,7 +209,6 @@ void ResponseBody::_generateServerResponse()
     std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
     if(requstedMethod == "GET")
     {
-        std::cout << "Calling Get handler" << std::endl;
         _handlerGetMethod();
     }
     else if(requstedMethod == "POST")

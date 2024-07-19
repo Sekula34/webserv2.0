@@ -142,27 +142,6 @@ void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
 	Response respones(header, serverRef);
 	Logger::info("Created Response with client header and serverRef", true);
 	respones.sendResponse();
-	// if(header.getErrorCode() == 0)
-	// {
-	// 	const ServerSettings& responseServer(_serversInfo.getServerByPort(header.getHostPort(), header.getHostName()));
-	// 	ServerResponse oneResponse(header, responseServer);
-	// 	_clientResponses.addResponse(oneResponse);
-	// 	Logger::info("Response added to ServerResponse manager");
-	// 	oneResponse.sendSimpleResponse();
-	// 	//normal response
-	// }
-	// else
-	// {
-	// 	Logger::warning("This was triggering segfault", true);
-	// 	//error Response
-	// }
-
-	//std::cout <<std::endl << "INFO: One Response is generated" << std::endl;
-	//std::cout << oneResponse << std::endl;
-	// std::cout << "Generating response for client " << communictaionFD << std::endl;
-	// std::cout <<"header of client is " << header << std::endl;
-	// std::cout <<"Server wiht id: " <<responseServer.getServerId() << " will be used to generate respose to " << communictaionFD << std::endl;;
-	
 }
 
 void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds

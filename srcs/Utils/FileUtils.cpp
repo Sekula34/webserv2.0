@@ -14,7 +14,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 		return false;
 	}
 	std::ifstream file(relativeFilePath.c_str());
-	Logger::info("Tryin to open "); std::cout << relativeFilePath.c_str() << std::endl;
+	Logger::info("Trying to open "); std::cout << relativeFilePath.c_str() << std::endl;
 	if(file.good() == false)
 	{
 		Logger::error("Opening file failed. Check if file exist (maybe typo) and if you have reading permmision.", true);
