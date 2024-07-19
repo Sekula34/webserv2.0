@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "NginxReturn.hpp"
 #include "ParsingUtils.hpp"
 DefaultSettings::DefaultSettings()
 {
@@ -151,6 +152,11 @@ const std::string& DefaultSettings::getRoot(void) const
 const std::string& DefaultSettings::getServerName(void) const
 {
 	return(_serverName);
+}
+
+const NginnxReturn& DefaultSettings::getNginxReturn(void) const 
+{
+	return(_return);
 }
 
 const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
