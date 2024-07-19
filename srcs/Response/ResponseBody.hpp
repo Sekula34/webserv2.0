@@ -15,7 +15,7 @@ class ResponseBody
 		void _generateServerResponse();
 		void _renderServerErrorPage(int errorCode);
 
-		int _handlerGetMethod();
+		void _handlerGetMethod();
 
 
 	public :

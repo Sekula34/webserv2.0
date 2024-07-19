@@ -112,9 +112,8 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
     }
 }
 
-int ResponseBody::_handlerGetMethod()
+void ResponseBody::_handlerGetMethod()
 {
-    int httpcode(0);
     Logger::info("Handling GET, ServerLocation", true);
     std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
     Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
@@ -131,10 +130,8 @@ int ResponseBody::_handlerGetMethod()
     else
     {
         _renderServerErrorPage(404);
-        //Generate Server Error(code)
         Logger::warning("Location not found");
     }
-    return httpcode;
 }
 
 void ResponseBody::_generateServerResponse()
