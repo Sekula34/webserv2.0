@@ -9,7 +9,7 @@ class FileUtils
 		/**
 		 * @brief put file in string 
 		 * 
-		 * @param relativeFilePath to the file, (Relative to executable webserv)
+		 * @param relativeFilePath to the file, (Relative to executable webserv), ./ will be appended by this function
 		 * @param string in which file will be putted
 		 * @return true file is regular and it is succesfully in string
 		 * @return false either file is not regular, not permission, or something failed, generate 500 http code in that case

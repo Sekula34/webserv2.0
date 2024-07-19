@@ -34,14 +34,15 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 	return true;
 }
 
-bool FileUtils::putFileInString(const std::string relativeFilePath, std::string &stringFile)
+bool FileUtils::putFileInString(const std::string filePath, std::string &stringFile)
 {
+	const std::string relativePath = "./" + filePath;
 	stringFile.erase();
-	if(isPathValid(relativeFilePath) == false)
+	if(isPathValid(relativePath) == false)
 	{
 		return false;
 	}
-	std::ifstream file(relativeFilePath.c_str());
+	std::ifstream file(relativePath.c_str());
 	if(!file.is_open())
 	{
 		Logger::error("Cannot open file, this should not happen", true);
