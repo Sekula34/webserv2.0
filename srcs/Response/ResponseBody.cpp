@@ -170,9 +170,34 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
     if(redirect.getFlag() == true)
     {
         _handleRedirect(redirect);
+        return;
         //handle redirect
     }
+    if(location.isMethodAllowed("GET"))
+        _fetchServerPage(location);
+    else
+        _renderServerErrorPage(403);
     //access this site
+}
+
+void ResponseBody::_fetchServerPage(const LocationSettings& location)
+{
+    Logger::info("Called fetching page", true);
+    location.printLocationSettings();
+    std::string path;
+    bool found = location.setIndexPagePath(path);
+    if(found == true)
+    {
+        bool success = FileUtils::putFileInString(path, _response);
+        if(success == true)
+            _httpStatusCode = 200;
+        else
+            _renderServerErrorPage(500);
+    }
+    else if(found == false)
+    {
+        _renderServerErrorPage(404);
+    }
 }
 
 void ResponseBody::_generateServerResponse()
