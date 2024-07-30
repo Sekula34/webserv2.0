@@ -124,7 +124,7 @@ void allInfoTest()
 {
 	ServersInfo allInfo;
 	//allInfo.printAllServersInfo();
-	 ServerSettings oneServer =allInfo.getOneServer(0);
+	 ServerSettings oneServer =allInfo.getServerById(0);
 	 //oneServer.printServerSettings();
 	// std::cout << oneServer.getRoot() << std::endl;
 	std::cout << oneServer.getServerName() << std::endl;
