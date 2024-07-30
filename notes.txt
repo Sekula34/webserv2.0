@@ -525,3 +525,27 @@ curl -i www.google.com
 
 Date: Fri, 05 Jul 2024 13:41:24 GMT
 Sun, 06 Nov 1994 08:49:37 GMT
+
+
+What will NGINX do
+
+location /
+root /var/www
+
+nginx will try to find /var/www/index.html and show it 
+
+example 2;
+location /folder/
+root /var/www
+
+nginx will try to find /var/www/folder/index.html;
+
+example 3;
+
+location /folder2
+alias /somethinNew/hej/drek;
+
+nginx will show /somethingNew/hej/drek;
+
+
+CGI Common Gateway Interface;

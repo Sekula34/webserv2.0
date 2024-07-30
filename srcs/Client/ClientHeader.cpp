@@ -181,6 +181,9 @@ ReadStatus ClientHeader::readOnce()
 		if(retVal < BUFFER_SIZE && lastCrlfPos == std::string::npos)
 		{
 			//didnt receive end of header but it is fully read
+			std::cout << buffer << std::endl;
+			Logger::error("Client Header is fully read but CRLFCRLF is not found which means it is invalid client header by HTTP protocol ", true);
+			//badrequest(400)??
 			std::cerr<<"//didnt receive end of header but it is fully read" << std::endl;
 			return ERROR;
 		} 

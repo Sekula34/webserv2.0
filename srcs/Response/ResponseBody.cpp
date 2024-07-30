@@ -129,8 +129,8 @@ void ResponseBody::_handlerGetMethod()
     }
     else
     {
+        Logger::warning("Location not found: "); std::cout << clientRequestUri << std::endl;
         _renderServerErrorPage(404);
-        Logger::warning("Location not found");
     }
 }
 

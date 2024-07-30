@@ -4,3 +4,4 @@ py_env
 tests/__pycache__/
 .vscode/
 *.out
+ubuntu_tester
