@@ -19,10 +19,8 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 	std::cout << clientHeader << std::endl;
 	if(clientHeader.getErrorCode() != 0)
 	{
-        //_response = _generateErrorPage(clientHeader.getErrorCode());
         _renderServerErrorPage(clientHeader.getErrorCode());
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
-		//std::cout << _generateErrorPage(clientHeader.getErrorCode());
 	}
 	else   
 	{
