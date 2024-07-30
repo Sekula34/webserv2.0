@@ -39,15 +39,14 @@
 
 ### Generate Client Response 
 1. IF client header have error code (that happend while reading)
-	1. YES - [Generate server error response](#generate-server-error-response)
+	1. YES - [Generate server error response](#generate-server-error-response-error-code) (clientHeaderError)
 	2. NO - [Generate server "normal" response](#generate-server-normal-reponse)
 2. Store Response (but not send it)
 3. Set client to be ready to write
 
-### Generate server error response 
-1. Find which error is in clientheader
-2. Create body message (Response body)
-3. Create response header
+### Generate server error response (error code)
+1. Create body message //(Response body)
+2. _Create response header_ (maybe not here)
 
 ### Generate server "normal" reponse 
 1. var = Read client header find what he wants 
@@ -60,5 +59,12 @@
 
 
 ### Handle Get Method
-1. Find which location client wants
-2. 
+1. Seperate client requested location and client requested file
+2. Find which location client wants
+3. IF location is redirected
+	1. Handle Redirect (nginx return)
+	2. return 
+4. value = Try to access site (constrct from location and requested file)
+5. IF (value == success)
+	1. return 200
+6. [Generate server erorr response](#generate-server-error-response-error-code) (value)
