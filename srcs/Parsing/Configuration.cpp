@@ -45,6 +45,15 @@ Configuration::~Configuration()
 
 }
 
+void Configuration::_checkDoubleHttp(const Token& oneToken)
+{
+	if(oneToken.getTokenInfo() == "http" && _tokensVector.size() != 0)
+	{
+		Logger::error("Second http context found ind line "); std::cout << oneToken.getTokenLineNumber() <<std::endl;
+		throw InvalidConfigFileException();
+	}
+}
+
 //function that tries to open file in _filePath 
 //throw InvalidConfFileException if file cannot be opened, is empty (No reading permmision or file dont exist)
 void Configuration::_checkFileAccessType() const
@@ -196,6 +205,8 @@ void Configuration:: _createOneToken(std::string& tokenInfo, size_t lineNumber)
 	}
 	//std::cout << "Server id is " << _serverId << std::endl;
 	Token oneToken(tokenInfo,lineNumber,_serverId);
+	_checkDoubleHttp(oneToken);
+	//check double http
 	//oneToken.printTokenInfo();
 	_tokensVector.push_back(oneToken);
 }

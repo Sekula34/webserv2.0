@@ -24,6 +24,13 @@ class Configuration
 		std::vector<Token> _tokensVector;
 
 		void _checkFileAccessType(void) const;
+		/**
+		 * @brief function that check if http Token is trying to be added in vector not on 0 index
+		 * 
+		 * @param oneToken 
+		 * @throw  InvalidConfig file if token info is http and size of _tokens vector is not 0 which means there is one http too much
+		 */
+		void _checkDoubleHttp(const Token& oneToken);
 		// void _constructDirLoop(std::string& pathPrefix, linePair line);
 		void _copyFileInVector(void);
 	
