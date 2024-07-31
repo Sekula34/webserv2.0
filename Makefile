@@ -115,4 +115,16 @@ confre:
 $(CONFNAME) : $(PARSING_OBJS) $(HEADERS)
 	$(CXX) $(PARSING_OBJS) $(CXXFLAGS)  Configuration/main.cpp -o $(CONFNAME)
 
+unitTest : $(OBJS) $(HEADERS) testers/unitTestmain.cpp testers/UnitTest.cpp testers/UnitTest.hpp
+			$(CXX) $(CXXFLAGS) -c testers/UnitTest.cpp -o testers/UnitTest.o
+			$(CXX) $(OBJS) testers/UnitTest.o $(CXXFLAGS) testers/unitTestmain.cpp -o unittest
+			@echo "$(GREEN)Compilation successful.$(RESET) Executable name: ./unittest"
+
+unitTestclean : 
+	$(MAKE) fclean
+	rm testers/UnitTest.o unittest
+
+unitTestre : 
+	$(MAKE) unitTestclean
+	$(MAKE) unitTest
 .PHONY:			all clean fclean re valgrind run conf confclean confre
