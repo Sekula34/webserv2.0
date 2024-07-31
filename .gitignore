@@ -4,4 +4,7 @@ py_env
 tests/__pycache__/
 .vscode/
 *.out
+*.o
 ubuntu_tester
+unittest
+testers/ConfigFileTest/TestFiles/noPermission
