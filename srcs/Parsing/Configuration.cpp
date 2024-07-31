@@ -25,26 +25,7 @@ Configuration::Configuration(const std::string& filePath)
 	_checkFileAccessType();
 	_copyFileInVector();
 	_fillTokensVector();
-	// for(size_t i = 0; i < _tokensVector.size(); i++)
-	// {
-	// 	_tokensVector[i].printTokenInfo();
-	// }
 	_fillAllTokensPaths();
-	//Token::checkAllTokensContext(_tokensVector);
-	// for(size_t i = 0; i < _tokensVector.size(); i++)
-	// {
-	// 	_tokensVector[i].printTokenInfo();
-	// 	if(_tokensVector[i].getTokenType() == DIRECTIVE)
-	// 	{
-	// 		// Directive directiva(_tokensVector[i]);
-	// 		// directiva.printDirectiveInfor();
-	// 	}
-	// }
-	//std::cout << "One line config is " << _confOneLine << std::endl;
-	//std::cout << "One liner is " << std::endl;
-	//printFileMember();
-	//std::cout <<"One liner is :["<< _getOneLineConfig() <<"]"<< std::endl;
-	//_findAllContextBraces();
 }
 
 Configuration::Configuration(const Configuration& source)
