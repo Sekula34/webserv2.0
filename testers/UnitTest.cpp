@@ -40,6 +40,7 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 	}
 	catch (std::exception& e)
 	{
+		std::cout << e.what() << std::endl;
 		if(exception == false)
 			assert(0);
 		else if (exception == true)
@@ -56,11 +57,14 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 
 void UnitTest::configTestBlock()
 {
+	std::string folder = "testers/ConfigFileTest/TestFiles/";
 	_configTestCase("testers/ConfigFileTest/TestFiles/simpleFile.conf",false);
 	_configTestCase("nonExistent", true);
 	_configTestCase("testers/ConfigFileTest/TestFiles/noPermission.conf", true);
 	_configTestCase("testers/ConfigFileTest/TestFiles/bulshit",true);
-	//Configuration conf("testers/ConfigFileTest/TestFiles/simpleFile.conf");
-	//assert(conf.getFilePath() == "testers/ConfigFileTest/TestFiles/simpleFile.conf");
+
+	_configTestCase(folder + "InvalidContext.conf", true);
+	_configTestCase(folder + "InvalidContext2.conf", true);
+	_configTestCase(folder + "doublehttp.conf", true); // this should be fixed maybe
 	return _testpassed(true);
 }
