@@ -197,6 +197,7 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 void ConnectionDispatcher::_handleReadyFd(void)
 {
 	
+	//how i can now that ther is nothing to be read form socket fd
 
 	std::vector<Socket> readySockets = _getAllReadyToReadSockets();
 	if(readySockets.size() != 0)
