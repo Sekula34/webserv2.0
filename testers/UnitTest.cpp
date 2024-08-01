@@ -5,6 +5,9 @@
 #include <iostream>
 
 
+
+const std::string UnitTest::_constFileFolder = "testers/ConfigFileTest/TestFiles/";
+
 void UnitTest::_testpassed(bool block)
 {
 	    const std::string green = "\033[32m";
@@ -65,6 +68,7 @@ void UnitTest::configTestBlock()
 
 	_configTestCase(folder + "InvalidContext.conf", true);
 	_configTestCase(folder + "InvalidContext2.conf", true);
-	_configTestCase(folder + "doublehttp.conf", true); // this should be fixed maybe
+	_configTestCase(folder + "doublehttp.conf", true);
+	_configTestCase(folder + "simpleServer.conf", false);
 	return _testpassed(true);
 }
