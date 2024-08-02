@@ -2,11 +2,10 @@
 #include <assert.h>
 #include <exception>
 #include "../srcs/Parsing/Configuration.hpp"
-#include "../srcs/Parsing/ServerSettings.hpp"
 #include <iostream>
-#include <vector>
+#include <string>
 #include "../srcs/Utils/Logger.hpp"
-
+#include "../srcs/Parsing/ParsingUtils.hpp"
 
 
 const std::string UnitTest::_constFileFolder = "testers/ConfigFileTest/TestFiles/";
@@ -29,21 +28,19 @@ void UnitTest::_testpassed(bool block)
 
 
 
-void UnitTest::_configTestCase(std::string filePath, bool exception)
+void UnitTest::_configFileSyntaxCheck(std::string filePath, bool exception)
 {
-	std::cout << "Testing openning: " << filePath << std::endl;
+	std::string expecetedMessage;
+	std::string title = "Syntax of file: " + filePath;
 	if(exception)
-	{
-		std::cout << "Excpetion should happend" << std::endl;
-	}
+		expecetedMessage ="Excpetion should happend";
 	else 
-	{
-		std::cout << "Exception should not happend" << std::endl;
-	}
+		expecetedMessage = "Exception should not happend";
+
+	Logger::testCase(title, expecetedMessage); std::cout << std::endl;
 	try 
 	{
 		Configuration conf(filePath);
-		std::cout << conf.getNumberOfServers() << std::endl << std::endl;
 	}
 	catch (std::exception& e)
 	{
@@ -58,54 +55,51 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 	}
 	if(exception == true)
 		assert(0);
-	//std::cout << "Test passed" << std::endl;
 	return _testpassed();
 }
 
 void UnitTest::_configNumberOfServers(std::string filePath, int expectedNumberOfServers)
 {
-	std::cout << "Testing number of servers of config file " << _constFileFolder + filePath << std::endl;
-	std::cout << "Expected number of servers is " << expectedNumberOfServers << std::endl;
+	std::string fullFilePath = _constFileFolder + filePath;
+	_configFileSyntaxCheck(fullFilePath, false);
+	std::string title = "Testing number of servers of config file " + fullFilePath; 
+	std::string expecetedMessage = ParsingUtils::toString(expectedNumberOfServers);
+	Logger::testCase(title, expecetedMessage);
 	Configuration conf(_constFileFolder + filePath);
 	assert(conf.getNumberOfServers() == expectedNumberOfServers);
 	_testpassed();
 }
 
-void UnitTest::_serveTestCase()
-{
-	Logger::warning("Not broken");
-	Configuration conf(_constFileFolder + "simpleServer.conf");
-	DefaultSettings defSettings;
-	std::vector<Token> allTokens = conf.getAllTokens();
-	//Token::printAllTokensInfo(allTokens);
-	ServerSettings server(1, defSettings, allTokens);
-	server.printServerTokens();
-	server.printAllSettings();
-}
 
-void UnitTest::configTestBlock()
+void UnitTest::configSyntaxBlock()
 {
 	std::string folder = "testers/ConfigFileTest/TestFiles/";
-	_configTestCase("testers/ConfigFileTest/TestFiles/simpleFile.conf",false);
-	_configTestCase("nonExistent", true);
-	_configTestCase("testers/ConfigFileTest/TestFiles/noPermission.conf", true);
-	_configTestCase("testers/ConfigFileTest/TestFiles/bulshit",true);
+	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/simpleFile.conf",false);
+	_configFileSyntaxCheck("nonExistent", true);
+	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/noPermission.conf", true);
+	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/bulshit",true);
 
-	_configTestCase(folder + "InvalidContext.conf", true);
-	_configTestCase(folder + "InvalidContext2.conf", true);
-	_configTestCase(folder + "doublehttp.conf", true);
-	_configTestCase(folder + "simpleServer.conf", false);
-	_configTestCase(folder + "ThreeServers.conf", false);
-	_configTestCase(folder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
+	_configFileSyntaxCheck(folder + "InvalidContext.conf", true);
+	_configFileSyntaxCheck(folder + "InvalidContext2.conf", true);
+	_configFileSyntaxCheck(folder + "doublehttp.conf", true);
+	_configFileSyntaxCheck(folder + "simpleServer.conf", false);
+	_configFileSyntaxCheck(folder + "ThreeServers.conf", false);
+	_configFileSyntaxCheck(folder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
 	return _testpassed(true);
 }
 
-void UnitTest::allTests()
+
+void UnitTest::configNumberOfServersBlock()
 {
-	configTestBlock();
 	_configNumberOfServers("simpleFile.conf", 1);
 	_configNumberOfServers("simpleServer.conf",1);
 	_configNumberOfServers("ThreeServers.conf",3);
 	_configNumberOfServers("zeroServer.conf", 0);
+	return _testpassed(true);
+}
+void UnitTest::allTests()
+{
+	configSyntaxBlock();
+	configNumberOfServersBlock();
 	//_serveTestCase();
 }
