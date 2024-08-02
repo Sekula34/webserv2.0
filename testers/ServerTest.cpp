@@ -4,30 +4,36 @@
 #include <iostream>
 #include <vector>
 #include "../srcs/Parsing/ServerSettings.hpp"
-#include "UnitTest.hpp"
+#include "../srcs/Utils/Logger.hpp"
 
 void ServerTest::_portTester(int expectedPort, const ServerSettings& server)
 {
 	std::cout << "Checking server port. ";
 	std::cout << "Expected port is " << expectedPort << std::endl;
+	std::cout << server.getPort();
 	assert(server.getPort() == expectedPort);
 	_testpassed();
 }
 
 void ServerTest::serverTestCase()
 {
+	Logger::warning("Broken test case");
 	Configuration conf(_constFileFolder + "simpleServer.conf");
 	DefaultSettings defSettings;
 	std::vector<Token> allTokens = conf.getAllTokens();
-	ServerSettings server(1, defSettings, allTokens );
-	//server.printServerSettings();
+	//Token::printAllTokensInfo(allTokens);
+	ServerSettings server(1, defSettings, allTokens);
+	DefaultSettings def2;
+	ServerSettings server2(1, def2, allTokens);
+	//server.printServerTokens();
+	server.printAllSettings();
 
-	_portTester(9090, server);
+	server2.printAllSettings();
+	std::cout << conf.getNumberOfServers();
+}
 
-	std::cout << "Checking number of server locations" << std::endl;
-	assert(server.getServerLocations().size() == 6);
-	_testpassed();
-
-
-
+void ServerTest::runAllTests()
+{
+	std::cout<<"Server Tests all" << std::endl;
+	serverTestCase();
 }

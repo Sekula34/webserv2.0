@@ -2,9 +2,10 @@
 #include <assert.h>
 #include <exception>
 #include "../srcs/Parsing/Configuration.hpp"
-#include "ServerTest.hpp"
+#include "../srcs/Parsing/ServerSettings.hpp"
 #include <iostream>
 #include <vector>
+#include "../srcs/Utils/Logger.hpp"
 
 
 
@@ -42,6 +43,7 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 	try 
 	{
 		Configuration conf(filePath);
+		std::cout << conf.getNumberOfServers() << std::endl << std::endl;
 	}
 	catch (std::exception& e)
 	{
@@ -60,11 +62,22 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 	return _testpassed();
 }
 
+void UnitTest::_configNumberOfServers(std::string filePath, int expectedNumberOfServers)
+{
+	std::cout << "Testing number of servers of config file " << _constFileFolder + filePath << std::endl;
+	std::cout << "Expected number of servers is " << expectedNumberOfServers << std::endl;
+	Configuration conf(_constFileFolder + filePath);
+	assert(conf.getNumberOfServers() == expectedNumberOfServers);
+	_testpassed();
+}
+
 void UnitTest::_serveTestCase()
 {
+	Logger::warning("Not broken");
 	Configuration conf(_constFileFolder + "simpleServer.conf");
 	DefaultSettings defSettings;
 	std::vector<Token> allTokens = conf.getAllTokens();
+	//Token::printAllTokensInfo(allTokens);
 	ServerSettings server(1, defSettings, allTokens);
 	server.printServerTokens();
 	server.printAllSettings();
@@ -82,12 +95,17 @@ void UnitTest::configTestBlock()
 	_configTestCase(folder + "InvalidContext2.conf", true);
 	_configTestCase(folder + "doublehttp.conf", true);
 	_configTestCase(folder + "simpleServer.conf", false);
+	_configTestCase(folder + "ThreeServers.conf", false);
+	_configTestCase(folder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
 	return _testpassed(true);
 }
 
 void UnitTest::allTests()
 {
-	//configTestBlock();
-	//ServerTest::serverTestCase();
-	_serveTestCase();
+	configTestBlock();
+	_configNumberOfServers("simpleFile.conf", 1);
+	_configNumberOfServers("simpleServer.conf",1);
+	_configNumberOfServers("ThreeServers.conf",3);
+	_configNumberOfServers("zeroServer.conf", 0);
+	//_serveTestCase();
 }
