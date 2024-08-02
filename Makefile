@@ -45,6 +45,8 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Utils/FileUtils.cpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.cpp\
+			testers/ServerTest.cpp\
+			testers/UnitTest.cpp \
 			#srcs/main.cpp
 
 
@@ -69,6 +71,9 @@ HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Utils/FileUtils.hpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.hpp\
+			testers/ServerTest.hpp\
+			testers/UnitTest.hpp \
+			
 
 OBJDIR =	obj
 OBJS =		$(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
@@ -115,16 +120,12 @@ confre:
 $(CONFNAME) : $(PARSING_OBJS) $(HEADERS)
 	$(CXX) $(PARSING_OBJS) $(CXXFLAGS)  Configuration/main.cpp -o $(CONFNAME)
 
-unitTest : $(OBJS) $(HEADERS) testers/unitTestmain.cpp testers/UnitTest.cpp testers/UnitTest.hpp
-			$(CXX) $(CXXFLAGS) -c testers/UnitTest.cpp -o testers/UnitTest.o
-			$(CXX) $(OBJS) testers/UnitTest.o $(CXXFLAGS) testers/unitTestmain.cpp -o unittest
+unitTest : $(OBJS) $(HEADERS) 
+			$(CXX) $(OBJS) $(CXXFLAGS) testers/unitTestmain.cpp -o unittest
 			@echo "$(GREEN)Compilation successful.$(RESET) Executable name: ./unittest"
 
-unitTestclean : 
-	$(MAKE) fclean
-	rm testers/UnitTest.o unittest
 
 unitTestre : 
-	$(MAKE) unitTestclean
+	$(MAKE) fclean
 	$(MAKE) unitTest
 .PHONY:			all clean fclean re valgrind run conf confclean confre

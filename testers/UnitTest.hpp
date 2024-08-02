@@ -7,7 +7,7 @@ class UnitTest
 	private :
 		//static void _testBlockPassed();
 		static void _configTestCase(std::string filePath, bool exception = false);
-
+		static void _serveTestCase();
 	
 	protected: 
 		static void _testpassed(bool block = false);

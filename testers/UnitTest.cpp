@@ -2,7 +2,9 @@
 #include <assert.h>
 #include <exception>
 #include "../srcs/Parsing/Configuration.hpp"
+#include "ServerTest.hpp"
 #include <iostream>
+#include <vector>
 
 
 
@@ -58,6 +60,16 @@ void UnitTest::_configTestCase(std::string filePath, bool exception)
 	return _testpassed();
 }
 
+void UnitTest::_serveTestCase()
+{
+	Configuration conf(_constFileFolder + "simpleServer.conf");
+	DefaultSettings defSettings;
+	std::vector<Token> allTokens = conf.getAllTokens();
+	ServerSettings server(1, defSettings, allTokens);
+	server.printServerTokens();
+	server.printAllSettings();
+}
+
 void UnitTest::configTestBlock()
 {
 	std::string folder = "testers/ConfigFileTest/TestFiles/";
@@ -71,4 +83,11 @@ void UnitTest::configTestBlock()
 	_configTestCase(folder + "doublehttp.conf", true);
 	_configTestCase(folder + "simpleServer.conf", false);
 	return _testpassed(true);
+}
+
+void UnitTest::allTests()
+{
+	//configTestBlock();
+	//ServerTest::serverTestCase();
+	_serveTestCase();
 }
