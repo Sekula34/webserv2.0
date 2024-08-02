@@ -10,7 +10,6 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 
-int Configuration::_serverId = 0;
 //either will stay private or will call Configuration(std::string path) where 
 //path will be default config file
 Configuration::Configuration()
@@ -20,7 +19,7 @@ Configuration::Configuration()
 
 //Set filePath to be const std::string variable
 Configuration::Configuration(const std::string& filePath)
-:_filePath(filePath)
+:_serverId(0),_filePath(filePath)
 {
 	_checkFileAccessType();
 	_copyFileInVector();
@@ -193,17 +192,14 @@ void Configuration::_fillAllTokensPaths(void)
 //if token is empty do nothing// not even exception maybe should change
 void Configuration:: _createOneToken(std::string& tokenInfo, size_t lineNumber)
 {
-	//static int _serverId = 0;
 	if(tokenInfo.empty() == true)
 	{
 		return;
 	}
 	if(tokenInfo == "server")
 	{
-		//tokenInfo = _generate_ServerIdString(_serverId);
 		_serverId ++;
 	}
-	//std::cout << "Server id is " << _serverId << std::endl;
 	Token oneToken(tokenInfo,lineNumber,_serverId);
 	_checkDoubleHttp(oneToken);
 	//check double http

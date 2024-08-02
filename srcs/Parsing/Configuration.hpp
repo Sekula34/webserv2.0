@@ -16,7 +16,7 @@ typedef std::pair<std::string, size_t > linePair ;
 class Configuration 
 {
 	private :
-		static int _serverId;
+	 	int _serverId;
 		const std::string _filePath;
 		std::vector <linePair > _fileLine;
 		std::string _confOneLine;
