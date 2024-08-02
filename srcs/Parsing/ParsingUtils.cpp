@@ -23,6 +23,17 @@ std::vector<std::string> ParsingUtils::splitString(std::string fullString, char 
 	return result;
 }
 
+std::string ParsingUtils::getStringOutOfVector(const std::vector<std::string> stringVector)
+{
+	std::string fullString;
+	for(size_t i = 0; i < stringVector.size(); i++)
+	{
+		std::string locationInBracket = "[" + stringVector[i] + "] ";
+		fullString += locationInBracket;
+	}
+	return fullString;
+}
+
 //check if all chars in toCheck are digits
 //return true if string is number
 //return false otherwise
