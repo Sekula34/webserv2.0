@@ -8,6 +8,7 @@ const std::string Logger::GREEN = "\033[32m";
 const std::string Logger::YELLOW = "\033[33m";
 const std::string Logger::RED = "\033[31m";
 const std::string Logger::RESET = "\033[0m";
+const std::string Logger::BLUE = "\033[34m";
 
 
 
@@ -55,4 +56,10 @@ void Logger::error(std::string message, bool newline)
 	std::cerr <<"ERROR: " << message  << RESET;
     if(newline == true)
         std::cout << std::endl;
+}
+
+void Logger::testCase(std::string title ,std::string expectedResult)
+{
+    std::cout << BLUE;
+    std::cout << "Test Case :" << title << ". " << RESET << expectedResult;
 }

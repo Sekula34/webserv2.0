@@ -16,12 +16,14 @@ class Logger
 		static const std::string YELLOW;
 		static const std::string RED;
 		static const std::string RESET;
+		static const std::string BLUE;
 		static void _printCurrentTime();
 
 	public :
 		static void info(std::string message, bool newline = false);
 		static void warning(std::string message, bool newline = false);
 		static void error(std::string message, bool newline = false);
+		static void testCase(std::string title, std::string expectedResult);
 };
 
 #endif
