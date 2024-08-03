@@ -75,7 +75,7 @@
 1. While(TRUE)  
 	1. IF [AM I Location](#am-i-location-paramurl)(to try) == true  
 		1. retunr URL
-	2. Shorten string to try (/hej/i/am/long.txt/ to /hej/i/am)
+	2. [Get new dir Name](#getdirname-param-url)(/hej/i/am/long.txt/ to /hej/i/am)
 
 
 ### getDirname (param: url)
