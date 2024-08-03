@@ -49,6 +49,11 @@ bool ParsingUtils::isStringNumber(std::string toCheck)
 	}
 	return true;
 }
+std::string ParsingUtils::getBaseName(const std::string& fullUrl, const std::string& serverLocationString)
+{
+	std::string fileName = fullUrl.substr(serverLocationString.size());
+	return fileName;
+}
 
 bool ParsingUtils::isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids)
 {
