@@ -38,6 +38,8 @@ void ServerTest::serverTestCase()
 	expectedLocations.push_back("/first/second/third/");
 
 	_locationUriTester(expectedLocations, server);
+	amIlocationtest("/", server, true);
+	amIlocationtest("/another_location/", server, true);
 
 	//server.printServerTokens();
 	//server.printServerSettings();
@@ -60,7 +62,10 @@ void ServerTest::_locationUriTester(const std::vector<std::string> expectedLocat
 	{
 		std::string fetchedLocationUri = server.getServerLocations()[i].getLocationUri();
 		assert(fetchedLocationUri == expectedLocations[i]);
+		amIlocationtest(expectedLocations[i], server, true);
 	}
+	std::string notExist = "I/am/not/here";
+	amIlocationtest(notExist, server, false);
 	return _testpassed();
 }
 
@@ -68,4 +73,17 @@ void ServerTest::runAllTests()
 {
 	std::cout<<"Server Tests all" << std::endl;
 	serverTestCase();
+}
+
+void ServerTest::amIlocationtest(std::string location, const ServerSettings& server, bool expected)
+{
+	std::string expectedMessage;
+	if(expected)
+		expectedMessage = "Expected to found";
+	else
+	 	expectedMessage= "Expected not to found";
+	Logger::testCase("Am i Location: " + location,expectedMessage);
+	bool found = server.amIServerLocation(location);
+	assert(found == expected);
+	_testpassed();
 }
