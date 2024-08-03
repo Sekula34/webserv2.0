@@ -1,5 +1,10 @@
 #ifndef LOGGER_HPP
 # define LOGGER_HPP
+
+# ifndef PRINT 
+#  define PRINT 1
+# endif
+
 #include <string>
 
 /**
@@ -18,6 +23,7 @@ class Logger
 		static const std::string RESET;
 		static const std::string BLUE;
 		static void _printCurrentTime();
+		static bool _isPrintingAllowed();
 
 	public :
 		static void info(std::string message, bool newline = false);

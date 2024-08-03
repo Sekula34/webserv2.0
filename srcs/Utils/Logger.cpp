@@ -12,6 +12,15 @@ const std::string Logger::BLUE = "\033[34m";
 
 
 
+bool Logger::_isPrintingAllowed()
+{
+    if(PRINT == 1)
+    {
+        return true;
+    }
+    return false;
+}
+
 void  Logger::_printCurrentTime() {
     timeval curTime;
     gettimeofday(&curTime, NULL);
@@ -34,6 +43,10 @@ void  Logger::_printCurrentTime() {
 
 void Logger::info(std::string message, bool newline)
 {
+    if(_isPrintingAllowed() == false)
+    {
+        return;
+    }
 	std::cout << GREEN;
 	_printCurrentTime();
 	std::cout <<"INFO: " << message << RESET;
@@ -43,6 +56,10 @@ void Logger::info(std::string message, bool newline)
 
 void Logger::warning(std::string message, bool newline)
 {
+    if(_isPrintingAllowed() == false)
+    {
+        return;
+    }
 	std::cout << YELLOW;
 	_printCurrentTime();
 	std::cout <<"WARNING: " << message << RESET;
