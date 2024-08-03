@@ -119,8 +119,26 @@ void UnitTest::configNumberOfServersBlock()
 }
 void UnitTest::allTests()
 {
+	_baseNameBlock();
 	configSyntaxBlock();
 	configNumberOfServersBlock();
 	testDirBlock();
 	//_serveTestCase();
+}
+
+void UnitTest::_baseNameBlock()
+{
+	_baseNameTestCase("/localhost/bokte/nece/stajeovo/", "/", "localhost/bokte/nece/stajeovo/");
+	_baseNameTestCase("/localhost/bokte/nece/stajeovo/", "/localhost/", "bokte/nece/stajeovo/");
+	_baseNameTestCase("/localhost/bokte/nece/stajeovo/", "/localhost/bokte/nece/", "stajeovo/");
+	_baseNameTestCase("/localhost/bokte/nece/stajeovo", "/localhost/bokte/nece/", "stajeovo");
+	_baseNameTestCase("/html/first/second.html", "/html/first/", "second.html");
+
+}
+void UnitTest::_baseNameTestCase(std::string url, std::string serverLocation, std::string expected)
+{
+	std::string titleMessage = "Base name tester of " + url + " and " + serverLocation + "\n";
+	Logger::testCase(titleMessage, expected);
+	std::string baseName = ParsingUtils::getBaseName(url, serverLocation);
+	assert(baseName == expected);
 }

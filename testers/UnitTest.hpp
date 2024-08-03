@@ -9,7 +9,8 @@ class UnitTest
 		static void _configFileSyntaxCheck(std::string filePath, bool exception = false);
 		static void _configNumberOfServers(std::string filePath, int expectedNumberOfServers);
 		static void _testDirGetter(std::string FullPath, const std::string expectedResult);
-	
+		static void _baseNameTestCase(std::string url, std::string serverLocation, std::string expected);
+		static void _baseNameBlock();
 	protected: 
 		static void _testpassed(bool block = false);
 		static const std::string _constFileFolder;
