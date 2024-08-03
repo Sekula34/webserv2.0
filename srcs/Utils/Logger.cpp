@@ -78,5 +78,5 @@ void Logger::error(std::string message, bool newline)
 void Logger::testCase(std::string title ,std::string expectedResult)
 {
     std::cout << BLUE;
-    std::cout << "Test Case :" << title << ". " << RESET << expectedResult;
+    std::cout << "Test Case :" << title << ". " << RESET << expectedResult << std::endl;
 }
