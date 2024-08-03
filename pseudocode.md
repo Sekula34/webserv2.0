@@ -68,3 +68,41 @@
 5. IF (value == success)
 	1. return 200
 6. [Generate server erorr response](#generate-server-error-response-error-code) (value)
+
+
+### Get Location Part of URL (param:URL that ends with /)
+1. string to try = url
+1. While(TRUE)  
+	1. IF [AM I Location](#am-i-location-paramurl)(to try) == true  
+		1. retunr URL
+	2. Shorten string to try (/hej/i/am/long.txt/ to /hej/i/am)
+
+
+### getDirname (param: url)
+1. if url end with / remove it 
+2. find position of first / from right to left
+3.  return that substring
+
+### AM I Location (param:URL)
+1. IF URL IS Server Location   
+	1. return TRUE;
+3. Return False;
+
+
+### FUCNTIOn(VECTOR)
+1. MAKE PAIRS
+2. VEC2 = STORE BIG PART
+3. IF(VEC2 > 3)
+	1. FoUNCTION(VEC2)
+4. INSERt PART
+
+5. RETURN
+
+
+19 20 21 22 23 24
+18 6   2  4  1 11
+
+18 19 20 21 22 23 24
+### INSERT PART
+1. find which Jacobstal index (6)
+1 3 2 5 4 6

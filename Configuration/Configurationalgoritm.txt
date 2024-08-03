@@ -50,3 +50,9 @@ goes through every token
 		remove last from TokenPath;
 	}
 }
+
+Configuring Cgi
+		location /cgi- bin {
+			handler /bin/python3;
+			extension .py;
+		}
