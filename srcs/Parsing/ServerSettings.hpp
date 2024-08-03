@@ -31,6 +31,15 @@ class ServerSettings : public DefaultSettings
 		ServerSettings& operator=(const ServerSettings& source);
 		~ServerSettings();
 
+
+		/**
+		 * @brief Get the Location Part Of Url object
+		 * if url is /hej/i/am/url/that/is/in/server function will return location that server have
+		 * for examle if /hej/i/am/ location in config file it will return that
+		 * @param url 
+		 * @return std::string 
+		 */
+		std::string getLocationPartOfUrl(const std::string& url) const;
 		bool amIServerLocation(const std::string& path) const;
 		std::vector<Token> getServerTokens(void) const;
 		std::vector<Directive> getServerDirectives(void) const;

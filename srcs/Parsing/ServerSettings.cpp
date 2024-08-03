@@ -2,6 +2,7 @@
 #include "DefaultSettings.hpp"
 #include "Directive.hpp"
 #include "LocationSettings.hpp"
+#include "ParsingUtils.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
@@ -83,6 +84,17 @@ bool ServerSettings::amIServerLocation(const std::string& path) const
 	bool found = true;
 	fetchLocationWithUri(path, found);
 	return found;
+}
+
+std::string ServerSettings::getLocationPartOfUrl(const std::string& url) const
+{
+	std::string toTry(url);
+	while (true)
+	{
+		if(amIServerLocation(toTry) == true)
+			return toTry;
+		toTry = ParsingUtils::getDirName(toTry);
+	}
 }
 void ServerSettings::addDirectiveToServer(Directive directive)
 {
