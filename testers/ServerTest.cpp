@@ -17,6 +17,17 @@ void ServerTest::_portTester(int expectedPort, const ServerSettings& server)
 	_testpassed();
 }
 
+void ServerTest::_locationFromUrlBlock(const ServerSettings& server)
+{
+	Logger::testCase("Getting location from URL block", "");
+	_locationFromUrlGetterTest(server, "/another_location/text.txt", "/another_location/");
+	_locationFromUrlGetterTest(server, "/first/second/third/fourth/fifit/sixth","/first/second/third/");
+	_locationFromUrlGetterTest(server, "/first/second/third/", "/first/second/third/");
+	_locationFromUrlGetterTest(server, "/", "/");
+	_locationFromUrlGetterTest(server, "/lookhow/i/can/be/some/bullshit/", "/");
+	_testpassed(true);
+}
+
 void ServerTest::serverTestCase()
 {
 	std::string fullFilePath = _constFileFolder + "simpleServer.conf";
@@ -38,8 +49,9 @@ void ServerTest::serverTestCase()
 	expectedLocations.push_back("/first/second/third/");
 
 	_locationUriTester(expectedLocations, server);
-	amIlocationtest("/", server, true);
-	amIlocationtest("/another_location/", server, true);
+	_amIlocationtest("/", server, true);
+	_amIlocationtest("/another_location/", server, true);
+	_locationFromUrlBlock(server);
 
 	//server.printServerTokens();
 	//server.printServerSettings();
@@ -53,6 +65,14 @@ void ServerTest::_locationNumberTester(size_t expectedNumberOfLocations, const S
 	_testpassed();
 }
 
+void ServerTest::_locationFromUrlGetterTest(const ServerSettings& server, std::string url, std::string expectedResult)
+{
+	Logger::testCase("geting location from url " + url, expectedResult);
+	std::string serverLocation = server.getLocationPartOfUrl(url);
+	assert(serverLocation == expectedResult);
+	return _testpassed();
+}
+
 void ServerTest::_locationUriTester(const std::vector<std::string> expectedLocations, const ServerSettings& server)
 {
 	std::string expectedString = ParsingUtils::getStringOutOfVector(expectedLocations);
@@ -62,10 +82,10 @@ void ServerTest::_locationUriTester(const std::vector<std::string> expectedLocat
 	{
 		std::string fetchedLocationUri = server.getServerLocations()[i].getLocationUri();
 		assert(fetchedLocationUri == expectedLocations[i]);
-		amIlocationtest(expectedLocations[i], server, true);
+		_amIlocationtest(expectedLocations[i], server, true);
 	}
 	std::string notExist = "I/am/not/here";
-	amIlocationtest(notExist, server, false);
+	_amIlocationtest(notExist, server, false);
 	return _testpassed();
 }
 
@@ -75,7 +95,7 @@ void ServerTest::runAllTests()
 	serverTestCase();
 }
 
-void ServerTest::amIlocationtest(std::string location, const ServerSettings& server, bool expected)
+void ServerTest::_amIlocationtest(std::string location, const ServerSettings& server, bool expected)
 {
 	std::string expectedMessage;
 	if(expected)

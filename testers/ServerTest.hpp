@@ -11,8 +11,10 @@ class ServerTest : public UnitTest
 		static void _portTester(int expectedPort, const ServerSettings& server);
 		static void _locationNumberTester(size_t expectedNumberOfLocations, const ServerSettings& server);
 		static void _locationUriTester(const std::vector<std::string >expectedLocations, const ServerSettings& server);
+		static void _amIlocationtest(std::string location, const ServerSettings& server, bool expected);
+		static void _locationFromUrlGetterTest(const ServerSettings& server, std::string url, std::string expectedResult);
+		static void _locationFromUrlBlock(const ServerSettings& server);
 	public :
-		static void amIlocationtest(std::string location, const ServerSettings& server, bool expected);
 		static void serverTestCase();
 		static void runAllTests();
 };
