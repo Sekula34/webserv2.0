@@ -8,6 +8,7 @@ int main()
 	std::cout << "Just new line " << std::endl;
 	UnitTest::allTests();
 	ServerTest::runAllTests();
+	//UnitTest::testDirBlock();
 	//UnitTest::configTestBlock();
 
 	//UnitTest::serverTestBlock();

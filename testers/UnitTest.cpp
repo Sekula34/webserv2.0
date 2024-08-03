@@ -64,10 +64,30 @@ void UnitTest::_configNumberOfServers(std::string filePath, int expectedNumberOf
 	_configFileSyntaxCheck(fullFilePath, false);
 	std::string title = "Testing number of servers of config file " + fullFilePath; 
 	std::string expecetedMessage = ParsingUtils::toString(expectedNumberOfServers);
-	Logger::testCase(title, expecetedMessage);
+	Logger::testCase(title, expecetedMessage); std::cout << std::endl;
 	Configuration conf(_constFileFolder + filePath);
 	assert(conf.getNumberOfServers() == expectedNumberOfServers);
 	_testpassed();
+}
+
+void UnitTest::_testDirGetter(std::string FullPath, const std::string expectedResult)
+{
+	Logger::testCase("Dir Getter", expectedResult);
+	std::string result = ParsingUtils::getDirName(FullPath);
+	//std::cout << "["<< result << "]"<< std::endl;
+	assert(result == expectedResult);
+	_testpassed();
+}
+
+void UnitTest::testDirBlock()
+{
+	_testDirGetter("hej/I/am/Filip", "hej/I/am/");
+	_testDirGetter("hej/I/am/Filip/", "hej/I/am/");
+	_testDirGetter("hej/I/am/Filip//", "hej/I/am/Filip/");
+	_testDirGetter("hej", "");
+	_testDirGetter("/hej", "/");
+	_testpassed(true);
+
 }
 
 
@@ -101,5 +121,6 @@ void UnitTest::allTests()
 {
 	configSyntaxBlock();
 	configNumberOfServersBlock();
+	testDirBlock();
 	//_serveTestCase();
 }

@@ -8,6 +8,7 @@ class UnitTest
 		//static void _testBlockPassed();
 		static void _configFileSyntaxCheck(std::string filePath, bool exception = false);
 		static void _configNumberOfServers(std::string filePath, int expectedNumberOfServers);
+		static void _testDirGetter(std::string FullPath, const std::string expectedResult);
 	
 	protected: 
 		static void _testpassed(bool block = false);
@@ -16,5 +17,6 @@ class UnitTest
 		static void allTests();
 		static void configSyntaxBlock();
 		static void configNumberOfServersBlock();
+		static void testDirBlock();
 };
 #endif
