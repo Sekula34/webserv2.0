@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 std::vector<std::string> ParsingUtils::splitString(std::string fullString, char delimiter)
@@ -76,6 +77,19 @@ size_t ParsingUtils::stringToSizeT(std::string string)
 		throw std::runtime_error("istringstrream to size_t failed. Number does not fit in size_t probably");
 	}
 	return sizeTValue;
+}
+
+std::string ParsingUtils::getDirName(std::string fullPath)
+{
+	if(fullPath.empty() || fullPath.size() == 1)
+		throw std::runtime_error("getDirName full path is empty or consist of only one char");
+	std::string::iterator lastChar = fullPath.end() - 1;
+	if(*lastChar == '/')
+	{	
+		fullPath.erase(lastChar);
+	}
+	std::size_t posOfSlash = fullPath.find_last_of('/');
+	return fullPath.substr(0, posOfSlash + 1);
 }
 
 

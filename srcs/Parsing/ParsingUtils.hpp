@@ -62,6 +62,14 @@ class ParsingUtils
 		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
 		static bool isStringNumber(std::string toCheck);
 		static size_t stringToSizeT(std::string string);
+		/**
+		 * @brief Get the Dir Name dir name. Dir name of /hej/filip2/donot.txt
+		 *  is /hej/filip2/
+		 * Dir name of hej/hej2/hej3/ is hej/hej2/
+		 * @param fullPath 
+		 * @return std::string dir/name
+		 */
+		static std::string getDirName(std::string fullPath);
 		
 		/**
 		 * @brief Get the Http Plain Value object
