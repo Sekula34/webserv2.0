@@ -77,6 +77,13 @@ void ServerSettings::_applyAllServerLevelDirectives()
 			_serverDirectives[i].apply(*this);
 	}
 }
+
+bool ServerSettings::amIServerLocation(const std::string& path) const
+{
+	bool found = true;
+	fetchLocationWithUri(path, found);
+	return found;
+}
 void ServerSettings::addDirectiveToServer(Directive directive)
 {
 	_serverDirectives.push_back(directive);

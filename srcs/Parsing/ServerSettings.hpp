@@ -31,6 +31,7 @@ class ServerSettings : public DefaultSettings
 		ServerSettings& operator=(const ServerSettings& source);
 		~ServerSettings();
 
+		bool amIServerLocation(const std::string& path) const;
 		std::vector<Token> getServerTokens(void) const;
 		std::vector<Directive> getServerDirectives(void) const;
 		const std::vector<LocationSettings>& getServerLocations() const;
