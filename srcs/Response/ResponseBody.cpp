@@ -1,4 +1,5 @@
 #include "ResponseBody.hpp"
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -111,12 +112,14 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
 void ResponseBody::_handlerGetMethod()
 {
     Logger::info("Handling GET, ServerLocation", true);
-    std::string clientRequestUri = _clientHeader.getRequestLine().requestTarget;
-    Logger::info("Requsted location is "); std::cout << clientRequestUri << std::endl;
+    std::string clientRequestUrl = _clientHeader.getRequestedUrl();
+    Logger::info("Requsted url is "); std::cout << clientRequestUrl << std::endl;
+    std::string serverLocation = _server.getLocationPartOfUrl(clientRequestUrl);
+    Logger::info("Server location resposible for reponse is " + serverLocation, true);
     bool found = true;
  //   Logger::info("Server that is responding is: "); std::cout << std::endl;
     //_server.printServerSettings();
-    std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(clientRequestUri, found);
+    std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(serverLocation, found);
     if(found == true)
     {
         const LocationSettings& location = *it;
@@ -127,7 +130,7 @@ void ResponseBody::_handlerGetMethod()
     }
     else
     {
-        Logger::warning("Location not found: "); std::cout << clientRequestUri << std::endl;
+        Logger::warning("Location not found: "); std::cout << clientRequestUrl << std::endl;
         _renderServerErrorPage(404);
     }
 }
@@ -178,12 +181,28 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
     //access this site
 }
 
+bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const
+{
+    path.erase();
+    std::string requestedUrl = _clientHeader.getRequestedUrl();
+    std::cout << "Requested url is " << requestedUrl << std::endl;
+    std::cout << "Location uri is" << location.getLocationUri();
+    std::string baseName = ParsingUtils::getBaseName(requestedUrl, location.getLocationUri());
+    Logger::info("base name is " + baseName, true);
+    if(baseName == "")
+        return location.setIndexPagePath(path);
+    std::string filePath = location.getRoot() + "/" + baseName; 
+    path = filePath;
+    std::cout << "File Path is [" << path << "]" << std::endl;
+    return FileUtils::isPathValid(filePath);
+}
+
 void ResponseBody::_fetchServerPage(const LocationSettings& location)
 {
     Logger::info("Called fetching page", true);
    // location.printLocationSettings();
     std::string path;
-    bool found = location.setIndexPagePath(path);
+    bool found = _setFilePath(path, location);
     if(found == true)
     {
         bool success = FileUtils::putFileInString(path, _response);

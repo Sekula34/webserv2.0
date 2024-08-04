@@ -21,6 +21,7 @@ class ResponseBody
 		void _handleRedirect(const NginnxReturn& redirect);
 
 		void _processRequestedLocation(const LocationSettings& location);
+		bool _setFilePath(std::string &filePath, const LocationSettings& location) const;
 
 
 	public :
