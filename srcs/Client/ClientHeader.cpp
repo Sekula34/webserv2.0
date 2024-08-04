@@ -263,6 +263,12 @@ const int& ClientHeader::getErrorCode(void) const
 	return _errorCode;
 }
 
+const std::string& ClientHeader::getRequestedUrl(void) const 
+{
+	const RequestLine& line = getRequestLine();
+	return line.requestTarget;
+}
+
 std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 {
 	os<< "Client message data" << std::endl;

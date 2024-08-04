@@ -129,6 +129,7 @@ class ClientHeader
 		const std::string& getFullMessage(void) const;
 		const int& getErrorCode(void) const;
 		const RequestLine& getRequestLine() const;
+		const std::string& getRequestedUrl() const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 
