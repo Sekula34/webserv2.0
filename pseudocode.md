@@ -106,3 +106,12 @@
 ### INSERT PART
 1. find which Jacobstal index (6)
 1 3 2 5 4 6
+
+
+### SetFilePath(std::& path)
+1. Find Base name of url and location
+2. if(base name == "")
+	1. call setIndexPagePath function
+	2. retrun true or false
+3. construct path from base name + root
+4. return true or false 

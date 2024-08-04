@@ -133,7 +133,7 @@ void UnitTest::_baseNameBlock()
 	_baseNameTestCase("/localhost/bokte/nece/stajeovo/", "/localhost/bokte/nece/", "stajeovo/");
 	_baseNameTestCase("/localhost/bokte/nece/stajeovo", "/localhost/bokte/nece/", "stajeovo");
 	_baseNameTestCase("/html/first/second.html", "/html/first/", "second.html");
-
+	_baseNameTestCase("/", "/", "");
 }
 void UnitTest::_baseNameTestCase(std::string url, std::string serverLocation, std::string expected)
 {

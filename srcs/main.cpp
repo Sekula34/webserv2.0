@@ -60,20 +60,6 @@ void clientMessageTest()
 }
 
 
-// void clientRequestTest()
-// {
-// 	std::string plainValue = ParsingUtils::getHttpPlainValue(" localhost:8080 ");
-// 	//std::cout << "plain value is [" << plainValue <<"]" << std::endl; 
-// 	ClientRequest curlRequest
-// 		("GET / HTTP/1.1\r\n"
-// 		"Host: localhost:8080\r\n"
-// 		"User-Agent: curl/7.XX.X\r\n"
-// 		"Accept: */*\r\n"
-// 		"\r\n");
-// 	std::cout << curlRequest << std::endl;
-// }
-
-
 void socketTest()
 {
 	Socket firstSocket(8080);
