@@ -91,10 +91,13 @@ std::vector<int> ConnectionDispatcher::_getReadyToReadCommunicationFds()
  */
 void ConnectionDispatcher::_setAllServerListenSocketsForRead(void)
 {
+	int epollfd = epoll_create(1);
+	if (epollfd == -1)					
+		exit_me("epoll_create error");
 	std::vector<int> listenFd = _sockets.getAllListenFd();
 	for(size_t i = 0; i < listenFd.size(); i++)
 	{
-		FD_SET(listenFd[i], &_readSetMaster);
+		epoll_add_listen_sock(listenFd[i], epollfd);
 	}
 }
 
@@ -285,9 +288,7 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 void ConnectionDispatcher::mainLoop(void)
 {
 	//only those go in select 
-	FD_ZERO(&_errorSetMaster);
-	FD_ZERO(&_readSetMaster);
-	FD_ZERO(&_writeSetMaster);
+
 	signal(SIGINT, handle_sigint); 
 
 	_setAllServerListenSocketsForRead();
@@ -300,13 +301,8 @@ void ConnectionDispatcher::mainLoop(void)
 			//std::cout << "Ctrl + c pressed" << std::endl;
 			break;
 		}
-		_readSetTemp = _readSetMaster;
-		_writeSetTemp = _writeSetMaster;
-		_errorSetTemp = _errorSetMaster;
 
-		//find maxFD
-		//ADD communication socket here as well
-		int selectMaxFD = _getMaxFd();
+
 		int retVal = select(selectMaxFD + 1, &_readSetTemp, &_writeSetTemp, &_errorSetTemp, &_selectTimeout);
 		if(retVal == -1)
 		{

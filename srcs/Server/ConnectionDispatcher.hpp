@@ -5,6 +5,7 @@
 #include <sys/select.h>
 #include "../Client/ClientHeaderManager.hpp"
 #include "../Response/ClientResponseManager.hpp"
+#include "epoll.hpp"
 
 /**
  * @brief class for handling select creating servers and give them tasks
