@@ -25,6 +25,7 @@ ParsingObjects/%.o: srcs/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 SRCS =		srcs/Client/ClientHeader.cpp \
+			srcs/Client/ClientRequestHeader.cpp\
 			srcs/Client/ClientHeaderManager.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
@@ -47,10 +48,12 @@ SRCS =		srcs/Client/ClientHeader.cpp \
 			srcs/Utils/Logger.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
+			testers/CHTest.cpp\
 			#srcs/main.cpp
 
 
 HEADERS =	srcs/Client/ClientHeader.hpp \
+			srcs/Client/ClientRequestHeader.cpp\
 			srcs/Client/ClientHeaderManager.hpp \
 			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
@@ -73,6 +76,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp \
 			srcs/Utils/Logger.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp \
+			testers/CHTest.hpp\
 			
 
 OBJDIR =	obj
