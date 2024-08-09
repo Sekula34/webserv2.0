@@ -53,8 +53,7 @@ int main(int argc, char **argv)
 	if (connect(sockfd, (SA *) &servaddr, sizeof(servaddr)) < 0)
 		exit_me("connect failed");
 
-	// sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");
-	sprintf(sendline, "");
+	sprintf(sendline, "GET / HTTP/1.1 ... noice\r\n\r\n");
 	sendbytes = strlen(sendline);
 
 	if (write(sockfd, sendline, sendbytes) != sendbytes)

@@ -73,19 +73,16 @@ void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& c
 
 void	clients_remove(std::map<int, Client*> & clients, int client_fd)
 {
-	if (clients.find(client_fd) != clients.end())
-	{
-		clients[client_fd]->setNoWrite();
-		clients.erase(client_fd);
-	}
+	clients[client_fd]->setNoWrite();
+	clients.erase(client_fd);
 }
 
 void	epoll_remove_client(int epollfd, struct epoll_event* events,
 					std::map<int, Client*> & clients, int client_fd)
 {
 	clients_remove(clients, client_fd);
-		epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fd, events);
-		close (client_fd);
+	epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fd, events);
+	close (client_fd);
 }
 
 void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
@@ -96,35 +93,44 @@ void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
 	int			n = 0;
 	int			peek = 0;
 
-	memset(recvline, 0, MAXLINE);
+	if (clients.find(client_fd) == clients.end())
+	{
+		std::cout << "ouuups no client in map for the id: " << client_fd << std::endl;
+		exit (1);
+	}
+	Client * client = clients[client_fd];
 	// if (events[idx].events & EPOLLHUP)
 	// 	std::cout << "*** epoll hang up flag" << std::endl;
 	// if (events[idx].events & EPOLLERR)
 	// 	std::cout << "*** epoll error  flag" << std::endl;
+	memset(recvline, 0, MAXLINE);
 	if (events[idx].events & EPOLLIN)
 		n = recv(client_fd, recvline, MAXLINE - 1, MSG_DONTWAIT);
 	else
+	{
+		if (!client->check_timeout(std::clock()))
+			epoll_remove_client(epollfd, events, clients, client_fd);
 		return ;
-	if (n == 0
-		|| (clients.find(client_fd) != clients.end()
-		&& !clients.find(client_fd)->second->check_timeout(std::clock())))
-		epoll_remove_client(epollfd, events, clients, client_fd);
+	}
 
 	std::cout << "*** return of recv: " << n << std::endl;
 
+	if (n == 0)
+		epoll_remove_client(epollfd, events, clients, client_fd);
+
 	if (n > 0)
 	{
-		clients[client_fd]->addToMessage((char *)recvline);
+		client->addToMessage((char *)recvline);
 		memset(recvline, 0, MAXLINE);
-		if (n == MAXLINE && clients[client_fd]->getMessage().find("\r\n\r\n") == std::string::npos)
+		if (n == MAXLINE && client->getMessage().find("\r\n\r\n") == std::string::npos)
 			peek = recv(client_fd, recvline, MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 	}
 	std::cout << "+++++ FD: "<< events[idx].data.fd << " , FLAG: "<< events[idx].events << std::endl;
 	if (n < 0 || peek < 0)
 		exit_me("read error");
-	if (n <= MAXLINE && clients[client_fd]->getMessage().find("\r\n\r\n") != std::string::npos)
+	if (n <= MAXLINE && client->getMessage().find("\r\n\r\n") != std::string::npos)
 	{
-		std::cout << std::endl << clients[client_fd]->getMessage() << std::endl;
+		std::cout << std::endl << client->getMessage() << std::endl;
 		if (events[idx].events & EPOLLOUT)
 		{
 			write(client_fd, answer.c_str(), answer.size());
@@ -158,6 +164,7 @@ void	run_poll()
 				handle_client(epollfd, events[n].data.fd, events, clients, n);
 		}
 		i++;
+		std::cout << "size of map: " << clients.size() << std::endl;
 	}
 }
 

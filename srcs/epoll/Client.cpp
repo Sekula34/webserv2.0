@@ -6,15 +6,13 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void): _fd(0), _write(true), _start(std::clock())
+Client::Client (void):_id(++client_cntr), _fd(0), _write(true), _start(std::clock())
 {
-	_id = ++client_cntr;
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd): _fd(fd), _write(true), _start(std::clock())
+Client::Client (int const fd):_id(++client_cntr), _fd(fd), _write(true), _start(std::clock())
 {
-	_id = ++client_cntr;
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
@@ -31,9 +29,8 @@ Client::~Client (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-Client::Client(Client const & src): _fd(src._fd), _start(std::clock())
+Client::Client(Client const & src):_id(++client_cntr), _fd(src._fd), _start(std::clock())
 {
-	_id = ++client_cntr;
 	//std::cout << "Client copy constructor called" << std::endl;
 	*this = src;
 }
@@ -86,8 +83,8 @@ int	Client::getFd() const
 
 bool	Client::check_timeout(std::clock_t time) const
 {
-
-	if (double(time - _start) * 1000 / CLOCKS_PER_SEC > MAX_TIMEOUT)
+	double	duration = (double(time - _start) * 1000) / CLOCKS_PER_SEC;
+	if ( duration> MAX_TIMEOUT)
 		return (false);
 	return (true);
 }
