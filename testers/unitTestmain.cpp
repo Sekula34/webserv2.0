@@ -1,6 +1,13 @@
 #include "ServerTest.hpp"
 #include "UnitTest.hpp"
+#include "CHTest.hpp"
 
+
+
+void chTests()
+{
+	CHTest::CHBlockTest();
+}
 
 int main()
 {
@@ -8,6 +15,8 @@ int main()
 	
 	UnitTest::allTests();
 	ServerTest::runAllTests();
+	chTests();
+
 	//UnitTest::testDirBlock();
 	//UnitTest::configTestBlock();
 

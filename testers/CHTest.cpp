@@ -1,0 +1,113 @@
+#include "CHTest.hpp"
+#include <cassert>
+#include "../srcs/Utils/Logger.hpp"
+#include <cstddef>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+
+std::vector<std::pair<std::string, int> > CHTest::messages;
+
+
+
+void CHTest::compare(const ClientRequestHeader& actual, const std::pair<std::string, int>& expected)
+{
+	Logger::testCase("Comparing", ". Expected error code is"); 
+	std::cout << expected.second <<", actual: " << actual.getErrorCode() << std::endl;
+	assert(actual.getFullMessage() == expected.first);
+	assert(actual.getErrorCode() == expected.second);
+}
+
+void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
+{
+	Logger::testCase("Testing simple header", "match other");
+	ClientRequestHeader header(fullMessage);
+	compare(header, expected);
+	_testpassed();
+}
+
+
+
+void CHTest::CHBlockTest()
+{
+	InitVector();
+	for(size_t i = 0; i < messages.size(); i++)
+	{
+		testCHcase(messages[i].first, messages[i]);
+	}
+	_testpassed(true);
+}
+
+
+std::string CHTest::generateValidHttpReques()
+{
+	std::string valid = "GET /path/to/resource HTTP/1.1\r\n \
+	Host: www.example.com\r\n \
+	User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n \
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n \
+	Accept-Encoding: gzip, deflate, br\r\n \
+	Accept-Language: en-US,en;q=0.9\r\n \
+	Connection: keep-alive\r\n \
+	\r\n";
+	return valid;
+}
+
+std::string invalidFirtLineRequest(void)
+{
+	std::string valid = "GET /path/to/resource HTTP/1.1 \
+	Host: www.example.com\r\n \
+	User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n \
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n \
+	Accept-Encoding: gzip, deflate, br\r\n \
+	Accept-Language: en-US,en;q=0.9\r\n \
+	Connection: keep-alive\r\n \
+	\r\n";
+	return valid;
+}
+std::string invalidHttp(void)
+{
+	std::string valid = "GET /path/to/resource HTTP/2\r\n \
+	Host: www.example.com\r\n \
+	User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n \
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n \
+	Accept-Encoding: gzip, deflate, br\r\n \
+	Accept-Language: en-US,en;q=0.9\r\n \
+	Connection: keep-alive\r\n \
+	\r\n";
+	return valid;
+}
+
+std::string unsuportedMethod(void)
+{
+	std::string valid = "PUT /path/to/resource HTTP/1.1\r\n \
+	Host: www.example.com\r\n \
+	User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n \
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n \
+	Accept-Encoding: gzip, deflate, br\r\n \
+	Accept-Language: en-US,en;q=0.9\r\n \
+	Connection: keep-alive\r\n \
+	\r\n";
+	return valid;
+}
+void CHTest::InitVector()
+{
+	std::pair<std::string, int> pair;
+	pair.first = generateValidHttpReques();
+	pair.second = 0;
+	messages.push_back(pair);
+
+	pair.first = invalidFirtLineRequest();
+	pair.second = 400;
+	messages.push_back(pair);
+
+	pair.first = invalidHttp();
+	pair.second = 505;
+	messages.push_back(pair);
+
+	pair.first = unsuportedMethod();
+	pair.second = 405;
+	messages.push_back(pair);
+
+}
