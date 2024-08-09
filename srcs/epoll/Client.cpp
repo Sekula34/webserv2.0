@@ -81,10 +81,10 @@ int	Client::getFd() const
 	return (_fd);
 }
 
-bool	Client::check_timeout(std::clock_t time) const
+bool	Client::check_timeout() const
 {
-	double	duration = (double(time - _start) * 1000) / CLOCKS_PER_SEC;
-	if ( duration> MAX_TIMEOUT)
+	if ( ((static_cast<double>(std::clock() - _start) * 1000)
+		/ CLOCKS_PER_SEC) > MAX_TIMEOUT)
 		return (false);
 	return (true);
 }

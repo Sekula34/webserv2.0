@@ -24,7 +24,7 @@ class Client {
 		std::string			getMessage() const;
 		void				addToMessage(char* buffer);
 		void				setNoWrite();
-		bool				check_timeout(std::clock_t time) const;
+		bool				check_timeout() const;
 
 							//Client specific functions
 

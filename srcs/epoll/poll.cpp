@@ -74,6 +74,7 @@ void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& c
 void	clients_remove(std::map<int, Client*> & clients, int client_fd)
 {
 	clients[client_fd]->setNoWrite();
+
 	clients.erase(client_fd);
 }
 
@@ -95,7 +96,7 @@ void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
 
 	if (clients.find(client_fd) == clients.end())
 	{
-		std::cout << "ouuups no client in map for the id: " << client_fd << std::endl;
+		std::cout << "ouuups no client in map for the fd: " << client_fd << std::endl;
 		exit (1);
 	}
 	Client * client = clients[client_fd];
@@ -108,7 +109,7 @@ void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
 		n = recv(client_fd, recvline, MAXLINE - 1, MSG_DONTWAIT);
 	else
 	{
-		if (!client->check_timeout(std::clock()))
+		if (!client->check_timeout())
 			epoll_remove_client(epollfd, events, clients, client_fd);
 		return ;
 	}
@@ -135,6 +136,7 @@ void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
 		{
 			write(client_fd, answer.c_str(), answer.size());
 			epoll_remove_client(epollfd, events, clients, client_fd);
+			delete client;
 		}
 	}
 }
