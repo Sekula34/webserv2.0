@@ -57,7 +57,6 @@ bool ClientHeader::_setRequestLine(void)
 		Logger::warning("Cannot find CRLF in clientHeader", true);
 		_errorCode = 400;
 		return false;
-		//throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	firstLine = _message.substr(0,firstLineEnd);
 	_requestLine = firstLine;
@@ -72,7 +71,6 @@ bool ClientHeader::_fillRequestStruct(void)
 		Logger::warning("there is no 3 elements in _requestLine", true);
 		_errorCode = 400;
 		return false;
-		//throw InvalidClientRequestException(400, "BAD REQUEST");
 	}
 	_requestLineElements.requestMethod = firstLineStrings[0];
 	_requestLineElements.requestTarget = firstLineStrings[1];
@@ -89,19 +87,12 @@ bool ClientHeader::_checkRequestStruct(void)
 		Logger::warning("Not valid method found: ", false); std::cerr << _requestLineElements.requestMethod << std::endl;
 		_errorCode = 405;
 		return false;
-		//TODO:
-		//Implement later to give this response to client since server
-		//only implements those 3 methods
-		//throw InvalidClientRequestException(405, "METHOD NOT ALLOWED");
 	}
 	if(_requestLineElements.protocolVersion != "HTTP/1.1")
 	{
 		Logger::warning("Not valid protocol", true);
 		_errorCode = 505;
 		return false;
-		//TODO:
-		//Implement later to give this response to client
-		//throw InvalidClientRequestException(505, "HTTP Version Not Supported");
 	}
 	return true;
 }
@@ -115,7 +106,6 @@ bool ClientHeader::_setHost(void)
 		Logger::warning("Invalid header", true);
 		_errorCode = 400;
 		return false;
-		//throw InvalidClientRequestException(400, "Bad Request");
 	}
 	size_t endHos = _message.find("\r\n", hosPos);
 	if(endHos == std::string::npos)
@@ -123,7 +113,6 @@ bool ClientHeader::_setHost(void)
 		Logger::warning("Invalid header end of host", true);
 		_errorCode = 400;
 		return false;
-		//throw InvalidClientRequestException(400, "Bad Request");
 	}
 	HostLine = _message.substr(hosPos, endHos - hosPos);
 	std::string plainHost = ParsingUtils::getHttpPlainValue(HostLine.substr(HostLine.find(':') + 1));
@@ -142,7 +131,6 @@ bool ClientHeader::_setHost(void)
 		Logger::warning("Found more than one port", true);
 		_errorCode = 400;
 		return false;
-		//throw InvalidClientRequestException(400, "Bad Request");
 	}
 	return true;
 }
