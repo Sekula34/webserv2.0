@@ -12,6 +12,10 @@ class CHTest : UnitTest
 	public:
 		static std::vector<std::pair<std::string, int> >messages;
 
+
+		static void runAllTests();
+		static void copyTest(const std::string fullMessage);
+		static void copyTestBlock();
 		static void InitVector();
 		static void testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected);
 		static void CHBlockTest();
