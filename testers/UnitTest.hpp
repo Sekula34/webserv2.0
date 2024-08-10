@@ -15,6 +15,8 @@ class UnitTest
 		static void _testpassed(bool block = false);
 		static const std::string _constFileFolder;
 	public:
+		static void stringEndCheck();
+		static void stringDelimCheck();
 		static void allTests();
 		static void configSyntaxBlock();
 		static void configNumberOfServersBlock();

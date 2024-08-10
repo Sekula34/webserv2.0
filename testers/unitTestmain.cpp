@@ -6,7 +6,7 @@
 
 void chTests()
 {
-	CHTest::CHBlockTest();
+	CHTest::runAllTests();
 }
 
 int main()
@@ -15,7 +15,11 @@ int main()
 	
 	UnitTest::allTests();
 	ServerTest::runAllTests();
-	chTests();
+	CHTest::runAllTests();
+	//UnitTest::stringEndCheck();
+	//UnitTest::stringDelimCheck();
+	
+	//chTests();
 
 	//UnitTest::testDirBlock();
 	//UnitTest::configTestBlock();
