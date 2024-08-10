@@ -36,7 +36,6 @@ class ClientRequestHeader
 		ClientRequestHeader& operator=(const ClientRequestHeader& source);
 		~ClientRequestHeader();
 
-		bool _setCHVarivables();
 
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
@@ -53,6 +52,9 @@ class ClientRequestHeader
 		RequestLine _requestLineElements;
 		Host _host;
 
+
+		void _constructFunction();
+		bool _setCHVarivables();
 
 		void _initAllVars(void);
 		/**

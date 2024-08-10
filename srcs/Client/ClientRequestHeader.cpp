@@ -4,16 +4,15 @@
 #include "../Parsing/ParsingUtils.hpp"
 
 ClientRequestHeader::ClientRequestHeader(const std::string message)
-:_message(message)
+:_message(ParsingUtils::extractUntilDelim(message, "\r\n\r\n"))
 {
-	_initAllVars();
-	_setCHVarivables();
+	_constructFunction();
 }
 
 ClientRequestHeader::ClientRequestHeader(const ClientRequestHeader& source)
 :_message(source._message)
 {
-	
+	_constructFunction();
 }
 
 ClientRequestHeader& ClientRequestHeader::operator=(const ClientRequestHeader& source)
@@ -88,6 +87,15 @@ const std::string& ClientRequestHeader::getRequestedUrl(void) const
 	return line.requestTarget;
 }
 
+
+void ClientRequestHeader::_constructFunction()
+{
+	if(_message == "")
+		Logger::warning("Tried to create ClientRequest header with string that does not contain CRLFCRLF",true);
+	_initAllVars();
+	_setCHVarivables();
+}
+
 bool ClientRequestHeader::_setRequestLine(void) 
 {
 	std::string firstLine;
@@ -137,6 +145,7 @@ bool ClientRequestHeader::_checkRequestStruct(void)
 	}
 	return true;
 }
+
 
 bool ClientRequestHeader::_setHost(void)
 {
