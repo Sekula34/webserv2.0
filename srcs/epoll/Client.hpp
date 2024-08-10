@@ -12,7 +12,7 @@ class Client {
 		static int			client_cntr;
 		
 							// canonical
-							Client (int fd);
+							Client (int const fd, int const epollfd);
 							~Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);
@@ -22,18 +22,22 @@ class Client {
 		int					getFd() const;
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
-		void				addToMessage(char* buffer);
+		uint8_t*			getRecvLine() const;
+		int					getEpollFd() const;
+		void				addRecvLineToMessage();
 		void				setNoWrite();
 		bool				check_timeout() const;
 
 							//Client specific functions
 
 	private:
-		unsigned long		_id;
+		unsigned long const	_id;
 		int const			_fd;
+		std::clock_t const	_start;
+		int const			_epollfd;
 		int					_write;
 		std::string			_message;
-		std::clock_t const	_start;
+		uint8_t*			_recvline;
 							Client(void);
 };
 
