@@ -58,7 +58,7 @@ int	init_socket()
 }
 
 // CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
-// ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE CLIENT INSTANCE POINTER
+// ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER
 void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& clients)
 {
 	struct epoll_event	ev;
@@ -78,8 +78,9 @@ void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& c
 	// OR CLIENT HAS CLOSED THE CONNECTION BEFORE A WRITE COULD HAPPEN
 	// IN THAT CASE THE  CLIENT INSTANCE NEEDS TO FINISH ITS JOB
 	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
+	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
 	if (clients.find(client_fd) != clients.end())
-		clients[client_fd]->setNoWrite();
+		clients[client_fd]->setWriteClient(false);
 	clients[client_fd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
@@ -92,7 +93,7 @@ void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& c
 void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client)
 {
 	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
-	clients[client->getFd()]->setNoWrite();
+	clients[client->getFd()]->setWriteClient(false);
 	
 	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 	clients.erase(client->getFd());
@@ -109,75 +110,104 @@ Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients)
 	std::map<int, Client*>::iterator it = clients.find(client_fd);
 	if (it == clients.end())
 	{
-		std::cout << "ouuups no client with fd: " << client_fd
+		std::cout << "no client with fd: " << client_fd
 			<< " can be found in clients map! FATAL ERROR!"<< std::endl;
 		exit (EXIT_FAILURE);
 	}
 	return (it->second);
 }
 
-bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int* n, int idx)
+bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx)
 {
 
 	if (events[idx].events & EPOLLIN)
-		*n = recv(client->getFd(), client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
-	else
 	{
-		if (!client->check_timeout())
-			epoll_remove_client(events, clients, client);
-		return (false);
+		n = recv(client->getFd(), client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		return (true);
 	}
-	return (true);
+	if (!client->check_timeout())
+	{
+		epoll_remove_client(events, clients, client);
+		delete client;
+	}
+	return (false);
 }
 
-void	handle_client(int epollfd, int client_fd, struct epoll_event* events,
-				   std::map<int, Client *> & clients, int idx)
+bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
 {
-	std::string	answer = "HTTP/1.0 200 OK\r\n\r\nWebserv 0.0";
 	int			n = 0;
 	int			peek = 0;
 
-
-	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
-	Client * client = find_client_in_clients(client_fd, clients);
+	// ON CONSTRUCTION READHEAD IS TRUE AND IS SET TO FALSE WHEN HEADER COMPLETELY READ
+	if (!client->getReadHeader())
+		return (true);
 
 	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
 	// ALSO REMOVES CLIENT ON TIMEOUT
-	if (!read_client(events, clients, client, &n, idx))
-		return ;
-
-	// CLIENT HAS CLOSED CONNECTION, WE REMOVE CLIENT FROM CLIENTS AND FROM EPOLL
-	// RIGHT NOW MEMORY LEAK!!!
-	if (n == 0)
-		epoll_remove_client(events, clients, client);
+	if (!read_client(events, clients, client, n, idx))
+		return (false);
 
 	// SUCCESSFUL RECIEVE -> ADDING BUFFER FILLED BY RECIEVE TO THE MESSAGE STRING
 	if (n > 0)
 	{
 		client->addRecvLineToMessage();
 		if (n == MAXLINE && client->getMessage().find("\r\n\r\n") == std::string::npos)
-			peek = recv(client_fd, client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
+			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 	}
 
-	// UNSUCCESSFUL RECIEVE -> REMOVE CLIENT FROM CLIENTS AND EPOLL. LOG ERR MSG
-	// RIGHT NOW MEMORY LEAK!!!
-	if (n < 0 || peek < 0)
+	// UNSUCCESSFUL RECIEVE AND INCOMPLETE HEADER 
+	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
+	if (n <= 0 || peek < 0)
 	{
 		epoll_remove_client(events, clients, client);
+		delete client;
 		std::cout << "error: recieve" << std::endl;
+		return (false);
 	}
 
+	// IF END OF HEADER DETECTED IN MESSAGE -> SET READHEADER FLAG TO FALSE
 	if (n <= MAXLINE && client->getMessage().find("\r\n\r\n") != std::string::npos)
 	{
-		if (events[idx].events & EPOLLOUT)
-		{
-			std::cout << std::endl << client->getMessage() << std::endl;
-			write(client_fd, answer.c_str(), answer.size());
-			epoll_remove_client(events, clients, client);
-			delete client;
-		}
+		client->setReadHeader(false);
+		client->setWriteClient(true);
+	}
+	return (true);
+}
+
+void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
+{
+	std::string	answer = "HTTP/1.1 200 OK\r\n\r\nWebserv 0.0\n";
+
+	if (events[idx].events & EPOLLOUT)
+	{
+		std::cout << std::endl << client->getMessage() << std::endl;
+		write(client->getFd(), answer.c_str(), answer.size());
+		epoll_remove_client(events, clients, client);
+		delete client;
 	}
 }
+
+
+void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx)
+{
+
+	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
+	Client* client = find_client_in_clients(events[idx].data.fd, clients);
+
+	// READ_HEADER RETURNS FALSE WHEN ERR IN READ AND CLIENT IS DELETED
+	if (!read_header(events, clients, client, idx))
+		return ;
+
+	// PROCESS HEADER
+	// READ BODY
+	// PROCESS BODY
+	// PROCESS ANSWER
+
+	// WRITE PROCESSED ANSWER TO CLIENT
+	if (client->getWriteClient())
+		write_client(events, clients, client, idx);
+}
+
 void	run_poll()
 {
 	struct epoll_event	events[MAX_EVENTS];
@@ -195,14 +225,13 @@ void	run_poll()
 		if (nfds == -1)
 			exit_me("epoll_wait error");
 	
-		for (int n = 0; n < nfds; ++n)
+		for (int idx = 0; idx < nfds; ++idx)
 		{
-			if (events[n].data.fd == listen_socket)
+			if (events[idx].data.fd == listen_socket)
 				epoll_add_client(epollfd, listen_socket, clients);
 			else
-				handle_client(epollfd, events[n].data.fd, events, clients, n);
+				handle_client(events, clients, idx);
 		}
-		std::cout << "size of map: " << clients.size() << std::endl;
 	}
 }
 

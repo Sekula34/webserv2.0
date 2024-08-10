@@ -24,20 +24,27 @@ class Client {
 		std::string			getMessage() const;
 		uint8_t*			getRecvLine() const;
 		int					getEpollFd() const;
-		void				addRecvLineToMessage();
-		void				setNoWrite();
-		bool				check_timeout() const;
+		bool				getReadHeader() const;
+		bool				getReadBody() const;
+		bool				getWriteClient() const;
+		void				setReadHeader(bool b);
+		void				setReadBody(bool b);
+		void				setWriteClient(bool b);
 
 							//Client specific functions
+		void				addRecvLineToMessage();
+		bool				check_timeout() const;
 
 	private:
 		unsigned long const	_id;
 		int const			_fd;
 		std::clock_t const	_start;
 		int const			_epollfd;
-		int					_write;
 		std::string			_message;
 		uint8_t*			_recvline;
+		bool				_readheader;
+		bool				_readbody;
+		bool				_writeclient;
 							Client(void);
 };
 

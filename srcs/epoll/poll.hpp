@@ -18,6 +18,7 @@
 #include <string>
 #include "Client.hpp"
 
+
 #define SERVER_PORT		18000
 // #define MAXLINE			4096
 // #define MAXLINE			493
@@ -29,10 +30,16 @@
 
 #define SA struct sockaddr
 
+class Client;
+
+Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
+bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int* n, int idx);
+bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& clients);
+void	exit_me(std::string s);
+void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client);
+void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+void	run_poll();
 int		init_epoll(int listen_sock);
 int		init_socket();
-void	exit_me(std::string s);
-void	epoll_add_client(int epollfd, int listen_socket);
-void	handle_client(int epollfd, int connfd, struct epoll_event* events,
-				   std::map<int, std::string> & messages, int idx);
-void	run_poll();

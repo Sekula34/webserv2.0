@@ -6,18 +6,24 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0), _write(true)
+Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0) 
 {
+	_readheader = true;
+	_readbody = false;
+	_writeclient = false;
 	_recvline = new uint8_t[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _start(std::clock()), _epollfd(epollfd), _write(true)
+Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _start(std::clock()), _epollfd(epollfd)
 {
+	_readheader = true;
+	_readbody = false;
+	_writeclient = false;
 	_recvline = new uint8_t[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
-	// std::cout << "Client default constructor called" << std::endl;
+	std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
 
 /******************************************************************************/
@@ -26,8 +32,8 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 
 Client::~Client (void)
 {
-	delete _recvline;
-	// std::cout << "Client destructor called" << std::endl;
+	delete [] _recvline;
+	std::cout << "Client with ID: " << _id <<  " destructed" << std::endl;
 }
 
 /******************************************************************************/
@@ -51,7 +57,9 @@ Client &	Client::operator=(Client const & rhs)
 	//std::cout << "Client Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
-		_write = rhs._write;
+		_readheader = rhs._readheader;
+		_readbody = rhs._readbody;
+		_writeclient = rhs._writeclient;
 	}
 	return (*this);
 }
@@ -89,10 +97,34 @@ int	Client::getEpollFd() const
 {
 	return (_epollfd);
 }
-
-void		Client::setNoWrite()
+bool	Client::getReadHeader() const
 {
-	_write = false;
+	return (_readheader);
+}
+
+bool	Client::getReadBody() const
+{
+	return (_readbody);
+}
+
+bool	Client::getWriteClient() const
+{
+	return (_writeclient);
+}
+
+void	Client::setReadHeader(bool b)
+{
+	_readheader = b;
+}
+
+void	Client::setReadBody(bool b)
+{
+	_readbody = b;
+}
+
+void	Client::setWriteClient(bool b)
+{
+	_writeclient = b;
 }
 
 /******************************************************************************/
