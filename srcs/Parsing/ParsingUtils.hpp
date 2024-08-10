@@ -63,6 +63,16 @@ class ParsingUtils
 		static bool isStringNumber(std::string toCheck);
 		static std::string getBaseName(const std::string& fullUrl, const std::string& ServerLocationString);
 		static size_t stringToSizeT(std::string string);
+		static bool isStringEnd(const std::string toCheck, const std::string expectedEnd);
+		/**
+		 * @brief return substring from 0 till delimiter is found example for header till /r/n/r/n is found
+		 * 
+		 * @param fullString 
+		 * @param delimiter 
+		 * @return std::string 
+		 */
+		static std::string extractUntilDelim(const std::string fullString, const std::string delimiter);
+
 		/**
 		 * @brief Get the Dir Name dir name. Dir name of /hej/filip2/donot.txt
 		 *  is /hej/filip2/
