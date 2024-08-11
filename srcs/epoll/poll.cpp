@@ -1,6 +1,6 @@
 # include "poll.hpp"
 
-// FAKE EXIT FUNCTION, NEEDS TO BE REPLACED BY REAL ONE
+/* FAKE EXIT FUNCTION, NEEDS TO BE REPLACED BY REAL ONE */
 void	exit_me(std::string s)
 {
 	std::cout << s << std::endl;
@@ -27,7 +27,7 @@ int	init_epoll(int listen_sock)
 	return (epollfd);
 }
 
-// CREATE LISTEN SOCKET, BIND IT AND LISTEN TO IT
+/* CREATE LISTEN SOCKET, BIND IT AND LISTEN TO IT */
 int	init_socket()
 {
 	struct sockaddr_in	servaddr;
@@ -57,8 +57,8 @@ int	init_socket()
 	return (listen_socket);
 }
 
-// CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
-// ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER
+/* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
+ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER */
 void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& clients)
 {
 	struct epoll_event	ev;
@@ -73,9 +73,7 @@ void	epoll_add_client(int epollfd, int listen_socket, std::map<int, Client *>& c
 	Client * newClient = new Client(client_fd, epollfd);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
-	// USUALLY THE MAP SHOULD NOT CONTAIN A KEY VALUE THAT
-	// EQUALS CLIENT FD. THIS CAN ONLY HAPPEN WHEN THERE IS A READ ERROR
-	// OR CLIENT HAS CLOSED THE CONNECTION BEFORE A WRITE COULD HAPPEN
+	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.
 	// IN THAT CASE THE  CLIENT INSTANCE NEEDS TO FINISH ITS JOB
 	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
 	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
@@ -168,6 +166,7 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 	// IF END OF HEADER DETECTED IN MESSAGE -> SET READHEADER FLAG TO FALSE
 	if (n <= MAXLINE && client->getMessage().find("\r\n\r\n") != std::string::npos)
 	{
+		std::cout << std::endl << client->getMessage() << std::endl;
 		client->setReadHeader(false);
 		client->setWriteClient(true);
 	}
@@ -180,7 +179,6 @@ void	write_client(struct epoll_event* events, std::map<int, Client *> & clients,
 
 	if (events[idx].events & EPOLLOUT)
 	{
-		std::cout << std::endl << client->getMessage() << std::endl;
 		write(client->getFd(), answer.c_str(), answer.size());
 		epoll_remove_client(events, clients, client);
 		delete client;
@@ -194,7 +192,7 @@ void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients
 	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
 	Client* client = find_client_in_clients(events[idx].data.fd, clients);
 
-	// READ_HEADER RETURNS FALSE WHEN ERR IN READ AND CLIENT IS DELETED
+	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
 	if (!read_header(events, clients, client, idx))
 		return ;
 

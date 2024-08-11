@@ -26,7 +26,7 @@
 #define MAX_EVENTS		10
 #define MAX_LISTEN		10
 #define MAX_WAIT		-1 // -1 will block forever, 0 not at all and rest is ms
-#define MAX_TIMEOUT		1000
+#define MAX_TIMEOUT		10000
 
 #define SA struct sockaddr
 
