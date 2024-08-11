@@ -11,8 +11,6 @@
 #include <iostream>
 #include <csignal>
 #include <fcntl.h>
-#include <algorithm>
-#include "../Response/Response.hpp"
 //#include "../Response/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
 
@@ -122,7 +120,7 @@ Client* ConnectionDispatcher::find_client_in_clients(int client_fd, std::map<int
 	{
 		std::cout << "no client with fd: " << client_fd
 			<< " can be found in clients map! FATAL ERROR!"<< std::endl;
-		exit (EXIT_FAILURE);
+		throw std::runtime_error("error in find_client_in_clients function");
 	}
 	return (it->second);
 }
@@ -266,93 +264,93 @@ void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 	}
 }
 
-void ConnectionDispatcher::_clientFdCheck(int communicationFd)
-{
-	std::vector<int>::iterator it = std::find(_communicationFds.begin(), _communicationFds.end(), communicationFd);
-	if(it != _communicationFds.end())
-	{
-		_clientHeaders.removeClient(communicationFd);
-		_communicationFds.erase(it);
-	}
-}
+// void ConnectionDispatcher::_clientFdCheck(int communicationFd)
+// {
+// 	std::vector<int>::iterator it = std::find(_communicationFds.begin(), _communicationFds.end(), communicationFd);
+// 	if(it != _communicationFds.end())
+// 	{
+// 		_clientHeaders.removeClient(communicationFd);
+// 		_communicationFds.erase(it);
+// 	}
+// }
 
-void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySockets)
-{
-	if(readySockets.empty() == true)
-	{
-		std::cerr<< "No ReadySockets to handle" << std::endl;
-		return;
-	}
-	for(size_t i =0; i < readySockets.size(); i++)
-	{
-		Socket& ready = readySockets[i];
-		Logger::info("Ready socket is ");
-		//std::cout << "Ready socket is " << std::endl;
-		std::cout << ready << std::endl;
-		int communicationSocket = ready.getCommunicationSocket();
-		//check if communication socket already exist in vector, if 
-		//it exist that means that client closed connection and i should removed that client first
-		_clientFdCheck(communicationSocket); 
-		_communicationFds.push_back(communicationSocket);
-		FD_SET(communicationSocket, &_readSetMaster);
-		//std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
-	}
-}
-
-
-
-void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
-{
-	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
-	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
-	const ServerSettings& serverRef = _serversInfo.getServerByPort(header.getHostPort(), header.getHostName());
-
-	Response respones(header, serverRef);
-	Logger::info("Created Response with client header and serverRef", true);
-	respones.sendResponse();
-}
-
-void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
-(std::vector<int>& readReadyClientFds)
-{
-	if(readReadyClientFds.empty() == true)
-	{
-		std::cout << "0 Ready clients to read" << std::endl;
-		return;
-	}
-	for(size_t i = 0; i < readReadyClientFds.size(); i++)
-	{
-		//procitaj fd i spremi ga u request
-		//ocitaj host i nadi odgovarajuci server 
-		//pospremi Serve i commmunication socket u klasu il negdje
-		//makni taj communication iz readReady i metni ga u write ready
+// void ConnectionDispatcher::_handleAllReadySockets(std::vector<Socket>& readySockets)
+// {
+// 	if(readySockets.empty() == true)
+// 	{
+// 		std::cerr<< "No ReadySockets to handle" << std::endl;
+// 		return;
+// 	}
+// 	for(size_t i =0; i < readySockets.size(); i++)
+// 	{
+// 		Socket& ready = readySockets[i];
+// 		Logger::info("Ready socket is ");
+// 		//std::cout << "Ready socket is " << std::endl;
+// 		std::cout << ready << std::endl;
+// 		int communicationSocket = ready.getCommunicationSocket();
+// 		//check if communication socket already exist in vector, if 
+// 		//it exist that means that client closed connection and i should removed that client first
+// 		_clientFdCheck(communicationSocket); 
+// 		_communicationFds.push_back(communicationSocket);
+// 		FD_SET(communicationSocket, &_readSetMaster);
+// 		//std::cout << "put fd: " << communicationSocket << " in set for reading" << std::endl;
+// 	}
+// }
 
 
-		int communicationSocket = readReadyClientFds[i];
-		//TO DO. Maybe should try catch _clientHeader readClientHeader
-		//cath INVALID HEADER EXCEPTION AND GENERATE ERROR RESPONSE
-		ReadStatus status =  _clientHeaders.readClientHeader(communicationSocket);
-		if(status == ERROR)
-		{
-			std::cout << "ERROR while reading. CLIENT CLOSED connection OR ERRRO" << std::endl;
-			_removeClient(communicationSocket);
-		}
-		if(status == DONE)
-		{
-			Logger::info("Fully read client with fd: "); std::cout << communicationSocket << std::endl;
-			_generateClientResponse(communicationSocket);
-			//generate response 
-			//save response to vector
-			//add fd to ready to write
-			//
-			FD_CLR(communicationSocket, &_readSetMaster);
-		}
-		std::cout << "FERTIG" << std::endl;
-		_removeClient(communicationSocket);
-		//close(communicationSocket);
-	}
 
-}
+// void ConnectionDispatcher::_generateClientResponse(int communictaionFD)
+// {
+// 	ClientHeader& header(_clientHeaders.getClientHeader(communictaionFD));
+// 	Logger::info("error code is :"); std::cout << header.getErrorCode() << std::endl;
+// 	const ServerSettings& serverRef = _serversInfo.getServerByPort(header.getHostPort(), header.getHostName());
+
+// 	Response respones(header, serverRef);
+// 	Logger::info("Created Response with client header and serverRef", true);
+// 	respones.sendResponse();
+// }
+
+// void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
+// (std::vector<int>& readReadyClientFds)
+// {
+// 	if(readReadyClientFds.empty() == true)
+// 	{
+// 		std::cout << "0 Ready clients to read" << std::endl;
+// 		return;
+// 	}
+// 	for(size_t i = 0; i < readReadyClientFds.size(); i++)
+// 	{
+// 		//procitaj fd i spremi ga u request
+// 		//ocitaj host i nadi odgovarajuci server 
+// 		//pospremi Serve i commmunication socket u klasu il negdje
+// 		//makni taj communication iz readReady i metni ga u write ready
+
+
+// 		int communicationSocket = readReadyClientFds[i];
+// 		//TO DO. Maybe should try catch _clientHeader readClientHeader
+// 		//cath INVALID HEADER EXCEPTION AND GENERATE ERROR RESPONSE
+// 		ReadStatus status =  _clientHeaders.readClientHeader(communicationSocket);
+// 		if(status == ERROR)
+// 		{
+// 			std::cout << "ERROR while reading. CLIENT CLOSED connection OR ERRRO" << std::endl;
+// 			_removeClient(communicationSocket);
+// 		}
+// 		if(status == DONE)
+// 		{
+// 			Logger::info("Fully read client with fd: "); std::cout << communicationSocket << std::endl;
+// 			_generateClientResponse(communicationSocket);
+// 			//generate response 
+// 			//save response to vector
+// 			//add fd to ready to write
+// 			//
+// 			FD_CLR(communicationSocket, &_readSetMaster);
+// 		}
+// 		std::cout << "FERTIG" << std::endl;
+// 		_removeClient(communicationSocket);
+// 		//close(communicationSocket);
+// 	}
+
+// }
 
 /*
 	findwhichfd is ready
@@ -362,24 +360,24 @@ void ConnectionDispatcher::_handleAllReadyToReadCommunicationFds
 		//store it somewhere
 		//set it to readFDMaseter
 */
-void ConnectionDispatcher::_handleReadyFd(void)
-{
+// void ConnectionDispatcher::_handleReadyFd(void)
+// {
 	
-	//how i can now that ther is nothing to be read form socket fd
+// 	//how i can now that ther is nothing to be read form socket fd
 
-	std::vector<Socket> readySockets = _getAllReadyToReadSockets();
-	if(readySockets.size() != 0)
-	{
-		_handleAllReadySockets(readySockets);
-		//handle all Sockets;
-	}
-	std::vector<int> readyReadClientFd = _getReadyToReadCommunicationFds();
-	if(readyReadClientFd.size() != 0)
-	{
-		_handleAllReadyToReadCommunicationFds(readyReadClientFd);
-		//ParsingUtils::printVector(readyReadClientFd);
-	}
-}
+// 	std::vector<Socket> readySockets = _getAllReadyToReadSockets();
+// 	if(readySockets.size() != 0)
+// 	{
+// 		_handleAllReadySockets(readySockets);
+// 		//handle all Sockets;
+// 	}
+// 	std::vector<int> readyReadClientFd = _getReadyToReadCommunicationFds();
+// 	if(readyReadClientFd.size() != 0)
+// 	{
+// 		_handleAllReadyToReadCommunicationFds(readyReadClientFd);
+// 		//ParsingUtils::printVector(readyReadClientFd);
+// 	}
+// }
 
 int ConnectionDispatcher::_getMaxFd(void) const 
 {
@@ -409,20 +407,20 @@ void ConnectionDispatcher::_closeAllClients(void)
 	// }
 }
 
-void ConnectionDispatcher::_removeClient(int clientFd)
-{
-	std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-			_communicationFds.end(), clientFd);
-	_clientHeaders.removeClient(clientFd);
-	if(it != _communicationFds.end())
-	{
-		_communicationFds.erase(it);
-	}
-	FD_CLR(clientFd, &_readSetMaster);
-	FD_CLR(clientFd, &_writeSetMaster);
-	FD_CLR(clientFd, &_errorSetMaster);
-	close(clientFd);
-}
+// void ConnectionDispatcher::_removeClient(int clientFd)
+// {
+// 	std::vector<int>::iterator it = std::find(_communicationFds.begin(),
+// 			_communicationFds.end(), clientFd);
+// 	_clientHeaders.removeClient(clientFd);
+// 	if(it != _communicationFds.end())
+// 	{
+// 		_communicationFds.erase(it);
+// 	}
+// 	FD_CLR(clientFd, &_readSetMaster);
+// 	FD_CLR(clientFd, &_writeSetMaster);
+// 	FD_CLR(clientFd, &_errorSetMaster);
+// 	close(clientFd);
+// }
 
 void ConnectionDispatcher::_notStuckMessage(void) const
 {
@@ -526,7 +524,7 @@ void ConnectionDispatcher::mainLoop(void)
 		}
 		else 
 		{
-			_handleReadyFd();
+			//_handleReadyFd();
 			// std::vector<int> toREad = _sockets.getAllListenFd();
 			// void *buffer[1024];
 			// read(toREad[0], buffer, 1024);
