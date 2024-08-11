@@ -1,7 +1,4 @@
 #include "./Parsing/ServersInfo.hpp"
-#include "Client/ClientHeader.hpp"
-#include "Client/ClientHeaderManager.hpp"
-#include "Response/ResponseBody.hpp"
 #include "Parsing/ParsingUtils.hpp"
 #include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
@@ -9,7 +6,6 @@
 #include "Server/SocketManager.hpp"
 #include "Utils/Logger.hpp"
 #include "Utils/HttpStatusCode.hpp"
-#include "Response/Response.hpp"
 
 #include <exception>
 #include <iostream>
@@ -23,41 +19,9 @@
 
 
 
-void ClientHeaderManagerTester()
-{
-	Socket mySocket(8080);
-	ClientHeaderManager cm;
-	std::cout << "Created ClientHeaderManager " << std::endl;
-	int fd = mySocket.getCommunicationSocket();
-	//int readfd(4);
-	//cm.createNewClientHeader(fd);
-	//ClientHeader header(fd);
-	//ClientHeader& header = cm.getClientHeader(3);
-	ReadStatus status = cm.readClientHeader(fd);
-	std::cout <<"Status is " << status << std::endl;
-	cm.readClientHeader(fd);
-	//cm.readClientHeader(fd);
-	//std::cout <<"Status is " << status << std::endl;
 
-}
 
-void clientMessageTest()
-{
-	Socket mySocket(8080);
-	int clientFD = mySocket.getCommunicationSocket();
-	ClientHeader message(clientFD);
-	//std::cout << message << std::endl;
-	ReadStatus status = message.readOnce();
-	std::cout << status << std::endl;
-	//status = message.readOnce();
-	std::cout << status << std::endl;
-	message.setCHVarivables();
-	//message.readOnce();
-	//message.readOnce();
-	std::cout << message << std::endl;
-	close(clientFD);
-	close(mySocket.getSocketFd());
-}
+
 
 
 void socketTest()
@@ -161,19 +125,6 @@ void errorMapTester()
 	std::cout << "Reason phrase behind " << code << " is " << reasonMessage << std::endl;
 }
 
-void ResponseTest()
-{
-	ServersInfo info;
-	ServerSettings server = info.getServerById(1);
-	Socket socket(7070);
-	int clientFD = socket.getCommunicationSocket();
-	ClientHeader header(clientFD);
-	header.readOnce();
-	Response response(header, server);
-	response.sendSimpleResponse();
-	close(clientFD);
-	close(socket.getSocketFd());
-}
 
 void responseHeaderTest(int status)
 {
@@ -183,20 +134,7 @@ void responseHeaderTest(int status)
 	//std::cout << header << std::endl;
 }
 
-void responseBodyTest()
-{
-	Socket socket(8080);
-	int clientFD = socket.getCommunicationSocket();
-	ClientHeader header(clientFD);
-	ServersInfo info;
-	ServerSettings server = info.getServerById(1);
-	header.readOnce();
-	header.setCHVarivables();
-	
-	ResponseBody body(header, server);
-	std::cout << "Response body is " << body.getResponse() << std::endl;
 
-}
 
 void toStringtest()
 {
