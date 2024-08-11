@@ -61,7 +61,7 @@ class ClientHeaderManager
 		 * DONE if clientFD is moved from unread to read, that means you have client header that you can further process
 		 * CONTINUE - client FD is not fully read in this iteration
 		 */
-		ReadStatus readClientHeader(int& clientFD);
+		//ReadStatus readClientHeader(int& clientFD);
 
 
 		class ClientHeaderNotFound : public std::exception
