@@ -7,15 +7,10 @@ void	exit_me(std::string s)
 	exit (EXIT_FAILURE);
 }
 
-int	init_epoll(int listen_sock)
+void	epoll_add_listen_sock(int listen_sock)
 {
 	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
 	struct epoll_event	ev; 
-
-	// CREATING EPOLL
-	int epollfd = epoll_create(1);
-	if (epollfd == -1)					
-		exit_me("epoll_create error");
 
 	// SETTING UP EV EVENTS 'SETTINGS' STRUCT FOR LISTEN_SOCKET
 	ev.events = EPOLLIN | EPOLLOUT;				
@@ -24,7 +19,6 @@ int	init_epoll(int listen_sock)
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, listen_sock, &ev) == -1) 
 		exit_me("epoll_ctl_add - listen socket error");
-	return (epollfd);
 }
 
 /* CREATE LISTEN SOCKET, BIND IT AND LISTEN TO IT */
@@ -211,6 +205,7 @@ void	run_poll()
 {
 	struct epoll_event	events[MAX_EVENTS];
 	std::map<int, Client *>	clients;
+
 	int	listen_socket;
 	int	nfds;
 	int	epollfd;
