@@ -26,7 +26,21 @@ void UnitTest::_testpassed(bool block)
 	
 }
 
+void UnitTest::stringEndCheck()
+{
+	Logger::testCase("Testing is string end function", "");
+	bool result = ParsingUtils::isStringEnd("hej\r\n\r\n", "\r\n\r\n");
+	assert(result == true);
+	_testpassed();
+}
 
+void UnitTest::stringDelimCheck()
+{
+	Logger::testCase("Extract testing ", "");
+	std::string hej = ParsingUtils::extractUntilDelim("hej ja sam\r\n\r\n djevojka", "\r\n\r\n");
+	assert(hej == "hej ja sam\r\n\r\n");
+	_testpassed();
+}
 
 void UnitTest::_configFileSyntaxCheck(std::string filePath, bool exception)
 {
@@ -119,6 +133,7 @@ void UnitTest::configNumberOfServersBlock()
 }
 void UnitTest::allTests()
 {
+	stringEndCheck();
 	_baseNameBlock();
 	configSyntaxBlock();
 	configNumberOfServersBlock();

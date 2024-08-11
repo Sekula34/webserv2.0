@@ -115,3 +115,58 @@
 	2. retrun true or false
 3. construct path from base name + root
 4. return true or false 
+
+
+
+
+## Epoll version
+1. Parse Config
+2. [Run Server](#run-server-1)
+
+
+### Run Server
+1. Prepare Sockets
+2. Fill epoll with server Sockets (the one that will accept later conntection) (listenFd will only be for Read not for write(EPPOLIN)) //listenFD to be named ServerSocket and accpeted one from ServerSocket we still can call Client FD
+3. while(true)
+	1. [Epoll Main function](#epoll-main-function) 
+	2. 
+
+#### Epoll main function
+1. retVal = Epollwait (same as select) retval is number of fds
+2. if (retVal > 0)
+	1. [Something ready](#something-ready) (either read or written to)
+3. if (retVal == -1)
+	1. error (CRITICAL, MAYBE WARNING???)
+
+#### Something ready 
+1. IF Loop through ready epoll FDs and check if it is Server Socket 
+	1. Yes - accpet connetcion (Client Fd) should be same as Run Server step 2 (EPOLLIN and EPOLLOUT, server socket is just EPOLL IN)
+	2. Add Client fd to epoll ready FDs (epoll ctrl)
+2. ELSE 
+	1. [Handle Client](#handle-client)
+
+
+##### Handle Client 
+//reading and writing at the same time 
+1. Read Client Header (maybe multiple times, end of header, several times through epoll) //Simplyfiy Client Header to take only string(from which i create others variables )
+	1. If buffer full and not  /r/n/r/n then go step Run Server 3.
+		RETURN  
+	2. If flag completeHeader == true process setCHVariables (THIS IS WHERE I CHECK IF HEADER IS VALID OR NOT)
+2. Does containg body 
+	1. NO - Continue
+	2. Yes - AllowREad body
+
+##### AloweRead body 
+1. IF (ALLOWED)
+	1. Read Body
+2. Put error code to Client Header
+
+
+
+
+## Possible solution for client lifespan
+1. Create Client with accept 
+2. Map [key:fd] [value:client]
+3. If in map that key exist then marked In client instance  that is not allowed to write and remove that old client from the map
+4. Value will now become new client and the old one is not destroyed yet
+5. Destroy client after write and remove it from map

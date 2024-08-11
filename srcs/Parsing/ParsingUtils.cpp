@@ -98,6 +98,28 @@ std::string ParsingUtils::getDirName(std::string fullPath)
 }
 
 
+bool ParsingUtils::isStringEnd(const std::string toCheck,const std::string expectedEnd)
+{
+	if(toCheck.size() < expectedEnd.size())
+		return false;
+	size_t posToStart = toCheck.size() - expectedEnd.size();
+	std::string end = toCheck.substr(posToStart);
+	std::cout << "End is [" << end.size() << "]" <<std::endl;
+	std::cout << "Expected end is [" << expectedEnd.size() << "]" << std::endl;
+	if(end != expectedEnd)
+		return false;
+	return true;
+}
+
+std::string ParsingUtils::extractUntilDelim(const std::string fullString, const std::string delimiter)
+{
+	std::string::size_type pos = fullString.find(delimiter);
+	if(pos == std::string::npos)
+		return "";
+	pos += delimiter.length();
+	return fullString.substr(0, pos);
+}
+
 
 std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 {

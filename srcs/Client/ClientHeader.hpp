@@ -42,7 +42,7 @@ struct Host
 
 /**
  * @brief class for reading and storing client Message, one read at the time
- * 
+ * REPLACED BY NEW CLASS CLIENTREQUESTHEADER that does not contains client Fd
  */
 class ClientHeader 
 {
