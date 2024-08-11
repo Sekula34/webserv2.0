@@ -1,6 +1,10 @@
 #ifndef CLIENTHEADER_HPP
 # define CLIENTHEADER_HPP
 #include <string>
+#include <map>
+#include <vector>
+
+class CHTest;
 
 /**
  * @brief struct that contains all info about requstLine
@@ -51,11 +55,22 @@ class ClientHeader
 		std::string _requestLine;
 		RequestLine _requestLineElements;
 		Host _host;
+		std::map<std::string, std::string> _headerFields;
 
 
 		void _constructFunction();
 		bool _setCHVarivables();
+		bool _setHeaderFields();
 
+
+		/**
+		 * @brief get vector of unseperated header values withut first line and last two CRLF
+		 * 
+		 * @return std::vector<std::string> 
+		 */
+		std::vector<std::string> _getHeaderFields(void) const;
+
+		void _setOneHeader(std::string keyAndValue);
 		void _initAllVars(void);
 		/**
 		 * @brief set Client header variables
@@ -96,6 +111,8 @@ class ClientHeader
 		  */
 		bool _setHost(void);
 
+
+		friend class CHTest;
 		friend std::ostream& operator<<(std::ostream& os, const ClientHeader& obj);
 };
 

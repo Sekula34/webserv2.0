@@ -1,5 +1,7 @@
 #include "ClientHeader.hpp"
 #include "../Utils/Logger.hpp"
+#include <cstddef>
+#include <string>
 #include <vector>
 #include "../Parsing/ParsingUtils.hpp"
 
@@ -51,8 +53,45 @@ bool ClientHeader::_setCHVarivables()
 		return false;
 	if(_checkRequestStruct() == false)
 		return false;
+	if(_setHeaderFields() == false)
+		return false;
 	return true;
 }
+
+bool ClientHeader::_setHeaderFields()
+{
+	std::vector<std::string> plainHeaders = _getHeaderFields();
+	for(size_t i = 0; i < plainHeaders.size(); i++)
+	{
+		_setOneHeader(plainHeaders[i]);
+	}
+	return true;
+	
+}
+
+void ClientHeader::_setOneHeader(std::string keyAndValue)
+{
+	std::vector<std::string> connected = ParsingUtils::splitString(keyAndValue, ':');
+	if(connected.size() < 2)
+	{
+		Logger::warning("Header filed syntax is in client Header is invalid ");
+		_errorCode = 400;
+	}
+	std::string key = connected[0];
+	std::string value = ParsingUtils::getHttpPlainValue(connected[1]);
+	_headerFields[key] = value;
+}
+
+std::vector<std::string> ClientHeader::_getHeaderFields(void) const 
+{
+	std::vector<std::string> headerFields =  ParsingUtils::splitString(_message, "\r\n");
+	std::vector<std::string>::iterator last = headerFields.end() - 1;
+	headerFields.erase(last);
+	last = headerFields.end() - 1;
+	headerFields.erase(last);
+	headerFields.erase(headerFields.begin());
+	return headerFields;
+} 
 
 const int& ClientHeader::getHostPort(void) const 
 {
