@@ -1,7 +1,6 @@
 #include "ResponseBody.hpp"
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <vector>
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
@@ -11,10 +10,10 @@
 ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server)
 :_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
 {
-    if(clientHeader.isFullyRead() == false)
-    {
-        throw std::runtime_error("Trying to create Resonse body without fully read header");
-    }
+    // if(clientHeader.isFullyRead() == false)
+    // {
+    //     throw std::runtime_error("Trying to create Resonse body without fully read header");
+    // }
     Logger::info("Called response body constructor: ");
 	std::cout << clientHeader << std::endl;
 	if(clientHeader.getErrorCode() != 0)
