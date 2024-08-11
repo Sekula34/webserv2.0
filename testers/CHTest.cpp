@@ -42,7 +42,16 @@ void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::stri
 	Logger::testCase("Testing simple header", fullMessage);
 	ClientHeader header(fullMessage);
 	compare(header, expected);
+	
+	std::cout << header.getFullMessage() << std::endl;
 	_testpassed();
+}
+
+void CHTest::simplePrint()
+{
+	Logger::testCase("Simple", "something");
+	ClientHeader header(generateValidHttpReques());
+	ParsingUtils::printMap(header._headerFields);
 }
 
 

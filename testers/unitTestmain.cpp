@@ -13,9 +13,11 @@ int main()
 {
 	//std::cout << "Just new line " << std::endl;
 	
-	UnitTest::allTests();
-	ServerTest::runAllTests();
-	CHTest::runAllTests();
+	//UnitTest::allTests();
+	//ServerTest::runAllTests();
+	//CHTest::runAllTests();
+	
+	CHTest::simplePrint();
 	//UnitTest::stringEndCheck();
 	//UnitTest::stringDelimCheck();
 	

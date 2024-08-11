@@ -20,6 +20,7 @@ class CHTest : UnitTest
 		static void testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected);
 		static void CHBlockTest();
 		static void compare(const ClientHeader& actual,const std::pair<std::string, int>& expected);
+		static void simplePrint();
 		static std::string generateValidHttpReques();
 	private:
 		//static const client
