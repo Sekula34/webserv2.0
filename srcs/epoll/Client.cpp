@@ -2,6 +2,7 @@
 #include "Client.hpp"
 #include <cstring>
 #include <iostream>
+#include "../Utils/Logger.hpp"
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -10,22 +11,16 @@ int	Client::client_cntr = 0;
 
 Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0) 
 {
-	_readheader = true;
-	_readbody = false;
-	_writeclient = false;
-	_recvline = new unsigned char[MAXLINE];
-	memset(_recvline, 0, MAXLINE);
+	_initVars();
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
 Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _start(std::clock()), _epollfd(epollfd)
 {
-	_readheader = true;
-	_readbody = false;
-	_writeclient = false;
-	_recvline = new unsigned char[MAXLINE];
-	memset(_recvline, 0, MAXLINE);
-	std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
+	_initVars();
+	Logger::info("Client constructed, unique ID: "); std::cout << _id;
+	std::cout << " FD: "; std::cout << _fd << std::endl;
+	//std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
 
 /******************************************************************************/
@@ -154,4 +149,15 @@ void		Client::addRecvLineToMessage()
 {
 	_message += (char *)_recvline;
 	memset(_recvline, 0, MAXLINE);
+}
+
+void Client::_initVars(void)
+{
+	_readheader = true;
+	_readbody = false;
+	_writeclient = false;
+	_recvline = new unsigned char[MAXLINE];
+	memset(_recvline, 0, MAXLINE);
+	
+	header = NULL;
 }

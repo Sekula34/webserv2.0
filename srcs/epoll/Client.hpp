@@ -5,8 +5,9 @@
 # include <ctime>
 // #define MAXLINE			4096
 // #define MAXLINE			493
-#define MAXLINE			50
-#define MAX_TIMEOUT		10000
+# define MAXLINE			50
+# define MAX_TIMEOUT		10000
+# include "../Client/ClientHeader.hpp"
 
 class Client {
 
@@ -48,6 +49,11 @@ class Client {
 		bool				_readbody;
 		bool				_writeclient;
 							Client(void);
+
+		ClientHeader* header;
+
+
+		void	_initVars(void);
 };
 
 #endif
