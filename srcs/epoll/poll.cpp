@@ -159,7 +159,8 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 	{
 		epoll_remove_client(events, clients, client);
 		delete client;
-		std::cout << "error: recieve" << std::endl;
+		if (n < 0 || peek < 0)
+			std::cout << "error: recieve from client, incomplete header" << std::endl;
 		return (false);
 	}
 
