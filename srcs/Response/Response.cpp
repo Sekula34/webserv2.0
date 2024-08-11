@@ -66,8 +66,9 @@ void Response::sendSimpleResponse()const
 	"Connection: close\r\n"
 	"\r\n"
 	"<html><body><h1>Hello, World!</h1></body></html>";
-	write(_clientHeader.getClientFd() , http_response , strlen(http_response));
-	Logger::info("Response is sent to client: "); std::cout <<_clientHeader.getClientFd() << std::endl;
+	(void) http_response;
+	// write(_clientHeader.getClientFd() , http_response , strlen(http_response));
+	// Logger::info("Response is sent to client: "); std::cout <<_clientHeader.getClientFd() << std::endl;
 }
 
 bool Response::sendResponse()
@@ -75,17 +76,17 @@ bool Response::sendResponse()
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
 	std::cout <<response<< std::endl;
-	int writeValue;
-	writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
-	if(writeValue == -1)
-		return false;
+	// int writeValue;
+	// writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
+	// if(writeValue == -1)
+	// 	return false;
 	return true;
 	//send it
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)
 {
-	os << "Response for client: " << obj._clientHeader.getClientFd() << std::endl;
+	//os << "Response for client: " << obj._clientHeader.getClientFd() << std::endl;
 	os << "Response header is :" << std::endl;
 	if(obj._responseHeader != NULL)
 		os << obj._responseHeader->turnResponseHeaderToString();
