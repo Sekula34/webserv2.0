@@ -206,7 +206,8 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
 	if (!read_header(events, clients, client, idx))
 		return ;
-
+	//Logger::info("Client message is "); std::cout << client->getMessage() << std::endl;
+	client->createClientHeader();
 	// PROCESS HEADER
 	// READ BODY
 	// PROCESS BODY
@@ -485,7 +486,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 				continue;
 			handle_client(events, clients, idx);
 		}
-		
+		_notStuckMessage();
 	}
 
 }

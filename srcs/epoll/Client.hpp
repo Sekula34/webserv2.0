@@ -38,6 +38,12 @@ class Client {
 		void				addRecvLineToMessage();
 		bool				check_timeout() const;
 
+		/**
+		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor
+		 * 
+		 */
+		void				createClientHeader();
+
 	private:
 		unsigned long const	_id;
 		int const			_fd;
@@ -50,7 +56,7 @@ class Client {
 		bool				_writeclient;
 							Client(void);
 
-		ClientHeader* header;
+		ClientHeader* _header; //client Responsible for deleting
 
 
 		void	_initVars(void);
