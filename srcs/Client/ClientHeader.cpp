@@ -1,52 +1,100 @@
 #include "ClientHeader.hpp"
-#include <cstddef>
-#include <ostream>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <iostream>
-#include <unistd.h>
-#include <stdio.h>
+#include "../Utils/Logger.hpp"
 #include <vector>
 #include "../Parsing/ParsingUtils.hpp"
-#include "../Utils/Logger.hpp"
 
-
-ClientHeader::ClientHeader(int& clientFD)
-:_clientFd(clientFD), _fullyRead(false)
+ClientHeader::ClientHeader(const std::string message)
+:_message(ParsingUtils::extractUntilDelim(message, "\r\n\r\n"))
 {
-	_host.name ="";
-	_host.port = -1;
-	_requestLineElements.requestMethod ="";
-	_requestLineElements.requestTarget ="";
-	_requestLineElements.protocolVersion = "";
-	_errorCode = 0;
+	_constructFunction();
 }
 
 ClientHeader::ClientHeader(const ClientHeader& source)
-:_clientFd(source._clientFd), _message(source._message), _fullyRead(source._fullyRead),
-_errorCode(source._errorCode) ,_requestLine(source._requestLine), _requestLineElements(source._requestLineElements),
-_host(source._host)
+:_message(source._message)
 {
-
-
+	_constructFunction();
 }
 
-ClientHeader&::ClientHeader::operator=(const ClientHeader& source)
+ClientHeader& ClientHeader::operator=(const ClientHeader& source)
 {
-	_message = source._message;
-	_fullyRead = source._fullyRead;
-	_errorCode = source._errorCode;
-	_requestLine = source._requestLine;
-	_requestLineElements = source._requestLineElements;
-	_host = source._host;
-	return(*this);
+	(void)source;
+	Logger::warning("Give me really good reason why you want this");
+	return (*this);
 }
 
 ClientHeader::~ClientHeader()
 {
-	
+
 }
 
+
+void ClientHeader::_initAllVars(void)
+{
+	_errorCode = 0;
+	_requestLine= "";
+
+	_requestLineElements.requestMethod = "";
+	_requestLineElements.requestTarget= "";
+	_requestLineElements.protocolVersion = "";
+	
+	_host.name = "";
+	_host.port = 0;
+}
+
+bool ClientHeader::_setCHVarivables()
+{
+	if(_setRequestLine() == false)
+		return false;
+	if(_fillRequestStruct() == false)
+		return false;
+	if(_setHost() == false)
+		return false;
+	if(_checkRequestStruct() == false)
+		return false;
+	return true;
+}
+
+const int& ClientHeader::getHostPort(void) const 
+{
+	return(_host.port);
+}
+
+const std::string& ClientHeader::getHostName(void) const 
+{
+	return(_host.name);
+}
+
+const std::string& ClientHeader::getFullMessage(void) const
+{
+	return (_message);
+}
+
+
+const RequestLine& ClientHeader::getRequestLine() const 
+{
+	return (_requestLineElements);
+}
+
+
+const int& ClientHeader::getErrorCode(void) const 
+{
+	return _errorCode;
+}
+
+const std::string& ClientHeader::getRequestedUrl(void) const 
+{
+	const RequestLine& line = getRequestLine();
+	return line.requestTarget;
+}
+
+
+void ClientHeader::_constructFunction()
+{
+	if(_message == "")
+		Logger::warning("Tried to create ClientRequest header with string that does not contain CRLFCRLF",true);
+	_initAllVars();
+	_setCHVarivables();
+}
 
 bool ClientHeader::_setRequestLine(void) 
 {
@@ -62,6 +110,7 @@ bool ClientHeader::_setRequestLine(void)
 	_requestLine = firstLine;
 	return true;
 }
+
 
 bool ClientHeader::_fillRequestStruct(void)
 {
@@ -96,6 +145,7 @@ bool ClientHeader::_checkRequestStruct(void)
 	}
 	return true;
 }
+
 
 bool ClientHeader::_setHost(void)
 {
@@ -135,138 +185,9 @@ bool ClientHeader::_setHost(void)
 	return true;
 }
 
-bool ClientHeader::_isConnectionClosedByClient(void)
-{
-	char buffer[16];
-	int bytes_read = recv(_clientFd, buffer, sizeof(buffer), MSG_PEEK);
-	if(bytes_read == 0)
-		return true;
-	return false;
-}
-
-ReadStatus ClientHeader::readOnce()
-{
-	if(_fullyRead == true)
-	{
-		if(_isConnectionClosedByClient() == true)
-			return CLIENT_CLOSE;
-		//check if it is close by client
-		std::cout << "NO need to read anymore" << std::endl;
-		return DONE;
-	}
-	char buffer[BUFFER_SIZE];
-	int retVal = recv(_clientFd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
-	//std::cout << "Ret val is " << retVal << std::endl;
-	if(retVal > 0)
-	{
-		_message.append(buffer, retVal);
-		size_t lastCrlfPos = _message.find("\r\n\r\n");
-		if(lastCrlfPos != std::string::npos)
-		{
-			_fullyRead = true;
-			return DONE;
-		}
-		if(retVal < BUFFER_SIZE && lastCrlfPos == std::string::npos)
-		{
-			//didnt receive end of header but it is fully read
-			std::cout << buffer << std::endl;
-			Logger::error("Client Header is fully read but CRLFCRLF is not found which means it is invalid client header by HTTP protocol ", true);
-			//badrequest(400)??
-			std::cerr<<"//didnt receive end of header but it is fully read" << std::endl;
-			return ERROR;
-		} 
-	}
-	else if(retVal == -1)
-	{
-		//TODO server error of reading client request remove cerr
-		//close(_clientFd);
-		// std::vector<int>::iterator it = std::find(_communicationFds.begin(),
-		// 		_communicationFds.end(), communicationFd);
-		// _communicationFds.erase(it);
-		std::cerr<<"Read failed while trying to read client req" << std::endl;
-		perror("read");
-		return ERROR;
-	}
-	else if(retVal == 0 )
-	{
-		std::cout << "End of file " << std::endl;
-		_fullyRead = true;
-		return CLIENT_CLOSE;
-	}
-	return CONTINUE_READING;
-}
-
-bool ClientHeader::setCHVarivables()
-{
-	if(_fullyRead == false)
-	{
-		std::cout << "Cannot set client Header Variables (yet)" << std::endl;
-		return false;
-	}
-	if(_setRequestLine() == false)
-		return false;
-	if(_fillRequestStruct() == false)
-		return false;
-	if(_setHost() == false)
-		return false;
-	if(_checkRequestStruct() == false)
-		return false;
-	return true;
-	//Logger::info("ALL header variables are setted and request is valid");std::cout<<std::endl;
-	//std::cout << "ALL header variables are setted and request is valid" << std::endl;
-}
-
-const int& ClientHeader::getHostPort(void) const 
-{
-	return(_host.port);
-}
-
-const std::string& ClientHeader::getHostName(void) const 
-{
-	return(_host.name);
-}
-
-const std::string& ClientHeader::getFullMessage(void) const
-{
-	return (_message);
-}
-
-const int& ClientHeader::getClientFd() const 
-{
-	return(_clientFd);
-}
-
-const RequestLine& ClientHeader::getRequestLine() const 
-{
-	return (_requestLineElements);
-}
-
-bool ClientHeader::isFullyRead() const
-{
-	return (_fullyRead);
-}
-
-const int& ClientHeader::getErrorCode(void) const 
-{
-	return _errorCode;
-}
-
-const std::string& ClientHeader::getRequestedUrl(void) const 
-{
-	const RequestLine& line = getRequestLine();
-	return line.requestTarget;
-}
-
 std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 {
 	os<< "Client message data" << std::endl;
-	os<< "FD is :" << obj._clientFd << std::endl;
-	os<< "IS fully read is " << obj._fullyRead << std::endl;
-	if(obj._fullyRead == false)
-	{
-		os<<"CH dont have fully set all variables, valgrind read" << std::endl;
-		return os;
-	}
 	os<< "Request method is :" << obj._requestLineElements.requestMethod << std::endl;
 	os<< "Request target is :" << obj._requestLineElements.requestTarget << std::endl;
 	os<< "Request protocol Version is :" << obj._requestLineElements.protocolVersion << std::endl;
@@ -274,21 +195,4 @@ std::ostream& operator<<(std::ostream& os, const ClientHeader& obj)
 	os<< "Host port is :" << obj._host.port << std::endl;
 	//os<< "Message is :[" << obj._message << "]";
 	return os;
-}
-
-
-ClientHeader::
-InvalidClientRequestException::InvalidClientRequestException(int errorCode, const std::string& errorMessage)
-:_errorCode(errorCode), _errorMessage(errorMessage)
-{
-
-}
-int ClientHeader::InvalidClientRequestException::getErrorCode() const 
-{
-	return _errorCode;
-}
-
-const char* ClientHeader::InvalidClientRequestException::what() const throw ()
-{
-	return (_errorMessage.c_str());
 }
