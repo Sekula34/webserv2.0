@@ -58,6 +58,7 @@ class ParsingUtils
 		}
 
 		static std::vector<std::string> splitString(std::string fullString, char delimiter);
+		static std::vector<std::string> splitString(std::string fullString, std::string delimiter);
 		static std::string getStringOutOfVector(const std::vector<std::string> stringVector);		
 		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
 		static bool isStringNumber(std::string toCheck);

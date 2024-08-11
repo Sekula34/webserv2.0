@@ -24,6 +24,24 @@ std::vector<std::string> ParsingUtils::splitString(std::string fullString, char 
 	return result;
 }
 
+std::vector<std::string> ParsingUtils::splitString(std::string fullString, std::string delimiter)
+{
+	std::vector<std::string> result;
+	size_t posDelimiter;
+	posDelimiter = fullString.find(delimiter);
+	while (posDelimiter != std::string::npos)
+	{
+		std::string oneValue = fullString.substr(0, posDelimiter);
+		//std::cout << "One value is [" << oneValue << "]" << std::endl;
+		result.push_back(oneValue);
+		fullString.erase(0, posDelimiter + delimiter.size());
+		//std::cout << "New full string is [" << fullString << "] " << std::endl;
+		posDelimiter = fullString.find(delimiter);
+	}
+	result.push_back(fullString);
+	return result;
+}
+
 std::string ParsingUtils::getStringOutOfVector(const std::vector<std::string> stringVector)
 {
 	std::string fullString;
