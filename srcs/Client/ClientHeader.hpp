@@ -47,6 +47,7 @@ class ClientHeader
 		const int& getErrorCode(void) const;
 		const RequestLine& getRequestLine() const;
 		const std::string& getRequestedUrl() const;
+		bool isBodyExpected() const;
 
 	private :
 		ClientHeader();
