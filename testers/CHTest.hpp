@@ -1,5 +1,5 @@
 #pragma once 
-#include "../srcs/Client/ClientRequestHeader.hpp"
+#include "../srcs/Client/ClientHeader.hpp"
 #include "UnitTest.hpp"
 #include <string>
 #include <utility>
@@ -19,7 +19,7 @@ class CHTest : UnitTest
 		static void InitVector();
 		static void testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected);
 		static void CHBlockTest();
-		static void compare(const ClientRequestHeader& actual,const std::pair<std::string, int>& expected);
+		static void compare(const ClientHeader& actual,const std::pair<std::string, int>& expected);
 		static std::string generateValidHttpReques();
 	private:
 		//static const client

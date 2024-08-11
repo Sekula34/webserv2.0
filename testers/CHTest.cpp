@@ -21,15 +21,15 @@ void CHTest::runAllTests()
 void CHTest::copyTest(const std::string fullMessage)
 {
 	Logger::testCase("Testing copy construcotr", "to be same");
-	ClientRequestHeader first(fullMessage);
-	ClientRequestHeader &second(first);
+	ClientHeader first(fullMessage);
+	ClientHeader &second(first);
 	assert(first.getErrorCode() == second.getErrorCode());
 	assert(first.getRequestedUrl() == second.getRequestedUrl());
 	_testpassed();
 }
 
 
-void CHTest::compare(const ClientRequestHeader& actual, const std::pair<std::string, int>& expected)
+void CHTest::compare(const ClientHeader& actual, const std::pair<std::string, int>& expected)
 {
 	Logger::testCase("Comparing", ". Expected error code is"); 
 	std::cout << expected.second <<", actual: " << actual.getErrorCode() << std::endl;
@@ -40,7 +40,7 @@ void CHTest::compare(const ClientRequestHeader& actual, const std::pair<std::str
 void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
 {
 	Logger::testCase("Testing simple header", fullMessage);
-	ClientRequestHeader header(fullMessage);
+	ClientHeader header(fullMessage);
 	compare(header, expected);
 	_testpassed();
 }
