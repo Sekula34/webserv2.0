@@ -121,7 +121,8 @@ void ConnectionDispatcherTest()
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	SocketManager sockets(serverInfo.getUniquePorts());
 	ConnectionDispatcher dispatcher(sockets, serverInfo);
-	dispatcher.mainLoop();
+	//dispatcher.mainLoop();
+	dispatcher.mainLoopEpoll();
 }
 
 void serverInfoTest()

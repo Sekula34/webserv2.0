@@ -2,10 +2,15 @@
 # define CONNECTIONDISPATCHER_HPP
 #include "SocketManager.hpp"
 #include "../Parsing/ServersInfo.hpp"
+#include <cstddef>
 #include <sys/select.h>
 #include "../Client/ClientHeaderManager.hpp"
 #include "../Response/ClientResponseManager.hpp"
-#include "epoll.hpp"
+#include "../epoll/Client.hpp"
+#include "sys/epoll.h"
+#define MAX_EVENTS		10
+#define MAX_WAIT		-1 
+
 
 /**
  * @brief class for handling select creating servers and give them tasks
@@ -13,12 +18,45 @@
  */
 class ConnectionDispatcher 
 {
+	public :
+		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
+		ConnectionDispatcher(ConnectionDispatcher& source);
+		ConnectionDispatcher& operator=(ConnectionDispatcher& source);
+		~ConnectionDispatcher();
+
+		std::map<int, Client *>	clients; //maybe private
+		struct epoll_event	events[MAX_EVENTS]; // maybe private
+
+		void mainLoop(void);
+		void mainLoopEpoll(void);
+		int	epollfd; //turn this in private later 
+		void epoll_add_listen_sock(int listen_sock); //pribvate probably 
+		void epoll_add_client(int epollfd, int listen_socket);
+void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client);
+	
+	Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
+	bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
+bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+	void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+	void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+	
 	private :
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 		ClientHeaderManager _clientHeaders;
 		ClientResponseManager _clientResponses;
 		struct timeval _selectTimeout;
+
+		void _addServerSocketsToEpoll(void);
+		
+		/**
+		 * @brief 
+		 * 
+		 * @param idx 
+		 * @return true if client is accepted
+		 * @return false if fd is client 
+		 */
+		bool _acceptClient(size_t idx);
 
 		/**
 		 * @brief all clientcommunication FDs, if fd is close it should be 
@@ -51,7 +89,7 @@ class ConnectionDispatcher
 		 */
 		std::vector<Socket> _getAllReadyToReadSockets();
 		std::vector<int> _getReadyToReadCommunicationFds();
-		void _setAllServerListenSocketsForRead(void);
+		void __addServerSocketsToEpoll(void);
 		int _getMaxFd(void) const;
 
 		/**
@@ -105,14 +143,6 @@ class ConnectionDispatcher
 		 */
 		void _notStuckMessage(void) const;
 		//ConnectionDispatcher();
-	public :
-		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
-		ConnectionDispatcher(ConnectionDispatcher& source);
-		ConnectionDispatcher& operator=(ConnectionDispatcher& source);
-		~ConnectionDispatcher();
-
-		void mainLoop(void);
-
 };
 
 #endif

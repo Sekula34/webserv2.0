@@ -1,10 +1,12 @@
 
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
-
-# include "poll.hpp"
-# include <iostream>
+# include <string>
 # include <ctime>
+// #define MAXLINE			4096
+// #define MAXLINE			493
+#define MAXLINE			50
+#define MAX_TIMEOUT		10000
 
 class Client {
 
@@ -22,7 +24,7 @@ class Client {
 		int					getFd() const;
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
-		uint8_t*			getRecvLine() const;
+		unsigned char*			getRecvLine() const;
 		int					getEpollFd() const;
 		bool				getReadHeader() const;
 		bool				getReadBody() const;
@@ -41,7 +43,7 @@ class Client {
 		std::clock_t const	_start;
 		int const			_epollfd;
 		std::string			_message;
-		uint8_t*			_recvline;
+		unsigned char*			_recvline;
 		bool				_readheader;
 		bool				_readbody;
 		bool				_writeclient;
@@ -49,4 +51,3 @@ class Client {
 };
 
 #endif
-

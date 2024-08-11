@@ -1,5 +1,7 @@
 
 #include "Client.hpp"
+#include <cstring>
+#include <iostream>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -11,7 +13,7 @@ Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd
 	_readheader = true;
 	_readbody = false;
 	_writeclient = false;
-	_recvline = new uint8_t[MAXLINE];
+	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	// std::cout << "Client default constructor called" << std::endl;
 }
@@ -21,7 +23,7 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 	_readheader = true;
 	_readbody = false;
 	_writeclient = false;
-	_recvline = new uint8_t[MAXLINE];
+	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
@@ -43,7 +45,7 @@ Client::~Client (void)
 Client::Client(Client const & src):_id(++client_cntr), _fd(src._fd), _start(std::clock()), _epollfd(src._epollfd)
 {
 	//std::cout << "Client copy constructor called" << std::endl;
-	_recvline = new uint8_t[MAXLINE];
+	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	*this = src;
 }
@@ -88,7 +90,7 @@ std::string	Client::getMessage() const
 	return (_message);
 }
 
-uint8_t*	Client::getRecvLine() const
+unsigned char*	Client::getRecvLine() const
 {
 	return (_recvline);
 }
