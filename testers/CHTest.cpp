@@ -14,9 +14,11 @@ std::vector<std::pair<std::string, int> > CHTest::messages;
 
 void CHTest::runAllTests()
 {
+	testIfThereIsBody();
 	CHBlockTest();
 	copyTestBlock();
 }
+
 
 void CHTest::copyTest(const std::string fullMessage)
 {
@@ -143,6 +145,20 @@ Connection: keep-alive\r\n\
 \r\nAnd here we have something that belongs to bod.......";
 	return valid;
 }
+
+std::string validWithContent()
+{
+	std::string withBody= "POST /path/resource HTTP/1.1\r\n\
+Host: www.example.com\r\n\
+User-Agent: MyCustomClient/1.0\r\n\
+Accept: */*\r\n\
+Content-Type: application/json\r\n\
+Content-Length: 1234\r\n\
+Connection: keep-alive\r\n\
+\r\n";
+
+	return withBody;
+}
 void CHTest::InitVector()
 {
 	std::pair<std::string, int> pair;
@@ -170,6 +186,10 @@ void CHTest::InitVector()
 	pair.second = 0;
 	messages.push_back(pair);
 
+	pair.first = validWithContent();
+	pair.second = 0;
+	messages.push_back(pair);
+
 }
 
 void CHTest::copyTestBlock()
@@ -177,4 +197,14 @@ void CHTest::copyTestBlock()
 	copyTest(generateValidHttpReques());
 	copyTest(invalidFirtLineRequest());
 	_testpassed(true);
+}
+
+void CHTest::testIfThereIsBody()
+{
+	Logger::testCase("Testing if ch expect body", "");
+	ClientHeader header(validWithContent());
+	assert(header.isBodyExpected() == true);
+	ClientHeader head2(generateValidHttpReques());
+	assert(head2.isBodyExpected() == false);
+	_testpassed();
 }

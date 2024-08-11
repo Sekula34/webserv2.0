@@ -13,6 +13,7 @@ class CHTest : UnitTest
 		static std::vector<std::pair<std::string, int> >messages;
 
 
+		static void testIfThereIsBody();
 		static void runAllTests();
 		static void copyTest(const std::string fullMessage);
 		static void copyTestBlock();
