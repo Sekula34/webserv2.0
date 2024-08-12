@@ -1,6 +1,7 @@
 obj
 webserv
 py_env
+testers/python/__pycache__
 tests/__pycache__/
 .vscode/
 *.out
