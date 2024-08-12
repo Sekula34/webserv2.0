@@ -10,6 +10,7 @@
 #include <iostream>
 #include <algorithm>
 #include "../Utils/Logger.hpp"
+#include "../Utils/HttpStatusCode.hpp"
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -67,12 +68,12 @@ bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
 	return true;
 }
 
-std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port)
+std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port) const
 {
 	std::vector<ServerSettings> serversPort;
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
-		ServerSettings& oneServer(_servers[i]);
+		const ServerSettings& oneServer(_servers[i]);
 		if(oneServer.getPort() == port)
 			serversPort.push_back(oneServer);
 	}
@@ -118,7 +119,7 @@ const ServerSettings& ServersInfo::getServerById(int serverId) const
 
 
 
-const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string serverName)
+const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string serverName) const
 {
 	int serverId;
 	std::vector<ServerSettings> ServersId = _getAllServersIdWithPort(portNumber);
@@ -140,26 +141,30 @@ const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string s
 	return getServerById(serverId);
 }
 
-bool ServersInfo::_validateClientHeader(const ClientHeader* header)
+bool ServersInfo::_validateClientHeader(const ClientHeader* header) const
 {
 	if(header == NULL)
 	{
 		Logger::warning("Trying to get Client Server with client that have no header");
 		return false;
 	}
-	if(header->getErrorCode() == 404)
+	if(header->getErrorCode() == 400) // or check if code is 400 
 	{
-		Logger::warning("Client sends bad request, There is no filled info in header for finding server");
+		const std::string reason = HttpStatusCode::getReasonPhrase(header->getErrorCode());
+		Logger::warning("Client send " + reason, true);
+		Logger::warning("There is no filled info in header for finding server", true);
 		return false;
 	}
 	return true;
 }
 
-ServerSettings* ServersInfo::getClientServer(const Client& client)
+const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
 	if(_validateClientHeader(client.header) == false)
 		return NULL;
-	return NULL;
+	const ServerSettings& ref = getServerByPort(client.header->getHostPort(), client.header->getHostName());
+	const ServerSettings* toReturn = &ref; 
+	return toReturn;
 }
 
 //goes through vector of servers
