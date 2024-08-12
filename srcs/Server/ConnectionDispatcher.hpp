@@ -86,6 +86,14 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 		void _processAnswer(Client& client);
 
 		/**
+		 * @brief creates Response instace that is forwarded to client. Client is resposible for deleting
+		 * 
+		 * @param client in to which Response Belong
+		 * @param responseServer server that is resposible for generating response instance
+		 */
+		void _createAndDelegateResponse(Client& client, const ServerSettings* responseServer);
+
+		/**
 		 * @brief fill vector with all socket that have something to read and are ready
 		 * 
 		 * @return std::vector<Socket> which can be empty if nothing is ready 

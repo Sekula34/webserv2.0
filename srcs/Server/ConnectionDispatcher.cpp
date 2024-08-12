@@ -188,11 +188,12 @@ bool	ConnectionDispatcher::read_header(struct epoll_event* events, std::map<int,
 
 void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
 {
-	std::string	answer = "HTTP/1.1 200 OK\r\n\r\nWebserv 0.0\n";
+	//std::string	answer = "HTTP/1.1 200 OK\r\n\r\nWebserv 0.0\n";
 
 	if (events[idx].events & EPOLLOUT)
 	{
-		write(client->getFd(), answer.c_str(), answer.size());
+		client->getResponse()->sendResponse();
+		//write(client->getFd(), answer.c_str(), answer.size());
 		epoll_remove_client(events, clients, client);
 		delete client;
 	}
@@ -243,9 +244,22 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 		std::cout << *responseServer << std::endl;
 	else
 		Logger::warning("NO Server found");
-	Response respones(client, responseServer);
-	Logger::info("Response created "); std::cout << respones.getResponseString() << std::endl;
+
+	_createAndDelegateResponse(client, responseServer);
 	//respones.sendResponse();
+}
+
+void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const ServerSettings* responseServer)
+{
+	Response* clientRespone = client.getResponse();
+	if(clientRespone != NULL)
+	{
+		Logger::error("Trying to create response for clinet that already have one", true);
+		return;
+	}
+	Response* response = new Response(client, responseServer);
+	client.setResponse(response);
+	Logger::info("Response created "); std::cout << response->getResponseString() << std::endl;
 }
 
 
