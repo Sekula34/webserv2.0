@@ -243,8 +243,8 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 		std::cout << *responseServer << std::endl;
 	else
 		Logger::warning("NO Server found");
-	//Response respones(client, responseServer);
-	//respones.sendResponse();
+	Response respones(client, responseServer);
+	respones.sendResponse();
 }
 
 
