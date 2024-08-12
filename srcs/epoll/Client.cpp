@@ -23,7 +23,6 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 	_initVars();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
-	std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
 
 /******************************************************************************/
@@ -36,7 +35,7 @@ Client::~Client (void)
 	delete [] _recvline;
 	delete header;
 	delete _response;
-	std::cout << "Client with ID: " << _id <<  " destructed" << std::endl;
+	Logger::info("Destructed client with ID: "); std::cout << _id << std::endl;
 }
 
 /******************************************************************************/

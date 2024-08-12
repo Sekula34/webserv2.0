@@ -179,7 +179,7 @@ bool	ConnectionDispatcher::read_header(struct epoll_event* events, std::map<int,
 	// IF END OF HEADER DETECTED IN MESSAGE -> SET READHEADER FLAG TO FALSE
 	if (n <= MAXLINE && client->getMessage().find("\r\n\r\n") != std::string::npos)
 	{
-		std::cout << std::endl << client->getMessage() << std::endl;
+		//std::cout << std::endl << client->getMessage() << std::endl;
 		client->setReadHeader(false);
 		client->setWriteClient(true);
 	}
@@ -192,8 +192,12 @@ void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int
 
 	if (events[idx].events & EPOLLOUT)
 	{
-		client->getResponse()->sendResponse();
 		//write(client->getFd(), answer.c_str(), answer.size());
+		bool result = client->getResponse()->sendResponse();
+		if(result == true)
+			Logger::info("The response  was sent successfully", true);
+		else
+			Logger::warning("Sending response had some error");
 		epoll_remove_client(events, clients, client);
 		delete client;
 	}
@@ -234,14 +238,15 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 
 void ConnectionDispatcher::_processAnswer(Client& client)
 {
-	Logger::info("Process answer for client", true);
-	std::cout << "Client address is " << &client << std::endl;
+	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
 	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
 
 	//const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)
-		std::cout << *responseServer << std::endl;
+	{
+		Logger::info("Server found, ID: "); std::cout << responseServer->getServerId() << std::endl;
+	}
 	else
 		Logger::warning("NO Server found");
 
@@ -259,7 +264,7 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 	}
 	Response* response = new Response(client, responseServer);
 	client.setResponse(response);
-	Logger::info("Response created "); std::cout << response->getResponseString() << std::endl;
+	Logger::info("Response created ", true);
 }
 
 
@@ -509,18 +514,15 @@ bool ConnectionDispatcher::_acceptClient(size_t idx)
 
 void ConnectionDispatcher::mainLoopEpoll()
 {
+	Logger::info("my pid is: "); std::cout << getpid() << std::endl;
 	signal(SIGINT, handle_sigint);
 	_addServerSocketsToEpoll();
 	int nfds;
-	Logger::warning("I am aabotu to start loop", true);
-	std::cout<<"my pid is: " << getpid() << std::endl;
 	while(true)
 	{
-		//Logger::warning("I am stuck", true);
 		if(flag)
 		{
 			Logger::info("Turn off procedure triggered"); std::cout<<std::endl;
-			//std::cout << "Ctrl + c pressed" << std::endl;
 			break;
 		}
 		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
@@ -535,9 +537,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 				continue;
 			handle_client(events, clients, idx);
 		}
-		//_notStuckMessage();
 	}
-
 
 }
 

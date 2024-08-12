@@ -63,7 +63,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		perror("listen systemcall failed");
 		throw std::runtime_error("System call listen failed");
 	}
-	Logger::info("Socket is listening on port :");
+	Logger::info("Socket is listening on port:");
 	std::cout << _port << std::endl;
 }
 
