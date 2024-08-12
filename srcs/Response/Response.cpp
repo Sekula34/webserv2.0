@@ -8,22 +8,22 @@
 #include <sstream>
 #include <unistd.h>
 
-Response::Response(ClientHeader& clientHeader, const ServerSettings& server)
-:_clientHeader(clientHeader), _server(server) ,_responseHeader(NULL)
-,_responseBody(_clientHeader, _server)
+Response::Response(const Client& client, const ServerSettings* server)
+:_client(client), _server(server) ,_responseHeader(NULL)
+,_responseBody(*client.header, *_server)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
 
-Response::Response(const Response& source)
-:_clientHeader(source._clientHeader), _server(source._server),
-_responseBody(source._responseBody)
-{
-	if(source._responseHeader == NULL)
-		_responseHeader = NULL;
-	else  
-		_responseHeader = new ResponseHeader(*source._responseHeader);
-}
+// Response::Response(const Response& source)
+// :_client(source._client, _server(source._server),
+// _responseBody(source._responseBody)
+// {
+// 	if(source._responseHeader == NULL)
+// 		_responseHeader = NULL;
+// 	else  
+// 		_responseHeader = new ResponseHeader(*source._responseHeader);
+// }
 
 Response&  Response::operator=(const Response& source)
 {
@@ -76,8 +76,8 @@ bool Response::sendResponse()
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
 	std::cout <<response<< std::endl;
-	// int writeValue;
-	// writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
+ 	int writeValue;
+	writeValue = write(_client.getFd(), response.c_str(), response.size());
 	// if(writeValue == -1)
 	// 	return false;
 	return true;
