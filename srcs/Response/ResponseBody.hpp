@@ -1,13 +1,13 @@
 #ifndef  RESPONSEBODY_HPP
 # define RESPONSEBODY_HPP
-#include "../Client/ClientHeader.hpp"
+#include "../epoll/Client.hpp"
 #include "../Parsing/ServerSettings.hpp"
 
 class ResponseBody
 {
 	private :
-		const ClientHeader& _clientHeader;
-		const ServerSettings& _server; //do not delete here
+		const Client& _client;
+		const ServerSettings* _server; //do not delete here This class is not resposible for deleting this
 		std::string _response;
 		int _httpStatusCode;
 		
@@ -26,7 +26,7 @@ class ResponseBody
 
 	public :
 		//ResponseBody();
-		ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server);
+		ResponseBody(const Client& client, const ServerSettings* server);
 		ResponseBody(const ResponseBody& source);
 		ResponseBody& operator=(const ResponseBody& source);
 		~ResponseBody();
