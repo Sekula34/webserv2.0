@@ -1,83 +1,13 @@
 #include "./Parsing/ServersInfo.hpp"
-#include "Parsing/ParsingUtils.hpp"
-#include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionDispatcher.hpp"
-#include "Server/Socket.hpp"
 #include "Server/SocketManager.hpp"
 #include "Utils/Logger.hpp"
-#include "Utils/HttpStatusCode.hpp"
-
 #include <exception>
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <cstring>
-#include <csignal>
 #include <iostream>
 
-
-
-
-
-
-
-
-
-
-void socketTest()
-{
-	Socket firstSocket(8080);
-	std::cout << firstSocket << std::endl;
-	//int serverSocket = firstSocket.getSocketFd();
-	std::cout << firstSocket.getSocketFd() << std::endl;
-	while(true)
-	{
-		int clientSocket = firstSocket.getCommunicationSocket();
-		char buffer[1024] = {0};
-		int valread = read(clientSocket , buffer, 1024); 
-		std::cout << "Valread is " << valread << std::endl;
-		std::cout << "CLIENT  REQUEST" << std::endl;
-		std::cout << buffer << std::endl;
-		std::cout <<"END OF CLIENT REQUEST" << std::endl;
-		close(clientSocket);
-	}
-
-}
-
-void multipleSocketTesting()
-{
-	ServersInfo servers;
-	std::vector<int> uniquePorts = servers.getUniquePorts();
-	SocketManager sockets(uniquePorts);
-	std::vector<Socket> allSockets = sockets.getAllSockets();
-	int clientSocket;
-
-	clientSocket = allSockets[0].getCommunicationSocket();
-	char buffer[1024] = {0};
-	int valread = read(clientSocket , buffer, 1024); 
-	std::cout << "Valread is " << valread << std::endl;
-	std::cout << "CLIENT  REQUEST" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout <<"END OF CLIENT REQUEST" << std::endl;
-	const char *http_response = 
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html\r\n"
-        "Content-Length: 46\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "<html><body><h1>Hello, World!</h1></body></html>";
-	//const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
-	write(clientSocket , http_response , strlen(http_response));
-	close(clientSocket);
-	int clientSocket2 = allSockets[1].getCommunicationSocket();
-	char buffer2[1024] = {0};
-	valread = read(clientSocket2 , buffer2, 1024); 
-	std::cout << "Valread is " << valread << std::endl;
-	std::cout << "CLIENT  REQUEST" << std::endl;
-	std::cout << buffer2 << std::endl;
-	std::cout <<"END OF CLIENT REQUEST" << std::endl;
-	close(clientSocket2);
-}
 
 void ConnectionDispatcherTest()
 {
@@ -85,91 +15,14 @@ void ConnectionDispatcherTest()
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	SocketManager sockets(serverInfo.getUniquePorts());
 	ConnectionDispatcher dispatcher(sockets, serverInfo);
-	//dispatcher.mainLoop();
 	dispatcher.mainLoopEpoll();
 }
 
-void serverInfoTest()
-{
-	ServersInfo servers;
-	ParsingUtils::printVector(servers.getUniquePorts());
-	//servers.getUniquePorts();
-
-		
-	std::vector<ServerSettings> serveri = servers.getAllServers();
-	servers.printAllServersInfo();
-}
-void SocketManagerTest()
-{
-	ServersInfo servers;
-	std::vector<int> uniquePorts = servers.getUniquePorts();
-	SocketManager sockets(uniquePorts);
-	ParsingUtils::printVector(sockets.getAllListenFd());
-	std:: cout << sockets.getMaxSocketFd() << std::endl;
-}
-
-
-
-void loggerTester()
-{
-	Logger::info("First Info");
-	Logger::warning("some Warning");
-	Logger::error("critical thing");
-}
-
-void errorMapTester()
-{
-	//ParsingUtils::printMap(HttpStatusCode::_statusCode);
-	int code(405);
-	std::string reasonMessage = HttpStatusCode::getReasonPhrase(code);
-	std::cout << "Reason phrase behind " << code << " is " << reasonMessage << std::endl;
-}
-
-
-void responseHeaderTest(int status)
-{
-	(void) status;
-	//ResponseHeader header(status);
-	//std::cout << header.turnResponseHeaderToString();
-	//std::cout << header << std::endl;
-}
-
-
-
-void toStringtest()
-{
-	std::cout << ParsingUtils::toString(-8999.67);
-}
-
-void signalHandler(int signum) {
-    std::cout << "Interrupt signal (" << signum << ") received.\n";
-
-    // cleanup and close up stuff here  
-    // terminate program  
-
-    //exit(signum);  
-}
 int main()
 {
-	//
-	signal(SIGINT, signalHandler);
 	try
 	{
-		//serverInfoTest();
-	//	socketTest();
-		//multipleSocketTesting();
 		ConnectionDispatcherTest();
-		//clientResponseTest();
-		//SocketManagerTest();
-		//clientRequestTest();
-		//clientMessageTest();
-		//ClientHeaderManagerTester();
-		//loggerTester();
-		//errorMapTester();
-		//ResponseTest();
-		//responseHeaderTest(404);
-		//responseBodyTest();
-		//toStringtest();
 	}
 	catch(std::exception &e)
 	{
@@ -179,3 +32,78 @@ int main()
 	}
 	return 0;
 }
+
+// void SocketManagerTest()
+// {
+// 	ServersInfo servers;
+// 	std::vector<int> uniquePorts = servers.getUniquePorts();
+// 	SocketManager sockets(uniquePorts);
+// 	ParsingUtils::printVector(sockets.getAllListenFd());
+// 	std:: cout << sockets.getMaxSocketFd() << std::endl;
+// }
+
+// void serverInfoTest()
+// {
+// 	ServersInfo servers;
+// 	ParsingUtils::printVector(servers.getUniquePorts());
+// 	//servers.getUniquePorts();
+
+		
+// 	std::vector<ServerSettings> serveri = servers.getAllServers();
+// 	servers.printAllServersInfo();
+// }
+
+// void multipleSocketTesting()
+// {
+// 	ServersInfo servers;
+// 	std::vector<int> uniquePorts = servers.getUniquePorts();
+// 	SocketManager sockets(uniquePorts);
+// 	std::vector<Socket> allSockets = sockets.getAllSockets();
+// 	int clientSocket;
+
+// 	clientSocket = allSockets[0].getCommunicationSocket();
+// 	char buffer[1024] = {0};
+// 	int valread = read(clientSocket , buffer, 1024); 
+// 	std::cout << "Valread is " << valread << std::endl;
+// 	std::cout << "CLIENT  REQUEST" << std::endl;
+// 	std::cout << buffer << std::endl;
+// 	std::cout <<"END OF CLIENT REQUEST" << std::endl;
+// 	const char *http_response = 
+//         "HTTP/1.1 200 OK\r\n"
+//         "Content-Type: text/html\r\n"
+//         "Content-Length: 46\r\n"
+//         "Connection: close\r\n"
+//         "\r\n"
+//         "<html><body><h1>Hello, World!</h1></body></html>";
+// 	//const char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";//IMPORTANT! WE WILL GET TO IT
+// 	write(clientSocket , http_response , strlen(http_response));
+// 	close(clientSocket);
+// 	int clientSocket2 = allSockets[1].getCommunicationSocket();
+// 	char buffer2[1024] = {0};
+// 	valread = read(clientSocket2 , buffer2, 1024); 
+// 	std::cout << "Valread is " << valread << std::endl;
+// 	std::cout << "CLIENT  REQUEST" << std::endl;
+// 	std::cout << buffer2 << std::endl;
+// 	std::cout <<"END OF CLIENT REQUEST" << std::endl;
+// 	close(clientSocket2);
+// }
+
+// void socketTest()
+// {
+// 	Socket firstSocket(8080);
+// 	std::cout << firstSocket << std::endl;
+// 	//int serverSocket = firstSocket.getSocketFd();
+// 	std::cout << firstSocket.getSocketFd() << std::endl;
+// 	while(true)
+// 	{
+// 		int clientSocket = firstSocket.getCommunicationSocket();
+// 		char buffer[1024] = {0};
+// 		int valread = read(clientSocket , buffer, 1024); 
+// 		std::cout << "Valread is " << valread << std::endl;
+// 		std::cout << "CLIENT  REQUEST" << std::endl;
+// 		std::cout << buffer << std::endl;
+// 		std::cout <<"END OF CLIENT REQUEST" << std::endl;
+// 		close(clientSocket);
+// 	}
+
+// }
