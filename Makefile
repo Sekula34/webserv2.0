@@ -25,7 +25,6 @@ ParsingObjects/%.o: srcs/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 SRCS =		srcs/Client/ClientHeader.cpp\
-			srcs/Client/ClientHeaderManager.cpp \
 			srcs/epoll/Client.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
@@ -36,7 +35,6 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
-			srcs/Response/ClientResponseManager.cpp\
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
@@ -53,7 +51,6 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 
 
 HEADERS =	srcs/Client/ClientHeader.cpp\
-			srcs/Client/ClientHeaderManager.hpp \
 			srcs/epoll/Client.hpp \
 			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
@@ -64,7 +61,6 @@ HEADERS =	srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.hpp \
 			srcs/Parsing/ParsingUtils.hpp \
 			srcs/Parsing/ServerSettings.hpp \
-			srcs/Response/ClientResponseManager.hpp\
 			srcs/Response/Response.hpp\
 			srcs/Response/ResponseBody.hpp\
 			srcs/Response/ResponseHeader.hpp\
