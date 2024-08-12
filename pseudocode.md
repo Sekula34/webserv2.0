@@ -170,3 +170,11 @@
 3. If in map that key exist then marked In client instance  that is not allowed to write and remove that old client from the map
 4. Value will now become new client and the old one is not destroyed yet
 5. Destroy client after write and remove it from map
+
+
+## Epoll client Handle 
+1. PROCESS HEADER
+2. IF There is body 
+	1. READ BODY
+	2. PROCESS BODY
+3. PROCESS ANSWER

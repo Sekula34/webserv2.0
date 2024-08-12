@@ -3,6 +3,7 @@
 #include "Directive.hpp"
 # include "ServerSettings.hpp"
 #include <vector>
+#include "../epoll/Client.hpp"
 
 /**
  * @brief class that contains all ServerSetting in vector _servers
@@ -19,6 +20,7 @@ class ServersInfo
 
 		void _setHttpDirectives(void);
 		bool _isTokenHttpDirective(const Token& toCheck) const;
+		bool _validateClientHeader(const ClientHeader* header);
 		std::vector<ServerSettings> _getAllServersIdWithPort(int port);
 
 	public :
@@ -46,6 +48,14 @@ class ServersInfo
 		 *if serverName is specified find return first Server with port == portNumber and name == serverName, if not again first with port is retured
 		 */
 		const ServerSettings& getServerByPort(int portNumber, std::string serverName ="");
+
+		/**
+		 * @brief get Server resposible for client response
+		 * 
+		 * @param client for which you are looking for server
+		 * @return ServerSettings* for client or NULL if there is no Server for that client (400 bad request usually)
+		 */
+		ServerSettings* getClientServer(const Client& client);
 		
 		/**
 		 * @brief Get the Unique Ports number for creating listeningSockets

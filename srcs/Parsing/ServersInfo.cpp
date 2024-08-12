@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../Utils/Logger.hpp"
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -137,6 +138,28 @@ const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string s
 	}
 	serverId = ServersId[0].getServerId();
 	return getServerById(serverId);
+}
+
+bool ServersInfo::_validateClientHeader(const ClientHeader* header)
+{
+	if(header == NULL)
+	{
+		Logger::warning("Trying to get Client Server with client that have no header");
+		return false;
+	}
+	if(header->getErrorCode() == 404)
+	{
+		Logger::warning("Client sends bad request, There is no filled info in header for finding server");
+		return false;
+	}
+	return true;
+}
+
+ServerSettings* ServersInfo::getClientServer(const Client& client)
+{
+	if(_validateClientHeader(client.header) == false)
+		return NULL;
+	return NULL;
 }
 
 //goes through vector of servers

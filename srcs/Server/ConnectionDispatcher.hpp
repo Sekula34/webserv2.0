@@ -9,7 +9,7 @@
 #include "../epoll/Client.hpp"
 #include "sys/epoll.h"
 #define MAX_EVENTS		10
-#define MAX_WAIT		-1 
+#define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
 
 
 /**
@@ -82,6 +82,9 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 		 * @param clientCommunicationSocket new fd that system return and need check
 		 */
 		void _clientFdCheck(int clientCommunicationFd);
+
+		void _processAnswer(Client& client);
+
 		/**
 		 * @brief fill vector with all socket that have something to read and are ready
 		 * 

@@ -50,7 +50,7 @@ ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& sour
 
 ConnectionDispatcher::~ConnectionDispatcher()
 {
-
+	close(epollfd);
 }
 
 void ConnectionDispatcher::epoll_add_listen_sock(int listen_sock)
@@ -108,9 +108,7 @@ void	ConnectionDispatcher::epoll_remove_client(struct epoll_event* events, std::
 
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	epoll_ctl(client->getEpollFd(), EPOLL_CTL_DEL, client->getFd(), events);
-
-	// CLOSE FD
-	close (client->getFd());
+	
 }
 
 Client* ConnectionDispatcher::find_client_in_clients(int client_fd, std::map<int, Client *> & clients)
@@ -207,15 +205,35 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 	if (!read_header(events, clients, client, idx))
 		return ;
 	//Logger::info("Client message is "); std::cout << client->getMessage() << std::endl;
-	client->createClientHeader();
+	
 	// PROCESS HEADER
-	// READ BODY
-	// PROCESS BODY
-	// PROCESS ANSWER
+	if(client->getReadHeader() == false)
+		client->createClientHeader();
+	if(client->header != NULL)
+	{
+		if(client->header->isBodyExpected() == true)
+		{
+			// READ BODY
+			// PROCESS BODY
+		}
+		std::cout << "client address is : " << client << std::endl;
+		_processAnswer(*client);
+		// PROCESS ANSWER
+		//_generateClientResponse(0);
+	}
 
 	// WRITE PROCESSED ANSWER TO CLIENT
 	if (client->getWriteClient())
 		write_client(events, clients, client, idx);
+}
+
+void ConnectionDispatcher::_processAnswer(Client& client)
+{
+	Logger::info("Process answer for client", true);
+	std::cout << "Client address is " << &client << std::endl;
+	const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
+	Logger::info("Resposible server is ", true);
+	std::cout << responseServer << std::endl;
 }
 
 
@@ -468,8 +486,11 @@ void ConnectionDispatcher::mainLoopEpoll()
 	signal(SIGINT, handle_sigint);
 	_addServerSocketsToEpoll();
 	int nfds;
+	Logger::warning("I am aabotu to start loop", true);
+	std::cout<<"my pid is: " << getpid() << std::endl;
 	while(true)
 	{
+		//Logger::warning("I am stuck", true);
 		if(flag)
 		{
 			Logger::info("Turn off procedure triggered"); std::cout<<std::endl;
@@ -478,8 +499,10 @@ void ConnectionDispatcher::mainLoopEpoll()
 		}
 		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
 		if (nfds == -1)
-			throw std::runtime_error("epoll wait failed");
-	
+		{
+			Logger::error("Epoll wait failed");
+			break;
+		}
 		for (size_t idx = 0; idx < static_cast<size_t>(nfds); ++idx)
 		{
 			if(_acceptClient(idx) == true)
@@ -533,7 +556,7 @@ void ConnectionDispatcher::mainLoop(void)
 			// read
 			// move it from current read to next write
 		}
-		_notStuckMessage();
+		//_notStuckMessage();
 	}
 	_closeAllClients();
 	Logger::warning("SERVER IS TURNED OFF"); std::cout<<std::endl;

@@ -15,9 +15,9 @@ int main()
 	
 	//UnitTest::allTests();
 	//ServerTest::runAllTests();
-	//CHTest::runAllTests();
+	CHTest::runAllTests();
 	
-	CHTest::simplePrint();
+	//CHTest::simplePrint();
 	//UnitTest::stringEndCheck();
 	//UnitTest::stringDelimCheck();
 	
