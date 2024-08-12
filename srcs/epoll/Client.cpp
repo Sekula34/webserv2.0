@@ -24,7 +24,7 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 	_initVars();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
-	//std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
+	std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
 
 /******************************************************************************/
