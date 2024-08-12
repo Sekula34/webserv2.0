@@ -43,6 +43,7 @@ class Client {
 		 * 
 		 */
 		void				createClientHeader();
+		ClientHeader* header; //client Responsible for deleting
 
 	private:
 		unsigned long const	_id;
@@ -56,7 +57,6 @@ class Client {
 		bool				_writeclient;
 							Client(void);
 
-		ClientHeader* _header; //client Responsible for deleting
 
 
 		void	_initVars(void);

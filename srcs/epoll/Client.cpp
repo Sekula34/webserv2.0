@@ -4,6 +4,8 @@
 #include <cstring>
 #include <iostream>
 #include "../Utils/Logger.hpp"
+#include <unistd.h>
+
 #include "../Parsing/ParsingUtils.hpp"
 
 /******************************************************************************/
@@ -31,8 +33,9 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 
 Client::~Client (void)
 {
+	close (_fd);
 	delete [] _recvline;
-	delete _header;
+	delete header;
 	std::cout << "Client with ID: " << _id <<  " destructed" << std::endl;
 }
 
@@ -156,19 +159,12 @@ void		Client::addRecvLineToMessage()
 
 void Client::createClientHeader()
 {
-	if(_header != NULL)
+	if(header != NULL)
 	{
 		Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
 		return;
 	}
-	Logger::error("Header is null");
-	// //bool result = ParsingUtils::isStringEnd(_message, "\r\n\r\n");
-	for(size_t i = 0; i < _message.size(); i++)
-	{
-		std::cout << "char " << _message[i] << " Ascii: " << static_cast<int>(_message[i]) << std::endl;
-	}
-	std::cout << "size of message is " << _message.size() << std::endl;
-	_header = new ClientHeader(this->getMessage());
+	header = new ClientHeader(this->getMessage());
 	Logger::info("Client header created with : "); std::cout << _message;
 }
 
@@ -180,5 +176,5 @@ void Client::_initVars(void)
 	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	
-	_header = NULL;
+	header = NULL;
 }
