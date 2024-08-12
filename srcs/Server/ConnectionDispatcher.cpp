@@ -13,6 +13,7 @@
 #include <fcntl.h>
 //#include "../Response/ServerResponse.hpp"
 #include "../Utils/Logger.hpp"
+#include "../Response/Response.hpp"
 
 
 //#include "../Parsing/ParsingUtils.hpp"
@@ -50,6 +51,9 @@ ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& sour
 
 ConnectionDispatcher::~ConnectionDispatcher()
 {
+	std::map<int, Client*>::iterator it = clients.begin();
+	for(; it != clients.end(); it++)
+		delete it->second;
 	close(epollfd);
 }
 
@@ -217,7 +221,7 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 			// PROCESS BODY
 		}
 		//std::cout << "client address is : " << client << std::endl;
-		//_processAnswer(*client);
+		_processAnswer(*client);
 		// PROCESS ANSWER
 		//_generateClientResponse(0);
 	}
@@ -231,9 +235,16 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 {
 	Logger::info("Process answer for client", true);
 	std::cout << "Client address is " << &client << std::endl;
-	const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
+	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
+
+	//const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
 	Logger::info("Resposible server is ", true);
-	std::cout << responseServer << std::endl;
+	if(responseServer != NULL)
+		std::cout << *responseServer << std::endl;
+	else
+		Logger::warning("NO Server found");
+	//Response respones(client, responseServer);
+	//respones.sendResponse();
 }
 
 
@@ -509,8 +520,9 @@ void ConnectionDispatcher::mainLoopEpoll()
 				continue;
 			handle_client(events, clients, idx);
 		}
-		_notStuckMessage();
+		//_notStuckMessage();
 	}
+
 
 }
 
