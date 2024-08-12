@@ -16,6 +16,11 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
     // }
     Logger::info("Called response body constructor: ");
 	std::cout << clientHeader << std::endl;
+    if(clientHeader.getErrorCode() == 400)
+    {
+        _generateErrorPage(400);
+        return;
+    }
 	if(clientHeader.getErrorCode() != 0)
 	{
         _renderServerErrorPage(clientHeader.getErrorCode());
