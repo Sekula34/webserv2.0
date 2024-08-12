@@ -216,8 +216,8 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 			// READ BODY
 			// PROCESS BODY
 		}
-		std::cout << "client address is : " << client << std::endl;
-		_processAnswer(*client);
+		//std::cout << "client address is : " << client << std::endl;
+		//_processAnswer(*client);
 		// PROCESS ANSWER
 		//_generateClientResponse(0);
 	}
