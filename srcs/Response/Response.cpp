@@ -10,20 +10,21 @@
 
 Response::Response(const Client& client, const ServerSettings* server)
 :_client(client), _server(server) ,_responseHeader(NULL)
-,_responseBody(*client.header, *_server)
+,_responseBody(*client.header, _server)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
 
-// Response::Response(const Response& source)
-// :_client(source._client, _server(source._server),
-// _responseBody(source._responseBody)
-// {
-// 	if(source._responseHeader == NULL)
-// 		_responseHeader = NULL;
-// 	else  
-// 		_responseHeader = new ResponseHeader(*source._responseHeader);
-// }
+//maybe broken
+Response::Response(const Response& source)
+:_client(source._client),
+_responseBody(source._responseBody)
+{
+	if(source._responseHeader == NULL)
+		_responseHeader = NULL;
+	else  
+		_responseHeader = new ResponseHeader(*source._responseHeader);
+}
 
 Response&  Response::operator=(const Response& source)
 {
@@ -34,6 +35,12 @@ Response&  Response::operator=(const Response& source)
 Response::~Response()
 {
 	delete _responseHeader;
+}
+
+std::string Response::getResponseString(void)
+{
+	std::string res = _createResponseString();
+	return res;
 }
 
 std::string Response::_createResponseString(void) 
@@ -75,13 +82,11 @@ bool Response::sendResponse()
 {
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
-	std::cout <<response<< std::endl;
  	int writeValue;
 	writeValue = write(_client.getFd(), response.c_str(), response.size());
-	// if(writeValue == -1)
-	// 	return false;
+	if(writeValue == -1)
+		return false;
 	return true;
-	//send it
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)

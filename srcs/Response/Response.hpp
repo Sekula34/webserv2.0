@@ -10,8 +10,8 @@ class Response
 {
 	private :
 		const Client& _client;
-		const ServerSettings* _server;
-		ResponseHeader* _responseHeader;
+		const ServerSettings* _server; //This class is not resposible for deleting
+		ResponseHeader* _responseHeader; //owning
 		//CLASS HEADER;
 		ResponseBody _responseBody;
 		
@@ -25,6 +25,7 @@ class Response
 		Response& operator=(const Response& source);
 		~Response();
 
+		std::string getResponseString(void);
 		void sendSimpleResponse() const;
 		bool sendResponse();
 
