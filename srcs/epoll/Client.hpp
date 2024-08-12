@@ -23,6 +23,8 @@ class Client {
 		Client &			operator=(Client const & rhs);
 							
 							// set and get
+		Response* 			getResponse() const;
+		void				setResponse(Response* respose);
 		unsigned long		getId() const;
 		int					getFd() const;
 		std::clock_t		getStartTime() const;

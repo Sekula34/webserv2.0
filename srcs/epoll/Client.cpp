@@ -76,6 +76,22 @@ std::clock_t	Client::getStartTime() const
 	return (_start);
 }
 
+
+Response* Client::getResponse()const 
+{
+	return(_response);
+}
+
+void Client::setResponse(Response* response)
+{
+	if(_response != NULL)
+	{
+		Logger::warning("Setting response in client but client already have one. Possible leak", true);
+		return;
+	}
+	_response = response;
+}
+
 unsigned long	Client::getId() const
 {
 	return (_id);
