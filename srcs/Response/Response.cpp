@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include <unistd.h>
+#include "../epoll/Client.hpp"
 
 Response::Response(const Client& client, const ServerSettings* server)
 :_client(client), _server(server) ,_responseHeader(NULL)

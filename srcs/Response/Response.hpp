@@ -3,7 +3,8 @@
 #include <ostream>
 #include "ResponseHeader.hpp"
 #include "ResponseBody.hpp"
-#include "../epoll/Client.hpp"
+
+class Client;
 //#include "../Parsing/ServerSettings.hpp"
 
 class Response 

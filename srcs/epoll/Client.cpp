@@ -6,7 +6,6 @@
 #include "../Utils/Logger.hpp"
 #include <unistd.h>
 
-#include "../Parsing/ParsingUtils.hpp"
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -36,6 +35,7 @@ Client::~Client (void)
 	close (_fd);
 	delete [] _recvline;
 	delete header;
+	delete _response;
 	std::cout << "Client with ID: " << _id <<  " destructed" << std::endl;
 }
 
@@ -177,4 +177,5 @@ void Client::_initVars(void)
 	memset(_recvline, 0, MAXLINE);
 	
 	header = NULL;
+	_response = NULL;
 }

@@ -244,7 +244,8 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 	else
 		Logger::warning("NO Server found");
 	Response respones(client, responseServer);
-	respones.sendResponse();
+	Logger::info("Response created "); std::cout << respones.getResponseString() << std::endl;
+	//respones.sendResponse();
 }
 
 

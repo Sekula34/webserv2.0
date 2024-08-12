@@ -6,6 +6,9 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
+#include "../epoll/Client.hpp"
+
+class Client;
 
 ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
 :_client(client), _server(server), _httpStatusCode(0)

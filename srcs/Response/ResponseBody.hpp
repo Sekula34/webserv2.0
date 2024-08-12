@@ -1,7 +1,8 @@
 #ifndef  RESPONSEBODY_HPP
 # define RESPONSEBODY_HPP
-#include "../epoll/Client.hpp"
 #include "../Parsing/ServerSettings.hpp"
+
+class Client;
 
 class ResponseBody
 {

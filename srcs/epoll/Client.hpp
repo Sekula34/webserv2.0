@@ -8,6 +8,8 @@
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
 # include "../Client/ClientHeader.hpp"
+# include "../Response/Response.hpp"
+
 
 class Client {
 
@@ -44,7 +46,6 @@ class Client {
 		 */
 		void				createClientHeader();
 		ClientHeader* header; //client Responsible for deleting
-
 	private:
 		unsigned long const	_id;
 		int const			_fd;
@@ -57,7 +58,7 @@ class Client {
 		bool				_writeclient;
 							Client(void);
 
-
+		Response* _response; // client owns so it should delete
 
 		void	_initVars(void);
 };
