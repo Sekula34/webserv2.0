@@ -137,7 +137,7 @@ int	Client::getErrorCode() const
 
 std::string const &	Client::getBody() const
 {
-	return (_body);
+	return (_client_body);
 }
 
 void	Client::setReadHeader(bool b)

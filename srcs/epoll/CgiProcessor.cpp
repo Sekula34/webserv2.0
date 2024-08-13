@@ -73,99 +73,100 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 	// pipe return of executable back to parent process;
 
 
-char**	CgiProcessor::create_env()
-{
+// char**	CgiProcessor::create_env()
+// {
 
-}
+// }
 
-char**	CgiProcessor::create_argv()
-{
+// char**	CgiProcessor::create_argv()
+// {
 
-}
+// }
 
-int	CgiProcessor::execute()
-{
-	int exepipefd[2];
-	char** env = create_env();
-	char** argv = create_env();
+// int	CgiProcessor::execute()
+// {
+// 	int exepipefd[2];
+// 	char** env = create_env();
+// 	char** argv = create_env();
 
-	if (pipe(exepipefd) == -1)
-		return (_client->setErrorCode(500), 1);
+// 	if (pipe(exepipefd) == -1)
+// 		return (_client->setErrorCode(500), 1);
 
-	write(exepipefd[1], _client->getBody().c_str(), _client->getBody().size());
+// 	write(exepipefd[1], _client->getBody().c_str(), _client->getBody().size());
 
-	close(exepipefd[1]);
-	close(_pipefd[0]);
+// 	close(exepipefd[1]);
+// 	close(_pipefd[0]);
 
-	if (dup2(exepipefd[0], STDIN_FILENO) == -1)
-		return (_client->setErrorCode(500), 1);
-	close(exepipefd[0]);
-	if (dup2(_pipefd[1], STDOUT_FILENO) == -1)
-		return (_client->setErrorCode(500), 1);
-	close(_pipefd[1]);
-	execve("script.py", argv, env);
-}
+// 	if (dup2(exepipefd[0], STDIN_FILENO) == -1)
+// 		return (_client->setErrorCode(500), 1);
+// 	close(exepipefd[0]);
+// 	if (dup2(_pipefd[1], STDOUT_FILENO) == -1)
+// 		return (_client->setErrorCode(500), 1);
+// 	close(_pipefd[1]);
+// 	execve("script.py", argv, env);
+// 	return 0;
+// }
 
-int	CgiProcessor::wait_for_child()
-{
-	int					status;
-	int					waitreturn;
+// int	CgiProcessor::wait_for_child()
+// {
+// 	int					status;
+// 	int					waitreturn;
 
-	close (_pipefd[1]);
+// 	close (_pipefd[1]);
 
-	std::cout << "waiting for child ..." << std::endl;
-	waitreturn = waitpid(_pid, &status, WNOHANG);
-	if (waitreturn == -1)
-		return (_client->setErrorCode(500), 1);
-	if (waitreturn != 0)
-			return (0);
-	return (1);
-}
+// 	std::cout << "waiting for child ..." << std::endl;
+// 	waitreturn = waitpid(_pid, &status, WNOHANG);
+// 	if (waitreturn == -1)
+// 		return (_client->setErrorCode(500), 1);
+// 	if (waitreturn != 0)
+// 			return (0);
+// 	return (1);
+// }
 
-int	CgiProcessor::gen_body()
-{
-	std::string			line;
-	unsigned char		buffer[MAXLINE];
+// int	CgiProcessor::gen_body()
+// {
+// 	std::string			line;
+// 	unsigned char		buffer[MAXLINE];
 
-	std::cout << "child has exited" << std::endl;
-	memset(buffer, 0, MAXLINE);
+// 	std::cout << "child has exited" << std::endl;
+// 	memset(buffer, 0, MAXLINE);
 
-	int readsize = read(_pipefd[0], buffer, MAXLINE - 1);
-	if (readsize == -1)
-		return (_client->setErrorCode(500), 1);
+// 	int readsize = read(_pipefd[0], buffer, MAXLINE - 1);
+// 	if (readsize == -1)
+// 		return (_client->setErrorCode(500), 1);
 
-	std::cout << "string from child process: " << buffer << std::endl;
-	close (_pipefd[0]);
-	return (1);
-}
+// 	std::cout << "string from child process: " << buffer << std::endl;
+// 	close (_pipefd[0]);
+// 	return (1);
+// }
 
-// CHECKER FOR PYTHON
-	// what ending is this? eg "script.py" -> language = python 
-	// do we support this language?
-	// is the interpreter for this language installed on this system?
-	// in this case argv = {"pthon3", "script.py"}
+// // CHECKER FOR PYTHON
+// 	// what ending is this? eg "script.py" -> language = python 
+// 	// do we support this language?
+// 	// is the interpreter for this language installed on this system?
+// 	// in this case argv = {"pthon3", "script.py"}
 
-int CgiProcessor::process()
-{
-	if (pipe(_pipefd) == -1)
-		return (_client->setErrorCode(500), 1);
+// int CgiProcessor::process()
+// {
+// 	if (pipe(_pipefd) == -1)
+// 		return (_client->setErrorCode(500), 1);
 
-	if (!_forked)
-	{
-		_forked = true;
-		_pid = fork();
+// 	if (!_forked)
+// 	{
+// 		_forked = true;
+// 		_pid = fork();
 
-		if (_pid == CHILD)
-		{
-			if(execute() == 1)
-				return (_client->setErrorCode(500), 1);
-		}
-	}
+// 		if (_pid == CHILD)
+// 		{
+// 			if(execute() == 1)
+// 				return (_client->setErrorCode(500), 1);
+// 		}
+// 	}
 
-	if (_pid != CHILD)
-	{
-		if (wait_for_child() == 0)
-			gen_body();
-	}
-	return (0);
-}
+// 	if (_pid != CHILD)
+// 	{
+// 		if (wait_for_child() == 0)
+// 			gen_body();
+// 	}
+// 	return (0);
+// }

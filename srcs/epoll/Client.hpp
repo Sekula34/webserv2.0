@@ -8,7 +8,7 @@
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
 # include "../Client/ClientHeader.hpp"
-# include "CgiProcessor.hpp"
+//# include "CgiProcessor.hpp"
 
 class CgiProcessor;
 # include "../Response/Response.hpp"
