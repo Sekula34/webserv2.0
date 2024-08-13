@@ -8,6 +8,9 @@
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
 # include "../Client/ClientHeader.hpp"
+# include "CgiProcessor.hpp"
+
+class CgiProcessor;
 
 class Client {
 
@@ -25,11 +28,14 @@ class Client {
 		int					getFd() const;
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
-		unsigned char*			getRecvLine() const;
+		unsigned char*		getRecvLine() const;
 		int					getEpollFd() const;
+		int					getErrorCode() const;
 		bool				getReadHeader() const;
 		bool				getReadBody() const;
 		bool				getWriteClient() const;
+		std::string const &	getBody() const;
+		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
 		void				setWriteClient(bool b);
@@ -43,14 +49,18 @@ class Client {
 		 * 
 		 */
 		void				createClientHeader();
-		ClientHeader* header; //client Responsible for deleting
+		CgiProcessor*		Cgi;			
+		ClientHeader*		header; //client Responsible for deleting
 
 	private:
+		int					_errorCode;
 		unsigned long const	_id;
 		int const			_fd;
 		std::clock_t const	_start;
 		int const			_epollfd;
 		std::string			_message;
+		std::string			_client_body; //maybe this will be replaced by body class
+		std::string			_response_body; // this will be replaced by respnse class
 		unsigned char*			_recvline;
 		bool				_readheader;
 		bool				_readbody;

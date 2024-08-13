@@ -115,6 +115,16 @@ bool	Client::getWriteClient() const
 	return (_writeclient);
 }
 
+int	Client::getErrorCode() const
+{
+	return (_errorCode);
+}
+
+std::string const &	Client::getBody() const
+{
+	return (_body);
+}
+
 void	Client::setReadHeader(bool b)
 {
 	_readheader = b;
@@ -130,6 +140,10 @@ void	Client::setWriteClient(bool b)
 	_writeclient = b;
 }
 
+void	Client::setErrorCode(int c)
+{
+	_errorCode = c;
+}
 /******************************************************************************/
 /*                               Error Handling                               */
 /******************************************************************************/

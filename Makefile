@@ -27,6 +27,7 @@ ParsingObjects/%.o: srcs/%.cpp
 SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Client/ClientHeaderManager.cpp \
 			srcs/epoll/Client.cpp \
+			srcs/epoll/CgiProcessor.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
@@ -55,6 +56,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 HEADERS =	srcs/Client/ClientHeader.cpp\
 			srcs/Client/ClientHeaderManager.hpp \
 			srcs/epoll/Client.hpp \
+			srcs/epoll/CgiProcessor.hpp \
 			srcs/Parsing/LocationSettings.hpp \
 			srcs/Parsing/ServersInfo.hpp \
 			srcs/Parsing/Token.hpp \
