@@ -11,6 +11,8 @@
 # include "CgiProcessor.hpp"
 
 class CgiProcessor;
+# include "../Response/Response.hpp"
+
 
 class Client {
 
@@ -24,6 +26,8 @@ class Client {
 		Client &			operator=(Client const & rhs);
 							
 							// set and get
+		Response* 			getResponse() const;
+		void				setResponse(Response* respose);
 		unsigned long		getId() const;
 		int					getFd() const;
 		std::clock_t		getStartTime() const;
@@ -67,7 +71,7 @@ class Client {
 		bool				_writeclient;
 							Client(void);
 
-
+		Response* _response; // client owns so it should delete
 
 		void	_initVars(void);
 };

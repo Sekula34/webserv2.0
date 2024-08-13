@@ -549,3 +549,59 @@ nginx will show /somethingNew/hej/drek;
 
 
 CGI Common Gateway Interface;
+
+
+## const type* name
+
+1. const type* name
+Example: const int* ptr;
+Explanation:
+
+ptr is a pointer to a const int.
+You can change the address stored in ptr, but you cannot modify the value at the address ptr is pointing to.
+Implications:
+
+You can make ptr point to a different integer, but you cannot change the value of the integer that ptr currently points to.
+
+int a = 10;
+int b = 20;
+const int* ptr = &a;  // ptr points to a
+
+*ptr = 30;  // Error: cannot modify a through ptr
+
+ptr = &b;   // This is fine: ptr now points to b
+
+
+
+## type* const name
+
+Example: int* const ptr;
+Explanation:
+
+ptr is a constant pointer to an int.
+You can modify the value at the address ptr is pointing to, but you cannot change the address stored in ptr.
+Implications:
+
+The pointer ptr will always point to the same memory address, but you can change the value at that address.
+
+int a = 10;
+int* const ptr = &a;  // ptr is a constant pointer to a
+
+*ptr = 30;  // This is fine: you can modify the value of a through ptr
+
+int b = 20;
+ptr = &b;   // Error: cannot change the address stored in ptr
+
+
+const type* const name
+Example: const int* const ptr;
+Explanation:
+
+ptr is a constant pointer to a constant int.
+You cannot change the address stored in ptr, nor can you modify the value at that address. Both are constant.
+
+int a = 10;
+const int* const ptr = &a;  // ptr is a constant pointer to a constant int
+
+*ptr = 30;  // Error: cannot modify a through ptr
+ptr = &b;   // Error: cannot change the address stored in ptr

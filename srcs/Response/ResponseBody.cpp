@@ -6,19 +6,21 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
+#include "../epoll/Client.hpp"
 
-ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSettings& server)
-:_clientHeader(clientHeader), _server(server), _httpStatusCode(0)
+class Client;
+
+ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
+:_client(client), _server(server), _httpStatusCode(0)
 {
-    // if(clientHeader.isFullyRead() == false)
-    // {
-    //     throw std::runtime_error("Trying to create Resonse body without fully read header");
-    // }
-    Logger::info("Called response body constructor: ");
-	std::cout << clientHeader << std::endl;
-	if(clientHeader.getErrorCode() != 0)
+    if(client.header->getErrorCode() == 400)
+    {
+        _generateErrorPage(400);
+        return;
+    }
+	if(client.header->getErrorCode() != 0)
 	{
-        _renderServerErrorPage(clientHeader.getErrorCode());
+        _renderServerErrorPage(client.header->getErrorCode());
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
 	}
 	else   
@@ -29,7 +31,7 @@ ResponseBody::ResponseBody(const ClientHeader& clientHeader, const ServerSetting
 }
 
 ResponseBody::ResponseBody(const ResponseBody& source)
-:_clientHeader(source._clientHeader), _server(source._server), _response(source._response)
+:_client(source._client), _server(source._server), _response(source._response)
 {
 
 }
@@ -86,7 +88,9 @@ std::string ResponseBody::_generateErrorPage(const int httpErrorCode)
     */
 void ResponseBody::_renderServerErrorPage(int errorCode)
 {
-    std::string errorPagePath = _server.getErrorPagePath(errorCode);
+    std::string errorPagePath = "";
+    if(_server != NULL)
+        errorPagePath = _server->getErrorPagePath(errorCode);
     if(errorPagePath != "")
     {
         Logger::info("Server have that page and path to it is "); std::cout << errorPagePath << std::endl;
@@ -110,14 +114,14 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
 void ResponseBody::_handlerGetMethod()
 {
     Logger::info("Handling GET, ServerLocation", true);
-    std::string clientRequestUrl = _clientHeader.getRequestedUrl();
+    std::string clientRequestUrl = _client.header->getRequestedUrl();
     Logger::info("Requsted url is "); std::cout << clientRequestUrl << std::endl;
-    std::string serverLocation = _server.getLocationPartOfUrl(clientRequestUrl);
+    std::string serverLocation = _server->getLocationPartOfUrl(clientRequestUrl);
     Logger::info("Server location resposible for reponse is " + serverLocation, true);
     bool found = true;
  //   Logger::info("Server that is responding is: "); std::cout << std::endl;
     //_server.printServerSettings();
-    std::vector<LocationSettings>::const_iterator it = _server.fetchLocationWithUri(serverLocation, found);
+    std::vector<LocationSettings>::const_iterator it = _server->fetchLocationWithUri(serverLocation, found);
     if(found == true)
     {
         const LocationSettings& location = *it;
@@ -182,7 +186,7 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
 bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const
 {
     path.erase();
-    std::string requestedUrl = _clientHeader.getRequestedUrl();
+    std::string requestedUrl = _client.header->getRequestedUrl();
     std::cout << "Requested url is " << requestedUrl << std::endl;
     std::cout << "Location uri is" << location.getLocationUri();
     std::string baseName = ParsingUtils::getBaseName(requestedUrl, location.getLocationUri());
@@ -217,11 +221,11 @@ void ResponseBody::_fetchServerPage(const LocationSettings& location)
 
 void ResponseBody::_generateServerResponse()
 {
-    if(_clientHeader.getRequestLine().protocolVersion != "HTTP/1.1")
+    if(_client.header->getRequestLine().protocolVersion != "HTTP/1.1")
     {
         _renderServerErrorPage(505);
     }
-    std::string requstedMethod = _clientHeader.getRequestLine().requestMethod;
+    std::string requstedMethod = _client.header->getRequestLine().requestMethod;
     if(requstedMethod == "GET")
     {
         _handlerGetMethod();

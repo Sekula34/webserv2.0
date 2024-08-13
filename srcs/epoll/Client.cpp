@@ -6,7 +6,6 @@
 #include "../Utils/Logger.hpp"
 #include <unistd.h>
 
-#include "../Parsing/ParsingUtils.hpp"
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -24,7 +23,6 @@ Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _s
 	_initVars();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
-	//std::cout << "Client constructed, unique ID: " << _id << " FD: " << _fd << std::endl;
 }
 
 /******************************************************************************/
@@ -36,7 +34,8 @@ Client::~Client (void)
 	close (_fd);
 	delete [] _recvline;
 	delete header;
-	std::cout << "Client with ID: " << _id <<  " destructed" << std::endl;
+	delete _response;
+	Logger::info("Destructed client with ID: "); std::cout << _id << std::endl;
 }
 
 /******************************************************************************/
@@ -74,6 +73,22 @@ Client &	Client::operator=(Client const & rhs)
 std::clock_t	Client::getStartTime() const
 {
 	return (_start);
+}
+
+
+Response* Client::getResponse()const 
+{
+	return(_response);
+}
+
+void Client::setResponse(Response* response)
+{
+	if(_response != NULL)
+	{
+		Logger::warning("Setting response in client but client already have one. Possible leak", true);
+		return;
+	}
+	_response = response;
 }
 
 unsigned long	Client::getId() const
@@ -191,4 +206,5 @@ void Client::_initVars(void)
 	memset(_recvline, 0, MAXLINE);
 	
 	header = NULL;
+	_response = NULL;
 }

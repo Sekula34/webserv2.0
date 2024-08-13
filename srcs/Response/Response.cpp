@@ -7,16 +7,18 @@
 #include <cstring>
 #include <sstream>
 #include <unistd.h>
+#include "../epoll/Client.hpp"
 
-Response::Response(ClientHeader& clientHeader, const ServerSettings& server)
-:_clientHeader(clientHeader), _server(server) ,_responseHeader(NULL)
-,_responseBody(_clientHeader, _server)
+Response::Response(const Client& client, const ServerSettings* server)
+:_client(client), _server(server) ,_responseHeader(NULL)
+,_responseBody(client, _server)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
 
+//maybe broken
 Response::Response(const Response& source)
-:_clientHeader(source._clientHeader), _server(source._server),
+:_client(source._client),
 _responseBody(source._responseBody)
 {
 	if(source._responseHeader == NULL)
@@ -34,6 +36,12 @@ Response&  Response::operator=(const Response& source)
 Response::~Response()
 {
 	delete _responseHeader;
+}
+
+std::string Response::getResponseString(void)
+{
+	std::string res = _createResponseString();
+	return res;
 }
 
 std::string Response::_createResponseString(void) 
@@ -75,13 +83,11 @@ bool Response::sendResponse()
 {
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
-	std::cout <<response<< std::endl;
-	// int writeValue;
-	// writeValue = write(_clientHeader.getClientFd(), response.c_str(), response.size());
-	// if(writeValue == -1)
-	// 	return false;
+ 	int writeValue;
+	writeValue = write(_client.getFd(), response.c_str(), response.size());
+	if(writeValue == -1)
+		return false;
 	return true;
-	//send it
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)

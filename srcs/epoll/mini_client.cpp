@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <iostream>
 
-#define SERVER_PORT	18000
+#define SERVER_PORT	8080
 
 #define MAXLINE		4096
 #define SA struct sockaddr
@@ -37,9 +37,6 @@ int main(int argc, char **argv)
 	char				recvline[MAXLINE];
 
 
-	if (argc != 2)
-		exit_me("need exactly two arguments");
-
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		exit_me("Error while creating the socket!");
 
@@ -47,14 +44,14 @@ int main(int argc, char **argv)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(SERVER_PORT);
 
-	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
+	if (inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr) <= 0)
 		exit_me("inet error");
 
 	if (connect(sockfd, (SA *) &servaddr, sizeof(servaddr)) < 0)
 		exit_me("connect failed");
 
-	// sprintf(sendline, "GET / HTTP/1.1 ... noice\r\n\r\n");
-	sprintf(sendline, "");
+	sprintf(sendline, "GET / HTTP/1.1 ... noice\r\n\r\n");
+	//sprintf(sendline, "");
 	sendbytes = strlen(sendline);
 
 	if (write(sockfd, sendline, sendbytes) != sendbytes)
