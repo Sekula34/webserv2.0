@@ -23,6 +23,11 @@ ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
         _renderServerErrorPage(client.header->getErrorCode());
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
 	}
+    else if (client.getCgi())
+    {
+        _httpStatusCode = 200;
+        _response = client.getCgi()->getCgiResponse();
+    }
 	else   
 	{
         Logger::warning("GENERATING SERVER RESPONSE NOT fully IMPLEMENTED YET", true);
