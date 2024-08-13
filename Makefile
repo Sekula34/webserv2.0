@@ -36,6 +36,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
+			srcs/Response/Autoindex.cpp \
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
@@ -45,6 +46,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Utils/FileUtils.cpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.cpp\
+			testers/AutoIndexTest.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
 			testers/CHTest.cpp\
@@ -63,6 +65,7 @@ HEADERS =	srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.hpp \
 			srcs/Parsing/ParsingUtils.hpp \
 			srcs/Parsing/ServerSettings.hpp \
+			srcs/Response/Autoindex.hpp\
 			srcs/Response/Response.hpp\
 			srcs/Response/ResponseBody.hpp\
 			srcs/Response/ResponseHeader.hpp\
@@ -70,8 +73,9 @@ HEADERS =	srcs/Client/ClientHeader.cpp\
 			srcs/Server/Socket.hpp \
 			srcs/Server/SocketManager.hpp \
 			srcs/Utils/FileUtils.hpp\
-			srcs/Utils/HttpStatusCode.cpp\
+			srcs/Utils/HttpStatusCode.hpp\
 			srcs/Utils/Logger.hpp\
+			testers/AutoIndexTest.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp \
 			testers/CHTest.hpp\
