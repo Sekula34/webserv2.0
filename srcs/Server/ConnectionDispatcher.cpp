@@ -24,8 +24,8 @@ void handle_sigint(int sig)
 	//std::cout << "Called custom ctrl + c function" << std::endl;
 }
 
-ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo)
-:_sockets(sockets), _serversInfo(serversInfo)
+ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo, char** envp)
+:_sockets(sockets), _serversInfo(serversInfo), _envp(envp)
 {
 
 }
@@ -77,7 +77,7 @@ void	ConnectionDispatcher::epoll_add_client(int epollfd, int listen_socket)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(client_fd, epollfd);
+	Client * newClient = new Client(client_fd, epollfd, _envp);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
 	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.
@@ -196,6 +196,38 @@ void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int
 	}
 }
 
+void	ConnectionDispatcher::_check_cgi(Client* client)
+{
+	if (!client->cgi_checked)
+	{
+		client->cgi_checked= true;
+		bool found = true;
+		const ServerSettings*	clientServer = _serversInfo.getClientServer(*client);
+		if (!clientServer)
+			return ;
+
+		ClientHeader* clientHeader = client->header;
+		std::string ServerLocation = clientServer->getLocationPartOfUrl(clientHeader->getRequestedUrl());
+		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
+		Logger::warning(it->getLocationUri(), true);
+		Logger::warning("", true);
+		std::cout << found << std::endl;
+		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
+		{ 
+			Logger::warning("Cgi checked and it exist on this location", true);
+			client->setCgi(new CgiProcessor(client));
+		}
+	}
+
+}
+
+bool	ConnectionDispatcher::run_cgi(Client* client)
+{
+	if (client->getCgi())
+		if (client->getCgi()->process())
+			return (true);
+	return (false);
+}
 
 void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx)
 {
@@ -207,6 +239,9 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 	if (!read_header(events, clients, client, idx))
 		return ;
 	//Logger::info("Client message is "); std::cout << client->getMessage() << std::endl;
+	// if (client->getCgi())
+	// 	if (client->getCgi()->process())
+	// 		return ;
 	
 	// PROCESS HEADER
 	if(client->getReadHeader() == false)
@@ -218,6 +253,14 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 			// READ BODY
 			// PROCESS BODY
 		}
+		// IF CGI RETURNS TRUE WE ARE WAITUNG FOR CHILD TO RETURN
+		_check_cgi(client);
+		if (run_cgi(client))
+			return ;
+		// if cgi request -> run CGI PROCESSOR
+		// if child not returned yet return;
+		//
+		// as soon as child returned write output of cgi script into string  
 		//std::cout << "client address is : " << client << std::endl;
 		// PROCESS ANSWER
 		_processAnswer(*client);

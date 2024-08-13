@@ -17,7 +17,7 @@
 class ConnectionDispatcher 
 {
 	public :
-		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
+		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo, char** envp);
 		ConnectionDispatcher(ConnectionDispatcher& source);
 		ConnectionDispatcher& operator=(ConnectionDispatcher& source);
 		~ConnectionDispatcher();
@@ -25,17 +25,18 @@ class ConnectionDispatcher
 		std::map<int, Client *>	clients; //maybe private
 		struct epoll_event	events[MAX_EVENTS]; // maybe private
 
-		void mainLoopEpoll(void);
-		int	epollfd; //turn this in private later 
-		void epoll_add_listen_sock(int listen_sock); //pribvate probably 
-		void epoll_add_client(int epollfd, int listen_socket);
-void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client);
+		void 	mainLoopEpoll(void);
+		int		epollfd; //turn this in private later 
+		void 	epoll_add_listen_sock(int listen_sock); //pribvate probably 
+		void 	epoll_add_client(int epollfd, int listen_socket);
+		void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client);
 	
-	Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
-	bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
-bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
-	void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
-	void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+		Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
+		bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
+		bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+		void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
+		void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+		
 	
 	private :
 		SocketManager &_sockets;
@@ -50,6 +51,7 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 		 * @return true if client is accepted
 		 * @return false if fd is client 
 		 */
+		bool	run_cgi(Client* client);
 		bool _acceptClient(size_t idx);
 
 
@@ -70,6 +72,9 @@ bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, 
 		 * commnet this while using valgrind cuz it allocates a lot in long run
 		 */
 		void _notStuckMessage(void) const;
+		void	_check_cgi(Client* client);
+		char**	_envp;
+		
 };
 
 #endif

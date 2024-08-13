@@ -8,6 +8,7 @@
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
 # include "../Client/ClientHeader.hpp"
+# include "CgiProcessor.hpp"
 //# include "CgiProcessor.hpp"
 
 class CgiProcessor;
@@ -20,7 +21,7 @@ class Client {
 		static int			client_cntr;
 		
 							// canonical
-							Client (int const fd, int const epollfd);
+							Client (int const fd, int const epollfd, char** envp);
 							~Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);
@@ -38,11 +39,14 @@ class Client {
 		bool				getReadHeader() const;
 		bool				getReadBody() const;
 		bool				getWriteClient() const;
-		std::string const &	getBody() const;
+		std::string const &	getClientBody() const;
+		char**				getEnvp() const;
+		CgiProcessor*		getCgi() const;
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
 		void				setWriteClient(bool b);
+		void				setCgi(CgiProcessor* cgi);
 
 							//Client specific functions
 		void				addRecvLineToMessage();
@@ -55,6 +59,7 @@ class Client {
 		void				createClientHeader();
 		CgiProcessor*		Cgi;			
 		ClientHeader*		header; //client Responsible for deleting
+		bool	cgi_checked;
 
 	private:
 		int					_errorCode;
@@ -65,10 +70,12 @@ class Client {
 		std::string			_message;
 		std::string			_client_body; //maybe this will be replaced by body class
 		std::string			_response_body; // this will be replaced by respnse class
-		unsigned char*			_recvline;
+		unsigned char*		_recvline;
 		bool				_readheader;
 		bool				_readbody;
 		bool				_writeclient;
+		char**				_envp;
+		CgiProcessor*		_cgi;
 							Client(void);
 
 		Response* _response; // client owns so it should delete

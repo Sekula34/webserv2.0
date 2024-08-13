@@ -12,14 +12,18 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0) 
+Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0)
 {
 	_initVars();
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _start(std::clock()), _epollfd(epollfd)
+Client::Client (int const fd, int const epollfd, char** envp):_id(++client_cntr),
+					_fd(fd), _start(std::clock()), _epollfd(epollfd), _envp(envp), _cgi(NULL)
 {
+	// we will need to do new cgi somewhere else, this is just for testing
+
+
 	_initVars();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
@@ -35,6 +39,7 @@ Client::~Client (void)
 	delete [] _recvline;
 	delete header;
 	delete _response;
+	delete _cgi;
 	Logger::info("Destructed client with ID: "); std::cout << _id << std::endl;
 }
 
@@ -135,9 +140,19 @@ int	Client::getErrorCode() const
 	return (_errorCode);
 }
 
-std::string const &	Client::getBody() const
+std::string const &	Client::getClientBody() const
 {
 	return (_client_body);
+}
+
+char**	Client::getEnvp() const
+{
+	return(_envp);
+}
+
+CgiProcessor*	Client::getCgi() const
+{
+	return(_cgi);
 }
 
 void	Client::setReadHeader(bool b)
@@ -158,6 +173,10 @@ void	Client::setWriteClient(bool b)
 void	Client::setErrorCode(int c)
 {
 	_errorCode = c;
+}
+void	Client::setCgi(CgiProcessor* cgi)
+{
+	_cgi = cgi;
 }
 /******************************************************************************/
 /*                               Error Handling                               */
@@ -199,6 +218,7 @@ void Client::createClientHeader()
 
 void Client::_initVars(void)
 {
+	cgi_checked = false;
 	_readheader = true;
 	_readbody = false;
 	_writeclient = false;
