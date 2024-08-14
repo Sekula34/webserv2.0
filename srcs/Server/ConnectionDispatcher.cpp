@@ -70,7 +70,7 @@ void	ConnectionDispatcher::epoll_add_client(int epollfd, int listen_socket)
 {
 	struct sockaddr client_addr;
 	struct epoll_event	ev;
-	socklen_t addrlen;
+	socklen_t addrlen = sizeof(client_addr);
 	int	client_fd;
 
 	// ACCEPT RETURNS CLIENT FD

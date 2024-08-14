@@ -240,14 +240,19 @@ void Client::_initVars(void)
 
 void	Client::_init_user_info()
 {
-	// struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
-	// struct in_addr ipAddr = pV4Addr->sin_addr.s_addr;
-	// char str[INET_ADDRSTRLEN];
-	// inet_ntop( AF_INET, &ipAddr, str, sizeof(str));
-	// _client_ip = str;
+	std::string address;
+	std::stringstream ss;
 
 	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
 	unsigned long num  = pV4Addr->sin_addr.s_addr;
-	num = htonl(num);
+	num = ntohl(num);
 	std::cout << num << std::endl;
+	ss << int((num&0xFF000000)>>24);
+	ss << ".";
+	ss << int((num&0xFF0000)>>16);
+	ss << ".";
+	ss << int((num&0xFF00)>>8);
+	ss << ".";
+	ss << int(num&0xFF);
+	_client_ip = ss.str();
 }

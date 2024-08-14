@@ -15,6 +15,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sstream>
 //# include "CgiProcessor.hpp"
 
 // #define MAXLINE			4096
