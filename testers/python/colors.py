@@ -10,12 +10,20 @@ class Colors:
 	UNDERLINE = '\033[4m'
 
 	@staticmethod
-	def color_print(text, color):
+	def color_text(text, color):
 		if isinstance(color, str) and hasattr(Colors, color):
 			color_code = getattr(Colors, color)
 		else :
 			color_code = color
-		print(f"{color_code}{text}{Colors.ENDC}")
+		return(f"{color_code}{text}{Colors.ENDC}")
+	
+	@staticmethod
+	def test_case_title(text):
+		return(f"{Colors.OKBLUE}{text}{Colors.ENDC}")
+	
+	@staticmethod
+	def test_passed():
+		print(f"{Colors.OKGREEN}Test passed ✅ {Colors.ENDC}")
 
 		
 
