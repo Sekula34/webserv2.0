@@ -1,10 +1,5 @@
 
 #include "Client.hpp"
-#include <cstddef>
-#include <cstring>
-#include <iostream>
-#include "../Utils/Logger.hpp"
-#include <unistd.h>
 
 
 /******************************************************************************/
@@ -15,16 +10,18 @@ int	Client::client_cntr = 0;
 Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0)
 {
 	_initVars();
+	_init_user_info();
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd, char** envp):_id(++client_cntr),
-					_fd(fd), _start(std::clock()), _epollfd(epollfd), _envp(envp), _cgi(NULL)
+Client::Client (int const fd, int const epollfd, char** envp, struct sockaddr client_addr):_id(++client_cntr),
+					_fd(fd), _start(std::clock()), _epollfd(epollfd), _envp(envp), _cgi(NULL), _client_addr(client_addr)
 {
 	// we will need to do new cgi somewhere else, this is just for testing
 
 
 	_initVars();
+	_init_user_info();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
 }
@@ -155,6 +152,11 @@ CgiProcessor*	Client::getCgi() const
 	return(_cgi);
 }
 
+std::string	Client::getClientIp() const
+{
+	return (_client_ip);
+}
+
 void	Client::setReadHeader(bool b)
 {
 	_readheader = b;
@@ -174,10 +176,17 @@ void	Client::setErrorCode(int c)
 {
 	_errorCode = c;
 }
+
 void	Client::setCgi(CgiProcessor* cgi)
 {
 	_cgi = cgi;
 }
+
+void	Client::setAddrlen(socklen_t addrlen)
+{
+	_addrlen = addrlen;
+}
+
 /******************************************************************************/
 /*                               Error Handling                               */
 /******************************************************************************/
@@ -209,7 +218,7 @@ void Client::createClientHeader()
 {
 	if(header != NULL)
 	{
-		Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
+		// Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
 		return;
 	}
 	header = new ClientHeader(this->getMessage());
@@ -227,4 +236,18 @@ void Client::_initVars(void)
 	
 	header = NULL;
 	_response = NULL;
+}
+
+void	Client::_init_user_info()
+{
+	// struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
+	// struct in_addr ipAddr = pV4Addr->sin_addr.s_addr;
+	// char str[INET_ADDRSTRLEN];
+	// inet_ntop( AF_INET, &ipAddr, str, sizeof(str));
+	// _client_ip = str;
+
+	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
+	unsigned long num  = pV4Addr->sin_addr.s_addr;
+	num = htonl(num);
+	std::cout << num << std::endl;
 }

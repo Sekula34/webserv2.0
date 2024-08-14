@@ -39,6 +39,7 @@ class CgiProcessor {
 		char**			_tmp;
 		bool			_forked;
 		std::string		_cgi_output;
+		int				_exitstatus;
 
 		char**			create_env();
 		char**			create_argv();

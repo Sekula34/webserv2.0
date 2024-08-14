@@ -3,13 +3,24 @@
 # define CLIENT_HPP
 # include <string>
 # include <ctime>
+# include "../Client/ClientHeader.hpp"
+# include "CgiProcessor.hpp"
+#include <cstddef>
+#include <cstring>
+#include <iostream>
+#include "../Utils/Logger.hpp"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+//# include "CgiProcessor.hpp"
+
 // #define MAXLINE			4096
 // #define MAXLINE			493
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
-# include "../Client/ClientHeader.hpp"
-# include "CgiProcessor.hpp"
-//# include "CgiProcessor.hpp"
 
 class CgiProcessor;
 # include "../Response/Response.hpp"
@@ -21,7 +32,7 @@ class Client {
 		static int			client_cntr;
 		
 							// canonical
-							Client (int const fd, int const epollfd, char** envp);
+							Client (int const fd, int const epollfd, char** envp, struct sockaddr client_addr);
 							~Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);
@@ -42,11 +53,13 @@ class Client {
 		std::string const &	getClientBody() const;
 		char**				getEnvp() const;
 		CgiProcessor*		getCgi() const;
+		std::string			getClientIp() const;
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
 		void				setWriteClient(bool b);
 		void				setCgi(CgiProcessor* cgi);
+		void				setAddrlen(socklen_t addrlen);
 
 							//Client specific functions
 		void				addRecvLineToMessage();
@@ -58,8 +71,8 @@ class Client {
 		 */
 		void				createClientHeader();
 		CgiProcessor*		Cgi;			
+		bool				cgi_checked;
 		ClientHeader*		header; //client Responsible for deleting
-		bool	cgi_checked;
 
 	private:
 		int					_errorCode;
@@ -76,11 +89,14 @@ class Client {
 		bool				_writeclient;
 		char**				_envp;
 		CgiProcessor*		_cgi;
+		Response*			_response; // client owns so it should delete
+		struct sockaddr		_client_addr;
 							Client(void);
+		std::string			_client_ip;
+		socklen_t			_addrlen;
 
-		Response* _response; // client owns so it should delete
-
-		void	_initVars(void);
+		void				_init_user_info();
+		void				_initVars(void);
 };
 
 #endif

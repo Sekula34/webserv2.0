@@ -47,16 +47,17 @@ class ClientHeader
 		const int& getErrorCode(void) const;
 		const RequestLine& getRequestLine() const;
 		const std::string& getRequestedUrl() const;
+		const std::map<std::string, std::string> & getHeaderFields() const; 
 		bool isBodyExpected() const;
 
 	private :
 		ClientHeader();
+		std::map<std::string, std::string> _headerFields;
 		const std::string _message;
 		int _errorCode;
 		std::string _requestLine;
 		RequestLine _requestLineElements;
 		Host _host;
-		std::map<std::string, std::string> _headerFields;
 
 
 		void _constructFunction();

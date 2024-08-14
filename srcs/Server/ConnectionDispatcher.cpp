@@ -68,16 +68,19 @@ void ConnectionDispatcher::epoll_add_listen_sock(int listen_sock)
 ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER */
 void	ConnectionDispatcher::epoll_add_client(int epollfd, int listen_socket)
 {
+	struct sockaddr client_addr;
 	struct epoll_event	ev;
+	socklen_t addrlen;
 	int	client_fd;
 
 	// ACCEPT RETURNS CLIENT FD
-	client_fd = accept(listen_socket, (struct sockaddr *) NULL, NULL);
+	client_fd = accept(listen_socket, &client_addr, &addrlen);
 	if (client_fd == -1)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(client_fd, epollfd, _envp);
+	Client * newClient = new Client(client_fd, epollfd, _envp, client_addr);
+	newClient->setAddrlen(addrlen);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
 	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.
@@ -209,9 +212,9 @@ void	ConnectionDispatcher::_check_cgi(Client* client)
 		ClientHeader* clientHeader = client->header;
 		std::string ServerLocation = clientServer->getLocationPartOfUrl(clientHeader->getRequestedUrl());
 		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-		Logger::warning(it->getLocationUri(), true);
-		Logger::warning("", true);
-		std::cout << found << std::endl;
+		// Logger::warning(it->getLocationUri(), true);
+		// Logger::warning("", true);
+		// std::cout << found << std::endl;
 		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
 		{ 
 			Logger::warning("Cgi checked and it exist on this location", true);
@@ -253,8 +256,8 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 			// READ BODY
 			// PROCESS BODY
 		}
-		// IF CGI RETURNS TRUE WE ARE WAITUNG FOR CHILD TO RETURN
 		_check_cgi(client);
+		// IF RUN_CGI RETURNS TRUE WE ARE WAITING FOR CHILD TO RETURN
 		if (run_cgi(client))
 			return ;
 		// if cgi request -> run CGI PROCESSOR

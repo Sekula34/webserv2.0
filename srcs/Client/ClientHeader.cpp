@@ -126,6 +126,11 @@ const std::string& ClientHeader::getRequestedUrl(void) const
 	return line.requestTarget;
 }
 
+const std::map<std::string, std::string> & ClientHeader::getHeaderFields() const
+{
+	return (_headerFields);
+}
+
 bool ClientHeader::isBodyExpected() const
 {
 	if(_headerFields.find("Content-Length") != _headerFields.end())
