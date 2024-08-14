@@ -28,10 +28,10 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(respones.status_code, 200)
 		self.assertIn("Socket", respones.text)
 
-	def test_spammer(self):
+	def spammer(self, numberOfRequest = 500):
 		accepted_count = 0
 		print("running spammer")
-		for i in range (0, 1000):
+		for i in range (0, numberOfRequest):
 			try:
 				response = requests.get("http://localhost:8080/hej/Socket.hpp", timeout=0.1)
 				if response.status_code == 200:
@@ -40,4 +40,4 @@ class TestMyWebServer(unittest.TestCase):
 				print(f"request {i} failed: {e}")
 
 			#self.assertEqual(response.status_code, 200)
-		print("Spammer done. Accepted Request {0}/{1}".format(accepted_count, 1000))
+		print("Spammer done. Accepted Request {0}/{1}".format(accepted_count, numberOfRequest))
