@@ -42,7 +42,7 @@ void UrlSuffix::_initVars()
 
 void UrlSuffix::_parseAndSetPath()
 {
-	size_t questionMarkPos = _urlSuffix.find('?');
+	size_t questionMarkPos = _urlSuffix.find_first_of("?#");
 	if(questionMarkPos == std::string::npos)
 		_path = _urlSuffix;
 	_path = _urlSuffix.substr(0, questionMarkPos);
