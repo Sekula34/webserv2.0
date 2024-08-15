@@ -8,15 +8,14 @@ UrlSuffix::UrlSuffix(const std::string urlSuffix)
 :_urlSuffix(urlSuffix)
 {
 	_initVars();
-	_parseAndSetPath();
-	_parseAndSetQuerryParameters();
-	_parseAndSetFragment();
+	_setAllVars();
 }
 
 UrlSuffix::UrlSuffix(const UrlSuffix& source) 
 :_urlSuffix(source._urlSuffix)
 {
-	//parse stuff from suffix	
+	_initVars();
+	_setAllVars();
 }
 
 UrlSuffix& UrlSuffix::operator=(const UrlSuffix source)
@@ -46,12 +45,25 @@ const std::string& UrlSuffix::getFragment() const
 	return (_fragment);
 }
 
+const bool& UrlSuffix::isUrlSuffixValid() const
+{
+	return(_valid);
+}
+
 
 void UrlSuffix::_initVars()
 {
 	_path = "";
 	_queryParameters = "";
 	_fragment = "";
+	_valid = true;
+}
+
+void UrlSuffix::_setAllVars()
+{
+	_parseAndSetPath();
+	_parseAndSetQuerryParameters();
+	_parseAndSetFragment();
 }
 
 void UrlSuffix::_parseAndSetPath()
@@ -76,4 +88,9 @@ void UrlSuffix::_parseAndSetQuerryParameters()
 void UrlSuffix::_parseAndSetFragment()
 {
 	_fragment = ParsingUtils::extractAfterDelim(_urlSuffix, "#");
+	if(_fragment.find('#') != std::string::npos)
+	{
+		Logger::error("INVALID SUFFIX");
+		_valid = false;
+	}
 }
