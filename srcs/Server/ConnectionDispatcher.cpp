@@ -380,6 +380,8 @@ void ConnectionDispatcher::mainLoopEpoll()
 		{
 			if(_acceptClient(idx) == true)
 				continue;
+			// check whether the file descriptor is a pipe to CGI child process
+			// set to true
 			handle_client(events, clients, idx);
 		}
 	}

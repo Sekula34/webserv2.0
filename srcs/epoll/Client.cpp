@@ -236,6 +236,7 @@ void Client::_initVars(void)
 	
 	header = NULL;
 	_response = NULL;
+	_client_body = "";
 }
 
 void	Client::_init_user_info()

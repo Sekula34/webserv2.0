@@ -113,37 +113,78 @@ std::string		CgiProcessor::getCgiResponse() const
 // Your program should call the CGI with the file requested as first argument.
 // The CGI should be run in the correct directory for relative path file access.
 //
-
+std::string operating_system()
+{
+    #ifdef _WIN32
+    return "Windows 32-bit";
+    #elif _WIN64
+    return "Windows 64-bit";
+    #elif __linux__
+    return "Linux";
+    #elif __APPLE__ || __MACH__
+    return "MacOS";
+    #elif __unix || __unix__
+    return "Unix";
+    #elif __FreeBSD__
+    return "FreeBSD";
+    #else
+    return "unknown OS";
+    #endif
+}  
 
 void	CgiProcessor::create_env_vector()
 {
 	std::string	line;
 
-	//  don't understand what this is
-	line = "AUTH_TYPE=Basic ";											
+	// AUTH_TYPE -> should be empty because we don't support authentification
+	line = "AUTH_TYPE=";											
 	_env_vec.push_back(line);
 
-	// will need to make this depend on content length of body when available
-	line = "CONTENT_LENGTH=0";											
+
+	// CONTENT_LENGTH
+	line = "CONTENT_LENGTH=";											
+	if (_client->getClientBody().size() > 0)
+	{
+		std::stringstream ss;
+		ss << _client->getClientBody().size();
+		line += ss.str();
+	}
 	_env_vec.push_back(line);
 
-	// we need to set this if POST type request
-	// line = "CONTENT_TYPE=application/x-www-form-urlencoded"; 		
-	// _env_vec.push_back(line);
+
+	// CONTENT_TYPE 
+	line = "CONTENT_TYPE="; 		
+	if (_client->header->getHeaderFields().find("Content-Type") != _client->header->getHeaderFields().end())
+		line +=_client->header->getHeaderFields().find("Content-Type")->second;
+	_env_vec.push_back(line);
+
 	
+
+	// GATEWAY_INTERFACE
 	line = "GATEWAY_INTERFACE=CGI/1.1"; 
 	_env_vec.push_back(line);
 
+
+	// PATH_INFO 
 	// Because you won’t call the CGI directly, use the full path as PATH_INFO.
+	// I DON'T UNDERSTAND the subject here
+	// PATH_INFO usually is the part in the url that comes after
+	// the executable name and before the query string e.g.:
+	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
 	line = "PATH_INFO="; 
 	line += _client->header->getRequestedUrl();
 	_env_vec.push_back(line);
 
+	
+
+	// PATH_TRANSLATED 
 	// The CGI should be run in the correct directory for relative path file access.
 	// line = "PATH_TRANSLATED="; 
 	// line += "/var/www/html/extra/path/info ";
 	// _env_vec.push_back(line);
 	
+
+	// QUERY_STRING
 	// everything after the '?' in URI
 	std::string url = _client->header->getRequestedUrl();
 	size_t found  = url.find('?');
@@ -154,24 +195,48 @@ void	CgiProcessor::create_env_vector()
 		_env_vec.push_back(line);
 	}
 
-	// using forbidden function here -> inet-ntoa
+	// REMOTE_ADDR
 	line = "REMOTE_ADDR="; 
 	line += _client->getClientIp();
 	_env_vec.push_back(line);
 
+	// REMOTE_HOST -> not mandatory according to RFC
+
+	// REMOTE_IDENT -> not mandatory according to RFC
+
+	// REMOTE_USER -> we don't support it (only makes sense if authentification was required)
 	
-/*	get info from getHeaderFields
-	std::map<std::string, std::string>::const_iterator it = _client->header->getHeaderFields().begin();
-	for (; it != _client->header->getHeaderFields().end(); it++)
-	{
-		line.clear();
-		line += it->first;
-		line += "=";
-		line += it->second;
-		std::cout << line << std::endl;
-		_env_vec.push_back(line);
-	}
-*/
+	//REQUEST_METHOD
+	line = "REQUEST_METHOD="; 
+	line += _client->header->getRequestLine().requestMethod;
+	_env_vec.push_back(line);
+
+
+	//SCRIPT_NAME
+	// should be "cgi-bin/hello.py"
+	
+	//SERVER_NAME
+	line = "SERVER_NAME="; 
+	line += _client->header->getHostName();
+	_env_vec.push_back(line);
+	
+	//SERVER_PORT
+	std::stringstream ss2;
+	line = "SERVER_PORT="; 
+	ss2 << _client->header->getHostPort();
+	line += ss2.str();
+	_env_vec.push_back(line);
+	
+	//SERVER_PROTOCOL 
+	line = "SERVER_PROTOCOL="; 
+	line += _client->header->getRequestLine().protocolVersion;
+	_env_vec.push_back(line);
+	
+	//SERVER_SOFTWARE
+	line = "SERVER_SOFTWARE=webserv2.0 ("; 
+	line += operating_system();
+	line += ")"; 
+	_env_vec.push_back(line);
 }
 
 void	CgiProcessor::create_args_vector()
@@ -179,9 +244,9 @@ void	CgiProcessor::create_args_vector()
 	// this is hardcoded now until parsing for CGI works
 	
 	// _args_vec.push_back("/home/gdanis/.brew/bin/python3");
-	// _args_vec.push_back("/home/gdanis/webserv/srcs/epoll/hello.py");
 	_args_vec.push_back("/usr/bin/python3");
-	_args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
+	_args_vec.push_back("/home/gdanis/webserv/srcs/epoll/hello.py");
+	// _args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
 
 }
 
