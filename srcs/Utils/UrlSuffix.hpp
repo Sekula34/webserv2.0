@@ -11,6 +11,7 @@ class UrlSuffix
 		~UrlSuffix();
 
 		const std::string& getPath() const;
+		const std::string& getQueryParameters() const;
 
 
 	private:

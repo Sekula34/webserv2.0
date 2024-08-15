@@ -1,5 +1,7 @@
 #include "UrlSuffix.hpp"
 #include "Logger.hpp"
+#include <cstddef>
+#include "../Parsing/ParsingUtils.hpp"
 
 
 UrlSuffix::UrlSuffix(const std::string urlSuffix)
@@ -7,6 +9,7 @@ UrlSuffix::UrlSuffix(const std::string urlSuffix)
 {
 	_initVars();
 	_parseAndSetPath();
+	_parseAndSetQuerryParameters();
 }
 
 UrlSuffix::UrlSuffix(const UrlSuffix& source) 
@@ -32,6 +35,11 @@ const std::string& UrlSuffix::getPath() const
 	return (_path);
 }
 
+const std::string& UrlSuffix::getQueryParameters() const 
+{
+	return (_queryParameters);
+}
+
 
 void UrlSuffix::_initVars()
 {
@@ -47,4 +55,14 @@ void UrlSuffix::_parseAndSetPath()
 		_path = _urlSuffix;
 	_path = _urlSuffix.substr(0, questionMarkPos);
 	
+}
+
+void UrlSuffix::_parseAndSetQuerryParameters()
+{
+	std::string rest = ParsingUtils::extractAfterDelim(_urlSuffix, "?");
+	_queryParameters = ParsingUtils::extractUntilDelim(rest, "#");
+	if(_queryParameters == "")
+		_queryParameters = rest;
+	else
+		_queryParameters.erase(_queryParameters.end() - 1);
 }
