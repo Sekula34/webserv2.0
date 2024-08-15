@@ -114,9 +114,9 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
 void ResponseBody::_handlerGetMethod()
 {
     Logger::info("Handling GET, ServerLocation", true);
-    std::string clientRequestUrl = _client.header->getRequestedUrl();
-    Logger::info("Requsted url is "); std::cout << clientRequestUrl << std::endl;
-    std::string serverLocation = _server->getLocationPartOfUrl(clientRequestUrl);
+    std::string clientURI = _client.header->getURI();
+    Logger::info("Requsted url is "); std::cout << clientURI << std::endl;
+    std::string serverLocation = _server->getLocationPartOfURI(clientURI);
     Logger::info("Server location resposible for reponse is " + serverLocation, true);
     bool found = true;
  //   Logger::info("Server that is responding is: "); std::cout << std::endl;
@@ -132,7 +132,7 @@ void ResponseBody::_handlerGetMethod()
     }
     else
     {
-        Logger::warning("Location not found: "); std::cout << clientRequestUrl << std::endl;
+        Logger::warning("Location not found: "); std::cout << clientURI << std::endl;
         _renderServerErrorPage(404);
     }
 }
@@ -186,7 +186,7 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
 bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const
 {
     path.erase();
-    std::string requestedUrl = _client.header->getRequestedUrl();
+    std::string requestedUrl = _client.header->getURI();
     std::cout << "Requested url is " << requestedUrl << std::endl;
     std::cout << "Location uri is" << location.getLocationUri();
     std::string baseName = ParsingUtils::getBaseName(requestedUrl, location.getLocationUri());
