@@ -127,7 +127,7 @@ void CHTest::uriTest()
 {
 	Logger::testCase("Testing uri");
 	ClientHeader header(generateComplexValid());
-	std::string uri = header.getURI();
+	std::string uri = header.getURLSuffix();
 	std::cout << "Uri is: [" << uri << "]"<< std::endl;
 }
 
@@ -137,7 +137,7 @@ void CHTest::copyTest(const std::string fullMessage)
 	ClientHeader first(fullMessage);
 	ClientHeader &second(first);
 	assert(first.getErrorCode() == second.getErrorCode());
-	assert(first.getURI() == second.getURI());
+	assert(first.getURLSuffix() == second.getURLSuffix());
 	_testpassed();
 }
 

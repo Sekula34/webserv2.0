@@ -13,5 +13,6 @@ void all()
 
 int main()
 {
-	CHTest::uriTest();
+	all();
+	//CHTest::uriTest();
 }
