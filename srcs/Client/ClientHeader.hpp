@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "../Utils/UrlSuffix.hpp"
 
 class CHTest;
 
@@ -41,6 +42,7 @@ class ClientHeader
 		~ClientHeader();
 
 
+		UrlSuffix* urlSuffix; // this class is resposible for this 
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
 		const std::string& getFullMessage(void) const;
