@@ -120,7 +120,7 @@ const int& ClientHeader::getErrorCode(void) const
 	return _errorCode;
 }
 
-const std::string& ClientHeader::getURI(void) const 
+const std::string& ClientHeader::getURLSuffix(void) const 
 {
 	const RequestLine& line = getRequestLine();
 	return line.requestTarget;
