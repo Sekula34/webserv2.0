@@ -35,13 +35,23 @@ void UnitTest::stringEndCheck()
 	_testpassed();
 }
 
-void UnitTest::urlPathTester(std::string urlSuffix, std::string expectedpath)
+void UnitTest::urlPathTesterBlock()
 {
-	Logger::testCase("Testing url path");
-	(void)urlSuffix;
-	(void)expectedpath;
-	UrlSuffix urlsuffix("/path/to/resource?query=1");
-	std::cout <<"["<< urlsuffix.getPath() <<"]"<<std::endl;
+	urlPathTester("/path/to/resource", "/path/to/resource");
+	urlPathTester("", "");
+	urlPathTester("/path/to/resource?hej", "/path/to/resource");
+	urlPathTester("/path/to/resource#hej", "/path/to/resource");
+	urlPathTester("/path/to/resource?query=1", "/path/to/resource");
+	_testpassed(true);
+}
+
+void UnitTest::urlPathTester(std::string suffixString, std::string expectedpath)
+{
+	Logger::testCase("Testing url path", expectedpath);
+	UrlSuffix urlsuffix(suffixString);
+	std::cout << "Testing ["<<suffixString<<"]" << "Result " << urlsuffix.getPath() << std::endl;
+	assert(urlsuffix.getPath() == expectedpath);
+	_testpassed();
 }
 
 void UnitTest::stringDelimCheck()
