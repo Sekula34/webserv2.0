@@ -54,6 +54,26 @@ void UnitTest::urlPathTester(std::string suffixString, std::string expectedpath)
 	assert(urlsuffix.getPath() == expectedpath);
 	_testpassed();
 }
+void UnitTest::urlFragmetTester(std::string suffixString, std::string expectedfrag)
+{
+	Logger::testCase("Testing url fragment", expectedfrag);
+	UrlSuffix urlsuffix(suffixString);
+	std::cout << "Testing ["<<suffixString<<"]" << "Result " << urlsuffix.getFragment() << std::endl;
+	assert(urlsuffix.getFragment() == expectedfrag);
+	_testpassed();
+}
+
+void UnitTest::urlFragmetBlock()
+{
+	urlFragmetTester("/path/to/resource", "");
+	urlFragmetTester("", "");
+	urlFragmetTester("/path/to/resource?hej", "");
+	urlFragmetTester("/path/to/resource#hej", "hej");
+	urlFragmetTester("/path/to/resource?query=1", "");
+	urlFragmetTester("/path/to/resource?querry = 2&3#hej", "hej");
+	_testpassed(true);
+}
+
 void UnitTest::urlPathQueryBlock()
 {
 	urlQueryTester("/path/to/resource", "");

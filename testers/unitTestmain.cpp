@@ -15,8 +15,8 @@ int main()
 {
 	//all();
 	//UnitTest::stringDelimCheck();
-	UnitTest::urlPathTesterBlock();
-	UnitTest::urlPathQueryBlock();
-	
+	//UnitTest::urlPathTesterBlock();
+	//UnitTest::urlPathQueryBlock();
+	UnitTest::urlFragmetBlock();
 	//CHTest::uriTest();
 }
