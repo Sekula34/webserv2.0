@@ -42,6 +42,7 @@ void UnitTest::urlPathTesterBlock()
 	urlPathTester("/path/to/resource?hej", "/path/to/resource");
 	urlPathTester("/path/to/resource#hej", "/path/to/resource");
 	urlPathTester("/path/to/resource?query=1", "/path/to/resource");
+	urlPathTester("/path/to/resource?querry = 2&3#hej", "/path/to/resource");
 	_testpassed(true);
 }
 
@@ -53,12 +54,35 @@ void UnitTest::urlPathTester(std::string suffixString, std::string expectedpath)
 	assert(urlsuffix.getPath() == expectedpath);
 	_testpassed();
 }
+void UnitTest::urlPathQueryBlock()
+{
+	urlQueryTester("/path/to/resource", "");
+	urlQueryTester("", "");
+	urlQueryTester("/path/to/resource?hej", "hej");
+	urlQueryTester("/path/to/resource#hej", "");
+	urlQueryTester("/path/to/resource?query=1", "query=1");
+	urlQueryTester("/path/to/resource?querry = 2&3#hej", "querry = 2&3");
+	_testpassed(true);
+}
+
+void UnitTest::urlQueryTester(std::string suffixString, std::string expectedQuery)
+{
+	Logger::testCase("Testing url query", expectedQuery);
+	UrlSuffix urlsuffix(suffixString);
+	std::cout << "Testing ["<<suffixString<<"]" << "Result " << urlsuffix.getQueryParameters() << std::endl;
+	assert(urlsuffix.getQueryParameters() == expectedQuery);
+	_testpassed();
+}
 
 void UnitTest::stringDelimCheck()
 {
 	Logger::testCase("Extract testing ", "");
 	std::string hej = ParsingUtils::extractUntilDelim("hej ja sam\r\n\r\n djevojka", "\r\n\r\n");
 	assert(hej == "hej ja sam\r\n\r\n");
+	std::string result = ParsingUtils::extractAfterDelim("hej/zasto/basti?mojaIkono", "?");
+	assert(result == "mojaIkono");
+	std::string result1 = ParsingUtils::extractAfterDelim("hej/zasto/basti?mojaIkono", "g");
+	assert(result1 == "");
 	_testpassed();
 }
 
@@ -158,6 +182,8 @@ void UnitTest::allTests()
 	configSyntaxBlock();
 	configNumberOfServersBlock();
 	testDirBlock();
+	urlPathTesterBlock();
+	urlPathQueryBlock();
 	//_serveTestCase();
 }
 

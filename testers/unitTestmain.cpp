@@ -14,7 +14,9 @@ void all()
 int main()
 {
 	//all();
+	//UnitTest::stringDelimCheck();
 	UnitTest::urlPathTesterBlock();
+	UnitTest::urlPathQueryBlock();
 	
 	//CHTest::uriTest();
 }
