@@ -86,9 +86,9 @@ bool ServerSettings::amIServerLocation(const std::string& path) const
 	return found;
 }
 
-std::string ServerSettings::getLocationPartOfUrl(const std::string& url) const
+std::string ServerSettings::getLocationPartOfURI(const std::string& uri) const
 {
-	std::string toTry(url);
+	std::string toTry(uri);
 	while (true)
 	{
 		if(amIServerLocation(toTry) == true)

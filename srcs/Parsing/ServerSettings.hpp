@@ -39,7 +39,7 @@ class ServerSettings : public DefaultSettings
 		 * @param url 
 		 * @return std::string 
 		 */
-		std::string										getLocationPartOfUrl(const std::string& url) const;
+		std::string										getLocationPartOfURI(const std::string& uri) const;
 		bool											amIServerLocation(const std::string& path) const;
 		std::vector<Token>								getServerTokens(void) const;
 		std::vector<Directive>							getServerDirectives(void) const;
