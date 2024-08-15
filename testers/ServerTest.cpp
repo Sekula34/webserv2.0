@@ -68,7 +68,7 @@ void ServerTest::_locationNumberTester(size_t expectedNumberOfLocations, const S
 void ServerTest::_locationFromUrlGetterTest(const ServerSettings& server, std::string url, std::string expectedResult)
 {
 	Logger::testCase("geting location from url " + url, expectedResult);
-	std::string serverLocation = server.getLocationPartOfURI(url);
+	std::string serverLocation = server.getLocationURIfromPath(url);
 	assert(serverLocation == expectedResult);
 	return _testpassed();
 }
