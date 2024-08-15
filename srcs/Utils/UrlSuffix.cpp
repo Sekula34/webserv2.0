@@ -10,6 +10,7 @@ UrlSuffix::UrlSuffix(const std::string urlSuffix)
 	_initVars();
 	_parseAndSetPath();
 	_parseAndSetQuerryParameters();
+	_parseAndSetFragment();
 }
 
 UrlSuffix::UrlSuffix(const UrlSuffix& source) 
@@ -40,6 +41,11 @@ const std::string& UrlSuffix::getQueryParameters() const
 	return (_queryParameters);
 }
 
+const std::string& UrlSuffix::getFragment() const
+{
+	return (_fragment);
+}
+
 
 void UrlSuffix::_initVars()
 {
@@ -65,4 +71,9 @@ void UrlSuffix::_parseAndSetQuerryParameters()
 		_queryParameters = rest;
 	else
 		_queryParameters.erase(_queryParameters.end() - 1);
+}
+
+void UrlSuffix::_parseAndSetFragment()
+{
+	_fragment = ParsingUtils::extractAfterDelim(_urlSuffix, "#");
 }

@@ -2,6 +2,10 @@
 # define URLSUFFIX_HPP
 #include <string>
 
+/**
+ * @brief class that store parse all UrlSuffix info
+ * 
+ */
 class UrlSuffix 
 {
 	public:
@@ -12,7 +16,7 @@ class UrlSuffix
 
 		const std::string& getPath() const;
 		const std::string& getQueryParameters() const;
-
+		const std::string& getFragment() const;
 
 	private:
 		std::string _path; //can only be ?
@@ -22,9 +26,10 @@ class UrlSuffix
 		const std::string _urlSuffix;
 
 		void _initVars();
+
 		void _parseAndSetPath();
 		void _parseAndSetQuerryParameters();
-		void _parseAndSetFragmetn();
+		void _parseAndSetFragment();
 };
 
 #endif
