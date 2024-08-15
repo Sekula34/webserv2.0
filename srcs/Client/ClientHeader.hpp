@@ -46,7 +46,7 @@ class ClientHeader
 		const std::string& getFullMessage(void) const;
 		const int& getErrorCode(void) const;
 		const RequestLine& getRequestLine() const;
-		const std::string& getRequestedUrl() const;
+		const std::string& getURI() const;
 		bool isBodyExpected() const;
 
 	private :
