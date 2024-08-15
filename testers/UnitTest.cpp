@@ -85,6 +85,16 @@ void UnitTest::urlPathQueryBlock()
 	_testpassed(true);
 }
 
+void UnitTest::urlValid()
+{
+	Logger::testCase("Testing url valid");
+	UrlSuffix urlsuffix("hej/hej#hej#");
+	assert(urlsuffix.isUrlSuffixValid() == false);
+	UrlSuffix urlsuffix1("hej/hejhej#");
+	assert(urlsuffix1.isUrlSuffixValid() == true);
+	_testpassed();
+}
+
 void UnitTest::urlQueryTester(std::string suffixString, std::string expectedQuery)
 {
 	Logger::testCase("Testing url query", expectedQuery);
@@ -204,6 +214,7 @@ void UnitTest::allTests()
 	testDirBlock();
 	urlPathTesterBlock();
 	urlPathQueryBlock();
+	urlValid();
 	//_serveTestCase();
 }
 

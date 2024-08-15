@@ -13,10 +13,11 @@ void all()
 
 int main()
 {
-	//all();
+	all();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();
-	UnitTest::urlFragmetBlock();
+	//UnitTest::urlFragmetBlock();
 	//CHTest::uriTest();
+	//UnitTest::urlValid();
 }
