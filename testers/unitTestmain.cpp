@@ -13,6 +13,8 @@ void all()
 
 int main()
 {
-	all();
+	//all();
+	UnitTest::urlPathTester("", "");
+	
 	//CHTest::uriTest();
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include "../srcs/Utils/Logger.hpp"
 #include "../srcs/Parsing/ParsingUtils.hpp"
+#include "../srcs/Utils/UrlSuffix.hpp"
 
 
 const std::string UnitTest::_constFileFolder = "testers/ConfigFileTest/TestFiles/";
@@ -32,6 +33,15 @@ void UnitTest::stringEndCheck()
 	bool result = ParsingUtils::isStringEnd("hej\r\n\r\n", "\r\n\r\n");
 	assert(result == true);
 	_testpassed();
+}
+
+void UnitTest::urlPathTester(std::string urlSuffix, std::string expectedpath)
+{
+	Logger::testCase("Testing url path");
+	(void)urlSuffix;
+	(void)expectedpath;
+	UrlSuffix urlsuffix("/path/to/resource?query=1");
+	std::cout <<"["<< urlsuffix.getPath() <<"]"<<std::endl;
 }
 
 void UnitTest::stringDelimCheck()
