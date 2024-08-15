@@ -611,3 +611,5 @@ getScript name = it should end .py or .php (this should be in config),
 Path Info is always after script name  this is optional
 
 and query string can exit without path info. everyhing after question mark not including 
+
+
