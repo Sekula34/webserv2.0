@@ -138,6 +138,15 @@ std::string ParsingUtils::extractUntilDelim(const std::string fullString, const 
 	return fullString.substr(0, pos);
 }
 
+std::string ParsingUtils::extractAfterDelim(const std::string fullString, const std::string delimiter)
+{
+	std::string::size_type pos = fullString.find(delimiter);
+	if(pos == std::string::npos)
+		return "";
+	pos += delimiter.length();
+	return fullString.substr(pos);
+}
+
 
 std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 {
