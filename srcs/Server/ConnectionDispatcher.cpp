@@ -210,7 +210,7 @@ void	ConnectionDispatcher::_check_cgi(Client* client)
 			return ;
 
 		ClientHeader* clientHeader = client->header;
-		std::string ServerLocation = clientServer->getLocationPartOfUrl(clientHeader->getRequestedUrl());
+		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
 		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
 		// Logger::warning(it->getLocationUri(), true);
 		// Logger::warning("", true);

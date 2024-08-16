@@ -172,7 +172,7 @@ void	CgiProcessor::create_env_vector()
 	// the executable name and before the query string e.g.:
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
 	line = "PATH_INFO="; 
-	line += _client->header->getRequestedUrl();
+	line += _client->header->urlSuffix->getPath();
 	_env_vec.push_back(line);
 
 	
@@ -185,15 +185,9 @@ void	CgiProcessor::create_env_vector()
 	
 
 	// QUERY_STRING
-	// everything after the '?' in URI
-	std::string url = _client->header->getRequestedUrl();
-	size_t found  = url.find('?');
-	if (found != std::string::npos && found != url.size() - 1)
-	{
-		line = "QUERY_STRING="; 
-		line += url.substr(found + 1, url.size());
-		_env_vec.push_back(line);
-	}
+	line = "QUERY_STRING="; 
+	line += _client->header->urlSuffix->getQueryParameters();
+	_env_vec.push_back(line);
 
 	// REMOTE_ADDR
 	line = "REMOTE_ADDR="; 
@@ -214,6 +208,9 @@ void	CgiProcessor::create_env_vector()
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
+	line = "SCRIPT_NAME"; 
+	line += _client->header->urlSuffix->getPath();
+	_env_vec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
