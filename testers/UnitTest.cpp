@@ -40,9 +40,9 @@ void UnitTest::urlPathTesterBlock()
 	urlPathTester("/path/to/resource", "/path/to/resource");
 	urlPathTester("", "");
 	urlPathTester("/path/to/resource?hej", "/path/to/resource");
-	urlPathTester("/path/to/resource#hej", "/path/to/resource");
+	urlPathTester("/path/to/resource", "/path/to/resource");
 	urlPathTester("/path/to/resource?query=1", "/path/to/resource");
-	urlPathTester("/path/to/resource?querry = 2&3#hej", "/path/to/resource");
+	urlPathTester("/path/to/resource?querry = 2&3", "/path/to/resource");
 	_testpassed(true);
 }
 
@@ -54,46 +54,21 @@ void UnitTest::urlPathTester(std::string suffixString, std::string expectedpath)
 	assert(urlsuffix.getPath() == expectedpath);
 	_testpassed();
 }
-void UnitTest::urlFragmetTester(std::string suffixString, std::string expectedfrag)
-{
-	Logger::testCase("Testing url fragment", expectedfrag);
-	UrlSuffix urlsuffix(suffixString);
-	std::cout << "Testing ["<<suffixString<<"]" << "Result " << urlsuffix.getFragment() << std::endl;
-	assert(urlsuffix.getFragment() == expectedfrag);
-	_testpassed();
-}
 
-void UnitTest::urlFragmetBlock()
-{
-	urlFragmetTester("/path/to/resource", "");
-	urlFragmetTester("", "");
-	urlFragmetTester("/path/to/resource?hej", "");
-	urlFragmetTester("/path/to/resource#hej", "hej");
-	urlFragmetTester("/path/to/resource?query=1", "");
-	urlFragmetTester("/path/to/resource?querry = 2&3#hej", "hej");
-	_testpassed(true);
-}
+
 
 void UnitTest::urlPathQueryBlock()
 {
 	urlQueryTester("/path/to/resource", "");
 	urlQueryTester("", "");
 	urlQueryTester("/path/to/resource?hej", "hej");
-	urlQueryTester("/path/to/resource#hej", "");
+	urlQueryTester("/path/to/resource", "");
 	urlQueryTester("/path/to/resource?query=1", "query=1");
-	urlQueryTester("/path/to/resource?querry = 2&3#hej", "querry = 2&3");
+	urlQueryTester("/path/to/resource?querry = 2&3", "querry = 2&3");
 	_testpassed(true);
 }
 
-void UnitTest::urlValid()
-{
-	Logger::testCase("Testing url valid");
-	UrlSuffix urlsuffix("hej/hej#hej#");
-	assert(urlsuffix.isUrlSuffixValid() == false);
-	UrlSuffix urlsuffix1("hej/hejhej#");
-	assert(urlsuffix1.isUrlSuffixValid() == true);
-	_testpassed();
-}
+
 
 void UnitTest::urlQueryTester(std::string suffixString, std::string expectedQuery)
 {
@@ -214,7 +189,6 @@ void UnitTest::allTests()
 	testDirBlock();
 	urlPathTesterBlock();
 	urlPathQueryBlock();
-	urlValid();
 	//_serveTestCase();
 }
 

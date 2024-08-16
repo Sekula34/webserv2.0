@@ -148,8 +148,6 @@ void ClientHeader::_constructFunction()
 	if(_setCHVarivables() == true)
 	{
 		urlSuffix = new UrlSuffix(getURLSuffix());
-		if(urlSuffix->isUrlSuffixValid() == false)
-			_errorCode = 400;
 	}
 }
 

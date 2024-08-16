@@ -16,15 +16,10 @@ class UrlSuffix
 
 		const std::string& getPath() const;
 		const std::string& getQueryParameters() const;
-		const std::string& getFragment() const;
-		const bool& isUrlSuffixValid() const;
 
 	private:
 		std::string _path; //can only be ?
 		std::string _queryParameters;
-		std::string _fragment;
-
-		bool _valid;
 
 		const std::string _urlSuffix;
 
@@ -32,7 +27,6 @@ class UrlSuffix
 		void _setAllVars();
 		void _parseAndSetPath();
 		void _parseAndSetQuerryParameters();
-		void _parseAndSetFragment();
 };
 
 #endif

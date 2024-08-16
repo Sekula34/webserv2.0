@@ -40,35 +40,22 @@ const std::string& UrlSuffix::getQueryParameters() const
 	return (_queryParameters);
 }
 
-const std::string& UrlSuffix::getFragment() const
-{
-	return (_fragment);
-}
-
-const bool& UrlSuffix::isUrlSuffixValid() const
-{
-	return(_valid);
-}
-
 
 void UrlSuffix::_initVars()
 {
 	_path = "";
 	_queryParameters = "";
-	_fragment = "";
-	_valid = true;
 }
 
 void UrlSuffix::_setAllVars()
 {
 	_parseAndSetPath();
 	_parseAndSetQuerryParameters();
-	_parseAndSetFragment();
 }
 
 void UrlSuffix::_parseAndSetPath()
 {
-	size_t questionMarkPos = _urlSuffix.find_first_of("?#");
+	size_t questionMarkPos = _urlSuffix.find_first_of("?");
 	if(questionMarkPos == std::string::npos)
 		_path = _urlSuffix;
 	_path = _urlSuffix.substr(0, questionMarkPos);
@@ -83,14 +70,4 @@ void UrlSuffix::_parseAndSetQuerryParameters()
 		_queryParameters = rest;
 	else
 		_queryParameters.erase(_queryParameters.end() - 1);
-}
-
-void UrlSuffix::_parseAndSetFragment()
-{
-	_fragment = ParsingUtils::extractAfterDelim(_urlSuffix, "#");
-	if(_fragment.find('#') != std::string::npos)
-	{
-		Logger::error("INVALID SUFFIX");
-		_valid = false;
-	}
 }
