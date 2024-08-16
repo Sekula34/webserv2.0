@@ -201,7 +201,7 @@ void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int
 
 void	ConnectionDispatcher::_check_cgi(Client* client)
 {
-	if (!client->cgi_checked)
+	if (!client->cgi_checked && client->getErrorCode() == 0)
 	{
 		client->cgi_checked= true;
 		bool found = true;
@@ -256,6 +256,7 @@ void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<in
 			// READ BODY
 			// PROCESS BODY
 		}
+		//check cgi only if there is no error in client so far
 		_check_cgi(client);
 		// IF RUN_CGI RETURNS TRUE WE ARE WAITING FOR CHILD TO RETURN
 		if (run_cgi(client))
