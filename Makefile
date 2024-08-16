@@ -45,6 +45,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Utils/FileUtils.cpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.cpp\
+			srcs/Utils/UrlSuffix.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
 			testers/CHTest.cpp\
@@ -72,6 +73,7 @@ HEADERS =	srcs/Client/ClientHeader.cpp\
 			srcs/Utils/FileUtils.hpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.hpp\
+			srcs/Utils/UrlSuffix.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp \
 			testers/CHTest.hpp\

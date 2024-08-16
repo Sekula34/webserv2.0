@@ -26,12 +26,13 @@ ClientHeader& ClientHeader::operator=(const ClientHeader& source)
 
 ClientHeader::~ClientHeader()
 {
-
+	delete urlSuffix;
 }
 
 
 void ClientHeader::_initAllVars(void)
 {
+	urlSuffix = NULL;
 	_errorCode = 0;
 	_requestLine= "";
 
@@ -120,7 +121,7 @@ const int& ClientHeader::getErrorCode(void) const
 	return _errorCode;
 }
 
-const std::string& ClientHeader::getRequestedUrl(void) const 
+const std::string& ClientHeader::getURLSuffix(void) const 
 {
 	const RequestLine& line = getRequestLine();
 	return line.requestTarget;
@@ -144,7 +145,12 @@ void ClientHeader::_constructFunction()
 	if(_message == "")
 		Logger::warning("Tried to create ClientRequest header with string that does not contain CRLFCRLF",true);
 	_initAllVars();
-	_setCHVarivables();
+	if(_setCHVarivables() == true)
+	{
+		urlSuffix = new UrlSuffix(getURLSuffix());
+		if(urlSuffix->isUrlSuffixValid() == false)
+			_errorCode = 400;
+	}
 }
 
 bool ClientHeader::_setRequestLine(void) 

@@ -14,16 +14,16 @@ class LocationSettings;
 class ServerSettings : public DefaultSettings
 {
 	private: 
-		void _applyAllServerLevelDirectives();
+		void 							_applyAllServerLevelDirectives();
 
 	protected: 
 		int _serverId;
-		std::vector<Directive> _serverDirectives;
-		std::vector<Token> _serverTokens;
-		std::vector<LocationSettings> _serverLocations;
+		std::vector<Directive>			_serverDirectives;
+		std::vector<Token>				_serverTokens;
+		std::vector<LocationSettings>	_serverLocations;
 		
 		
-		std::vector<LocationSettings> _setServerLocations();
+		std::vector<LocationSettings>	_setServerLocations();
 	public :
 		ServerSettings();
 		ServerSettings(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);
@@ -39,17 +39,17 @@ class ServerSettings : public DefaultSettings
 		 * @param url 
 		 * @return std::string 
 		 */
-		std::string getLocationPartOfUrl(const std::string& url) const;
-		bool amIServerLocation(const std::string& path) const;
-		std::vector<Token> getServerTokens(void) const;
-		std::vector<Directive> getServerDirectives(void) const;
-		const std::vector<LocationSettings>& getServerLocations() const;
-		std::vector<LocationSettings>::const_iterator fetchLocationWithUri(const std::string uri, bool& found) const;
+		std::string										getLocationURIfromPath(const std::string& fullPath) const;
+		bool											amIServerLocation(const std::string& path) const;
+		std::vector<Token>								getServerTokens(void) const;
+		std::vector<Directive>							getServerDirectives(void) const;
+		const std::vector<LocationSettings>&			getServerLocations() const;
+		std::vector<LocationSettings>::const_iterator	fetchLocationWithUri(const std::string uri, bool& found) const;
 		//LocationSettings& fetchLocationFromServer(std::string requestedLocation);
-		const int& getServerId() const;
-		void printServerSettings(void) const;
-		void printServerTokens(void) const;
-		void addDirectiveToServer(Directive directive);
+		const int&										getServerId() const;
+		void											printServerSettings(void) const;
+		void											printServerTokens(void) const;
+		void											addDirectiveToServer(Directive directive);
 
 		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);
 };

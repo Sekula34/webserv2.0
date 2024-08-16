@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "../Utils/UrlSuffix.hpp"
 
 class CHTest;
 
@@ -41,6 +42,7 @@ class ClientHeader
 		~ClientHeader();
 
 
+		UrlSuffix* urlSuffix; // this class is resposible for this 
 		const int& getHostPort(void) const;
 		const std::string& getHostName(void) const;
 		const std::string& getFullMessage(void) const;
@@ -48,6 +50,7 @@ class ClientHeader
 		const RequestLine& getRequestLine() const;
 		const std::string& getRequestedUrl() const;
 		const std::map<std::string, std::string> & getHeaderFields() const; 
+		const std::string& getURLSuffix() const;
 		bool isBodyExpected() const;
 
 	private :

@@ -8,67 +8,6 @@
 #include <vector>
 #include "../srcs/Parsing/ParsingUtils.hpp"
 
-
-std::vector<std::pair<std::string, int> > CHTest::messages;
-
-
-void CHTest::runAllTests()
-{
-	testIfThereIsBody();
-	CHBlockTest();
-	copyTestBlock();
-}
-
-
-void CHTest::copyTest(const std::string fullMessage)
-{
-	Logger::testCase("Testing copy construcotr", "to be same");
-	ClientHeader first(fullMessage);
-	ClientHeader &second(first);
-	assert(first.getErrorCode() == second.getErrorCode());
-	assert(first.getRequestedUrl() == second.getRequestedUrl());
-	_testpassed();
-}
-
-
-void CHTest::compare(const ClientHeader& actual, const std::pair<std::string, int>& expected)
-{
-	Logger::testCase("Comparing", ". Expected error code is"); 
-	std::cout << expected.second <<", actual: " << actual.getErrorCode() << std::endl;
-	assert(actual.getFullMessage() == ParsingUtils::extractUntilDelim(expected.first, "\r\n\r\n"));
-	assert(actual.getErrorCode() == expected.second);
-}
-
-void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
-{
-	Logger::testCase("Testing simple header", fullMessage);
-	ClientHeader header(fullMessage);
-	compare(header, expected);
-	
-	std::cout << header.getFullMessage() << std::endl;
-	_testpassed();
-}
-
-void CHTest::simplePrint()
-{
-	Logger::testCase("Simple", "something");
-	ClientHeader header(generateValidHttpReques());
-	ParsingUtils::printMap(header._headerFields);
-}
-
-
-
-void CHTest::CHBlockTest()
-{
-	InitVector();
-	for(size_t i = 0; i < messages.size(); i++)
-	{
-		testCHcase(messages[i].first, messages[i]);
-	}
-	_testpassed(true);
-}
-
-
 std::string CHTest::generateValidHttpReques()
 {
 	std::string valid = "GET /path/to/resource HTTP/1.1\r\n\
@@ -80,6 +19,19 @@ Accept-Language: en-US,en;q=0.9\r\n\
 Connection: keep-alive\r\n\
 \r\n";
 	return valid;
+}
+
+std::string generateComplexValid(void)
+{
+	std::string complex ="GET /cgi-bin/hello.py/something/?name=John HTTP/1.1\r\n\
+Host: www.example.com\r\n\
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36\r\n\
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\n\
+Accept-Language: en-US,en;q=0.5\r\n\
+Accept-Encoding: gzip, deflate, br\r\n\
+Connection: keep-alive\r\n\
+Upgrade-Insecure-Requests: 1\r\n\r\n";
+	return complex;
 }
 
 std::string invalidFirtLineRequest(void)
@@ -159,6 +111,75 @@ Connection: keep-alive\r\n\
 
 	return withBody;
 }
+
+std::vector<std::pair<std::string, int> > CHTest::messages;
+
+
+void CHTest::runAllTests()
+{
+	testIfThereIsBody();
+	CHBlockTest();
+	copyTestBlock();
+}
+
+
+void CHTest::uriTest()
+{
+	Logger::testCase("Testing uri");
+	ClientHeader header(generateComplexValid());
+	std::string uri = header.getURLSuffix();
+	std::cout << "Uri is: [" << uri << "]"<< std::endl;
+}
+
+void CHTest::copyTest(const std::string fullMessage)
+{
+	Logger::testCase("Testing copy construcotr", "to be same");
+	ClientHeader first(fullMessage);
+	ClientHeader &second(first);
+	assert(first.getErrorCode() == second.getErrorCode());
+	assert(first.getURLSuffix() == second.getURLSuffix());
+	_testpassed();
+}
+
+
+void CHTest::compare(const ClientHeader& actual, const std::pair<std::string, int>& expected)
+{
+	Logger::testCase("Comparing", ". Expected error code is"); 
+	std::cout << expected.second <<", actual: " << actual.getErrorCode() << std::endl;
+	assert(actual.getFullMessage() == ParsingUtils::extractUntilDelim(expected.first, "\r\n\r\n"));
+	assert(actual.getErrorCode() == expected.second);
+}
+
+void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
+{
+	Logger::testCase("Testing simple header", fullMessage);
+	ClientHeader header(fullMessage);
+	compare(header, expected);
+	
+	std::cout << header.getFullMessage() << std::endl;
+	_testpassed();
+}
+
+void CHTest::simplePrint()
+{
+	Logger::testCase("Simple", "something");
+	ClientHeader header(generateValidHttpReques());
+	ParsingUtils::printMap(header._headerFields);
+}
+
+
+
+void CHTest::CHBlockTest()
+{
+	InitVector();
+	for(size_t i = 0; i < messages.size(); i++)
+	{
+		testCHcase(messages[i].first, messages[i]);
+	}
+	_testpassed(true);
+}
+
+
 void CHTest::InitVector()
 {
 	std::pair<std::string, int> pair;
@@ -187,6 +208,10 @@ void CHTest::InitVector()
 	messages.push_back(pair);
 
 	pair.first = validWithContent();
+	pair.second = 0;
+	messages.push_back(pair);
+
+	pair.first = generateComplexValid();
 	pair.second = 0;
 	messages.push_back(pair);
 

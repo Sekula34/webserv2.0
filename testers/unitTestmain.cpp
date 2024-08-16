@@ -4,29 +4,20 @@
 
 
 
-void chTests()
+void all()
 {
+	UnitTest::allTests();
+	ServerTest::runAllTests();
 	CHTest::runAllTests();
 }
 
 int main()
 {
-	//std::cout << "Just new line " << std::endl;
-	
-	//UnitTest::allTests();
-	//ServerTest::runAllTests();
-	CHTest::runAllTests();
-	
-	//CHTest::simplePrint();
-	//UnitTest::stringEndCheck();
+	all();
 	//UnitTest::stringDelimCheck();
-	
-	//chTests();
-
-	//UnitTest::testDirBlock();
-	//UnitTest::configTestBlock();
-
-	//UnitTest::serverTestBlock();
-	//ServerTest::serverTestCase();
-	//std::cout << "Test Passed" << std::endl;
+	//UnitTest::urlPathTesterBlock();
+	//UnitTest::urlPathQueryBlock();
+	//UnitTest::urlFragmetBlock();
+	//CHTest::uriTest();
+	//UnitTest::urlValid();
 }

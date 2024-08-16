@@ -86,9 +86,9 @@ bool ServerSettings::amIServerLocation(const std::string& path) const
 	return found;
 }
 
-std::string ServerSettings::getLocationPartOfUrl(const std::string& url) const
+std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) const
 {
-	std::string toTry(url);
+	std::string toTry(fullPath);
 	while (true)
 	{
 		if(amIServerLocation(toTry) == true)
@@ -123,6 +123,7 @@ const int& ServerSettings::getServerId() const
 
 std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithUri(const std::string uri, bool& found) const
 {
+	found = true;
 	std::vector<LocationSettings>::const_iterator it = std::find_if(_serverLocations.begin(), _serverLocations.end(), FindByUri(uri));
 	if(it == _serverLocations.end())
 	{
