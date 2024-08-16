@@ -7,15 +7,13 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0)
-{
-	_initVars();
-	_init_user_info();
+Client::Client (void): _id(0), _fd(0), _start(std::clock()), _epollfd(0)
+{ 	
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd, char** envp, struct sockaddr client_addr):_id(++client_cntr),
-					_fd(fd), _start(std::clock()), _epollfd(epollfd), _envp(envp), _cgi(NULL), _client_addr(client_addr)
+Client::Client (int const fd, int const epollfd, std::map<int, int> * child_sockets, struct sockaddr client_addr):_id(++client_cntr),
+					_fd(fd), _start(std::clock()), _epollfd(epollfd), _child_sockets(child_sockets), _cgi(NULL), _client_addr(client_addr)
 {
 	// we will need to do new cgi somewhere else, this is just for testing
 
@@ -142,11 +140,6 @@ std::string const &	Client::getClientBody() const
 	return (_client_body);
 }
 
-char**	Client::getEnvp() const
-{
-	return(_envp);
-}
-
 CgiProcessor*	Client::getCgi() const
 {
 	return(_cgi);
@@ -237,6 +230,10 @@ void Client::_initVars(void)
 	header = NULL;
 	_response = NULL;
 	_client_body = "";
+}
+void	Client::addChildSocket(int fd)
+{
+	(*_child_sockets)[fd] = NOTREADY;
 }
 
 void	Client::_init_user_info()

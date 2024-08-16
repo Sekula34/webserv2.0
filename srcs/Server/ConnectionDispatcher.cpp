@@ -47,39 +47,27 @@ ConnectionDispatcher::~ConnectionDispatcher()
 	std::map<int, Client*>::iterator it = clients.begin();
 	for(; it != clients.end(); it++)
 		delete it->second;
+	std::map<int, bool>::iterator it_children = child_sockets.begin();
+	for(; it_children != child_sockets.end(); it_children++)
+		close(it_children->first);
 	close(epollfd);
-}
-
-void ConnectionDispatcher::epoll_add_listen_sock(int listen_sock)
-{
-	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
-	struct epoll_event	ev; 
-
-	// SETTING UP EV EVENTS 'SETTINGS' STRUCT FOR LISTEN_SOCKET
-	ev.events = EPOLLIN | EPOLLOUT;				
-	ev.data.fd = listen_sock;
-
-	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, listen_sock, &ev) == -1) 
-		throw std::runtime_error("epoll_ctl_add - listen socket error");
 }
 
 /* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
 ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER */
-void	ConnectionDispatcher::epoll_add_client(int epollfd, int listen_socket)
+void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
 {
 	struct sockaddr client_addr;
-	struct epoll_event	ev;
 	socklen_t addrlen = sizeof(client_addr);
-	int	client_fd;
+	int	clientfd;
 
 	// ACCEPT RETURNS CLIENT FD
-	client_fd = accept(listen_socket, &client_addr, &addrlen);
-	if (client_fd == -1)
+	clientfd = accept(listen_socket, &client_addr, &addrlen);
+	if (clientfd == -1)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(client_fd, epollfd, _envp, client_addr);
+	Client * newClient = new Client(clientfd, epollfd, &_child_sockets, client_addr);
 	newClient->setAddrlen(addrlen);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
@@ -87,28 +75,24 @@ void	ConnectionDispatcher::epoll_add_client(int epollfd, int listen_socket)
 	// IN THAT CASE THE  CLIENT INSTANCE NEEDS TO FINISH ITS JOB
 	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
 	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
-	if (clients.find(client_fd) != clients.end())
-		clients[client_fd]->setWriteClient(false);
-	clients[client_fd] = newClient;
+	if (clients.find(clientfd) != clients.end())
+		clients[clientfd]->setWriteClient(false);
+	clients[clientfd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
-	ev.events = EPOLLIN | EPOLLOUT;
-	ev.data.fd = client_fd;
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_fd, &ev) == -1)
-		throw std::runtime_error("epoll_ctl - conn_socket error");
+	EpollHandler::epoll_add_fd(epollfd, clientfd);
+	
 }
 
-void	ConnectionDispatcher::epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client)
+bool	ConnectionDispatcher::_is_childsocket(int fd)
 {
-	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
-	clients[client->getFd()]->setWriteClient(false);
-	
-	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
-	clients.erase(client->getFd());
-
-	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
-	epoll_ctl(client->getEpollFd(), EPOLL_CTL_DEL, client->getFd(), events);
-	
+	std::map<int, int>::iterator it = _child_sockets.find(fd);
+	if (it != _child_sockets.end())
+	{
+		it->second = READY;
+		return (true);
+	}
+	return (false);
 }
 
 Client* ConnectionDispatcher::find_client_in_clients(int client_fd, std::map<int, Client *> & clients)
@@ -133,10 +117,21 @@ bool	ConnectionDispatcher::read_client(struct epoll_event* events, std::map<int,
 	}
 	if (!client->check_timeout())
 	{
-		epoll_remove_client(events, clients, client);
+		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
+		clients_remove_fd(clients, client);
+		epoll_remove_fd(events, client);
 		delete client;
 	}
 	return (false);
+}
+
+void	ConnectionDispatcher::clients_remove_fd(std::map<int, Client*> & clients, Client* client)
+{
+	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
+	clients[client->getFd()]->setWriteClient(false);
+	
+	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
+	clients.erase(client->getFd());
 }
 
 bool	ConnectionDispatcher::read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
@@ -165,7 +160,8 @@ bool	ConnectionDispatcher::read_header(struct epoll_event* events, std::map<int,
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
 	if (n <= 0 || peek < 0)
 	{
-		epoll_remove_client(events, clients, client);
+		clients_remove_fd(clients, client);
+		epoll_remove_fd(events, client);
 		delete client;
 		if (n < 0 || peek < 0)
 			std::cout << "error: recieve from client, incomplete header" << std::endl;
@@ -182,19 +178,24 @@ bool	ConnectionDispatcher::read_header(struct epoll_event* events, std::map<int,
 	return (true);
 }
 
+void	ConnectionDispatcher::epoll_remove_fd(struct epoll_event* events, Client* client)
+{
+	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
+	epoll_ctl(client->getEpollFd(), EPOLL_CTL_DEL, client->getFd(), events);
+	
+}
+
 void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
 {
-	//std::string	answer = "HTTP/1.1 200 OK\r\n\r\nWebserv 0.0\n";
-
 	if (events[idx].events & EPOLLOUT)
 	{
-		//write(client->getFd(), answer.c_str(), answer.size());
 		bool result = client->getResponse()->sendResponse();
 		if(result == true)
 			Logger::info("The response  was sent successfully", true);
 		else
 			Logger::warning("Sending response had some error");
-		epoll_remove_client(events, clients, client);
+		clients_remove_fd(clients, client);
+		epoll_remove_fd(events, client);
 		delete client;
 	}
 }
@@ -306,16 +307,16 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 
 void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 {
+	// create epill fd
 	epollfd = epoll_create(1);
 	if (epollfd == -1)					
 		throw std::runtime_error("epoll create failed");
+
+	// add server sockets to epoll listener
 	std::vector<int> listenFd = _sockets.getAllListenFd();
 	for(size_t i = 0; i < listenFd.size(); i++)
-	{
-		epoll_add_listen_sock(listenFd[i]);
-	}
+		EpollHandler::epoll_add_fd(epollfd, listenFd[i]);
 }
-
 
 void ConnectionDispatcher::_notStuckMessage(void) const
 {
@@ -343,14 +344,18 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 			counter = 0;
 }
 
+void	ConnectionDispatcher::handle_child_sockets()
+{
+	
+}
 
-bool ConnectionDispatcher::_acceptClient(size_t idx)
+bool ConnectionDispatcher::_isServerSocket(size_t idx)
 {
 	for(size_t i = 0; i < _sockets.getAllListenFd().size(); i++)
 	{
 		if (events[idx].data.fd == _sockets.getAllListenFd()[i])
 		{
-			epoll_add_client(epollfd, _sockets.getAllListenFd()[i]);
+			_epoll_accept_client(epollfd, _sockets.getAllListenFd()[i]);
 			return true;
 		}
 	}
@@ -367,7 +372,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 	{
 		if(flag)
 		{
-			Logger::info("Turn off procedure triggered"); std::cout<<std::endl;
+			Logger::info("Turn off procedure triggered"); std::cout << std::endl;
 			break;
 		}
 		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
@@ -378,12 +383,11 @@ void ConnectionDispatcher::mainLoopEpoll()
 		}
 		for (size_t idx = 0; idx < static_cast<size_t>(nfds); ++idx)
 		{
-			if(_acceptClient(idx) == true)
+			if(_isServerSocket(idx) == true)
 				continue;
-			// check whether the file descriptor is a pipe to CGI child process
-			// set to true
+			if (_is_childsocket(events[idx].data.fd))
+				continue;
 			handle_client(events, clients, idx);
 		}
 	}
-
 }

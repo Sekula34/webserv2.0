@@ -280,26 +280,14 @@ void	CgiProcessor::delete_chararr(char ** lines)
 
 int	CgiProcessor::execute()
 {
-	int exepipefd[2];
-
+	close(_sockets[0]);
 	std::cout << "entered execute..." << std::endl;
 
-
-	if (pipe(exepipefd) == -1)
+ 	if (dup2(_sockets[1], STDIN_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
-
- 	write(exepipefd[1], _client->getClientBody().c_str(), _client->getClientBody().size());
- 	write(exepipefd[1], "check this out\n", 15);
-
- 	close(exepipefd[1]);
- 	close(_pipefd[0]);
-
- 	if (dup2(exepipefd[0], STDIN_FILENO) == -1)
+ 	if (dup2(_sockets[1], STDOUT_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
- 	close(exepipefd[0]);
- 	if (dup2(_pipefd[1], STDOUT_FILENO) == -1)
- 		return (_client->setErrorCode(500), 1);
- 	close(_pipefd[1]);
+	std::cerr << "got to after dup2" << std::endl;
  	int ret = execve(_args[0], _args, _env);
 	std::cerr << "######### EXECVE FAILED" << std::endl;
  	return (_client->setErrorCode(500), ret);
@@ -310,11 +298,19 @@ int	CgiProcessor::wait_for_child()
 	int					status;
 	pid_t					waitreturn;
 
-	close (_pipefd[1]);
-
+	close(_sockets[1]);
+	EpollHandler::epoll_add_fd(_client->getEpollFd(), _sockets[0]);
+	_client->addChildSocket(_sockets[0]);
+ 	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
+ 	// write(_sockets[0], "check this out\n", 15);
+	sleep(1);
+	// std::cout << "waiting for child" << std::endl;
 	waitreturn = waitpid(_pid, &status, WNOHANG);
 	if (WIFEXITED(status))
+	{
 		_exitstatus = WEXITSTATUS(status);
+		// std::cout << "child exited with: " << _exitstatus << std::endl;
+	}
 	if (waitreturn == -1)
 		return (_client->setErrorCode(500), 1);
 	return (waitreturn);
@@ -327,15 +323,16 @@ int	CgiProcessor::gen_body()
 
 	while (true)
 	{
+		std::cout << "in gen body, reading from socket" << std::endl;
 		memset(buffer, 0, MAXLINE);
-		readsize = read(_pipefd[0], buffer, MAXLINE - 1);
+		readsize = read(_sockets[0], buffer, MAXLINE - 1);
 		if (readsize == -1)
 			return (_client->setErrorCode(500), 1);
 		_cgi_output += buffer;
 		if (readsize < MAXLINE - 1)
 			break;
 	}
-	close (_pipefd[0]);
+	close(_sockets[0]);
 	return (1);
 }
 
@@ -350,17 +347,17 @@ int CgiProcessor::process()
 	if (!_forked)
 	{
 		_forked = true;
-		if (pipe(_pipefd) == -1)
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets) < 0)
 			return (_client->setErrorCode(500), 1);
-		_pid = fork();
 
+		if ((_pid = fork()) == -1)
+			return (_client->setErrorCode(500), 1);
 		if (_pid == CHILD)
 		{
 			if(execute() == -1)
 				return (_client->setErrorCode(500), 1);
 		}
 	}
-
 	if (_pid != CHILD)
 	{
 		if (wait_for_child() > 0)

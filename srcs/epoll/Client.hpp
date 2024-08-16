@@ -17,15 +17,20 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sstream>
+#include <map>
+# include "../Response/Response.hpp"
 //# include "CgiProcessor.hpp"
 
 // #define MAXLINE			4096
 // #define MAXLINE			493
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
+#define READY			0 
+#define NOTREADY		1 
+#define ADD				2 
+#define DELETE			3 
 
 class CgiProcessor;
-# include "../Response/Response.hpp"
 
 
 class Client {
@@ -34,10 +39,9 @@ class Client {
 		static int			client_cntr;
 		
 							// canonical
-							Client (int const fd, int const epollfd, char** envp, struct sockaddr client_addr);
+							Client (int const fd, int const epollfd, std::map<int,
+			   						int>* child_sockets, struct sockaddr client_addr);
 							~Client(void);
-							Client(Client const & src);
-		Client &			operator=(Client const & rhs);
 							
 							// set and get
 		Response* 			getResponse() const;
@@ -53,7 +57,6 @@ class Client {
 		bool				getReadBody() const;
 		bool				getWriteClient() const;
 		std::string const &	getClientBody() const;
-		char**				getEnvp() const;
 		CgiProcessor*		getCgi() const;
 		std::string			getClientIp() const;
 		void				setErrorCode(int e);
@@ -66,6 +69,7 @@ class Client {
 							//Client specific functions
 		void				addRecvLineToMessage();
 		bool				check_timeout() const;
+		void				addChildSocket(int fd);
 
 		/**
 		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor
@@ -89,11 +93,13 @@ class Client {
 		bool				_readheader;
 		bool				_readbody;
 		bool				_writeclient;
-		char**				_envp;
+		std::map<int, int>*	_child_sockets;
 		CgiProcessor*		_cgi;
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_client_addr;
 							Client(void);
+							Client(Client const & src);
+		Client &			operator=(Client const & rhs);
 		std::string			_client_ip;
 		socklen_t			_addrlen;
 

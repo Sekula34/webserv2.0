@@ -42,6 +42,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
+			srcs/Server/EpollHandler.cpp \
 			srcs/Server/ConnectionDispatcher.cpp \
 			srcs/Server/Socket.cpp \
 			srcs/Server/SocketManager.cpp \
@@ -70,6 +71,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp\
 			srcs/Response/Response.hpp\
 			srcs/Response/ResponseBody.hpp\
 			srcs/Response/ResponseHeader.hpp\
+			srcs/Server/EpollHandler.hpp \
 			srcs/Server/ConnectionDispatcher.hpp\
 			srcs/Server/Socket.hpp\
 			srcs/Server/SocketManager.hpp\

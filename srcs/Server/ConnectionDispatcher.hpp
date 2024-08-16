@@ -1,13 +1,20 @@
 #ifndef CONNECTIONDISPATCHER_HPP
 # define CONNECTIONDISPATCHER_HPP
+#include <cstddef>
+#include <sys/epoll.h>
+#include <sys/select.h>
 #include "SocketManager.hpp"
 #include "../Parsing/ServersInfo.hpp"
-#include <cstddef>
-#include <sys/select.h>
 #include "../epoll/Client.hpp"
-#include "sys/epoll.h"
+#include "../epoll/Client.hpp"
+#include "EpollHandler.hpp"
+
 #define MAX_EVENTS		10
 #define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
+#define READY			0 
+#define NOTREADY		1 
+#define ADD				2 
+#define DELETE			3 
 
 
 /**
@@ -23,26 +30,30 @@ class ConnectionDispatcher
 		~ConnectionDispatcher();
 
 		std::map<int, Client *>	clients; //maybe private
+		std::map<int, bool>	child_sockets; //maybe private
 		struct epoll_event	events[MAX_EVENTS]; // maybe private
 
 		void 	mainLoopEpoll(void);
 		int		epollfd; //turn this in private later 
-		void 	epoll_add_listen_sock(int listen_sock); //pribvate probably 
-		void 	epoll_add_client(int epollfd, int listen_socket);
-		void	epoll_remove_client(struct epoll_event* events, std::map<int, Client*> & clients, Client* client);
 	
 		Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
 		bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
 		bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
 		void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
 		void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+		void	clients_remove_fd(std::map<int, Client*> & clients, Client* client);
+		void	handle_child_sockets();
+		void	epoll_remove_fd(struct epoll_event* events, Client* client);
 		
 	
 	private :
+		std::map<int,int>	_child_sockets;
+		bool				_is_childsocket(int fd);
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 
 		void _addServerSocketsToEpoll(void);
+		bool	run_cgi(Client* client);
 		
 		/**
 		 * @brief 
@@ -51,8 +62,8 @@ class ConnectionDispatcher
 		 * @return true if client is accepted
 		 * @return false if fd is client 
 		 */
-		bool	run_cgi(Client* client);
-		bool _acceptClient(size_t idx);
+		bool	_isServerSocket(size_t idx);
+		void 	_epoll_accept_client(int epollfd, int listen_socket);
 
 
 		void _processAnswer(Client& client);

@@ -2,6 +2,7 @@
 #ifndef CGIPROCESSOR_HPP
 # define CGIPROCESSOR_HPP
 # include "Client.hpp"
+# include "../Server/EpollHandler.hpp"
 
 # include <iostream>
 # include <fcntl.h>
@@ -31,7 +32,8 @@ class CgiProcessor {
 	private:
 		Client *		_client;
 		int				_pid;
-		int				_pipefd[2]; // 0 read, 1 write
+		// int				_pipefd[2]; // 0 read, 1 write
+		int				_sockets[2];
 		std::vector<std::string>	_args_vec;
 		std::vector<std::string>	_env_vec;
 		char**			_args;
