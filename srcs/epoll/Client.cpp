@@ -223,7 +223,6 @@ void Client::createClientHeader()
 {
 	if(header != NULL)
 	{
-		Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
 		return;
 	}
 	header = new ClientHeader(this->getMessage());
