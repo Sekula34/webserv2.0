@@ -7,7 +7,6 @@
 #include "../Parsing/ServersInfo.hpp"
 #include "../epoll/Client.hpp"
 #include "../epoll/Client.hpp"
-#include "EpollHandler.hpp"
 
 #define MAX_EVENTS		10
 #define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
@@ -44,7 +43,7 @@ class ConnectionDispatcher
 		void	clients_remove_fd(std::map<int, Client*> & clients, Client* client);
 		void	handle_child_sockets();
 		void	epoll_remove_fd(struct epoll_event* events, Client* client);
-		
+		void	epoll_add_fd(int epollfd, int clientfd);
 	
 	private :
 		std::map<int,int>	_child_sockets;

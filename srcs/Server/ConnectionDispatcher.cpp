@@ -80,7 +80,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
 	clients[clientfd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
-	EpollHandler::epoll_add_fd(epollfd, clientfd);
+	epoll_add_fd(epollfd, clientfd);
 	
 }
 
@@ -183,6 +183,20 @@ void	ConnectionDispatcher::epoll_remove_fd(struct epoll_event* events, Client* c
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	epoll_ctl(client->getEpollFd(), EPOLL_CTL_DEL, client->getFd(), events);
 	
+}
+
+void	ConnectionDispatcher::epoll_add_fd(int epollfd, int clientfd)
+{
+	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
+	struct epoll_event	ev;
+
+	// SETTING UP EV EVENTS 'SETTINGS' STRUCT FOR LISTEN_SOCKET
+	ev.events = EPOLLIN | EPOLLOUT;
+	ev.data.fd = clientfd;
+
+	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &ev) == -1)
+		throw std::runtime_error("epoll_ctl - conn_socket error");
 }
 
 void	ConnectionDispatcher::write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx)
@@ -315,7 +329,7 @@ void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 	// add server sockets to epoll listener
 	std::vector<int> listenFd = _sockets.getAllListenFd();
 	for(size_t i = 0; i < listenFd.size(); i++)
-		EpollHandler::epoll_add_fd(epollfd, listenFd[i]);
+		epoll_add_fd(epollfd, listenFd[i]);
 }
 
 void ConnectionDispatcher::_notStuckMessage(void) const
@@ -346,7 +360,11 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 
 void	ConnectionDispatcher::handle_child_sockets()
 {
-	
+// handle all 4 cases of child socket
+	// READY -> should do nothing I think
+	// NOTREADY
+	// ADD
+	// DELETE
 }
 
 bool ConnectionDispatcher::_isServerSocket(size_t idx)
@@ -375,6 +393,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 			Logger::info("Turn off procedure triggered"); std::cout << std::endl;
 			break;
 		}
+		// handle_child_sockets
 		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
 		if (nfds == -1)
 		{

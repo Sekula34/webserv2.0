@@ -5,7 +5,6 @@
 # include <string>
 # include <ctime>
 # include "../Client/ClientHeader.hpp"
-# include "CgiProcessor.hpp"
 #include <cstddef>
 #include <cstring>
 #include <iostream>

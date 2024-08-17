@@ -293,47 +293,47 @@ int	CgiProcessor::execute()
  	return (_client->setErrorCode(500), ret);
 }
 
-int	CgiProcessor::wait_for_child()
+pid_t	CgiProcessor::wait_for_child()
 {
-	int					status;
 	pid_t					waitreturn;
+	int					status;
 
-	close(_sockets[1]);
-	EpollHandler::epoll_add_fd(_client->getEpollFd(), _sockets[0]);
-	_client->addChildSocket(_sockets[0]);
- 	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
- 	// write(_sockets[0], "check this out\n", 15);
-	sleep(1);
-	// std::cout << "waiting for child" << std::endl;
 	waitreturn = waitpid(_pid, &status, WNOHANG);
 	if (WIFEXITED(status))
 	{
 		_exitstatus = WEXITSTATUS(status);
 		// std::cout << "child exited with: " << _exitstatus << std::endl;
 	}
-	if (waitreturn == -1)
-		return (_client->setErrorCode(500), 1);
 	return (waitreturn);
 }
 
-int	CgiProcessor::gen_body()
-{
-	char		buffer[MAXLINE];
-	int			readsize;
+// create new function write_to_child
+ 	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
+ 	// write(_sockets[0], "check this out\n", 15);
 
-	while (true)
-	{
-		std::cout << "in gen body, reading from socket" << std::endl;
-		memset(buffer, 0, MAXLINE);
-		readsize = read(_sockets[0], buffer, MAXLINE - 1);
-		if (readsize == -1)
-			return (_client->setErrorCode(500), 1);
-		_cgi_output += buffer;
-		if (readsize < MAXLINE - 1)
-			break;
-	}
-	close(_sockets[0]);
-	return (1);
+int	CgiProcessor::read_from_child()
+{
+	pid_t	waitreturn;
+	char 	buffer[MAXLINE];
+
+	close(_sockets[1]);
+	_client->addChildSocket(_sockets[0]);
+
+	// if waitreturn == -1 then return with errorcode 500
+	// if socket READY and readable then read into buffer
+	// if reading worked concat buffer to body string
+	// if socket empty or reading did not fill buffer AND waitreturn > 0 -> return (1)
+
+	if ((waitreturn = wait_for_child()) == -1)
+		return (_client->setErrorCode(500), 1);
+
+	// generic read function
+	
+	_cgi_output += buffer;
+
+	sleep(1);
+	// std::cout << "waiting for child" << std::endl;
+	return (waitreturn);
 }
 
 // CHECKER FOR PYTHON
@@ -360,10 +360,8 @@ int CgiProcessor::process()
 	}
 	if (_pid != CHILD)
 	{
-		if (wait_for_child() > 0)
-			gen_body();
-		else 
-			return (1);
+		// write_to_child()
+		return (read_from_child());
 	}
 	return (0);
 }

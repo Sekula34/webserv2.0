@@ -2,7 +2,6 @@
 #ifndef CGIPROCESSOR_HPP
 # define CGIPROCESSOR_HPP
 # include "Client.hpp"
-# include "../Server/EpollHandler.hpp"
 
 # include <iostream>
 # include <fcntl.h>
@@ -47,11 +46,12 @@ class CgiProcessor {
 		char**			create_argv();
 		int				execute();
 		int				gen_body();
-		int				wait_for_child();
+		int				read_from_child();
 		char**			vec_to_chararr(std::vector<std::string>);
 		void			delete_chararr(char ** lines);
 		void			create_env_vector();
 		void			create_args_vector();
+		pid_t			wait_for_child();
 
 						CgiProcessor(void);
 						CgiProcessor(CgiProcessor const & src);
