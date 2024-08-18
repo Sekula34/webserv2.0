@@ -5,7 +5,7 @@ import time
 HOST ="localhost"
 PORT = 9090
 
-class RequestData():
+class CustomRequest():
 	def __init__(self, title, curl_request, expected_http_status):
 		self.__title = title
 		self.__curl_request = curl_request
@@ -50,7 +50,7 @@ def no_host_request():
 
 
 def long_timeout():
-	req = RequestData("Long Timeout", "get", 400)
+	req = CustomRequest("Long Timeout", "get", 400)
 	start = time.time()
 	req.send()
 	end = time.time()
@@ -58,10 +58,17 @@ def long_timeout():
 
 def phantom_port():
 	curl_request = "GET / HTTP/1.1\r\nHost: example.com\r\nUser-Agent: CustomClient\r\n\r\n"
-	req = RequestData("Confusing Host", curl_request, 400)
+	req = CustomRequest("Confusing Host", curl_request, 400)
+	return(req.send())
+
+def no_host():
+	curl_request = "GET / HTTP/1.1\r\nUser-Agent: CustomClient\r\n\r\n"
+	req = CustomRequest("No Host", curl_request, 400)
 	return(req.send())
 
 def main():
+	response = no_host()
+	print("NO hosT reposne is {0}".format(response))
 	message = phantom_port()
 	print("Message is [{0}]".format(message))
 	#long_timeout()
