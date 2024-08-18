@@ -279,8 +279,6 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 {
 	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
 	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
-
-	//const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)
 	{
