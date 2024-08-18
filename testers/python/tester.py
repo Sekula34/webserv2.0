@@ -55,6 +55,11 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 
+	def test_authorization(self):
+		TestMyWebServer.print_test_title("Testing authorization in header")
+		response = CustomRequst.authorization_not_supported()
+		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
+		Colors.test_passed()
 
 	def spammer(self, numberOfRequest = 500):
 		accepted_count = 0

@@ -25,7 +25,7 @@ class CustomRequest():
 		sock.sendall(self.__curl_request.encode("utf-8"))
 		server_response = sock.recv(4096)
 		decoded_response = server_response.decode("utf-8")
-		print(decoded_response)
+		#print(decoded_response)
 		sock.close()
 		return decoded_response
 		
@@ -66,7 +66,17 @@ def no_host():
 	req = CustomRequest("No Host", curl_request, 400)
 	return(req.send())
 
+def authorization_not_supported():
+		curl_request = "GET / HTTP/1.1\r\n\
+Host:localhost:9090\r\n\
+Authorization: SomeAuthorization\r\n\
+User-Agent: CustomClient\r\n\r\n"
+		req = CustomRequest("Authorization", curl_request, 403)
+		return(req.send())
+
 def main():
+	response = authorization_not_supported()
+	print("Authorization reposne is {0}".format(response))
 	response = no_host()
 	print("NO hosT reposne is {0}".format(response))
 	message = phantom_port()

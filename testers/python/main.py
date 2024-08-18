@@ -27,8 +27,7 @@ def spammerInput(testInstance):
 	testInstance.spammer(int(answer))
 
 
-if __name__ == "__main__":
-	#used to load test cases from specific module
+def big_main():
 	tester_intro()
 	loader = unittest.TestLoader()
 	suite = loader.loadTestsFromModule(tester)
@@ -38,4 +37,6 @@ if __name__ == "__main__":
 
 	testInstance = tester.TestMyWebServer()
 	spammer(testInstance=testInstance)
-	#testInstance.spammer()
+
+if __name__ == "__main__":
+	big_main()
