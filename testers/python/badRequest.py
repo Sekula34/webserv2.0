@@ -17,15 +17,17 @@ class RequestData():
 		text = Colors.color_text(mesage, Colors.OKCYAN)
 		print(text)
 
-	def send(self):
+	def send(self, port = 9090, host = "localhost"):
 		text = Colors.color_text("Sending custom request", Colors.WARNING)
 		print(text)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((HOST, PORT))
+		sock.connect((host, port))
 		sock.sendall(self.__curl_request.encode("utf-8"))
 		server_response = sock.recv(4096)
-		print(server_response.decode("utf-8"))
+		decoded_response = server_response.decode("utf-8")
+		print(decoded_response)
 		sock.close()
+		return decoded_response
 		
 
 
@@ -54,14 +56,15 @@ def long_timeout():
 	end = time.time()
 	print("Response took: {0} seconds".format(end - start))
 
-def seg_fault():
+def phantom_port():
 	curl_request = "GET / HTTP/1.1\r\nHost: example.com\r\nUser-Agent: CustomClient\r\n\r\n"
 	req = RequestData("Confusing Host", curl_request, 400)
-	req.send()
+	return(req.send())
 
 def main():
-	seg_fault()
-	long_timeout()
+	message = phantom_port()
+	print("Message is [{0}]".format(message))
+	#long_timeout()
 
 if __name__ == "__main__":
 	main()

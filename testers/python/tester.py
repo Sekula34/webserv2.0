@@ -1,6 +1,7 @@
 import requests
 import unittest
 from colors import Colors
+import badRequest
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -41,6 +42,14 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(respones.status_code, 200)
 		self.assertIn("Socket", respones.text)
 		Colors.test_passed()
+
+	def test_bad_request(self):
+		TestMyWebServer.print_test_title("Testing phantom port")
+		response = badRequest.phantom_port()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+		
+
 
 	def spammer(self, numberOfRequest = 500):
 		accepted_count = 0
