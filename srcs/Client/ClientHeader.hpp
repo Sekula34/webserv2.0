@@ -108,6 +108,8 @@ class ClientHeader
 		  */
 		bool _checkRequestStruct(void);
 
+		bool _checkHeaderFields(void);
+
 		 /**
 		  * @brief set host
 		  * 
