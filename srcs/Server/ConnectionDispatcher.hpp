@@ -36,7 +36,7 @@ class ConnectionDispatcher
 		bool	read_header(Client* client,  int idx);
 		void	write_client(Client* client,  int idx);
 		void	clients_remove_fd(Client* client);
-		void	epoll_remove_fd(Client* client);
+		void	epoll_remove_fd(int fd);
 		void	epoll_add_fd(int epollfd, int clientfd);
 	
 	private :
@@ -48,7 +48,7 @@ class ConnectionDispatcher
 		void				_handleClient(int idx);
 		bool				_checkReceiveError(Client* client, int n, int peek);
 		void				_checkEndHeader(Client* client, int n);
-		void				_concatMessageAndPeek(Client* client, int n, int peek);
+		void				_concatMessageAndPeek(Client* client, int n, int & peek);
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 

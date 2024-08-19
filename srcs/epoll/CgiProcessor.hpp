@@ -24,9 +24,11 @@ class CgiProcessor {
 
 						// set and get
 		std::string		getCgiResponse() const;
+		void			setCgiOutput(std::string  s);
 
 						//CgiProcessor specific functions
 		int				process(void);
+		std::string		_cgi_output;
 
 	private:
 		Client *		_client;
@@ -39,7 +41,6 @@ class CgiProcessor {
 		char**			_env;
 		char**			_tmp;
 		bool			_forked;
-		std::string		_cgi_output;
 		int				_exitstatus;
 
 		char**			create_env();

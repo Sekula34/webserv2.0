@@ -65,6 +65,11 @@ std::string		CgiProcessor::getCgiResponse() const
 	return (_cgi_output);
 }
 
+void	CgiProcessor::setCgiOutput(std::string s)
+{
+	_cgi_output = s;
+}
+
 /******************************************************************************/
 /*                               Error Handling                               */
 /******************************************************************************/
@@ -337,6 +342,7 @@ int CgiProcessor::process()
 	if (_pid != CHILD)
 	{
 		wait_for_child();
+		return (_client->waitreturn);
 	}
-	return (_client->waitreturn);
+	return (0);
 }

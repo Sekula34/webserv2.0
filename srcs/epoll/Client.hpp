@@ -23,11 +23,12 @@
 
 // #define MAXLINE			4096
 // #define MAXLINE			493
-# define MAXLINE			50
+# define MAXLINE			50000
 # define MAX_TIMEOUT		10000
 #define NONE			0 
 #define ADD				1 
 #define DELETE			2 
+#define TOBEDELETE		3 
 
 class CgiProcessor;
 
@@ -84,6 +85,7 @@ class Client {
 		ClientHeader*		header; //client Responsible for deleting
 		pid_t				waitreturn;
 		int					childSocketStatus;
+		int					childSocket;
 
 	private:
 		int					_errorCode;

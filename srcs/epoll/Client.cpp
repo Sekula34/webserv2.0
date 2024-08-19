@@ -30,6 +30,10 @@ Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_
 
 Client::~Client (void)
 {
+	if (Cgi)
+	{
+		(*_child_sockets)[childSocket] = NULL;
+	}
 	close (_fd);
 	delete [] _recvline;
 	delete header;
@@ -245,6 +249,7 @@ void	Client::setChildSocket(int fd)
 {
 	(*_child_sockets)[fd] = this;
 	childSocketStatus = ADD;
+	childSocket = fd;
 }
 
 void	Client::unsetChildSocket()

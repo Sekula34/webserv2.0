@@ -101,7 +101,7 @@ bool	ConnectionDispatcher::_checkReceiveError(Client* client, int n, int peek)
 	if (n <= 0 || peek < 0)
 	{
 		clients_remove_fd(client);
-		epoll_remove_fd(client);
+		epoll_remove_fd(client->getFd());
 		delete client;
 		if (n < 0 || peek < 0)
 			std::cout << "error: receive" << std::endl;
@@ -120,12 +120,12 @@ void	ConnectionDispatcher::_checkEndHeader(Client* client, int n)
 	}
 }
 
-void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int peek)
+void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int & peek)
 {
 	if (n > 0)
 	{
 		client->addRecvLineToMessage();
-		if (n == MAXLINE && client->getMessage().find("\r\n\r\n") == std::string::npos)
+		if (n == MAXLINE - 1 && client->getMessage().find("\r\n\r\n") == std::string::npos)
 			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 	}
 }
@@ -143,7 +143,7 @@ bool	ConnectionDispatcher::read_fd(int fd, Client * client, int & n, int idx)
 	{
 		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 		clients_remove_fd(client);
-		epoll_remove_fd(client);
+		epoll_remove_fd(client->getFd());
 		delete client;
 	}
 	return (false);
@@ -186,10 +186,10 @@ bool	ConnectionDispatcher::read_header(Client* client,  int idx)
 	return (true);
 }
 
-void	ConnectionDispatcher::epoll_remove_fd(Client* client)
+void	ConnectionDispatcher::epoll_remove_fd(int fd)
 {
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
-	epoll_ctl(client->getEpollFd(), EPOLL_CTL_DEL, client->getFd(), events);
+	epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, events);
 	
 }
 
@@ -217,7 +217,7 @@ void	ConnectionDispatcher::write_client(Client* client,  int idx)
 		else
 			Logger::warning("Sending response had some error");
 		clients_remove_fd(client);
-		epoll_remove_fd(client);
+		epoll_remove_fd(client->getFd());
 		delete client;
 	}
 }
@@ -257,6 +257,10 @@ bool	ConnectionDispatcher::run_cgi(Client* client)
 
 bool	ConnectionDispatcher::_isChildSocket(int fd)
 {
+	// std::cout << "all fds in Childsocket list: ";
+	std::map<int, Client*>::iterator it1 = _child_sockets.begin();
+	for (; it1 != _child_sockets.end(); it1++)
+		std::cout << it1->first << std::endl;
 	std::map<int, Client*>::iterator it = _child_sockets.find(fd);
 	if (it != _child_sockets.end())
 		return (true);
@@ -264,6 +268,8 @@ bool	ConnectionDispatcher::_isChildSocket(int fd)
 }
 bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 {
+	// std::cout << "looking for socket: " << socket << std::endl;
+
 	if (!_isChildSocket(socket))
 		return (false);
 
@@ -274,7 +280,7 @@ bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 
 	// if no Client for this FD in map then return fatal error
 	Client* client = _child_sockets.find(socket)->second;
-	client->clearMessage();
+	// client->clearMessage();
 
 	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
 	// ALSO REMOVES CLIENT ON TIMEOUT
@@ -293,10 +299,10 @@ bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 	{
 		if (client->waitreturn)
 		{
+			std::cout << "got to n < MAXLINE - 1 with string: " << client->getMessage() << std::endl;
 			client->unsetChildSocket();
-			client->_
+			client->Cgi->_cgi_output = client->getMessage();
 		}
-
 	}
 	
 	return (true);
@@ -313,7 +319,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 		return ;
 	//Logger::info("Client message is "); std::cout << client->getMessage() << std::endl;
 	// if (client->getCgi())
-	// 	if (client->getCgi()->process())
+	// 	if (client->getCgi()->process()):
 	// 		return ;
 	
 	// PROCESS HEADER
@@ -328,8 +334,9 @@ void	ConnectionDispatcher::_handleClient(int idx)
 		}
 		_check_cgi(client);
 		// IF RUN_CGI RETURNS TRUE WE ARE WAITING FOR CHILD TO RETURN
-		if (run_cgi(client))
+		if (run_cgi(client) || client->childSocketStatus != DELETE)
 			return ;
+		std::cout << "***** got past CGI in handleClient" << std::endl;
 		// if cgi request -> run CGI PROCESSOR
 		// if child not returned yet return;
 		//
@@ -415,14 +422,22 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 
 void	ConnectionDispatcher::_prepareChildSockets()
 {
+	std::cout << "prepare Child Sockets" << std::endl;
 	std::map<int, Client*>::iterator it = _child_sockets.begin(); 
 	for (; it != _child_sockets.end(); it++)
 	{
+		if (!it->second)
+		{
+			close(it->first);
+			epoll_remove_fd(it->first);
+			_child_sockets.erase(it->first);
+			continue ;
+		}
 		if (it->second->childSocketStatus == DELETE)
 		{
 			close(it->first);
-			epoll_remove_fd(it->second);
-			// _child_sockets.erase(it->first);
+			epoll_remove_fd(it->first);
+			_child_sockets.erase(it->first);
 		}
 	  	else if (it->second->childSocketStatus == ADD)
 		{
@@ -430,12 +445,6 @@ void	ConnectionDispatcher::_prepareChildSockets()
 			it->second->childSocketStatus = NONE;
 		}
 	}
-	;
-// handle all 4 cases of child socket
-	// READY -> should do nothing I think
-	// NOTREADY
-	// ADD
-	// DELETE
 }
 
 bool ConnectionDispatcher::_handleServerSocket(size_t idx)
