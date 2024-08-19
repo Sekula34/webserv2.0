@@ -2,7 +2,7 @@
 #include <cassert>
 #include "../srcs/Response/Autoindex.hpp"
 #include "../srcs/Utils/Logger.hpp"
-
+#include <iostream>
 void AutoindexTest::runAll()
 {
 	simpleTest();
@@ -13,6 +13,7 @@ void AutoindexTest::simpleTest()
 	Logger::testCase("Teting simple creation of Auto Index", "no error");
 	int statusCode = 0;
 	Autoindex index("This/is/Folder/Path", statusCode);
+	std::cout << index._folderPath << std::endl;
 	assert(index.getStatusCode() == statusCode);
 
 	Logger::testCase("Teting simple creation of Auto Index", "ERROR");

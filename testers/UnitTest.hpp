@@ -26,5 +26,8 @@ class UnitTest
 		static void configSyntaxBlock();
 		static void configNumberOfServersBlock();
 		static void testDirBlock();
+		static void testingOpeninDirBlock();
+		static void testOpeningDirCase(const std::string path, int expected_error);
+
 };
 #endif

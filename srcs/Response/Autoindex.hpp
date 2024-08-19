@@ -2,6 +2,7 @@
 # define AUTOINDEX
 #include <string>
 
+class AutoindexTest;
 
 class Autoindex
 {
@@ -17,6 +18,8 @@ class Autoindex
 		Autoindex();
 		const std::string _folderPath;
 		int& _statusCode;
+
+	friend AutoindexTest;
 };
 
 #endif

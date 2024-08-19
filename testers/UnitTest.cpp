@@ -1,5 +1,7 @@
 #include "UnitTest.hpp"
 #include <assert.h>
+#include <cerrno>
+#include <cstdio>
 #include <exception>
 #include "../srcs/Parsing/Configuration.hpp"
 #include <iostream>
@@ -7,6 +9,7 @@
 #include "../srcs/Utils/Logger.hpp"
 #include "../srcs/Parsing/ParsingUtils.hpp"
 #include "../srcs/Utils/UrlSuffix.hpp"
+#include "../srcs/Utils/FileUtils.hpp"
 
 
 const std::string UnitTest::_constFileFolder = "testers/ConfigFileTest/TestFiles/";
@@ -90,6 +93,29 @@ void UnitTest::stringDelimCheck()
 	assert(result1 == "");
 	_testpassed();
 }
+
+
+void UnitTest::testingOpeninDirBlock()
+{
+	testOpeningDirCase("Configuration", 0);
+	testOpeningDirCase("./Configuration/", 0);
+	testOpeningDirCase("html/403.html", 404);
+	testOpeningDirCase("testers/NoPermisionFolder", 403);
+	testOpeningDirCase("testers/EmptyFolder/", 0);
+}
+
+void UnitTest::testOpeningDirCase(const std::string path, int expected_error)
+{
+	Logger::testCase("Testing opening dir "); std::cout << path << std::endl;
+	int statusCode = 0;
+	bool result =  FileUtils::isDirectoryValid(path, statusCode);
+	std::cout << "Result is " << result << std::endl;
+	perror("Opening dir failed");
+	errno = 0;
+	assert(statusCode == expected_error);
+	_testpassed();
+}
+
 
 void UnitTest::_configFileSyntaxCheck(std::string filePath, bool exception)
 {
