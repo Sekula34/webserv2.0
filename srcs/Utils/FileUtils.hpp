@@ -15,6 +15,11 @@ class FileUtils
 		 * @return false either file is not regular, not permission, or something failed, generate 500 http code in that case
 		 */
 		static bool putFileInString(const std::string relativeFilePath, std::string& string);
+
+		static bool isDirectoryValid(const std::string relativeDirPath, int& httpStatusCode);
+
+	private:
+		static void _setDirFailStatusCode(int ernnoNum, int& httpStatusCode);
 };
 
 #endif

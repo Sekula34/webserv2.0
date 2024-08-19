@@ -1,10 +1,15 @@
 #include "FileUtils.hpp"
+#include <asm-generic/errno.h>
+#include <cerrno>
 #include <fstream>
 #include <iostream>
 #include "Logger.hpp"
 #include <sstream>
 #include <string>
 #include <sys/stat.h> 
+#include <sys/types.h>
+#include <dirent.h>
+
 
 bool FileUtils::isPathValid(const std::string relativeFilePath)
 {
@@ -58,4 +63,31 @@ bool FileUtils::putFileInString(const std::string filePath, std::string &stringF
 	file.close();
 	stringFile = ss.str();
 	return true;
+}
+
+bool FileUtils::isDirectoryValid(const std::string relativeDirPath, int& httpStatusCode)
+{
+	DIR* directory = opendir(relativeDirPath.c_str());
+	if(directory == NULL)
+	{
+		_setDirFailStatusCode(errno, httpStatusCode);
+		return false;
+	}
+	closedir(directory);
+	return true;
+}
+
+void FileUtils::_setDirFailStatusCode(int errnoNum, int& httpStatusCode)
+{
+	if(errnoNum == EACCES || errnoNum == EBADF)
+	{
+		httpStatusCode = 403;
+		return;
+	}
+	if(errnoNum == ENONET || errnoNum == ENOTDIR)
+	{
+		httpStatusCode = 404;
+		return;
+	}
+	httpStatusCode = 500;
 }
