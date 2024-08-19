@@ -101,8 +101,6 @@ std::string		CgiProcessor::getCgiResponse() const
 	fails to conform to this specification.
 */
 
-// create new environment list out of header -> key:value pairs
-// find out what part of envp should be sent to execve
 // create args checker -> check whether interpreter exists and binary exists
 // create timeout checker so that child process is terminated after certain time
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
@@ -110,7 +108,6 @@ std::string		CgiProcessor::getCgiResponse() const
 //		it, the CGI will expect EOF as end of the body.
 // Same things for the output of the CGI. If no content_length is returned
 //		from the CGI, EOF will mark the end of the returned data.
-// Your program should call the CGI with the file requested as first argument.
 // The CGI should be run in the correct directory for relative path file access.
 //
 std::string operating_system()
@@ -317,7 +314,7 @@ int	CgiProcessor::read_from_child()
 	char 	buffer[MAXLINE];
 
 	close(_sockets[1]);
-	_client->addChildSocket(_sockets[0]);
+	_client->resetChildSocketInMap(_sockets[0]);
 
 	// if waitreturn == -1 then return with errorcode 500
 	// if socket READY and readable then read into buffer

@@ -5,6 +5,7 @@
 # include <string>
 # include <ctime>
 # include "../Client/ClientHeader.hpp"
+# include "../epoll/CgiProcessor.hpp"
 #include <cstddef>
 #include <cstring>
 #include <iostream>
@@ -68,7 +69,7 @@ class Client {
 							//Client specific functions
 		void				addRecvLineToMessage();
 		bool				check_timeout() const;
-		void				addChildSocket(int fd);
+		void				resetChildSocketInMap(int fd);
 
 		/**
 		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor

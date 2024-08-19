@@ -231,7 +231,7 @@ void Client::_initVars(void)
 	_response = NULL;
 	_client_body = "";
 }
-void	Client::addChildSocket(int fd)
+void	Client::resetChildSocketInMap(int fd)
 {
 	(*_child_sockets)[fd] = NOTREADY;
 }

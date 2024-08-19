@@ -39,15 +39,17 @@ class ConnectionDispatcher
 		bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
 		bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
 		void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
-		void	handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
 		void	clients_remove_fd(std::map<int, Client*> & clients, Client* client);
-		void	handle_child_sockets();
 		void	epoll_remove_fd(struct epoll_event* events, Client* client);
 		void	epoll_add_fd(int epollfd, int clientfd);
 	
 	private :
 		std::map<int,int>	_child_sockets;
-		bool				_is_childsocket(int fd);
+		bool				_isChildSocket(int fd);
+		bool				_handleServerSocket(size_t idx);
+		bool				_handleChildSocket(int fd);
+		void				_prepareChildSockets();
+		void				_handleClient(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 
@@ -61,7 +63,6 @@ class ConnectionDispatcher
 		 * @return true if client is accepted
 		 * @return false if fd is client 
 		 */
-		bool	_isServerSocket(size_t idx);
 		void 	_epoll_accept_client(int epollfd, int listen_socket);
 
 

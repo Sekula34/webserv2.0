@@ -84,17 +84,6 @@ void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
 	
 }
 
-bool	ConnectionDispatcher::_is_childsocket(int fd)
-{
-	std::map<int, int>::iterator it = _child_sockets.find(fd);
-	if (it != _child_sockets.end())
-	{
-		it->second = READY;
-		return (true);
-	}
-	return (false);
-}
-
 Client* ConnectionDispatcher::find_client_in_clients(int client_fd, std::map<int, Client *> & clients)
 {
 	std::map<int, Client*>::iterator it = clients.find(client_fd);
@@ -247,7 +236,28 @@ bool	ConnectionDispatcher::run_cgi(Client* client)
 	return (false);
 }
 
-void	ConnectionDispatcher::handle_client(struct epoll_event* events, std::map<int, Client *> & clients, int idx)
+bool	ConnectionDispatcher::_isChildSocket(int fd)
+{
+	std::map<int, int>::iterator it = _child_sockets.find(fd);
+	if (it != _child_sockets.end())
+		return (true);
+	return (false);
+}
+bool	ConnectionDispatcher::_handleChildSocket(int socket)
+{
+	if (!_isChildSocket(socket))
+		return (false);
+
+	// if no Client for this FD in map then return fatal error
+	
+	// if allowed to write -> write into socket
+	
+	// if allowd to read -> read from socket
+	
+	return (true);
+}
+
+void	ConnectionDispatcher::_handleClient(struct epoll_event* events, std::map<int, Client *> & clients, int idx)
 {
 
 	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
@@ -321,7 +331,7 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 
 void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 {
-	// create epill fd
+	// create epoll fd
 	epollfd = epoll_create(1);
 	if (epollfd == -1)					
 		throw std::runtime_error("epoll create failed");
@@ -358,7 +368,7 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 			counter = 0;
 }
 
-void	ConnectionDispatcher::handle_child_sockets()
+void	ConnectionDispatcher::_prepareChildSockets()
 {
 // handle all 4 cases of child socket
 	// READY -> should do nothing I think
@@ -367,7 +377,7 @@ void	ConnectionDispatcher::handle_child_sockets()
 	// DELETE
 }
 
-bool ConnectionDispatcher::_isServerSocket(size_t idx)
+bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 {
 	for(size_t i = 0; i < _sockets.getAllListenFd().size(); i++)
 	{
@@ -393,7 +403,9 @@ void ConnectionDispatcher::mainLoopEpoll()
 			Logger::info("Turn off procedure triggered"); std::cout << std::endl;
 			break;
 		}
-		// handle_child_sockets
+
+		// prepareChildSockets
+		
 		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
 		if (nfds == -1)
 		{
@@ -402,11 +414,11 @@ void ConnectionDispatcher::mainLoopEpoll()
 		}
 		for (size_t idx = 0; idx < static_cast<size_t>(nfds); ++idx)
 		{
-			if(_isServerSocket(idx) == true)
+			if(_handleServerSocket(idx) == true)
 				continue;
-			if (_is_childsocket(events[idx].data.fd))
+			if (_handleChildSocket(events[idx].data.fd))
 				continue;
-			handle_client(events, clients, idx);
+			_handleClient(events, clients, idx);
 		}
 	}
 }
