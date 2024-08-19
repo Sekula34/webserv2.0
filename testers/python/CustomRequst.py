@@ -21,12 +21,15 @@ class CustomRequest():
 		text = Colors.color_text("Sending custom request", Colors.WARNING)
 		print(text)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		start = time.time()
 		sock.connect((host, port))
 		sock.sendall(self.__curl_request.encode("utf-8"))
 		server_response = sock.recv(4096)
 		decoded_response = server_response.decode("utf-8")
 		#print(decoded_response)
 		sock.close()
+		end = time.time()
+		print("Response took: {0} seconds".format(end - start))
 		return decoded_response
 		
 
@@ -49,12 +52,9 @@ def no_host_request():
 	print(text)
 
 
-def long_timeout():
-	req = CustomRequest("Long Timeout", "get", 400)
-	start = time.time()
-	req.send()
-	end = time.time()
-	print("Response took: {0} seconds".format(end - start))
+def short_invalid_request():
+	req = CustomRequest("Short Invalid Request", "get", 400)
+	return(req.send())
 
 def phantom_port():
 	curl_request = "GET / HTTP/1.1\r\nHost: example.com\r\nUser-Agent: CustomClient\r\n\r\n"
@@ -81,7 +81,7 @@ def main():
 	print("NO hosT reposne is {0}".format(response))
 	message = phantom_port()
 	print("Message is [{0}]".format(message))
-	#long_timeout()
+	short_invalid_request()
 
 if __name__ == "__main__":
 	main()
