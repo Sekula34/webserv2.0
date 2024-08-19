@@ -15,6 +15,11 @@ class UnitTest
 		static void _testpassed(bool block = false);
 		static const std::string _constFileFolder;
 	public:
+		static void urlPathTester(std::string urlSuffix, std::string expectePath);
+		static void urlQueryTester(std::string suffixString, std::string expectedQuery);		
+
+		static void urlPathQueryBlock();
+		static void urlPathTesterBlock();
 		static void stringEndCheck();
 		static void stringDelimCheck();
 		static void allTests();

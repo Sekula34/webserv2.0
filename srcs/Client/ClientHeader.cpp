@@ -26,12 +26,13 @@ ClientHeader& ClientHeader::operator=(const ClientHeader& source)
 
 ClientHeader::~ClientHeader()
 {
-
+	delete urlSuffix;
 }
 
 
 void ClientHeader::_initAllVars(void)
 {
+	urlSuffix = NULL;
 	_errorCode = 0;
 	_requestLine= "";
 
@@ -54,6 +55,8 @@ bool ClientHeader::_setCHVarivables()
 	if(_checkRequestStruct() == false)
 		return false;
 	if(_setHeaderFields() == false)
+		return false;
+	if(_checkHeaderFields() == false)
 		return false;
 	return true;
 }
@@ -120,10 +123,15 @@ const int& ClientHeader::getErrorCode(void) const
 	return _errorCode;
 }
 
-const std::string& ClientHeader::getRequestedUrl(void) const 
+const std::string& ClientHeader::getURLSuffix(void) const 
 {
 	const RequestLine& line = getRequestLine();
 	return line.requestTarget;
+}
+
+const std::map<std::string, std::string> & ClientHeader::getHeaderFields() const
+{
+	return (_headerFields);
 }
 
 bool ClientHeader::isBodyExpected() const
@@ -139,7 +147,10 @@ void ClientHeader::_constructFunction()
 	if(_message == "")
 		Logger::warning("Tried to create ClientRequest header with string that does not contain CRLFCRLF",true);
 	_initAllVars();
-	_setCHVarivables();
+	if(_setCHVarivables() == true)
+	{
+		urlSuffix = new UrlSuffix(getURLSuffix());
+	}
 }
 
 bool ClientHeader::_setRequestLine(void) 
@@ -187,6 +198,20 @@ bool ClientHeader::_checkRequestStruct(void)
 	{
 		Logger::warning("Not valid protocol", true);
 		_errorCode = 505;
+		return false;
+	}
+	return true;
+}
+
+bool ClientHeader::_checkHeaderFields(void)
+{
+	//check if there is authorization
+	std::string authorizationKey = "Authorization";
+	std::map<std::string, std::string>::iterator it = _headerFields.find((authorizationKey));
+	if(it != _headerFields.end())
+	{
+		Logger::error("Authorization is not supported", true);
+		_errorCode = 403;
 		return false;
 	}
 	return true;

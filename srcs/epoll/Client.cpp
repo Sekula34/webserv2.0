@@ -4,7 +4,7 @@
 #include <cstring>
 #include <iostream>
 #include "../Utils/Logger.hpp"
-#include <unistd.h>
+#include <sstream>
 
 
 /******************************************************************************/
@@ -12,15 +12,21 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0) 
+Client::Client (void):_id(++client_cntr), _fd(0), _start(std::clock()), _epollfd(0)
 {
 	_initVars();
+	_init_user_info();
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd):_id(++client_cntr), _fd(fd), _start(std::clock()), _epollfd(epollfd)
+Client::Client (int const fd, int const epollfd, char** envp, struct sockaddr client_addr):_id(++client_cntr),
+					_fd(fd), _start(std::clock()), _epollfd(epollfd), _envp(envp), _cgi(NULL), _client_addr(client_addr)
 {
+	// we will need to do new cgi somewhere else, this is just for testing
+
+
 	_initVars();
+	_init_user_info();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
 }
@@ -35,6 +41,7 @@ Client::~Client (void)
 	delete [] _recvline;
 	delete header;
 	delete _response;
+	delete _cgi;
 	Logger::info("Destructed client with ID: "); std::cout << _id << std::endl;
 }
 
@@ -135,9 +142,24 @@ int	Client::getErrorCode() const
 	return (_errorCode);
 }
 
-std::string const &	Client::getBody() const
+std::string const &	Client::getClientBody() const
 {
 	return (_client_body);
+}
+
+char**	Client::getEnvp() const
+{
+	return(_envp);
+}
+
+CgiProcessor*	Client::getCgi() const
+{
+	return(_cgi);
+}
+
+std::string	Client::getClientIp() const
+{
+	return (_client_ip);
 }
 
 void	Client::setReadHeader(bool b)
@@ -159,6 +181,17 @@ void	Client::setErrorCode(int c)
 {
 	_errorCode = c;
 }
+
+void	Client::setCgi(CgiProcessor* cgi)
+{
+	_cgi = cgi;
+}
+
+void	Client::setAddrlen(socklen_t addrlen)
+{
+	_addrlen = addrlen;
+}
+
 /******************************************************************************/
 /*                               Error Handling                               */
 /******************************************************************************/
@@ -190,15 +223,21 @@ void Client::createClientHeader()
 {
 	if(header != NULL)
 	{
-		Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
 		return;
 	}
 	header = new ClientHeader(this->getMessage());
 	Logger::info("Client header created with : "); std::cout << _message;
+	if(header->getErrorCode() != 0)
+	{
+		Logger::warning("Client Header have error", false); std::cout << header->getErrorCode() << std::endl;
+		setErrorCode(header->getErrorCode());
+	}
 }
 
 void Client::_initVars(void)
 {
+	cgi_checked = false;
+	_errorCode = 0;
 	_readheader = true;
 	_readbody = false;
 	_writeclient = false;
@@ -207,4 +246,24 @@ void Client::_initVars(void)
 	
 	header = NULL;
 	_response = NULL;
+	_client_body = "";
+}
+
+void	Client::_init_user_info()
+{
+	std::string address;
+	std::stringstream ss;
+
+	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
+	unsigned long num  = pV4Addr->sin_addr.s_addr;
+	num = ntohl(num);
+	std::cout << num << std::endl;
+	ss << int((num&0xFF000000)>>24);
+	ss << ".";
+	ss << int((num&0xFF0000)>>16);
+	ss << ".";
+	ss << int((num&0xFF00)>>8);
+	ss << ".";
+	ss << int(num&0xFF);
+	_client_ip = ss.str();
 }

@@ -9,20 +9,22 @@
 #include <iostream>
 
 
-void ConnectionDispatcherTest()
+void ConnectionDispatcherTest(char** envp)
 {
 	ServersInfo serverInfo;
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	SocketManager sockets(serverInfo.getUniquePorts());
-	ConnectionDispatcher dispatcher(sockets, serverInfo);
+	ConnectionDispatcher dispatcher(sockets, serverInfo, envp);
 	dispatcher.mainLoopEpoll();
 }
 
-int main()
+int main(int argc, char** argv, char** envp)
 {
+	(void)argc;
+	(void)argv;
 	try
 	{
-		ConnectionDispatcherTest();
+		ConnectionDispatcherTest(envp);
 	}
 	catch(std::exception &e)
 	{

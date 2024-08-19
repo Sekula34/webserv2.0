@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <iostream>
 
-#define SERVER_PORT	8080
+#define SERVER_PORT	9090
 
 #define MAXLINE		4096
 #define SA struct sockaddr

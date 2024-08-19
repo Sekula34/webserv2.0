@@ -14,5 +14,11 @@ void all()
 
 int main()
 {
-	AutoindexTest::runAll();
+	all();
+	//UnitTest::stringDelimCheck();
+	//UnitTest::urlPathTesterBlock();
+	//UnitTest::urlPathQueryBlock();
+	//UnitTest::urlFragmetBlock();
+	//CHTest::uriTest();
+	//UnitTest::urlValid();
 }

@@ -119,14 +119,18 @@ const ServerSettings& ServersInfo::getServerById(int serverId) const
 
 
 
-const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string serverName) const
+const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string serverName) const
 {
 	int serverId;
+	const ServerSettings* toReturn = NULL;
 	std::vector<ServerSettings> ServersId = _getAllServersIdWithPort(portNumber);
+	if(ServersId.size() == 0)
+		return NULL;
 	if(ServersId.size() == 1 || serverName == "")
 	{
 		serverId = ServersId[0].getServerId();
-		return getServerById(serverId);
+		toReturn = &getServerById(serverId);
+		return toReturn;
 	}
 	for(size_t i = 0; i< ServersId.size(); i++)
 	{
@@ -134,12 +138,13 @@ const ServerSettings& ServersInfo::getServerByPort(int portNumber, std::string s
 		if(oneServer.getServerName() == serverName)
 		{
 			serverId = oneServer.getServerId();
-			return getServerById(serverId);
+			return &getServerById(serverId);
 		}
 	}
 	serverId = ServersId[0].getServerId();
-	return getServerById(serverId);
+	return &getServerById(serverId);
 }
+
 
 bool ServersInfo::_validateClientHeader(const ClientHeader* header) const
 {
@@ -162,8 +167,7 @@ const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
 	if(_validateClientHeader(client.header) == false)
 		return NULL;
-	const ServerSettings& ref = getServerByPort(client.header->getHostPort(), client.header->getHostName());
-	const ServerSettings* toReturn = &ref; 
+	const ServerSettings* toReturn = getServerByPort(client.header->getHostPort(), client.header->getHostName());
 	return toReturn;
 }
 
