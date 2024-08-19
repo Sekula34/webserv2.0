@@ -39,7 +39,6 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
-			srcs/Response/Autoindex.cpp \
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
