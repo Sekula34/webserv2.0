@@ -61,6 +61,11 @@ def phantom_port():
 	req = CustomRequest("Confusing Host", curl_request, 400)
 	return(req.send())
 
+def disguise_port():
+	curl_request = "GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: CustomClient\r\n\r\n"
+	req = CustomRequest("Confusing Host", curl_request, 400)
+	return(req.send())
+
 def no_host():
 	curl_request = "GET / HTTP/1.1\r\nUser-Agent: CustomClient\r\n\r\n"
 	req = CustomRequest("No Host", curl_request, 400)
@@ -84,4 +89,6 @@ def main():
 	short_invalid_request()
 
 if __name__ == "__main__":
-	main()
+	#main()
+	message = disguise_port()
+	print(message)
