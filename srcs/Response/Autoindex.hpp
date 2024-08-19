@@ -1,6 +1,7 @@
 #ifndef AUTOINDEX
 # define AUTOINDEX
 #include <string>
+#include <vector>
 
 class AutoindexTest;
 
@@ -17,8 +18,12 @@ class Autoindex
 	private:
 		Autoindex();
 		const std::string _folderPath;
+		std::vector<std::string> _fileLinks;
+		std::string _autoIndexHtml;
 		int& _statusCode;
-
+		void _createHtmlMenu();
+		void _createAndStoreOneFileLink(const std::string fileEntry);
+		void _generateHtmlPage(const std::string pageTitle);
 	friend AutoindexTest;
 };
 
