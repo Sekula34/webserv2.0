@@ -12,7 +12,7 @@ Client::Client (void): _id(0), _fd(0), _start(std::clock()), _epollfd(0)
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd, std::map<int, int> * child_sockets, struct sockaddr client_addr):_id(++client_cntr),
+Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_sockets, struct sockaddr client_addr):_id(++client_cntr),
 					_fd(fd), _start(std::clock()), _epollfd(epollfd), _child_sockets(child_sockets), _cgi(NULL), _client_addr(client_addr)
 {
 	// we will need to do new cgi somewhere else, this is just for testing
@@ -204,7 +204,16 @@ bool	Client::check_timeout() const
 void		Client::addRecvLineToMessage()
 {
 	_message += (char *)_recvline;
+}
+
+void	Client::clearRecvLine()
+{
 	memset(_recvline, 0, MAXLINE);
+}
+
+void	Client::clearMessage()
+{
+	_message.clear();
 }
 
 void Client::createClientHeader()
@@ -220,6 +229,7 @@ void Client::createClientHeader()
 
 void Client::_initVars(void)
 {
+	waitreturn = 0;
 	cgi_checked = false;
 	_readheader = true;
 	_readbody = false;
@@ -231,9 +241,15 @@ void Client::_initVars(void)
 	_response = NULL;
 	_client_body = "";
 }
-void	Client::resetChildSocketInMap(int fd)
+void	Client::setChildSocket(int fd)
 {
-	(*_child_sockets)[fd] = NOTREADY;
+	(*_child_sockets)[fd] = this;
+	childSocketStatus = ADD;
+}
+
+void	Client::unsetChildSocket()
+{
+	childSocketStatus = DELETE;
 }
 
 void	Client::_init_user_info()

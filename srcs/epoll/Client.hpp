@@ -25,10 +25,9 @@
 // #define MAXLINE			493
 # define MAXLINE			50
 # define MAX_TIMEOUT		10000
-#define READY			0 
-#define NOTREADY		1 
-#define ADD				2 
-#define DELETE			3 
+#define NONE			0 
+#define ADD				1 
+#define DELETE			2 
 
 class CgiProcessor;
 
@@ -40,7 +39,7 @@ class Client {
 		
 							// canonical
 							Client (int const fd, int const epollfd, std::map<int,
-			   						int>* child_sockets, struct sockaddr client_addr);
+			   						Client*>* child_sockets, struct sockaddr client_addr);
 							~Client(void);
 							
 							// set and get
@@ -65,11 +64,15 @@ class Client {
 		void				setWriteClient(bool b);
 		void				setCgi(CgiProcessor* cgi);
 		void				setAddrlen(socklen_t addrlen);
+		void				setChildSocket(int fd);
+		void				unsetChildSocket();
 
 							//Client specific functions
 		void				addRecvLineToMessage();
 		bool				check_timeout() const;
 		void				resetChildSocketInMap(int fd);
+		void				clearMessage();
+		void				clearRecvLine();
 
 		/**
 		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor
@@ -79,6 +82,8 @@ class Client {
 		CgiProcessor*		Cgi;			
 		bool				cgi_checked;
 		ClientHeader*		header; //client Responsible for deleting
+		pid_t				waitreturn;
+		int					childSocketStatus;
 
 	private:
 		int					_errorCode;
@@ -93,7 +98,7 @@ class Client {
 		bool				_readheader;
 		bool				_readbody;
 		bool				_writeclient;
-		std::map<int, int>*	_child_sockets;
+		std::map<int, Client*>*	_child_sockets;
 		CgiProcessor*		_cgi;
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_client_addr;

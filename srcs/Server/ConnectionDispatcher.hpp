@@ -10,10 +10,6 @@
 
 #define MAX_EVENTS		10
 #define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
-#define READY			0 
-#define NOTREADY		1 
-#define ADD				2 
-#define DELETE			3 
 
 
 /**
@@ -36,20 +32,23 @@ class ConnectionDispatcher
 		int		epollfd; //turn this in private later 
 	
 		Client*	find_client_in_clients(int client_fd, std::map<int, Client *> & clients);
-		bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, Client * client, int & n, int idx);
-		bool	read_header(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
-		void	write_client(struct epoll_event* events, std::map<int, Client *> & clients, Client* client,  int idx);
-		void	clients_remove_fd(std::map<int, Client*> & clients, Client* client);
-		void	epoll_remove_fd(struct epoll_event* events, Client* client);
+		bool	read_fd(int fd, Client * client, int & n, int idx);
+		bool	read_header(Client* client,  int idx);
+		void	write_client(Client* client,  int idx);
+		void	clients_remove_fd(Client* client);
+		void	epoll_remove_fd(Client* client);
 		void	epoll_add_fd(int epollfd, int clientfd);
 	
 	private :
-		std::map<int,int>	_child_sockets;
+		std::map<int,Client*>	_child_sockets;
 		bool				_isChildSocket(int fd);
 		bool				_handleServerSocket(size_t idx);
-		bool				_handleChildSocket(int fd);
+		bool				_handleChildSocket(int socket, size_t idx);
 		void				_prepareChildSockets();
-		void				_handleClient(struct epoll_event* events, std::map<int, Client *> & clients, int idx);
+		void				_handleClient(int idx);
+		bool				_checkReceiveError(Client* client, int n, int peek);
+		void				_checkEndHeader(Client* client, int n);
+		void				_concatMessageAndPeek(Client* client, int n, int peek);
 		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 

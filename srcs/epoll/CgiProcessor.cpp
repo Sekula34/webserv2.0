@@ -292,46 +292,23 @@ int	CgiProcessor::execute()
 
 pid_t	CgiProcessor::wait_for_child()
 {
-	pid_t					waitreturn;
-	int					status;
+	int		status;
 
-	waitreturn = waitpid(_pid, &status, WNOHANG);
+	_client->waitreturn = waitpid(_pid, &status, WNOHANG);
+	if (_client->waitreturn == -1)
+		return (_client->setErrorCode(500), 1);
 	if (WIFEXITED(status))
 	{
 		_exitstatus = WEXITSTATUS(status);
-		// std::cout << "child exited with: " << _exitstatus << std::endl;
+		std::cout << "child exited with: " << _exitstatus << std::endl;
 	}
-	return (waitreturn);
+	return (_client->waitreturn);
 }
 
 // create new function write_to_child
  	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
  	// write(_sockets[0], "check this out\n", 15);
 
-int	CgiProcessor::read_from_child()
-{
-	pid_t	waitreturn;
-	char 	buffer[MAXLINE];
-
-	close(_sockets[1]);
-	_client->resetChildSocketInMap(_sockets[0]);
-
-	// if waitreturn == -1 then return with errorcode 500
-	// if socket READY and readable then read into buffer
-	// if reading worked concat buffer to body string
-	// if socket empty or reading did not fill buffer AND waitreturn > 0 -> return (1)
-
-	if ((waitreturn = wait_for_child()) == -1)
-		return (_client->setErrorCode(500), 1);
-
-	// generic read function
-	
-	_cgi_output += buffer;
-
-	sleep(1);
-	// std::cout << "waiting for child" << std::endl;
-	return (waitreturn);
-}
 
 // CHECKER FOR PYTHON
 	// what ending is this? eg "script.py" -> language = python 
@@ -354,11 +331,12 @@ int CgiProcessor::process()
 			if(execute() == -1)
 				return (_client->setErrorCode(500), 1);
 		}
+		close(_sockets[1]);
+		_client->setChildSocket(_sockets[0]);
 	}
 	if (_pid != CHILD)
 	{
-		// write_to_child()
-		return (read_from_child());
+		wait_for_child();
 	}
-	return (0);
+	return (_client->waitreturn);
 }
