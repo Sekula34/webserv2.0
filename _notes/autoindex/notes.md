@@ -31,4 +31,15 @@ maybe even generate file that will be later turn into string with Response body
 2. Check if you have access to it
 	NO - (Either server internal or 403 Forbidden)
 	return 
-3. Generate Html menu (file) out of that folder
+3. [Generate Html menu (file) out of that folder](#create-html-menu)
+
+
+### Create Html Menu
+1. Try to open folder once more   
+	1. FAIL - HTTP 500
+	2. return 
+2. for each file in that folder 
+	1. take that file and create html link out of it
+	(<a href="second.html">Go to Second Page</a>)
+	2. store that html link in some kind of vector
+3. Create some html file in which you will iterate thorugh vector of links and put them in string for return
