@@ -215,6 +215,7 @@ void UnitTest::allTests()
 	testDirBlock();
 	urlPathTesterBlock();
 	urlPathQueryBlock();
+	testingOpeninDirBlock();
 	//_serveTestCase();
 }
 

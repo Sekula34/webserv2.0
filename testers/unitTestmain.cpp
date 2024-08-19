@@ -15,7 +15,8 @@ void all()
 int main()
 {
 	//AutoindexTest::runAll();
-	UnitTest::testingOpeninDirBlock();
+	AutoindexTest::validSimpleTest();
+	//UnitTest::testingOpeninDirBlock();
 	//all();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();

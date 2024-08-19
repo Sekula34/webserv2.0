@@ -6,6 +6,7 @@
 void AutoindexTest::runAll()
 {
 	simpleTest();
+	validSimpleTest();
 }
 
 void AutoindexTest::simpleTest()
@@ -22,4 +23,12 @@ void AutoindexTest::simpleTest()
 	assert(second.getStatusCode() != 0);
 
 	_testpassed();
+}
+
+void AutoindexTest::validSimpleTest()
+{
+	int statuscode = 0;
+	Autoindex index("html", statuscode);
+	std::cout << index._autoIndexHtml;
+
 }
