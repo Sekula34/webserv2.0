@@ -181,9 +181,11 @@ void	CgiProcessor::create_env_vector()
 
 	// PATH_TRANSLATED 
 	// The CGI should be run in the correct directory for relative path file access.
-	// line = "PATH_TRANSLATED="; 
-	// line += "/var/www/html/extra/path/info ";
-	// _env_vec.push_back(line);
+	char buf[256];
+	getcwd(buf, sizeof(buf));
+	line = "PATH_TRANSLATED="; 
+	line += buf;
+	_env_vec.push_back(line);
 	
 
 	// QUERY_STRING
