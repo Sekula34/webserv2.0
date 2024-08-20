@@ -1,6 +1,7 @@
 import requests
 import unittest
 from colors import Colors
+import CustomRequst
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -40,6 +41,30 @@ class TestMyWebServer(unittest.TestCase):
 		respones = requests.get("http://localhost:8080/hej/Socket.hpp")
 		self.assertEqual(respones.status_code, 200)
 		self.assertIn("Socket", respones.text)
+		Colors.test_passed()
+
+	def test_phantom_port(self):
+		TestMyWebServer.print_test_title("Testing phantom port")
+		response = CustomRequst.phantom_port()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+	
+	def test_no_host(self):
+		TestMyWebServer.print_test_title("Testing no host")
+		response = CustomRequst.no_host()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+
+	def test_authorization(self):
+		TestMyWebServer.print_test_title("Testing authorization in header")
+		response = CustomRequst.authorization_not_supported()
+		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
+		Colors.test_passed()
+	
+	def test_short_invalid(self):
+		TestMyWebServer.print_test_title("Testing short invalid request")
+		response = CustomRequst.short_invalid_request()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 
 	def spammer(self, numberOfRequest = 500):

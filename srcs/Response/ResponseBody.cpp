@@ -13,22 +13,21 @@ class Client;
 ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
 :_client(client), _server(server), _httpStatusCode(0)
 {
-    if(client.header->getErrorCode() == 400)
+    if(client.getErrorCode() == 400 || server == NULL)
     {
         _generateErrorPage(400);
         return;
     }
-	if(client.header->getErrorCode() != 0)
+
+	if(client.getErrorCode() != 0)
 	{
         _renderServerErrorPage(client.header->getErrorCode());
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
-	}
-    else if (client.getCgi())
+    }else if(client.getCgi())
     {
         _httpStatusCode = 200;
         _response = client.getCgi()->getCgiResponse();
-    }
-	else   
+    }else   
 	{
         Logger::warning("GENERATING SERVER RESPONSE NOT fully IMPLEMENTED YET", true);
 		_generateServerResponse();

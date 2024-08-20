@@ -1,5 +1,10 @@
 
 #include "Client.hpp"
+#include <cstddef>
+#include <cstring>
+#include <iostream>
+#include "../Utils/Logger.hpp"
+#include <sstream>
 
 
 /******************************************************************************/
@@ -224,17 +229,22 @@ void Client::createClientHeader()
 {
 	if(header != NULL)
 	{
-		// Logger::warning("You are trying to create header but this already exist. Could be reason for leak");
 		return;
 	}
 	header = new ClientHeader(this->getMessage());
 	Logger::info("Client header created with : "); std::cout << _message;
+	if(header->getErrorCode() != 0)
+	{
+		Logger::warning("Client Header have error", false); std::cout << header->getErrorCode() << std::endl;
+		setErrorCode(header->getErrorCode());
+	}
 }
 
 void Client::_initVars(void)
 {
 	waitreturn = 0;
 	cgi_checked = false;
+	_errorCode = 0;
 	_readheader = true;
 	_readbody = false;
 	_writeclient = false;

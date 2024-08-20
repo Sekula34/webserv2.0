@@ -56,6 +56,8 @@ bool ClientHeader::_setCHVarivables()
 		return false;
 	if(_setHeaderFields() == false)
 		return false;
+	if(_checkHeaderFields() == false)
+		return false;
 	return true;
 }
 
@@ -148,8 +150,6 @@ void ClientHeader::_constructFunction()
 	if(_setCHVarivables() == true)
 	{
 		urlSuffix = new UrlSuffix(getURLSuffix());
-		if(urlSuffix->isUrlSuffixValid() == false)
-			_errorCode = 400;
 	}
 }
 
@@ -198,6 +198,20 @@ bool ClientHeader::_checkRequestStruct(void)
 	{
 		Logger::warning("Not valid protocol", true);
 		_errorCode = 505;
+		return false;
+	}
+	return true;
+}
+
+bool ClientHeader::_checkHeaderFields(void)
+{
+	//check if there is authorization
+	std::string authorizationKey = "Authorization";
+	std::map<std::string, std::string>::iterator it = _headerFields.find((authorizationKey));
+	if(it != _headerFields.end())
+	{
+		Logger::error("Authorization is not supported", true);
+		_errorCode = 403;
 		return false;
 	}
 	return true;

@@ -224,7 +224,7 @@ void	ConnectionDispatcher::write_client(Client* client,  int idx)
 
 void	ConnectionDispatcher::_check_cgi(Client* client)
 {
-	if (!client->cgi_checked)
+	if (!client->cgi_checked && client->getErrorCode() == 0)
 	{
 		client->cgi_checked= true;
 		bool found = true;
@@ -352,6 +352,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 			// READ BODY
 			// PROCESS BODY
 		}
+		//check cgi only if there is no error in client so far
 		_check_cgi(client);
 		// IF RUN_CGI RETURNS TRUE WE ARE WAITING FOR CHILD TO RETURN
 		if (run_cgi(client) || client->childSocketStatus != DELETED)
@@ -375,8 +376,6 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 {
 	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
 	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
-
-	//const ServerSettings& responseServer = _serversInfo.getServerByPort(client.header->getHostPort(), client.header->getHostName());
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)
 	{

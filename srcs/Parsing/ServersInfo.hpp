@@ -47,7 +47,7 @@ class ServersInfo
 		 * @return const ServerSettings& first server that have port == PortNumber 
 		 *if serverName is specified find return first Server with port == portNumber and name == serverName, if not again first with port is retured
 		 */
-		const ServerSettings& getServerByPort(int portNumber, std::string serverName ="") const;
+		const ServerSettings* getServerByPort(int portNumber, std::string serverName ="") const;
 
 		/**
 		 * @brief get Server resposible for client response
