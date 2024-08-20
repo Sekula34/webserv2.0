@@ -35,10 +35,6 @@ Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_
 
 Client::~Client (void)
 {
-	if (Cgi)
-	{
-		(*_child_sockets)[childSocket] = NULL;
-	}
 	close (_fd);
 	delete [] _recvline;
 	delete header;
@@ -113,6 +109,11 @@ int	Client::getFd() const
 std::string	Client::getMessage() const
 {
 	return (_message);
+}
+
+std::string	Client::getCgiMessage() const
+{
+	return (_cgimessage);
 }
 
 unsigned char*	Client::getRecvLine() const
@@ -215,6 +216,11 @@ void		Client::addRecvLineToMessage()
 	_message += (char *)_recvline;
 }
 
+void	Client::addRecvLineToCgiMessage()
+{
+	_cgimessage += (char *)_recvline;
+}
+
 void	Client::clearRecvLine()
 {
 	memset(_recvline, 0, MAXLINE);
@@ -222,7 +228,8 @@ void	Client::clearRecvLine()
 
 void	Client::clearMessage()
 {
-	_message.clear();
+	// _message.clear();
+	// _message = "";
 }
 
 void Client::createClientHeader()
@@ -250,10 +257,13 @@ void Client::_initVars(void)
 	_writeclient = false;
 	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
+	childSocketStatus = NONE;
 	
 	header = NULL;
 	_response = NULL;
 	_client_body = "";
+	_cgi_output = "";
+	Cgi = NULL;
 }
 void	Client::setChildSocket(int fd)
 {

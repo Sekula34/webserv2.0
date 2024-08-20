@@ -38,6 +38,7 @@ class ConnectionDispatcher
 		void	clients_remove_fd(Client* client);
 		void	epoll_remove_fd(int fd);
 		void	epoll_add_fd(int epollfd, int clientfd);
+		Client*	findSocketClient(int socket);
 	
 	private :
 		std::map<int,Client*>	_child_sockets;

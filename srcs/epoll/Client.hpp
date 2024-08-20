@@ -50,6 +50,7 @@ class Client {
 		int					getFd() const;
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
+		std::string			getCgiMessage() const;
 		unsigned char*		getRecvLine() const;
 		int					getEpollFd() const;
 		int					getErrorCode() const;
@@ -70,6 +71,7 @@ class Client {
 
 							//Client specific functions
 		void				addRecvLineToMessage();
+		void				addRecvLineToCgiMessage();
 		bool				check_timeout() const;
 		void				resetChildSocketInMap(int fd);
 		void				clearMessage();
@@ -81,6 +83,7 @@ class Client {
 		 */
 		void				createClientHeader();
 		CgiProcessor*		Cgi;			
+		std::string			_cgi_output;
 		bool				cgi_checked;
 		ClientHeader*		header; //client Responsible for deleting
 		pid_t				waitreturn;
@@ -94,6 +97,7 @@ class Client {
 		std::clock_t const	_start;
 		int const			_epollfd;
 		std::string			_message;
+		std::string			_cgimessage;
 		std::string			_client_body; //maybe this will be replaced by body class
 		std::string			_response_body; // this will be replaced by respnse class
 		unsigned char*		_recvline;

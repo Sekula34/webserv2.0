@@ -23,12 +23,11 @@ class CgiProcessor {
 						~CgiProcessor(void);
 
 						// set and get
-		std::string		getCgiResponse() const;
-		void			setCgiOutput(std::string  s);
+		// std::string		getCgiResponse() const;
+		// void			setCgiOutput(std::string  s);
 
 						//CgiProcessor specific functions
 		int				process(void);
-		std::string		_cgi_output;
 
 	private:
 		Client *		_client;

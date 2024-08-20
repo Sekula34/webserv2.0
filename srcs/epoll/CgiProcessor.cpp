@@ -60,15 +60,15 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 /*                          Setters and Getters                               */
 /******************************************************************************/
 
-std::string		CgiProcessor::getCgiResponse() const
-{
-	return (_cgi_output);
-}
-
-void	CgiProcessor::setCgiOutput(std::string s)
-{
-	_cgi_output = s;
-}
+// std::string		CgiProcessor::getCgiResponse() const
+// {
+// 	return (_cgi_output);
+// }
+//
+// void	CgiProcessor::setCgiOutput(std::string s)
+// {
+// 	_cgi_output = s;
+// }
 
 /******************************************************************************/
 /*                               Error Handling                               */
@@ -340,6 +340,8 @@ int CgiProcessor::process()
 		}
 		close(_sockets[1]);
 		_client->setChildSocket(_sockets[0]);
+		std::cout << "child Socket set with value: " << _sockets[0] << std::endl;
+
 	}
 	if (_pid != CHILD)
 	{
