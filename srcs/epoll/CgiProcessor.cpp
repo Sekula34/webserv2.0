@@ -244,7 +244,7 @@ void	CgiProcessor::create_args_vector()
 	
 	// _args_vec.push_back("/home/gdanis/.brew/bin/python3");
 	_args_vec.push_back("/usr/bin/python3");
-	_args_vec.push_back("/home/gdanis/webserv/srcs/epoll/hello.py");
+	_args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
 	// _args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
 
 }
@@ -323,6 +323,8 @@ pid_t	CgiProcessor::wait_for_child()
 
 int CgiProcessor::process()
 {
+	if (_client->waitreturn > 0)
+		return (_client->waitreturn);
 	if (!_forked)
 	{
 		_forked = true;

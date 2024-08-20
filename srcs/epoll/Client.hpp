@@ -28,7 +28,7 @@
 #define NONE			0 
 #define ADD				1 
 #define DELETE			2 
-#define TOBEDELETE		3 
+#define DELETED			3 
 
 class CgiProcessor;
 

@@ -247,7 +247,6 @@ void Client::_initVars(void)
 }
 void	Client::setChildSocket(int fd)
 {
-	(*_child_sockets)[fd] = this;
 	childSocketStatus = ADD;
 	childSocket = fd;
 }
