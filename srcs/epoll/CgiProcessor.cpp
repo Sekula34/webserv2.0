@@ -285,15 +285,12 @@ void	CgiProcessor::delete_chararr(char ** lines)
 int	CgiProcessor::execute()
 {
 	close(_sockets[0]);
-	std::cout << "entered execute..." << std::endl;
 
  	if (dup2(_sockets[1], STDIN_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
  	if (dup2(_sockets[1], STDOUT_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
-	std::cerr << "got to after dup2" << std::endl;
  	int ret = execve(_args[0], _args, _env);
-	std::cerr << "######### EXECVE FAILED" << std::endl;
  	return (_client->setErrorCode(500), ret);
 }
 
@@ -305,10 +302,7 @@ pid_t	CgiProcessor::wait_for_child()
 	if (_client->waitreturn == -1)
 		return (_client->setErrorCode(500), 1);
 	if (WIFEXITED(status))
-	{
 		_exitstatus = WEXITSTATUS(status);
-		std::cout << "child exited with: " << _exitstatus << std::endl;
-	}
 	return (_client->waitreturn);
 }
 
@@ -342,8 +336,6 @@ int CgiProcessor::process()
 		}
 		close(_sockets[1]);
 		_client->setChildSocket(_sockets[0]);
-		std::cout << "child Socket set with value: " << _sockets[0] << std::endl;
-
 	}
 	if (_pid != CHILD)
 	{

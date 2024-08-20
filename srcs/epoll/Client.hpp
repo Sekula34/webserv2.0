@@ -23,7 +23,7 @@
 
 // #define MAXLINE			4096
 // #define MAXLINE			493
-# define MAXLINE			50000
+# define MAXLINE			50
 # define MAX_TIMEOUT		10000
 #define NONE			0 
 #define ADD				1 
@@ -89,6 +89,7 @@ class Client {
 		pid_t				waitreturn;
 		int					childSocketStatus;
 		int					childSocket;
+		bool				hasWritten;
 
 	private:
 		int					_errorCode;

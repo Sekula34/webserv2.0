@@ -249,6 +249,7 @@ void Client::createClientHeader()
 
 void Client::_initVars(void)
 {
+	hasWritten = false;
 	waitreturn = 0;
 	cgi_checked = false;
 	_errorCode = 0;
@@ -258,7 +259,7 @@ void Client::_initVars(void)
 	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
 	childSocketStatus = NONE;
-	
+	childSocket = -1;
 	header = NULL;
 	_response = NULL;
 	_client_body = "";
@@ -284,7 +285,6 @@ void	Client::_init_user_info()
 	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
 	unsigned long num  = pV4Addr->sin_addr.s_addr;
 	num = ntohl(num);
-	std::cout << num << std::endl;
 	ss << int((num&0xFF000000)>>24);
 	ss << ".";
 	ss << int((num&0xFF0000)>>16);

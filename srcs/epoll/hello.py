@@ -21,6 +21,7 @@ start = """
             height: 100%;
             margin: 30px;
             padding: 30px;
+            font-size: 28px;
         }
         h1, h2, h3 {
             margin: 15px;
@@ -62,12 +63,9 @@ for key, value in os.environ.items():
 print("\n<p>Received from stdin:</p>")
 
 # Read and print from stdin
-#for line in sys.stdin:
-#    print(line, end='')
+for line in sys.stdin:
+    print(f"<p>{line}</p>")
+# first_line = sys.stdin.readline()
+# print(f"<p>{first_line}</p>")
 
 print (end)
-
-
-
-
-
