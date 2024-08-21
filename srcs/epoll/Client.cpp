@@ -12,12 +12,12 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void): _id(0), _fd(0), _start(std::clock()), _epollfd(0)
+Client::Client (void):  allSockets(NULL), _id(0), _fd(0), _start(std::clock()), _epollfd(0)
 { 	
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_sockets, struct sockaddr client_addr):_id(++client_cntr),
+Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_sockets, struct sockaddr client_addr, std::vector<Socket>* allSockets): allSockets(allSockets), _id(++client_cntr),
 					_fd(fd), _start(std::clock()), _epollfd(epollfd), _child_sockets(child_sockets), _cgi(NULL), _client_addr(client_addr)
 {
 	// we will need to do new cgi somewhere else, this is just for testing

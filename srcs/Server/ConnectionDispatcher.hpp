@@ -39,6 +39,7 @@ class ConnectionDispatcher
 		void	epoll_remove_fd(int fd);
 		void	epoll_add_fd(int epollfd, int clientfd);
 		Client*	findSocketClient(int socket);
+		SocketManager &_sockets;
 	
 	private :
 		std::map<int,Client*>	_child_sockets;
@@ -50,7 +51,6 @@ class ConnectionDispatcher
 		bool				_checkReceiveError(Client* client, int n, int peek);
 		void				_checkEndHeader(Client* client, int n);
 		void				_concatMessageAndPeek(Client* client, int n, int & peek);
-		SocketManager &_sockets;
 		ServersInfo &_serversInfo;
 
 		void _addServerSocketsToEpoll(void);

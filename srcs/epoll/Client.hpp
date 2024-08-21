@@ -6,19 +6,20 @@
 # include <ctime>
 # include "../Client/ClientHeader.hpp"
 # include "../epoll/CgiProcessor.hpp"
-#include <cstddef>
-#include <cstring>
-#include <iostream>
-#include "../Utils/Logger.hpp"
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sstream>
-#include <map>
 # include "../Response/Response.hpp"
+# include "../Utils/Logger.hpp"
+# include "../Server/SocketManager.hpp"
+# include <cstddef>
+# include <cstring>
+# include <iostream>
+# include <unistd.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# include <sstream>
+# include <map>
 //# include "CgiProcessor.hpp"
 
 // #define MAXLINE			4096
@@ -40,7 +41,7 @@ class Client {
 		
 							// canonical
 							Client (int const fd, int const epollfd, std::map<int,
-			   						Client*>* child_sockets, struct sockaddr client_addr);
+			   						Client*>* child_sockets, struct sockaddr client_addr, std::vector<Socket>* allSockets);
 							~Client(void);
 							
 							// set and get
@@ -94,6 +95,7 @@ class Client {
 		int					socket_fromchild;
 		bool				hasWrittenToCgi;
 		bool				hasReadFromCgi;
+		std::vector<Socket>* allSockets;
 
 	private:
 		int					_errorCode;

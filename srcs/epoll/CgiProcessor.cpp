@@ -296,8 +296,10 @@ int	CgiProcessor::execute()
 	close(_sockets_fromchild[1]);
 	close(_client->getEpollFd());
 	close(_client->getFd());
-	close(3);
-	close(4);
+	for(size_t i = 0; i < _client->allSockets->size(); i++)
+	{
+		close((*_client->allSockets)[i].getSocketFd());
+	}
  	int ret = execve(_args[0], _args, _env);
  	return (_client->setErrorCode(500), ret);
 }
