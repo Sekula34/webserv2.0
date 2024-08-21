@@ -95,7 +95,7 @@ OBJ_DIRS := $(sort $(dir $(OBJ)))
 all: $(NAME)
 
 
-$(NAME): $(OBJ) $(HEADERS) srcs/main.o  
+$(NAME): $(OBJ) $(HEADERS) srcs/main.cpp  
 	@printf "\r\033[K"
 	@printf "$(YELLOW)$(NAME)!\n"
 	@$(MAKE) --no-print-directory mainandtest
