@@ -133,7 +133,7 @@ bonus: all
 
 
 valgrind:		
-					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
+					valgrind --tool=memcheck --track-fds=yes --suppressions=python.supp --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
 		
 
 unitTest : $(OBJ) $(HEADERS) testers/unitTestmain.cpp 

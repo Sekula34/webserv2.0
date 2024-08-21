@@ -36,6 +36,10 @@ Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_
 Client::~Client (void)
 {
 	close (_fd);
+	if (socketstatus_tochild != DELETED)
+		close(socket_tochild);
+	if (socketstatus_fromchild != DELETED)
+		close(socket_fromchild);
 	delete [] _recvline;
 	delete header;
 	delete _response;

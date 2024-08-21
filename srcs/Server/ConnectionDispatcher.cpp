@@ -47,9 +47,6 @@ ConnectionDispatcher::~ConnectionDispatcher()
 	std::map<int, Client*>::iterator it = clients.begin();
 	for(; it != clients.end(); it++)
 		delete it->second;
-	std::map<int, bool>::iterator it_children = child_sockets.begin();
-	for(; it_children != child_sockets.end(); it_children++)
-		close(it_children->first);
 	close(epollfd);
 }
 
