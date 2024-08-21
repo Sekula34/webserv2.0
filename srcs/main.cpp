@@ -28,7 +28,7 @@ int main(int argc, char** argv, char** envp)
 	}
 	catch(std::exception &e)
 	{
-		Logger::error("Exception Happeed", true);
+		Logger::error("Exception Happened", true);
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}

@@ -66,8 +66,9 @@ class Client {
 		void				setWriteClient(bool b);
 		void				setCgi(CgiProcessor* cgi);
 		void				setAddrlen(socklen_t addrlen);
-		void				setChildSocket(int fd);
-		void				unsetChildSocket();
+		void				setChildSocket(int in, int out);
+		void				unsetsocket_tochild();
+		void				unsetsocket_fromchild();
 
 							//Client specific functions
 		void				addRecvLineToMessage();
@@ -87,9 +88,12 @@ class Client {
 		bool				cgi_checked;
 		ClientHeader*		header; //client Responsible for deleting
 		pid_t				waitreturn;
-		int					childSocketStatus;
-		int					childSocket;
-		bool				hasWritten;
+		int					socketstatus_fromchild;
+		int					socketstatus_tochild;
+		int					socket_tochild;
+		int					socket_fromchild;
+		bool				hasWrittenToCgi;
+		bool				hasReadFromCgi;
 
 	private:
 		int					_errorCode;

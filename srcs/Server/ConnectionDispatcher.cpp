@@ -260,7 +260,9 @@ bool	ConnectionDispatcher::_isChildSocket(int fd)
 	std::map<int, Client*>::iterator it = clients.begin();
 	for (; it != clients.end(); it++)
 	{
-		if (it->second->childSocket == fd)
+		if (it->second->socket_fromchild == fd)
+			return (true);
+		if (it->second->socket_tochild == fd)
 			return (true);
 	}
 	return (false);
@@ -268,21 +270,33 @@ bool	ConnectionDispatcher::_isChildSocket(int fd)
 
 void	ConnectionDispatcher::_prepareChildSockets()
 {
-	// std::cout << "prepare Child Sockets" << std::endl;
 	std::map<int, Client*>::iterator it = clients.begin(); 
 	for (; it != clients.end(); it++)
 	{
-		if (it->second->childSocketStatus == DELETE)
+		if (it->second->socketstatus_fromchild == DELETE)
 		{
-			close(it->second->childSocket);
-			epoll_remove_fd(it->second->childSocket);
-			it->second->childSocketStatus = DELETED;
+			close(it->second->socket_fromchild);
+			epoll_remove_fd(it->second->socket_fromchild);
+			// it->second->socket_fromchild = -1;
+			it->second->socketstatus_fromchild = DELETED;
 		}
-	  	else if (it->second->childSocketStatus == ADD)
+		if (it->second->socketstatus_tochild == DELETE)
 		{
-			epoll_add_fd(epollfd, it->second->childSocket);
+			close(it->second->socket_tochild);
+			epoll_remove_fd(it->second->socket_tochild);
+			// it->second->socket_tochild = -1;
+			it->second->socketstatus_tochild = DELETED;
+		}
+	  	if (it->second->socketstatus_fromchild == ADD)
+		{
+			epoll_add_fd(epollfd, it->second->socket_fromchild);
+			it->second->socketstatus_fromchild = NONE;
+		}
+	  	if (it->second->socketstatus_tochild == ADD)
+		{
+			epoll_add_fd(epollfd, it->second->socket_tochild);
 			it->second->clearMessage();
-			it->second->childSocketStatus = NONE;
+			it->second->socketstatus_tochild = NONE;
 		}
 	}
 }
@@ -293,7 +307,9 @@ Client*	ConnectionDispatcher::findSocketClient(int socket)
 	std::map<int, Client*>::iterator it = clients.begin(); 
 	for (; it != clients.end(); it++)
 	{
-		if (it->second->childSocket == socket)
+		if (it->second->socket_fromchild == socket)
+			return (it->second);
+		if (it->second->socket_tochild == socket)
 			return (it->second);
 	}
 	return (NULL);
@@ -319,43 +335,50 @@ bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 	// client->clearMessage();
 	
  	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
-	if (events[idx].events & EPOLLOUT && !client->hasWritten)
+	if (!client->hasWrittenToCgi && events[idx].events & EPOLLOUT && client->socket_tochild == socket)
 	{
-		client->hasWritten = true;
  		write(socket, "check this out\n", 15);
-		shutdown(socket, SHUT_WR);
+		client->hasWrittenToCgi = true;
+		client->unsetsocket_tochild();
 		return (true);
 	}
-
-	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
-	// ALSO REMOVES CLIENT ON TIMEOUT
-	if (!read_fd(socket, client, n, idx))
+	if (socket == client->socket_tochild)
 		return (true);
 
-	// if something was read it adds it to _message, peek if readsize = buffersize
-	// to prevent block
-	// _concatMessageAndPeek(client, n, peek);
-	if (n > 0)
+	if (!client->hasReadFromCgi)
 	{
-		client->addRecvLineToCgiMessage();
-		// if (n == MAXLINE - 1 && client->getCgiMessage().find("\r\n\r\n") == std::string::npos)
-		// 	peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
-	}
+		// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
+		// ALSO REMOVES CLIENT ON TIMEOUT
+		if (!read_fd(socket, client, n, idx))
+			return (true);
+		std::cout << "bytes read from child socket: " << n << std::endl;
 
-	if (n < 0)
-	{
-		std::cout << "error: received, in handleChildSocket n: " << n << std::endl;
-		return (true);
-	}
-	
-	
-	if (n < MAXLINE - 1)
-	{
-		if (client->waitreturn)
+		// if something was read it adds it to _message, peek if readsize = buffersize
+		// to prevent block
+		// _concatMessageAndPeek(client, n, peek);
+		if (n > 0)
 		{
-			client->unsetChildSocket();
-			client->_cgi_output = client->getCgiMessage();
+			client->addRecvLineToCgiMessage();
+			// if (n == MAXLINE - 1 && client->getCgiMessage().find("\r\n\r\n") == std::string::npos)
+			// 	peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 		}
+
+		if (n < 0)
+		{
+			std::cout << "error: received, in handleChildSocket n: " << n << std::endl;
+			return (true);
+		}
+		
+		
+		if (n < MAXLINE - 1)
+		{
+			client->hasReadFromCgi = true;
+		}
+	}
+	if (client->waitreturn)
+	{
+		client->unsetsocket_fromchild();
+		client->_cgi_output = client->getCgiMessage();
 	}
 	return (true);
 }
@@ -390,7 +413,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 
 
 		run_cgi(client);
-		if ( client->getCgi() && client->childSocketStatus != DELETED)
+		if ( client->getCgi() && client->socketstatus_fromchild != DELETED)
 			return ;
 		
 

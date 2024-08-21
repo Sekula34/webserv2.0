@@ -284,12 +284,15 @@ void	CgiProcessor::delete_chararr(char ** lines)
 
 int	CgiProcessor::execute()
 {
-	close(_sockets[0]);
+	close(_sockets_tochild[0]);
+	close(_sockets_fromchild[0]);
 
- 	if (dup2(_sockets[1], STDIN_FILENO) == -1)
+ 	if (dup2(_sockets_tochild[1], STDIN_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
- 	if (dup2(_sockets[1], STDOUT_FILENO) == -1)
+	close(_sockets_tochild[1]);
+ 	if (dup2(_sockets_fromchild[1], STDOUT_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
+	close(_sockets_fromchild[1]);
  	int ret = execve(_args[0], _args, _env);
  	return (_client->setErrorCode(500), ret);
 }
@@ -302,7 +305,10 @@ pid_t	CgiProcessor::wait_for_child()
 	if (_client->waitreturn == -1)
 		return (_client->setErrorCode(500), 1);
 	if (WIFEXITED(status))
+	{
+		std::cout << "child exited" << std::endl;
 		_exitstatus = WEXITSTATUS(status);
+	}
 	return (_client->waitreturn);
 }
 
@@ -324,7 +330,9 @@ int CgiProcessor::process()
 	if (!_forked)
 	{
 		_forked = true;
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets) < 0)
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
+			return (_client->setErrorCode(500), 1);
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_fromchild) < 0)
 			return (_client->setErrorCode(500), 1);
 
 		if ((_pid = fork()) == -1)
@@ -334,8 +342,9 @@ int CgiProcessor::process()
 			if(execute() == -1)
 				return (_client->setErrorCode(500), 1);
 		}
-		close(_sockets[1]);
-		_client->setChildSocket(_sockets[0]);
+		close(_sockets_tochild[1]);
+		close(_sockets_fromchild[1]);
+		_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
 	}
 	if (_pid != CHILD)
 	{

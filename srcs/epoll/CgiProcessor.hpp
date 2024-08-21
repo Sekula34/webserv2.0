@@ -33,7 +33,8 @@ class CgiProcessor {
 		Client *		_client;
 		int				_pid;
 		// int				_pipefd[2]; // 0 read, 1 write
-		int				_sockets[2];
+		int				_sockets_tochild[2];
+		int				_sockets_fromchild[2];
 		std::vector<std::string>	_args_vec;
 		std::vector<std::string>	_env_vec;
 		char**			_args;

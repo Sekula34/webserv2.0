@@ -133,7 +133,7 @@ bonus: all
 
 
 valgrind:		
-					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(NAME)
+					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
 		
 
 unitTest : $(OBJ) $(HEADERS) testers/unitTestmain.cpp 

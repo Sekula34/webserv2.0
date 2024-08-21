@@ -249,7 +249,12 @@ void Client::createClientHeader()
 
 void Client::_initVars(void)
 {
-	hasWritten = false;
+	hasWrittenToCgi = false;
+	hasReadFromCgi = false;
+	socketstatus_fromchild = NONE;
+	socketstatus_tochild = NONE;
+	socket_fromchild = -1;
+	socket_tochild = -1;
 	waitreturn = 0;
 	cgi_checked = false;
 	_errorCode = 0;
@@ -258,23 +263,28 @@ void Client::_initVars(void)
 	_writeclient = false;
 	_recvline = new unsigned char[MAXLINE];
 	memset(_recvline, 0, MAXLINE);
-	childSocketStatus = NONE;
-	childSocket = -1;
 	header = NULL;
 	_response = NULL;
 	_client_body = "";
 	_cgi_output = "";
 	Cgi = NULL;
 }
-void	Client::setChildSocket(int fd)
+void	Client::setChildSocket(int to, int from)
 {
-	childSocketStatus = ADD;
-	childSocket = fd;
+	socketstatus_tochild = ADD;
+	socketstatus_fromchild = ADD;
+	socket_tochild = to;
+	socket_fromchild = from;
 }
 
-void	Client::unsetChildSocket()
+void	Client::unsetsocket_tochild()
 {
-	childSocketStatus = DELETE;
+	socketstatus_tochild = DELETE;
+}
+
+void	Client::unsetsocket_fromchild()
+{
+	socketstatus_fromchild = DELETE;
 }
 
 void	Client::_init_user_info()
