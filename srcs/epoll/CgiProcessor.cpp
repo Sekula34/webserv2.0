@@ -310,6 +310,43 @@ int	CgiProcessor::execute()
  	return (_client->setErrorCode(500), ret);
 }
 
+void	CgiProcessor::ioChild()
+{
+	int n = 0;
+	Client* client = findSocketClient(socket);
+	if (!client)
+		return (std::cout << "no client for this socket, FATAL ERROR!", false);
+	if (!client->hasWrittenToCgi && Data::setEvents()[idx].events & EPOLLOUT && client->socket_tochild == socket)
+	{
+ 		write(socket, "check this out\n", 15);
+		client->hasWrittenToCgi = true;
+		client->unsetsocket_tochild();
+		return (true);
+	}
+	if (socket == client->socket_tochild)
+		return (true);
+
+		wait_for_child();
+	if (!client->hasReadFromCgi)
+	{
+		if (!read_fd(socket, client, n, idx))
+			return (true);
+		std::cout << "bytes read from child socket: " << n << std::endl;
+		if (n > 0)
+			client->addRecvLineToCgiMessage();
+		if (n < 0)
+			return (std::cout << "error: received, in handleChildSocket n: " << n << std::endl, true);
+		if (n < MAXLINE - 1)
+			client->hasReadFromCgi = true;
+	}
+	if (client->waitreturn)
+	{
+		client->unsetsocket_fromchild();
+		client->_cgi_output = client->getCgiMessage();
+	}
+	return (true);
+}
+
 pid_t	CgiProcessor::wait_for_child()
 {
 	int		status;
@@ -336,6 +373,11 @@ pid_t	CgiProcessor::wait_for_child()
 	// is the interpreter for this language installed on this system?
 	// in this case argv = {"pthon3", "script.py"}
 
+
+
+
+// RETURN = TRUE -> return in handle client because CGI is still runnig
+// RETURN = FALSE ->  contiunue in handle client
 int CgiProcessor::process()
 {
 	if (_client->waitreturn > 0)
@@ -361,7 +403,7 @@ int CgiProcessor::process()
 	}
 	if (_pid != CHILD)
 	{
-		wait_for_child();
+		ioChild();
 		return (_client->waitreturn);
 	}
 	return (0);

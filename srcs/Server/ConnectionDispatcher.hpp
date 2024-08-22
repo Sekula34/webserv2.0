@@ -39,11 +39,12 @@ class ConnectionDispatcher
 		std::map<int,Client*>		_child_sockets;
 		ServersInfo &				_serversInfo;
 		const int					_epollfd;
+		Client* 					_isClient(int fd);
 		bool						_isChildSocket(int fd);
 		bool						_handleServerSocket(size_t idx);
 		bool						_handleChildSocket(int socket, size_t idx);
-		void						_prepareChildSockets();
-		void						_handleClient(int idx);
+		// void						_prepareChildSockets();
+		void						_handleClient(Client* client, int idx);
 		bool						_checkReceiveError(Client* client, int n, int peek);
 		void						_checkEndHeader(Client* client, int n);
 		void						_concatMessageAndPeek(Client* client, int n, int & peek);
