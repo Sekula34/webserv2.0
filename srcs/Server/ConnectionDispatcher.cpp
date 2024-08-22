@@ -70,8 +70,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(clientfd, Data::getEpollFd(), &_child_sockets, client_addr, &(_sockets.getAllSockets()));
-	newClient->setAddrlen(addrlen);
+	Client * newClient = new Client(clientfd, client_addr, addrlen);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
 	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.

@@ -8,15 +8,20 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-CgiProcessor::CgiProcessor (void)
+CgiProcessor::CgiProcessor (void):
+_allSockets(Data::getServerSockets())
 {
 	// std::cout << "CgiProcessor default constructor called" << std::endl;
 }
 
-CgiProcessor::CgiProcessor (Client* c): _client(c), _args(NULL), _env(NULL),
-	_tmp(NULL), _forked(false)
+CgiProcessor::CgiProcessor (Client* c):
+_allSockets(Data::getServerSockets())
 {
-
+	_client = c;
+	_args = NULL;
+	_env = NULL;
+	_tmp = NULL;
+	_forked = false;
 	create_env_vector();
 	create_args_vector();
 	_env = vec_to_chararr(_env_vec);
@@ -40,7 +45,8 @@ CgiProcessor::~CgiProcessor (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-CgiProcessor::CgiProcessor(CgiProcessor const & src)
+CgiProcessor::CgiProcessor(CgiProcessor const & src):
+_allSockets(Data::getServerSockets())
 {
 	//std::cout << "CgiProcessor copy constructor called" << std::endl;
 	*this = src;
@@ -298,10 +304,8 @@ int	CgiProcessor::execute()
 	close(_sockets_fromchild[1]);
 	close(Data::getEpollFd());
 	close(_client->getFd());
-	for(size_t i = 0; i < _client->allSockets->size(); i++)
-	{
+	for(size_t i = 0; i < _allSockets.size(); i++)
 		close(Data::getServerSocketFds()[i]);
-	}
  	int ret = execve(_args[0], _args, _env);
  	return (_client->setErrorCode(500), ret);
 }

@@ -14,6 +14,7 @@
 # define CHILD 0
 
 class Client;
+class Socket;
 
 class CgiProcessor {
 
@@ -42,6 +43,7 @@ class CgiProcessor {
 		char**			_tmp;
 		bool			_forked;
 		int				_exitstatus;
+		const std::vector<Socket>& _allSockets;
 
 		char**			create_env();
 		char**			create_argv();

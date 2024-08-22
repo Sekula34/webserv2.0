@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 #include "../Utils/Logger.hpp"
+#include "../Utils/Data.hpp"
 #include <sstream>
 
 
@@ -12,17 +13,24 @@
 /******************************************************************************/
 int	Client::client_cntr = 0;
 
-Client::Client (void):  allSockets(NULL), _id(0), _fd(0), _start(std::clock()), _epollfd(0)
+Client::Client (void): 
+_id(0),
+_fd(0),
+_start(std::clock()),
+_epollfd(0)
 { 	
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, int const epollfd, std::map<int, Client*> * child_sockets, struct sockaddr client_addr, std::vector<Socket>* allSockets): allSockets(allSockets), _id(++client_cntr),
-					_fd(fd), _start(std::clock()), _epollfd(epollfd), _child_sockets(child_sockets), _cgi(NULL), _client_addr(client_addr)
+Client::Client (int const fd, struct sockaddr client_addr, socklen_t addrlen):
+	_id(++client_cntr),
+	_fd(fd),
+	_start(std::clock()),
+	_epollfd(Data::getEpollFd()),
+	_cgi(NULL),
+	_client_addr(client_addr),
+	_addrlen(addrlen)
 {
-	// we will need to do new cgi somewhere else, this is just for testing
-
-
 	_initVars();
 	_init_user_info();
 	Logger::info("Client constructed, unique ID: "); std::cout << _id;
@@ -51,7 +59,11 @@ Client::~Client (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-Client::Client(Client const & src):_id(++client_cntr), _fd(src._fd), _start(std::clock()), _epollfd(src._epollfd)
+Client::Client(Client const & src):
+_id(++client_cntr),
+_fd(src._fd),
+_start(std::clock()),
+_epollfd(src._epollfd)
 {
 	//std::cout << "Client copy constructor called" << std::endl;
 	_recvline = new unsigned char[MAXLINE];
@@ -94,7 +106,7 @@ void Client::setResponse(Response* response)
 {
 	if(_response != NULL)
 	{
-		Logger::warning("Setting response in client but client already have one. Possible leak", true);
+		Logger::warning("Setting response in Client but it already have one. Possible leak", true);
 		return;
 	}
 	_response = response;
@@ -232,8 +244,6 @@ void	Client::clearRecvLine()
 
 void	Client::clearMessage()
 {
-	// _message.clear();
-	// _message = "";
 }
 
 void Client::createClientHeader()

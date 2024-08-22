@@ -40,8 +40,7 @@ class Client {
 		static int			client_cntr;
 		
 							// canonical
-							Client (int const fd, int const epollfd, std::map<int,
-			   						Client*>* child_sockets, struct sockaddr client_addr, std::vector<Socket>* allSockets);
+							Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);
 							~Client(void);
 							
 							// set and get
@@ -95,7 +94,6 @@ class Client {
 		int					socket_fromchild;
 		bool				hasWrittenToCgi;
 		bool				hasReadFromCgi;
-		std::vector<Socket>* allSockets;
 
 	private:
 		int					_errorCode;
@@ -111,7 +109,6 @@ class Client {
 		bool				_readheader;
 		bool				_readbody;
 		bool				_writeclient;
-		std::map<int, Client*>*	_child_sockets;
 		CgiProcessor*		_cgi;
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_client_addr;
