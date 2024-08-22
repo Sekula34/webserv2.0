@@ -14,8 +14,10 @@ class Socket;
 class Data {
 
 	public:
+		static char**							envp;
+
 		static int								getEpollFd();
-		static const std::map<int, Client*> &	getClients();
+		static std::map<int, Client*> &			getClients();
 		static const Client *					getClientByFd(int fd);
 		static const std::vector<Socket> &		getServerSockets();
 		static const std::vector<int> 			getServerSocketFds();
@@ -31,7 +33,7 @@ class Data {
 
 	private:
 		static int								_epollfd;
-		static std::map<int, Client*> *			_clients;
+		static std::map<int, Client*> &			_clients;
 		static std::vector<Socket> *			_serverSockets;
 		static struct epoll_event				_events[MAX_EVENTS];
 

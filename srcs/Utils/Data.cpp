@@ -60,25 +60,28 @@ Data &	Data::operator=(Data const & rhs)
 /******************************************************************************/
 /*                          Class Specific Functions                          */
 /******************************************************************************/
-int Data::_epollfd = 0;
-std::map<int, Client*>*	Data::_clients = NULL;
+char** Data::envp = NULL;
+int Data::_epollfd = epoll_create(1);
+std::map<int, Client*> emptyClients;
+std::map<int, Client*>&	Data::_clients = emptyClients;
 std::vector<Socket> *	Data::_serverSockets = NULL;
 struct epoll_event	Data::_events[MAX_EVENTS];
 
 
-int								Data::getEpollFd()
+int	Data::getEpollFd()
 {
 	return (_epollfd);
 }
 
-const std::map<int, Client*> &	Data::getClients()
+std::map<int, Client*> &	Data::getClients()
 {
-	return (*_clients);
+	return (_clients);
 }
+
 const Client*	Data::getClientByFd(int fd)
 {
-	std::map<int, Client*>::iterator it = _clients->begin();
-	for(; it != _clients->end(); it++)
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for(; it != _clients.end(); it++)
 	{
 		if (it->second->getFd() == fd)
 			return (it->second);

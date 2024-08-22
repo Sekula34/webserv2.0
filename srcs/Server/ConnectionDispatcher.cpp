@@ -20,17 +20,23 @@ void handle_sigint(int sig)
 {
 	flag = 1;
 	(void) sig;
-	Logger::warning("CTRL + C cathced, Server is turning off"); std::cout <<std::endl;
+	Logger::warning("CTRL + C caught, Server is turning off"); std::cout <<std::endl;
 	//std::cout << "Called custom ctrl + c function" << std::endl;
 }
 
-ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo, char** envp)
-:_sockets(sockets), _serversInfo(serversInfo), _envp(envp)
+ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo):
+_sockets(sockets),
+_clients(Data::getClients()),
+_serversInfo(serversInfo),
+_epollfd(Data::getEpollFd())
 {
 
 }
-ConnectionDispatcher::ConnectionDispatcher(ConnectionDispatcher& source)
-:_sockets(source._sockets), _serversInfo(source._serversInfo)
+ConnectionDispatcher::ConnectionDispatcher(ConnectionDispatcher& source):
+_sockets(source._sockets),
+_clients(Data::getClients()),
+_serversInfo(source._serversInfo),
+_epollfd(Data::getEpollFd())
 {
 
 }
@@ -44,8 +50,8 @@ ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& sour
 
 ConnectionDispatcher::~ConnectionDispatcher()
 {
-	std::map<int, Client*>::iterator it = clients.begin();
-	for(; it != clients.end(); it++)
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for(; it != _clients.end(); it++)
 		delete it->second;
 	close(Data::getEpollFd());
 }
@@ -72,19 +78,19 @@ void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
 	// IN THAT CASE THE  CLIENT INSTANCE NEEDS TO FINISH ITS JOB
 	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
 	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
-	if (clients.find(clientfd) != clients.end())
-		clients[clientfd]->setWriteClient(false);
-	clients[clientfd] = newClient;
+	if (_clients.find(clientfd) != _clients.end())
+		_clients[clientfd]->setWriteClient(false);
+	_clients[clientfd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
 	Data::epollAddFd(clientfd);
 	
 }
 
-Client* ConnectionDispatcher::find_client_in_clients(int client_fd, std::map<int, Client *> & clients)
+Client* ConnectionDispatcher::find_client_in_clients(int client_fd)
 {
-	std::map<int, Client*>::iterator it = clients.find(client_fd);
-	if (it == clients.end())
+	std::map<int, Client*>::iterator it = _clients.find(client_fd);
+	if (it == _clients.end())
 	{
 		std::cout << "no client with fd: " << client_fd
 			<< " can be found in clients map! FATAL ERROR!"<< std::endl;
@@ -149,10 +155,10 @@ bool	ConnectionDispatcher::read_fd(int fd, Client * client, int & n, int idx)
 void	ConnectionDispatcher::clients_remove_fd(Client* client)
 {
 	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
-	clients[client->getFd()]->setWriteClient(false);
+	_clients[client->getFd()]->setWriteClient(false);
 	
 	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
-	clients.erase(client->getFd());
+	_clients.erase(client->getFd());
 }
 
 bool	ConnectionDispatcher::read_header(Client* client,  int idx)
@@ -177,8 +183,7 @@ bool	ConnectionDispatcher::read_header(Client* client,  int idx)
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
 	if (!_checkReceiveError(client, n, peek))
 		return (false);
-
-	// IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
+// IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
 	_checkEndHeader(client, n);
 	return (true);
 }
@@ -223,19 +228,17 @@ void	ConnectionDispatcher::_check_cgi(Client* client)
 
 }
 
-bool	ConnectionDispatcher::run_cgi(Client* client)
+bool	ConnectionDispatcher::_run_cgi(Client* client)
 {
-	if (client->getCgi())
-		if (client->getCgi()->process())
-			return (true);
-	return (false);
+	if (!client->getCgi() || !client->getCgi()->process())
+		return (false);
+	return (true);
 }
 
 bool	ConnectionDispatcher::_isChildSocket(int fd)
 {
-	std::map<int, Client*>::iterator it = clients.begin();
-	for (; it != clients.end(); it++)
-	{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for (; it != _clients.end(); it++) {
 		if (it->second->socket_fromchild == fd)
 			return (true);
 		if (it->second->socket_tochild == fd)
@@ -246,8 +249,8 @@ bool	ConnectionDispatcher::_isChildSocket(int fd)
 
 void	ConnectionDispatcher::_prepareChildSockets()
 {
-	std::map<int, Client*>::iterator it = clients.begin(); 
-	for (; it != clients.end(); it++)
+	std::map<int, Client*>::iterator it = _clients.begin(); 
+	for (; it != _clients.end(); it++)
 	{
 		if (it->second->socketstatus_fromchild == DELETE)
 		{
@@ -280,8 +283,8 @@ void	ConnectionDispatcher::_prepareChildSockets()
 Client*	ConnectionDispatcher::findSocketClient(int socket)
 {
 
-	std::map<int, Client*>::iterator it = clients.begin(); 
-	for (; it != clients.end(); it++)
+	std::map<int, Client*>::iterator it = _clients.begin(); 
+	for (; it != _clients.end(); it++)
 	{
 		if (it->second->socket_fromchild == socket)
 			return (it->second);
@@ -293,24 +296,12 @@ Client*	ConnectionDispatcher::findSocketClient(int socket)
 
 bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 {
-	// std::cout << "looking for socket: " << socket << std::endl;
-
 	if (!_isChildSocket(socket))
 		return (false);
-
 	int n = 0;
-	
-
-	// if allowed to write -> write into socket
-
-	// if no Client for this FD in map then return fatal error
-	//
 	Client* client = findSocketClient(socket);
 	if (!client)
 		return (std::cout << "no client for this socket, FATAL ERROR!", false);
-	// client->clearMessage();
-	
- 	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
 	if (!client->hasWrittenToCgi && Data::setEvents()[idx].events & EPOLLOUT && client->socket_tochild == socket)
 	{
  		write(socket, "check this out\n", 15);
@@ -323,33 +314,15 @@ bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 
 	if (!client->hasReadFromCgi)
 	{
-		// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
-		// ALSO REMOVES CLIENT ON TIMEOUT
 		if (!read_fd(socket, client, n, idx))
 			return (true);
 		std::cout << "bytes read from child socket: " << n << std::endl;
-
-		// if something was read it adds it to _message, peek if readsize = buffersize
-		// to prevent block
-		// _concatMessageAndPeek(client, n, peek);
 		if (n > 0)
-		{
 			client->addRecvLineToCgiMessage();
-			// if (n == MAXLINE - 1 && client->getCgiMessage().find("\r\n\r\n") == std::string::npos)
-			// 	peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
-		}
-
 		if (n < 0)
-		{
-			std::cout << "error: received, in handleChildSocket n: " << n << std::endl;
-			return (true);
-		}
-		
-		
+			return (std::cout << "error: received, in handleChildSocket n: " << n << std::endl, true);
 		if (n < MAXLINE - 1)
-		{
 			client->hasReadFromCgi = true;
-		}
 	}
 	if (client->waitreturn)
 	{
@@ -363,7 +336,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 {
 
 	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
-	Client* client = find_client_in_clients(Data::setEvents()[idx].data.fd, clients);
+	Client* client = find_client_in_clients(Data::setEvents()[idx].data.fd);
 
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
 	if (!read_header(client, idx))
@@ -388,7 +361,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 		_check_cgi(client);
 
 
-		run_cgi(client);
+		_run_cgi(client);
 		if ( client->getCgi() && client->socketstatus_fromchild != DELETED)
 			return ;
 		
@@ -437,8 +410,6 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 
 void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 {
-	// create epoll fd
-	Data::setEpollFd(epoll_create(1));
 
 	// add server sockets to epoll listener
 	std::vector<int> socketFds = Data::getServerSocketFds();
@@ -485,25 +456,33 @@ bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 	return false;
 }
 
+bool	ConnectionDispatcher::_catchEpollErrorAndSignal(int nfds)
+{
+	if (nfds == -1)
+	{
+		if(flag)
+			Logger::info("Turn off procedure triggered", true);
+		else
+			Logger::error("Epoll wait failed", true);
+		return (false);
+	}
+	return (true);
+}
+
 
 void ConnectionDispatcher::mainLoopEpoll()
 {
+	int nfds;
+
 	Logger::info("my pid is: "); std::cout << getpid() << std::endl;
 	signal(SIGINT, handle_sigint);
 	_addServerSocketsToEpoll();
-	int nfds;
 	while(true)
 	{
 		_prepareChildSockets();
-		nfds = epoll_wait(Data::getEpollFd(), Data::setEvents(), MAX_EVENTS, MAX_WAIT);
-		if (nfds == -1)
-		{
-			if(flag)
-				Logger::info("Turn off procedure triggered", true);
-			else
-				Logger::error("Epoll wait failed", true);
+		nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
+		if (!_catchEpollErrorAndSignal(nfds))
 			break;
-		}
 		for (size_t idx = 0; idx < static_cast<size_t>(nfds); ++idx)
 		{
 			if(_handleServerSocket(idx) == true)
