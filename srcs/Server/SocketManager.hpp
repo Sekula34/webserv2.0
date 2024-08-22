@@ -1,7 +1,8 @@
 #ifndef SOCKETMANAGER_HPP
 # define SOCKETMANAGER_HPP
 # include <vector>
-# include "Socket.hpp"
+
+class Socket;
 
 /**
  * @brief Class that creates and store all Sockets in _allSockets
