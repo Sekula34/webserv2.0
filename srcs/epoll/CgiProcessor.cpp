@@ -1,5 +1,7 @@
 
 #include "../Server/SocketManager.hpp"
+#include "../Server/Socket.hpp"
+#include "../Utils/Data.hpp"
 #include "CgiProcessor.hpp"
 
 /******************************************************************************/
@@ -294,11 +296,11 @@ int	CgiProcessor::execute()
  	if (dup2(_sockets_fromchild[1], STDOUT_FILENO) == -1)
  		return (_client->setErrorCode(500), 1);
 	close(_sockets_fromchild[1]);
-	close(_client->getEpollFd());
+	close(Data::getEpollFd());
 	close(_client->getFd());
 	for(size_t i = 0; i < _client->allSockets->size(); i++)
 	{
-		close((*_client->allSockets)[i].getSocketFd());
+		close(Data::getServerSocketFds()[i]);
 	}
  	int ret = execve(_args[0], _args, _env);
  	return (_client->setErrorCode(500), ret);

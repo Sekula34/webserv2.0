@@ -1,4 +1,5 @@
 #include "SocketManager.hpp"
+#include "../Utils/Data.hpp"
 #include "Socket.hpp"
 #include <cstddef>
 #include <stdexcept>
@@ -19,6 +20,8 @@ SocketManager::SocketManager(const std::vector<int>& uniquePorts)
 		Socket oneSocket(uniquePorts[i]);
 		_allSockets.push_back(oneSocket);
 	}
+	// maybe Data will replace socket manager...
+	Data::setServerSockets(&_allSockets);
 }
 
 SocketManager::SocketManager(const SocketManager& source)

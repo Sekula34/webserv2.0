@@ -47,12 +47,12 @@ ConnectionDispatcher::~ConnectionDispatcher()
 	std::map<int, Client*>::iterator it = clients.begin();
 	for(; it != clients.end(); it++)
 		delete it->second;
-	close(epollfd);
+	close(Data::getEpollFd());
 }
 
 /* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
 ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER */
-void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
+void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
 {
 	struct sockaddr client_addr;
 	socklen_t addrlen = sizeof(client_addr);
@@ -64,7 +64,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(clientfd, epollfd, &_child_sockets, client_addr, &(_sockets.getAllSockets()));
+	Client * newClient = new Client(clientfd, Data::getEpollFd(), &_child_sockets, client_addr, &(_sockets.getAllSockets()));
 	newClient->setAddrlen(addrlen);
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
@@ -77,7 +77,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int epollfd, int listen_socket)
 	clients[clientfd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
-	epoll_add_fd(epollfd, clientfd);
+	Data::epollAddFd(clientfd);
 	
 }
 
@@ -98,7 +98,7 @@ bool	ConnectionDispatcher::_checkReceiveError(Client* client, int n, int peek)
 	if (n <= 0 || peek < 0)
 	{
 		clients_remove_fd(client);
-		epoll_remove_fd(client->getFd());
+		Data::epollRemoveFd(client->getFd());
 		delete client;
 		if (n < 0 || peek < 0)
 			std::cout << "error: receive" << std::endl;
@@ -130,7 +130,7 @@ void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int & pe
 bool	ConnectionDispatcher::read_fd(int fd, Client * client, int & n, int idx)
 {
 
-	if (events[idx].events & EPOLLIN)
+	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
 		client->clearRecvLine();
 		n = recv(fd, client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
@@ -140,7 +140,7 @@ bool	ConnectionDispatcher::read_fd(int fd, Client * client, int & n, int idx)
 	{
 		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 		clients_remove_fd(client);
-		epoll_remove_fd(client->getFd());
+		Data::epollRemoveFd(client->getFd());
 		delete client;
 	}
 	return (false);
@@ -183,30 +183,9 @@ bool	ConnectionDispatcher::read_header(Client* client,  int idx)
 	return (true);
 }
 
-void	ConnectionDispatcher::epoll_remove_fd(int fd)
-{
-	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
-	epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, events);
-	
-}
-
-void	ConnectionDispatcher::epoll_add_fd(int epollfd, int clientfd)
-{
-	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
-	struct epoll_event	ev;
-
-	// SETTING UP EV EVENTS 'SETTINGS' STRUCT FOR LISTEN_SOCKET
-	ev.events = EPOLLIN | EPOLLOUT;
-	ev.data.fd = clientfd;
-
-	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &ev) == -1)
-		throw std::runtime_error("epoll_ctl - conn_socket error");
-}
-
 void	ConnectionDispatcher::write_client(Client* client,  int idx)
 {
-	if (events[idx].events & EPOLLOUT)
+	if (Data::setEvents()[idx].events & EPOLLOUT)
 	{
 		bool result = client->getResponse()->sendResponse();
 		if(result == true)
@@ -214,7 +193,7 @@ void	ConnectionDispatcher::write_client(Client* client,  int idx)
 		else
 			Logger::warning("Sending response had some error");
 		clients_remove_fd(client);
-		epoll_remove_fd(client->getFd());
+		Data::epollRemoveFd(client->getFd());
 		delete client;
 	}
 }
@@ -272,26 +251,26 @@ void	ConnectionDispatcher::_prepareChildSockets()
 	{
 		if (it->second->socketstatus_fromchild == DELETE)
 		{
+			Data::epollRemoveFd(it->second->socket_fromchild);
 			close(it->second->socket_fromchild);
-			epoll_remove_fd(it->second->socket_fromchild);
 			// it->second->socket_fromchild = -1;
 			it->second->socketstatus_fromchild = DELETED;
 		}
 		if (it->second->socketstatus_tochild == DELETE)
 		{
+			Data::epollRemoveFd(it->second->socket_tochild);
 			close(it->second->socket_tochild);
-			epoll_remove_fd(it->second->socket_tochild);
 			// it->second->socket_tochild = -1;
 			it->second->socketstatus_tochild = DELETED;
 		}
 	  	if (it->second->socketstatus_fromchild == ADD)
 		{
-			epoll_add_fd(epollfd, it->second->socket_fromchild);
+			Data::epollAddFd(it->second->socket_fromchild);
 			it->second->socketstatus_fromchild = NONE;
 		}
 	  	if (it->second->socketstatus_tochild == ADD)
 		{
-			epoll_add_fd(epollfd, it->second->socket_tochild);
+			Data::epollAddFd(it->second->socket_tochild);
 			it->second->clearMessage();
 			it->second->socketstatus_tochild = NONE;
 		}
@@ -332,7 +311,7 @@ bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
 	// client->clearMessage();
 	
  	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
-	if (!client->hasWrittenToCgi && events[idx].events & EPOLLOUT && client->socket_tochild == socket)
+	if (!client->hasWrittenToCgi && Data::setEvents()[idx].events & EPOLLOUT && client->socket_tochild == socket)
 	{
  		write(socket, "check this out\n", 15);
 		client->hasWrittenToCgi = true;
@@ -384,7 +363,7 @@ void	ConnectionDispatcher::_handleClient(int idx)
 {
 
 	// CHECK WHETHER CLIENT FD CAN BE FOUND IN CLIENTS MAP AND RETURN CLIENT POINTER
-	Client* client = find_client_in_clients(events[idx].data.fd, clients);
+	Client* client = find_client_in_clients(Data::setEvents()[idx].data.fd, clients);
 
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
 	if (!read_header(client, idx))
@@ -447,7 +426,7 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 	Response* clientRespone = client.getResponse();
 	if(clientRespone != NULL)
 	{
-		Logger::error("Trying to create response for clinet that already have one", true);
+		Logger::error("Trying to create response for client that already has one", true);
 		return;
 	}
 	Response* response = new Response(client, responseServer);
@@ -459,14 +438,12 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 {
 	// create epoll fd
-	epollfd = epoll_create(1);
-	if (epollfd == -1)					
-		throw std::runtime_error("epoll create failed");
+	Data::setEpollFd(epoll_create(1));
 
 	// add server sockets to epoll listener
-	std::vector<int> listenFd = _sockets.getAllListenFd();
-	for(size_t i = 0; i < listenFd.size(); i++)
-		epoll_add_fd(epollfd, listenFd[i]);
+	std::vector<int> socketFds = Data::getServerSocketFds();
+	for(size_t i = 0; i < socketFds.size(); i++)
+		Data::epollAddFd(socketFds[i]);
 }
 
 void ConnectionDispatcher::_notStuckMessage(void) const
@@ -499,9 +476,9 @@ bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 {
 	for(size_t i = 0; i < _sockets.getAllListenFd().size(); i++)
 	{
-		if (events[idx].data.fd == _sockets.getAllListenFd()[i])
+		if (Data::setEvents()[idx].data.fd == _sockets.getAllListenFd()[i])
 		{
-			_epoll_accept_client(epollfd, _sockets.getAllListenFd()[i]);
+			_epoll_accept_client(_sockets.getAllListenFd()[i]);
 			return true;
 		}
 	}
@@ -518,7 +495,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 	while(true)
 	{
 		_prepareChildSockets();
-		nfds = epoll_wait(epollfd, events, MAX_EVENTS, MAX_WAIT);
+		nfds = epoll_wait(Data::getEpollFd(), Data::setEvents(), MAX_EVENTS, MAX_WAIT);
 		if (nfds == -1)
 		{
 			if(flag)
@@ -531,7 +508,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 		{
 			if(_handleServerSocket(idx) == true)
 				continue;
-			if (_handleChildSocket(events[idx].data.fd, idx))
+			if (_handleChildSocket(Data::setEvents()[idx].data.fd, idx))
 				continue;
 			_handleClient(idx);
 		}

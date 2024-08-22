@@ -24,7 +24,7 @@
 
 // #define MAXLINE			4096
 // #define MAXLINE			493
-# define MAXLINE			50
+# define MAXLINE			4096
 # define MAX_TIMEOUT		10000
 #define NONE			0 
 #define ADD				1 

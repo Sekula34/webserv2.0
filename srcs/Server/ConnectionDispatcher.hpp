@@ -7,8 +7,8 @@
 #include "../Parsing/ServersInfo.hpp"
 #include "../epoll/Client.hpp"
 #include "../epoll/Client.hpp"
+#include "../Utils/Data.hpp"
 
-#define MAX_EVENTS		10
 #define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
 
 
@@ -25,8 +25,6 @@ class ConnectionDispatcher
 		~ConnectionDispatcher();
 
 		std::map<int, Client *>	clients; //maybe private
-		std::map<int, bool>	child_sockets; //maybe private
-		struct epoll_event	events[MAX_EVENTS]; // maybe private
 
 		void 	mainLoopEpoll(void);
 		int		epollfd; //turn this in private later 
@@ -36,8 +34,6 @@ class ConnectionDispatcher
 		bool	read_header(Client* client,  int idx);
 		void	write_client(Client* client,  int idx);
 		void	clients_remove_fd(Client* client);
-		void	epoll_remove_fd(int fd);
-		void	epoll_add_fd(int epollfd, int clientfd);
 		Client*	findSocketClient(int socket);
 		SocketManager &_sockets;
 	
@@ -63,7 +59,7 @@ class ConnectionDispatcher
 		 * @return true if client is accepted
 		 * @return false if fd is client 
 		 */
-		void 	_epoll_accept_client(int epollfd, int listen_socket);
+		void 	_epoll_accept_client(int listen_socket);
 
 
 		void _processAnswer(Client& client);

@@ -60,6 +60,11 @@ Data &	Data::operator=(Data const & rhs)
 /******************************************************************************/
 /*                          Class Specific Functions                          */
 /******************************************************************************/
+int Data::_epollfd = 0;
+std::map<int, Client*>*	Data::_clients = NULL;
+std::vector<Socket> *	Data::_serverSockets = NULL;
+struct epoll_event	Data::_events[MAX_EVENTS];
+
 
 int								Data::getEpollFd()
 {
@@ -68,12 +73,12 @@ int								Data::getEpollFd()
 
 const std::map<int, Client*> &	Data::getClients()
 {
-	return (_clients);
+	return (*_clients);
 }
 const Client*	Data::getClientByFd(int fd)
 {
-	std::map<int, Client*>::iterator it = _clients.begin();
-	for(; it != _clients.end(); it++)
+	std::map<int, Client*>::iterator it = _clients->begin();
+	for(; it != _clients->end(); it++)
 	{
 		if (it->second->getFd() == fd)
 			return (it->second);
@@ -83,21 +88,26 @@ const Client*	Data::getClientByFd(int fd)
 
 const std::vector<Socket> &		Data::getServerSockets()
 {
-	return (_serverSockets);
+	return (*_serverSockets);
 }
 
 const std::vector<int> 		Data::getServerSocketFds()
 {
 	std::vector<int> listenFds;
-	for(size_t i = 0; i < _serverSockets.size(); i++)
+	for(size_t i = 0; i < _serverSockets->size(); i++)
 	{
-		int oneFd = _serverSockets[i].getSocketFd();
+		int oneFd = (*_serverSockets)[i].getSocketFd();
 		listenFds.push_back(oneFd);
 	}
 	return listenFds;
 }
 
-void							Data::closeAllFds()
+struct epoll_event*		Data::setEvents() 
+{
+	return (_events);
+}
+
+void	Data::closeAllFds()
 {
 }
 
@@ -120,4 +130,14 @@ void	Data::epollRemoveFd(int fd)
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
 		throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
+}
+void	Data::setEpollFd(int fd)
+{
+	_epollfd = fd;
+	if (Data::_epollfd == -1)					
+		throw std::runtime_error("epoll create failed");
+}
+void	Data::setServerSockets(std::vector<Socket> * sockets)
+{
+	_serverSockets = sockets;
 }
