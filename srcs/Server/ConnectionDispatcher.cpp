@@ -169,30 +169,30 @@ void	ConnectionDispatcher::clients_remove_fd(Client* client)
 	_clients.erase(client->getFd());
 }
 
-bool	ConnectionDispatcher::read_header(Client* client,  int idx)
+bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
 {
 	int			n = 0;
 	int			peek = 0;
 
 	// ON CONSTRUCTION READHEAD IS TRUE AND IS SET TO FALSE WHEN HEADER COMPLETELY READ
-	if (!client->getReadHeader())
+	if (!client.getReadHeader())
 		return (true);
 
 	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
 	// ALSO REMOVES CLIENT ON TIMEOUT
-	if (!read_fd(client->getFd(), client, n, idx))
+	if (!read_fd(client.getFd(), &client, n, idx))
 		return (false);
 
 	// SUCCESSFUL RECIEVE -> ADDING BUFFER FILLED BY RECIEVE TO THE MESSAGE STRING
 	// peek in order to rule out the possibility to block on next read
-	_concatMessageAndPeek(client, n, peek);
+	_concatMessageAndPeek(&client, n, peek);
 
 	// UNSUCCESSFUL RECIEVE AND INCOMPLETE HEADER 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
-	if (!_checkReceiveError(client, n, peek))
+	if (!_checkReceiveError(&client, n, peek))
 		return (false);
 // IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
-	_checkEndHeader(client, n);
+	_checkEndHeader(&client, n);
 	return (true);
 }
 
@@ -209,38 +209,6 @@ void	ConnectionDispatcher::write_client(Client* client,  int idx)
 		Data::epollRemoveFd(client->getFd());
 		delete client;
 	}
-}
-
-void	ConnectionDispatcher::_check_cgi(Client* client)
-{
-	if (!client->cgi_checked && client->getErrorCode() == 0)
-	{
-		client->cgi_checked= true;
-		bool found = true;
-		const ServerSettings*	clientServer = _serversInfo.getClientServer(*client);
-		if (!clientServer)
-			return ;
-
-		ClientHeader* clientHeader = client->header;
-		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
-		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-		// Logger::warning(it->getLocationUri(), true);
-		// Logger::warning("", true);
-		// std::cout << found << std::endl;
-		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
-		{ 
-			Logger::warning("Cgi checked and it exist on this location", true);
-			client->setCgi(new CgiProcessor(client));
-		}
-	}
-
-}
-
-void	ConnectionDispatcher::_run_cgi(Client* client)
-{
-	if (!client->getCgi() || !client->cgiRunning)
-		return ;
-	client->getCgi()->process();
 }
 
 bool	ConnectionDispatcher::_isChildSocket(int fd)
@@ -269,38 +237,70 @@ Client*	ConnectionDispatcher::findSocketClient(int socket)
 	return (NULL);
 }
 
-void	ConnectionDispatcher::_handleClient(Client* client, int idx)
+void	ConnectionDispatcher::_checkCgi(Client& client)
+{
+	if (!client.cgi_checked && client.getErrorCode() == 0)
+	{
+		client.cgi_checked= true;
+		bool found = true;
+		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
+		if (!clientServer)
+			return ;
+
+		ClientHeader* clientHeader = client.header;
+		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
+		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
+		// Logger::warning(it->getLocationUri(), true);
+		// Logger::warning("", true);
+		// std::cout << found << std::endl;
+		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
+		{ 
+			Logger::warning("Cgi checked and it exist on this location", true);
+			client.setCgi(new CgiProcessor(client));
+		}
+	}
+}
+
+void	ConnectionDispatcher::_runCgi(Client& client)
+{
+	_checkCgi(client);
+	if (!client.getCgi() || !client.cgiRunning)
+		return ;
+	client.getCgi()->process();
+}
+
+
+void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 {
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
-	if (!read_header(client, idx))
+	if (!readHeader(client, idx))
 		return ;
 	
 	// HANDLE HEADER
-	if(client->getReadHeader() == false)
-		client->createClientHeader();
+	if(client.getReadHeader() == false)
+		client.createClientHeader();
 
 	// HANDLE BODY
-	if(client->header != NULL)
+	if(client.header != NULL)
 	{
-		if(client->header->isBodyExpected() == true)
+		if(client.header->isBodyExpected() == true)
 		{
 			// READ BODY
 			// PROCESS BODY
 		}
 
 		//check cgi only if there is no error in client so far
-		_check_cgi(client);
-		_run_cgi(client);
-		if (client->getCgi() && client->cgiRunning)
+		_runCgi(client);
+		if (client.getCgi() && client.cgiRunning)
 			return ;
 
 		// PROCESS ANSWER
-		_processAnswer(*client);
+		_processAnswer(client);
 	}
 
 	// WRITE PROCESSED ANSWER TO CLIENT
-	if (client->getWriteClient())
-		write_client(client, idx);
+	if (client.getWriteClient())
+		write_client(&client, idx);
 }
 
 void ConnectionDispatcher::_processAnswer(Client& client)
@@ -410,7 +410,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 			if (_handleServerSocket(idx) == true)
 				continue;
 			if ((client = _isClient(Data::setEvents()[idx].data.fd)) != NULL)
-	   			_handleClient(client, idx);
+	   			_handleClient(*client, idx);
 		}
 	}
 }

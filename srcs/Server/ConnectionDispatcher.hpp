@@ -27,7 +27,7 @@ class ConnectionDispatcher
 		void						mainLoopEpoll(void);
 		Client*						find_client_in_clients(int client_fd);
 		bool						read_fd(int fd, Client * client, int & n, int idx);
-		bool						read_header(Client* client,  int idx);
+		bool						readHeader(Client& client,  int idx);
 		void						write_client(Client* client,  int idx);
 		void						clients_remove_fd(Client* client);
 		Client*						findSocketClient(int socket);
@@ -44,15 +44,15 @@ class ConnectionDispatcher
 		bool						_handleServerSocket(size_t idx);
 		bool						_handleChildSocket(int socket, size_t idx);
 		// void						_prepareChildSockets();
-		void						_handleClient(Client* client, int idx);
+		void						_handleClient(Client& client, int idx);
 		bool						_checkReceiveError(Client* client, int n, int peek);
 		void						_checkEndHeader(Client* client, int n);
 		void						_concatMessageAndPeek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
-		void						_run_cgi(Client* client);
+		void						_runCgi(Client& client);
 		void 						_epoll_accept_client(int listen_socket);
 		void						_processAnswer(Client& client);
-		void						_check_cgi(Client* client);
+		void						_checkCgi(Client& client);
 		bool						_catchEpollErrorAndSignal();
 
 		/**

@@ -19,7 +19,7 @@ class Socket;
 class CgiProcessor {
 
 	public:
-									CgiProcessor(Client* client);
+									CgiProcessor(Client& client);
 									~CgiProcessor(void);
 		int							process(void);
 		void						ioChild();

@@ -9,6 +9,8 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
+Client c();
+
 CgiProcessor::CgiProcessor (void):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
@@ -16,11 +18,11 @@ _nfds(Data::getNfds())
 	// std::cout << "CgiProcessor default constructor called" << std::endl;
 }
 
-CgiProcessor::CgiProcessor (Client* c):
+CgiProcessor::CgiProcessor (Client& c):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
 {
-	_client = c;
+	_client = &c;
 	_args = NULL;
 	_env = NULL;
 	_tmp = NULL;
