@@ -9,14 +9,10 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-Client c();
-
 CgiProcessor::CgiProcessor (void):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
-{
-	// std::cout << "CgiProcessor default constructor called" << std::endl;
-}
+{}
 
 CgiProcessor::CgiProcessor (Client& c):
 _allSockets(Data::getServerSockets()),
@@ -27,7 +23,7 @@ _nfds(Data::getNfds())
 	_env = NULL;
 	_tmp = NULL;
 	_forked = false;
-	_exited = false;
+	_childExited = false;
 	create_env_vector();
 	create_args_vector();
 	_env = vec_to_chararr(_env_vec);
@@ -72,32 +68,6 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 	return (*this);
 }
 
-/******************************************************************************/
-/*                          Setters and Getters                               */
-/******************************************************************************/
-
-// std::string		CgiProcessor::getCgiResponse() const
-// {
-// 	return (_cgi_output);
-// }
-//
-// void	CgiProcessor::setCgiOutput(std::string s)
-// {
-// 	_cgi_output = s;
-// }
-
-/******************************************************************************/
-/*                               Error Handling                               */
-/******************************************************************************/
-
-/******************************************************************************/
-/*                            O-Stream Overload                               */
-/******************************************************************************/
-
-/******************************************************************************/
-/*                          Class Specific Functions                          */
-/******************************************************************************/
-
 /*
  * RFC 3875 - Common Gateway Protocol
  
@@ -130,7 +100,7 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 // Same things for the output of the CGI. If no content_length is returned
 //		from the CGI, EOF will mark the end of the returned data.
 // The CGI should be run in the correct directory for relative path file access.
-//
+
 std::string operating_system()
 {
     #ifdef _WIN32
@@ -259,8 +229,12 @@ void	CgiProcessor::create_env_vector()
 void	CgiProcessor::create_args_vector()
 {
 	// this is hardcoded now until parsing for CGI works
+	char buf[256];
+	getcwd(buf, sizeof(buf));
+	std::string s = buf;
+	s += "/srcs/epoll/hello.py";
 	_args_vec.push_back("/usr/bin/python3");
-	_args_vec.push_back("/home/gdanis/webserv/srcs/epoll/hello.py");
+	_args_vec.push_back(s);
 }
 
 char**	CgiProcessor::vec_to_chararr(std::vector<std::string> list)
@@ -363,7 +337,10 @@ void	CgiProcessor::ioChild()
 	_writeToChild();
 	if (!_client->hasWrittenToCgi)
 		return ;
+
+	// running waitpid to know when childprocess has finished and quit if it crashes
 	_wait_for_child();
+
 	_readFromChild();
 	if (_client->hasReadFromCgi)
 	{
@@ -379,7 +356,7 @@ void	CgiProcessor::_wait_for_child()
 {
 	int		status;
 	
-	if (_exited)
+	if (_childExited)
 		return ;
 	_client->waitreturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitreturn == -1)
@@ -391,7 +368,7 @@ void	CgiProcessor::_wait_for_child()
 	{
 		// std::cout << "child exited" << std::endl;
 		_exitstatus = WEXITSTATUS(status);
-		_exited = true;
+		_childExited = true;
 	}
 	return ;
 }

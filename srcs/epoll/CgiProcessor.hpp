@@ -38,7 +38,7 @@ class CgiProcessor {
 		int							_exitstatus;
 		const std::vector<Socket>&	_allSockets;
 		const int &					_nfds;	
-		bool						_exited;
+		bool						_childExited;
 
 		void						_readFromChild();
 		void						_writeToChild();

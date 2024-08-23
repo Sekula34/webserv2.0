@@ -21,7 +21,7 @@ start = """
             height: 100%;
             margin: 30px;
             padding: 30px;
-            font-size: 28px;
+            font-size: 20px;
         }
         h1, h2, h3 {
             margin: 15px;
