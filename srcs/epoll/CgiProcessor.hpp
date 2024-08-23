@@ -21,7 +21,7 @@ class CgiProcessor {
 	public:
 									CgiProcessor(Client* client);
 									~CgiProcessor(void);
-		void						process(void);
+		int							process(void);
 		void						ioChild();
 
 	private:
@@ -40,6 +40,8 @@ class CgiProcessor {
 		const int &					_nfds;	
 		bool						_exited;
 
+		void						_stopCgiSetErrorCode();
+		bool						_createSockets();
 		bool						isSocketReady(int socket, int macro);
 		char**						create_env();
 		char**						create_argv();

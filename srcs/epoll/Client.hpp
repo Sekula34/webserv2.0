@@ -26,10 +26,7 @@
 // #define MAXLINE			493
 # define MAXLINE			4096
 # define MAX_TIMEOUT		10000
-#define NONE			0 
-#define ADD				1 
-#define DELETE			2 
-#define DELETED			3 
+#define DELETED				-1 
 
 class CgiProcessor;
 
@@ -67,10 +64,10 @@ class Client {
 		void				setCgi(CgiProcessor* cgi);
 		void				setAddrlen(socklen_t addrlen);
 		void				setChildSocket(int in, int out);
-		void				unsetsocket_tochild();
-		void				unsetsocket_fromchild();
 
 							//Client specific functions
+		void				unsetsocket_tochild();
+		void				unsetsocket_fromchild();
 		void				addRecvLineToMessage();
 		void				addRecvLineToCgiMessage();
 		bool				check_timeout() const;

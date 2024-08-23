@@ -39,6 +39,7 @@ SocketManager::~SocketManager()
 {
 	for(size_t i = 0; i < _allSockets.size(); i++)
 	{
+		std::cout << "trying to close sockets" << std::endl;
 		close(_allSockets[i].getSocketFd());
 	}
 }

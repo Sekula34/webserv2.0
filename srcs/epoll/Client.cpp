@@ -44,9 +44,9 @@ Client::Client (int const fd, struct sockaddr client_addr, socklen_t addrlen):
 Client::~Client (void)
 {
 	close (_fd);
-	if (socketstatus_tochild != DELETED)
+	if (socket_tochild != DELETED)
 		close(socket_tochild);
-	if (socketstatus_fromchild != DELETED)
+	if (socket_fromchild != DELETED)
 		close(socket_fromchild);
 	delete [] _recvline;
 	delete header;
@@ -265,10 +265,8 @@ void Client::_initVars(void)
 {
 	hasWrittenToCgi = false;
 	hasReadFromCgi = false;
-	socketstatus_fromchild = NONE;
-	socketstatus_tochild = NONE;
-	socket_fromchild = -1;
-	socket_tochild = -1;
+	socket_fromchild = DELETED;
+	socket_tochild = DELETED;
 	waitreturn = 0;
 	cgi_checked = false;
 	_errorCode = 0;
@@ -286,20 +284,18 @@ void Client::_initVars(void)
 }
 void	Client::setChildSocket(int to, int from)
 {
-	socketstatus_tochild = ADD;
-	socketstatus_fromchild = ADD;
 	socket_tochild = to;
 	socket_fromchild = from;
 }
 
 void	Client::unsetsocket_tochild()
 {
-	socketstatus_tochild = DELETE;
+	socket_tochild = DELETED;
 }
 
 void	Client::unsetsocket_fromchild()
 {
-	socketstatus_fromchild = DELETE;
+	socket_fromchild = DELETED;
 }
 
 void	Client::_init_user_info()

@@ -53,7 +53,7 @@ class ConnectionDispatcher
 		void 						_epoll_accept_client(int listen_socket);
 		void						_processAnswer(Client& client);
 		void						_check_cgi(Client* client);
-		bool						_catchEpollErrorAndSignal(int nfds);
+		bool						_catchEpollErrorAndSignal();
 
 		/**
 		 * @brief creates Response instace that is forwarded to client. Client is resposible for deleting

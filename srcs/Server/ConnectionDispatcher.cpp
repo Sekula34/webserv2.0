@@ -13,7 +13,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Response/Response.hpp"
 
-#define MAX_WAIT		0 //0 epoll coplete non block 6,7 % CPU
+#define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
 
 volatile sig_atomic_t flag = 0 ;
 
@@ -50,10 +50,10 @@ ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& sour
 
 ConnectionDispatcher::~ConnectionDispatcher()
 {
+	close(Data::getEpollFd());
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for(; it != _clients.end(); it++)
 		delete it->second;
-	close(Data::getEpollFd());
 }
 
 /* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
@@ -291,8 +291,9 @@ void	ConnectionDispatcher::_handleClient(Client* client, int idx)
 		//check cgi only if there is no error in client so far
 		_check_cgi(client);
 		_run_cgi(client);
-		if (client->getCgi() && client->waitreturn == 0)
+		if (client->getCgi() && client->cgiRunning)
 			return ;
+		std::cout << "got to after cgi in handle client" << std::endl;
 
 		// PROCESS ANSWER
 		_processAnswer(*client);
@@ -379,10 +380,11 @@ bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 	return false;
 }
 
-bool	ConnectionDispatcher::_catchEpollErrorAndSignal(int nfds)
+bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 {
-	if (nfds == -1)
+	if (_nfds == -1)
 	{
+		std::cout << "epoll error of signal caught" << std::endl;
 		if(flag)
 			Logger::info("Turn off procedure triggered", true);
 		else
@@ -403,7 +405,7 @@ void ConnectionDispatcher::mainLoopEpoll()
 	{
 		// _prepareChildSockets();
 		_nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
-		if (!_catchEpollErrorAndSignal(_nfds))
+		if (!_catchEpollErrorAndSignal())
 			break;
 		for (size_t idx = 0; idx < static_cast<size_t>(_nfds); ++idx)
 		{

@@ -339,8 +339,8 @@ void	CgiProcessor::ioChild()
 		return ;
 
 	wait_for_child();
-	if (_client->waitreturn < 0)
-		return ;
+	// if (_client->waitreturn < 0)
+	// 	return ;
 	if (!_client->hasReadFromCgi && isSocketReady(_client->socket_fromchild, EPOLLIN))
 	{
 		_client->clearRecvLine();
@@ -356,11 +356,11 @@ void	CgiProcessor::ioChild()
 		if (n < MAXLINE - 1)
 			_client->hasReadFromCgi = true;
 	}
-	if (_client->waitreturn)
+	//if (_client->waitreturn > 0 && _client->hasReadFromCgi)
+	if (_client->hasReadFromCgi)
 	{
 		Data::epollRemoveFd(_client->socket_fromchild);
 		close(_client->socket_fromchild);
-		_client->unsetsocket_fromchild();
 		_client->_cgi_output = _client->getCgiMessage();
 		_client->cgiRunning = false;
 	}
@@ -375,10 +375,13 @@ void	CgiProcessor::wait_for_child()
 		return ;
 	_client->waitreturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitreturn == -1)
-		_client->setErrorCode(500);
+	{
+		_stopCgiSetErrorCode();
+		return ;
+	}
 	if (WIFEXITED(status))
 	{
-		std::cout << "child exited" << std::endl;
+		// std::cout << "child exited" << std::endl;
 		_exitstatus = WEXITSTATUS(status);
 		_exited = true;
 	}
@@ -397,37 +400,38 @@ void	CgiProcessor::wait_for_child()
 	// in this case argv = {"pthon3", "script.py"}
 
 
+bool	CgiProcessor::_createSockets()
+{
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
+		return (false);
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_fromchild) < 0)
+		return (false);
+	return (true);
+}
 
+void	CgiProcessor::_stopCgiSetErrorCode()
+{
+	_client->setErrorCode(500);
+	_client->cgiRunning = false;
+}
 
 // RETURN = TRUE -> return in handle client because CGI is still runnig
 // RETURN = FALSE ->  contiunue in handle client
-void CgiProcessor::process()
+int CgiProcessor::process()
 {
 	if (_client->waitreturn > 0)
-		return;
+		return (0);
 	if (!_forked)
 	{
 		_forked = true;
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
-		{
-			_client->setErrorCode(500);
-			return ;
-		}
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_fromchild) < 0)
-		{
-			_client->setErrorCode(500);
-			return ;
-		}
+		if(!_createSockets())
+			return (_stopCgiSetErrorCode(), 1);
 		if ((_pid = fork()) == -1)
-		{
-			_client->setErrorCode(500);
-			return ;
-		}
+			return (_stopCgiSetErrorCode(), 1);
 		if (_pid == CHILD)
 		{
 			execute();
-			_client->setErrorCode(500);
-			return ;
+			return (_stopCgiSetErrorCode(), 1);
 		}
 		close(_sockets_tochild[1]);
 		close(_sockets_fromchild[1]);
@@ -436,5 +440,5 @@ void CgiProcessor::process()
 		_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
 	}
 	ioChild();
-	return ;
+	return (0);
 }
