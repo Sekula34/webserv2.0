@@ -39,6 +39,7 @@ class ConnectionDispatcher
 		std::map<int,Client*>		_child_sockets;
 		ServersInfo &				_serversInfo;
 		const int					_epollfd;
+		int &						_nfds;
 		Client* 					_isClient(int fd);
 		bool						_isChildSocket(int fd);
 		bool						_handleServerSocket(size_t idx);
@@ -49,7 +50,7 @@ class ConnectionDispatcher
 		void						_checkEndHeader(Client* client, int n);
 		void						_concatMessageAndPeek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
-		bool						_run_cgi(Client* client);
+		void						_run_cgi(Client* client);
 		void 						_epoll_accept_client(int listen_socket);
 		void						_processAnswer(Client& client);
 		void						_check_cgi(Client* client);

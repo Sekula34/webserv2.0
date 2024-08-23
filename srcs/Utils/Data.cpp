@@ -60,6 +60,8 @@ Data &	Data::operator=(Data const & rhs)
 /******************************************************************************/
 /*                          Class Specific Functions                          */
 /******************************************************************************/
+
+int Data::_nfds = 0;
 char** Data::envp = NULL;
 int Data::_epollfd = epoll_create(1);
 std::map<int, Client*> emptyClients;
@@ -103,6 +105,10 @@ const std::vector<int> 		Data::getServerSocketFds()
 		listenFds.push_back(oneFd);
 	}
 	return listenFds;
+}
+int &	Data::getNfds()
+{
+	return (_nfds);
 }
 
 struct epoll_event*		Data::setEvents() 

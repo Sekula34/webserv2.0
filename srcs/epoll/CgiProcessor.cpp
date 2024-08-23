@@ -3,19 +3,22 @@
 #include "../Server/Socket.hpp"
 #include "../Utils/Data.hpp"
 #include "CgiProcessor.hpp"
+#include <unistd.h>
 
 /******************************************************************************/
 /*                               Constructors                                 */
 /******************************************************************************/
 
 CgiProcessor::CgiProcessor (void):
-_allSockets(Data::getServerSockets())
+_allSockets(Data::getServerSockets()),
+_nfds(Data::getNfds())
 {
 	// std::cout << "CgiProcessor default constructor called" << std::endl;
 }
 
 CgiProcessor::CgiProcessor (Client* c):
-_allSockets(Data::getServerSockets())
+_allSockets(Data::getServerSockets()),
+_nfds(Data::getNfds())
 {
 	_client = c;
 	_args = NULL;
@@ -46,7 +49,8 @@ CgiProcessor::~CgiProcessor (void)
 /******************************************************************************/
 
 CgiProcessor::CgiProcessor(CgiProcessor const & src):
-_allSockets(Data::getServerSockets())
+_allSockets(Data::getServerSockets()),
+_nfds(Data::getNfds())
 {
 	//std::cout << "CgiProcessor copy constructor called" << std::endl;
 	*this = src;
@@ -252,12 +256,8 @@ void	CgiProcessor::create_env_vector()
 void	CgiProcessor::create_args_vector()
 {
 	// this is hardcoded now until parsing for CGI works
-	
-	// _args_vec.push_back("/home/gdanis/.brew/bin/python3");
 	_args_vec.push_back("/usr/bin/python3");
 	_args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
-	// _args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
-
 }
 
 char**	CgiProcessor::vec_to_chararr(std::vector<std::string> list)
@@ -310,41 +310,59 @@ int	CgiProcessor::execute()
  	return (_client->setErrorCode(500), ret);
 }
 
+bool	CgiProcessor::isSocketReady(int socket, int macro)
+{
+	for (size_t i = 0; i < static_cast<size_t>(_nfds); ++i)
+	{
+		if (Data::setEvents()[i].data.fd == socket && Data::setEvents()[i].events & macro)
+			return (true);
+	}
+	return (false);
+}
+
 void	CgiProcessor::ioChild()
 {
 	int n = 0;
-	Client* client = findSocketClient(socket);
-	if (!client)
-		return (std::cout << "no client for this socket, FATAL ERROR!", false);
-	if (!client->hasWrittenToCgi && Data::setEvents()[idx].events & EPOLLOUT && client->socket_tochild == socket)
-	{
- 		write(socket, "check this out\n", 15);
-		client->hasWrittenToCgi = true;
-		client->unsetsocket_tochild();
-		return (true);
-	}
-	if (socket == client->socket_tochild)
-		return (true);
 
-		wait_for_child();
-	if (!client->hasReadFromCgi)
+	// want to check here: has write to CGI finished already && is the socketToChild part of epollreturn && is socketToChild ready  to be written to
+	if (!_client->hasWrittenToCgi && isSocketReady(_client->socket_tochild, EPOLLOUT))
 	{
-		if (!read_fd(socket, client, n, idx))
-			return (true);
+ 		write(_client->socket_tochild, "check this out\n", 15);
+		_client->hasWrittenToCgi = true;
+		_client->unsetsocket_tochild();
+		Data::epollRemoveFd(_client->socket_tochild);
+		close(_client->socket_tochild);
+		return ;
+	}
+	// not sure this if statement is needed
+	if (!_client->hasWrittenToCgi)
+		return ;
+
+	wait_for_child();
+	if (!_client->hasReadFromCgi && isSocketReady(_client->socket_fromchild, EPOLLIN))
+	{
+		_client->clearRecvLine();
+		n = recv(_client->socket_fromchild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		std::cout << "bytes read from child socket: " << n << std::endl;
 		if (n > 0)
-			client->addRecvLineToCgiMessage();
+			_client->addRecvLineToCgiMessage();
 		if (n < 0)
-			return (std::cout << "error: received, in handleChildSocket n: " << n << std::endl, true);
+		{
+			std::cout << "error: received, in handleChildSocket n: " << n << std::endl;
+			return ;
+		}
 		if (n < MAXLINE - 1)
-			client->hasReadFromCgi = true;
+			_client->hasReadFromCgi = true;
 	}
-	if (client->waitreturn)
+	if (_client->waitreturn)
 	{
-		client->unsetsocket_fromchild();
-		client->_cgi_output = client->getCgiMessage();
+		Data::epollRemoveFd(_client->socket_fromchild);
+		close(_client->socket_fromchild);
+		_client->unsetsocket_fromchild();
+		_client->_cgi_output = _client->getCgiMessage();
+		_client->cgiRunning = false;
 	}
-	return (true);
+	return ;
 }
 
 pid_t	CgiProcessor::wait_for_child()
@@ -378,33 +396,40 @@ pid_t	CgiProcessor::wait_for_child()
 
 // RETURN = TRUE -> return in handle client because CGI is still runnig
 // RETURN = FALSE ->  contiunue in handle client
-int CgiProcessor::process()
+void CgiProcessor::process()
 {
 	if (_client->waitreturn > 0)
-		return (_client->waitreturn);
+		return;
 	if (!_forked)
 	{
 		_forked = true;
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
-			return (_client->setErrorCode(500), 1);
+		{
+			_client->setErrorCode(500);
+			return ;
+		}
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_fromchild) < 0)
-			return (_client->setErrorCode(500), 1);
-
+		{
+			_client->setErrorCode(500);
+			return ;
+		}
 		if ((_pid = fork()) == -1)
-			return (_client->setErrorCode(500), 1);
+		{
+			_client->setErrorCode(500);
+			return ;
+		}
 		if (_pid == CHILD)
 		{
-			if(execute() == -1)
-				return (_client->setErrorCode(500), 1);
+			execute();
+			_client->setErrorCode(500);
+			return ;
 		}
 		close(_sockets_tochild[1]);
 		close(_sockets_fromchild[1]);
+		Data::epollAddFd(_sockets_tochild[0]);
+		Data::epollAddFd(_sockets_fromchild[0]);
 		_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
 	}
-	if (_pid != CHILD)
-	{
-		ioChild();
-		return (_client->waitreturn);
-	}
-	return (0);
+	ioChild();
+	return ;
 }

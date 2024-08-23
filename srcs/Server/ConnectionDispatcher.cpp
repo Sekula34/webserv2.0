@@ -28,14 +28,16 @@ ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& 
 _sockets(sockets),
 _clients(Data::getClients()),
 _serversInfo(serversInfo),
-_epollfd(Data::getEpollFd())
+_epollfd(Data::getEpollFd()),
+_nfds(Data::getNfds())
 {}
 
 ConnectionDispatcher::ConnectionDispatcher(ConnectionDispatcher& source):
 _sockets(source._sockets),
 _clients(Data::getClients()),
 _serversInfo(source._serversInfo),
-_epollfd(Data::getEpollFd())
+_epollfd(Data::getEpollFd()),
+_nfds(Data::getNfds())
 {}
 
 ConnectionDispatcher& ConnectionDispatcher::operator=(ConnectionDispatcher& source)
@@ -233,11 +235,11 @@ void	ConnectionDispatcher::_check_cgi(Client* client)
 
 }
 
-bool	ConnectionDispatcher::_run_cgi(Client* client)
+void	ConnectionDispatcher::_run_cgi(Client* client)
 {
-	if (!client->getCgi() || !client->getCgi()->process())
-		return (false);
-	return (true);
+	if (!client->getCgi() || !client->cgiRunning)
+		return ;
+	client->getCgi()->process();
 }
 
 bool	ConnectionDispatcher::_isChildSocket(int fd)
@@ -252,39 +254,6 @@ bool	ConnectionDispatcher::_isChildSocket(int fd)
 	return (false);
 }
 
-// void	ConnectionDispatcher::_prepareChildSockets()
-// {
-// 	std::map<int, Client*>::iterator it = _clients.begin(); 
-// 	for (; it != _clients.end(); it++)
-// 	{
-// 		if (it->second->socketstatus_fromchild == DELETE)
-// 		{
-// 			Data::epollRemoveFd(it->second->socket_fromchild);
-// 			close(it->second->socket_fromchild);
-// 			// it->second->socket_fromchild = -1;
-// 			it->second->socketstatus_fromchild = DELETED;
-// 		}
-// 		if (it->second->socketstatus_tochild == DELETE)
-// 		{
-// 			Data::epollRemoveFd(it->second->socket_tochild);
-// 			close(it->second->socket_tochild);
-// 			// it->second->socket_tochild = -1;
-// 			it->second->socketstatus_tochild = DELETED;
-// 		}
-// 	  	if (it->second->socketstatus_fromchild == ADD)
-// 		{
-// 			Data::epollAddFd(it->second->socket_fromchild);
-// 			it->second->socketstatus_fromchild = NONE;
-// 		}
-// 	  	if (it->second->socketstatus_tochild == ADD)
-// 		{
-// 			Data::epollAddFd(it->second->socket_tochild);
-// 			it->second->clearMessage();
-// 			it->second->socketstatus_tochild = NONE;
-// 		}
-// 	}
-// }
-
 Client*	ConnectionDispatcher::findSocketClient(int socket)
 {
 
@@ -298,44 +267,6 @@ Client*	ConnectionDispatcher::findSocketClient(int socket)
 	}
 	return (NULL);
 }
-
-// bool	ConnectionDispatcher::_handleChildSocket(int socket, size_t idx)
-// {
-// 	if (!_isChildSocket(socket))
-// 		return (false);
-// 	int n = 0;
-// 	Client* client = findSocketClient(socket);
-// 	if (!client)
-// 		return (std::cout << "no client for this socket, FATAL ERROR!", false);
-// 	if (!client->hasWrittenToCgi && Data::setEvents()[idx].events & EPOLLOUT && client->socket_tochild == socket)
-// 	{
-//  		write(socket, "check this out\n", 15);
-// 		client->hasWrittenToCgi = true;
-// 		client->unsetsocket_tochild();
-// 		return (true);
-// 	}
-// 	if (socket == client->socket_tochild)
-// 		return (true);
-//
-// 	if (!client->hasReadFromCgi)
-// 	{
-// 		if (!read_fd(socket, client, n, idx))
-// 			return (true);
-// 		std::cout << "bytes read from child socket: " << n << std::endl;
-// 		if (n > 0)
-// 			client->addRecvLineToCgiMessage();
-// 		if (n < 0)
-// 			return (std::cout << "error: received, in handleChildSocket n: " << n << std::endl, true);
-// 		if (n < MAXLINE - 1)
-// 			client->hasReadFromCgi = true;
-// 	}
-// 	if (client->waitreturn)
-// 	{
-// 		client->unsetsocket_fromchild();
-// 		client->_cgi_output = client->getCgiMessage();
-// 	}
-// 	return (true);
-// }
 
 void	ConnectionDispatcher::_handleClient(Client* client, int idx)
 {
@@ -359,7 +290,7 @@ void	ConnectionDispatcher::_handleClient(Client* client, int idx)
 		//check cgi only if there is no error in client so far
 		_check_cgi(client);
 		_run_cgi(client);
-		if (client->getCgi() && client->socketstatus_fromchild != DELETED)
+		if (client->getCgi() && client->waitreturn == 0)
 			return ;
 
 		// PROCESS ANSWER
@@ -462,7 +393,6 @@ bool	ConnectionDispatcher::_catchEpollErrorAndSignal(int nfds)
 
 void ConnectionDispatcher::mainLoopEpoll()
 {
-	int nfds;
 	Client* client;
 
 	Logger::info("my pid is: "); std::cout << getpid() << std::endl;
@@ -471,10 +401,10 @@ void ConnectionDispatcher::mainLoopEpoll()
 	while(true)
 	{
 		// _prepareChildSockets();
-		nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
-		if (!_catchEpollErrorAndSignal(nfds))
+		_nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
+		if (!_catchEpollErrorAndSignal(_nfds))
 			break;
-		for (size_t idx = 0; idx < static_cast<size_t>(nfds); ++idx)
+		for (size_t idx = 0; idx < static_cast<size_t>(_nfds); ++idx)
 		{
 			if (_handleServerSocket(idx) == true)
 				continue;

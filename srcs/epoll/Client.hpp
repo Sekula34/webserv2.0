@@ -94,6 +94,7 @@ class Client {
 		int					socket_fromchild;
 		bool				hasWrittenToCgi;
 		bool				hasReadFromCgi;
+		bool				cgiRunning;
 
 	private:
 		int					_errorCode;
@@ -112,12 +113,11 @@ class Client {
 		CgiProcessor*		_cgi;
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_client_addr;
+		std::string			_client_ip;
+		socklen_t			_addrlen;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);
-		std::string			_client_ip;
-		socklen_t			_addrlen;
-
 		void				_init_user_info();
 		void				_initVars(void);
 };

@@ -19,46 +19,41 @@ class Socket;
 class CgiProcessor {
 
 	public:
-						// canonical
-						CgiProcessor(Client* client);
-						~CgiProcessor(void);
-
-						// set and get
-		// std::string		getCgiResponse() const;
-		// void			setCgiOutput(std::string  s);
-
-						//CgiProcessor specific functions
-		int				process(void);
+									CgiProcessor(Client* client);
+									~CgiProcessor(void);
+		void						process(void);
+		void						ioChild();
 
 	private:
-		Client *		_client;
-		int				_pid;
-		// int				_pipefd[2]; // 0 read, 1 write
-		int				_sockets_tochild[2];
-		int				_sockets_fromchild[2];
+		Client *					_client;
+		int							_pid;
+		int							_sockets_tochild[2];
+		int							_sockets_fromchild[2];
 		std::vector<std::string>	_args_vec;
 		std::vector<std::string>	_env_vec;
-		char**			_args;
-		char**			_env;
-		char**			_tmp;
-		bool			_forked;
-		int				_exitstatus;
-		const std::vector<Socket>& _allSockets;
+		char**						_args;
+		char**						_env;
+		char**						_tmp;
+		bool						_forked;
+		int							_exitstatus;
+		const std::vector<Socket>&	_allSockets;
+		const int &					_nfds;	
 
-		char**			create_env();
-		char**			create_argv();
-		int				execute();
-		int				gen_body();
-		int				read_from_child();
-		char**			vec_to_chararr(std::vector<std::string>);
-		void			delete_chararr(char ** lines);
-		void			create_env_vector();
-		void			create_args_vector();
-		pid_t			wait_for_child();
+		bool						isSocketReady(int socket, int macro);
+		char**						create_env();
+		char**						create_argv();
+		int							execute();
+		int							gen_body();
+		int							read_from_child();
+		char**						vec_to_chararr(std::vector<std::string>);
+		void						delete_chararr(char ** lines);
+		void						create_env_vector();
+		void						create_args_vector();
+		pid_t						wait_for_child();
 
-						CgiProcessor(void);
-						CgiProcessor(CgiProcessor const & src);
-		CgiProcessor &	operator=(CgiProcessor const & rhs);
+									CgiProcessor(void);
+									CgiProcessor(CgiProcessor const & src);
+		CgiProcessor &				operator=(CgiProcessor const & rhs);
 };
 
 #endif

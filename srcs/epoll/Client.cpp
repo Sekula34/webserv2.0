@@ -282,6 +282,7 @@ void Client::_initVars(void)
 	_client_body = "";
 	_cgi_output = "";
 	Cgi = NULL;
+	cgiRunning = true;
 }
 void	Client::setChildSocket(int to, int from)
 {

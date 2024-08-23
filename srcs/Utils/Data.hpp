@@ -21,6 +21,7 @@ class Data {
 		static const Client *					getClientByFd(int fd);
 		static const std::vector<Socket> &		getServerSockets();
 		static const std::vector<int> 			getServerSocketFds();
+		static int &							getNfds();
 		static struct epoll_event *				setEvents(); 
 		static void								closeAllFds();
 		static void								epollAddFd(int fd);
@@ -36,6 +37,7 @@ class Data {
 		static std::map<int, Client*> &			_clients;
 		static std::vector<Socket> *			_serverSockets;
 		static struct epoll_event				_events[MAX_EVENTS];
+		static int								_nfds;
 
 												Data(void);
 												Data(Data const & src);
