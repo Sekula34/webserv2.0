@@ -232,6 +232,7 @@ void	CgiProcessor::create_args_vector()
 	char buf[256];
 	getcwd(buf, sizeof(buf));
 	std::string s = buf;
+	// s += "/srcs/epoll/hello.py";
 	s += "/srcs/epoll/hello.py";
 	_args_vec.push_back("/usr/bin/python3");
 	_args_vec.push_back(s);
@@ -284,7 +285,7 @@ int	CgiProcessor::execute()
 	for(size_t i = 0; i < _allSockets.size(); i++)
 		close(Data::getServerSocketFds()[i]);
  	int ret = execve(_args[0], _args, _env);
- 	return (_client->setErrorCode(500), ret);
+ 	return (_stopCgiSetErrorCode(), ret);
 }
 
 bool	CgiProcessor::isSocketReady(int socket, int macro)
@@ -340,6 +341,8 @@ void	CgiProcessor::ioChild()
 
 	// running waitpid to know when childprocess has finished and quit if it crashes
 	_wait_for_child();
+	if (!_client->cgiRunning)
+		return ;
 
 	_readFromChild();
 	if (_client->hasReadFromCgi)
@@ -373,12 +376,6 @@ void	CgiProcessor::_wait_for_child()
 	return ;
 }
 
-// CHECKER FOR PYTHON
-	// what ending is this? eg "script.py" -> language = python 
-	// do we support this language?
-	// is the interpreter for this language installed on this system?
-	// in this case argv = {"pthon3", "script.py"}
-
 bool	CgiProcessor::_createSockets()
 {
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
@@ -403,8 +400,6 @@ void	CgiProcessor::_prepareSockets()
 	_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
 }
 
-// RETURN = TRUE -> return in handle client because CGI is still runnig
-// RETURN = FALSE ->  contiunue in handle client
 int CgiProcessor::process()
 {
 	if (_client->waitreturn > 0)
@@ -412,15 +407,21 @@ int CgiProcessor::process()
 	if (!_forked)
 	{
 		_forked = true;
+
+		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
 			return (_stopCgiSetErrorCode(), 1);
 		if ((_pid = fork()) == -1)
 			return (_stopCgiSetErrorCode(), 1);
 		if (_pid == CHILD)
 		{
+
+			// runs execve on cgi-script
 			execute();
 			return (_stopCgiSetErrorCode(), 1);
 		}
+
+		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets();
 	}
 	ioChild();

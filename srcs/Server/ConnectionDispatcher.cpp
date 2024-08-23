@@ -289,7 +289,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 			// PROCESS BODY
 		}
 
-		//check cgi only if there is no error in client so far
+		//run cgi if cgi on and only if there is no error in client so far
 		_runCgi(client);
 		if (client.getCgi() && client.cgiRunning)
 			return ;
@@ -333,8 +333,6 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 
 void ConnectionDispatcher::_addServerSocketsToEpoll(void)
 {
-
-	// add server sockets to epoll listener
 	std::vector<int> socketFds = Data::getServerSocketFds();
 	for(size_t i = 0; i < socketFds.size(); i++)
 		Data::epollAddFd(socketFds[i]);
