@@ -293,7 +293,6 @@ void	ConnectionDispatcher::_handleClient(Client* client, int idx)
 		_run_cgi(client);
 		if (client->getCgi() && client->cgiRunning)
 			return ;
-		std::cout << "got to after cgi in handle client" << std::endl;
 
 		// PROCESS ANSWER
 		_processAnswer(*client);
@@ -384,7 +383,6 @@ bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 {
 	if (_nfds == -1)
 	{
-		std::cout << "epoll error of signal caught" << std::endl;
 		if(flag)
 			Logger::info("Turn off procedure triggered", true);
 		else

@@ -30,7 +30,7 @@ _nfds(Data::getNfds())
 	create_args_vector();
 	_env = vec_to_chararr(_env_vec);
 	_args = vec_to_chararr(_args_vec);
-	// std::cout << "CgiProcessor default constructor called" << std::endl;
+	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
 /******************************************************************************/
@@ -39,7 +39,7 @@ _nfds(Data::getNfds())
 
 CgiProcessor::~CgiProcessor (void)
 {
-	std::cout << "CgiProcessor destructor called" << std::endl;
+	Logger::info("CgiProcessor destructor called"); std::cout << std::endl;
 	delete_chararr(_tmp);
 	delete_chararr(_args);
 	delete_chararr(_env);
@@ -321,42 +321,48 @@ bool	CgiProcessor::isSocketReady(int socket, int macro)
 	return (false);
 }
 
-void	CgiProcessor::ioChild()
+void	CgiProcessor::_writeToChild()
+{
+	if (_client->hasWrittenToCgi || !isSocketReady(_client->socket_tochild, EPOLLOUT))
+		return ;
+	std::cout << "writing to child" << std::endl;
+	write(_client->socket_tochild, "check this out\n", 15);
+	_client->hasWrittenToCgi = true;
+	Data::epollRemoveFd(_client->socket_tochild);
+	close(_client->socket_tochild);
+}
+
+void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
 
-	if (!_client->hasWrittenToCgi && isSocketReady(_client->socket_tochild, EPOLLOUT))
-	{
-		std::cout << "writing to child" << std::endl;
- 		write(_client->socket_tochild, "check this out\n", 15);
-		_client->hasWrittenToCgi = true;
-		Data::epollRemoveFd(_client->socket_tochild);
-		close(_client->socket_tochild);
-		return ;
-	}
-	// not sure this if statement is needed
-	if (!_client->hasWrittenToCgi)
-		return ;
-
-	wait_for_child();
-	// if (_client->waitreturn < 0)
-	// 	return ;
 	if (!_client->hasReadFromCgi && isSocketReady(_client->socket_fromchild, EPOLLIN))
 	{
 		_client->clearRecvLine();
 		n = recv(_client->socket_fromchild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		std::cout << "bytes read from child socket: " << n << std::endl;
+
+		// successful read, concat message
 		if (n > 0)
 			_client->addRecvLineToCgiMessage();
+
+		// invalid read, stop CGI and set errorcode = 500
 		if (n < 0)
-		{
-			std::cout << "error: received, in handleChildSocket n: " << n << std::endl;
-			return ;
-		}
-		if (n < MAXLINE - 1)
+			_stopCgiSetErrorCode();
+
+		// EOF reached, child has gracefully shutdown connection
+		if (n == 0)
 			_client->hasReadFromCgi = true;
 	}
-	//if (_client->waitreturn > 0 && _client->hasReadFromCgi)
+}
+
+void	CgiProcessor::ioChild()
+{
+	_writeToChild();
+	if (!_client->hasWrittenToCgi)
+		return ;
+	_wait_for_child();
+	_readFromChild();
 	if (_client->hasReadFromCgi)
 	{
 		Data::epollRemoveFd(_client->socket_fromchild);
@@ -367,7 +373,7 @@ void	CgiProcessor::ioChild()
 	return ;
 }
 
-void	CgiProcessor::wait_for_child()
+void	CgiProcessor::_wait_for_child()
 {
 	int		status;
 	
@@ -388,17 +394,11 @@ void	CgiProcessor::wait_for_child()
 	return ;
 }
 
-// create new function write_to_child
- 	// write(_sockets[0], _client->getClientBody().c_str(), _client->getClientBody().size());
- 	// write(_sockets[0], "check this out\n", 15);
-
-
 // CHECKER FOR PYTHON
 	// what ending is this? eg "script.py" -> language = python 
 	// do we support this language?
 	// is the interpreter for this language installed on this system?
 	// in this case argv = {"pthon3", "script.py"}
-
 
 bool	CgiProcessor::_createSockets()
 {
@@ -413,6 +413,15 @@ void	CgiProcessor::_stopCgiSetErrorCode()
 {
 	_client->setErrorCode(500);
 	_client->cgiRunning = false;
+}
+
+void	CgiProcessor::_prepareSockets()
+{
+	close(_sockets_tochild[1]);
+	close(_sockets_fromchild[1]);
+	Data::epollAddFd(_sockets_tochild[0]);
+	Data::epollAddFd(_sockets_fromchild[0]);
+	_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
 }
 
 // RETURN = TRUE -> return in handle client because CGI is still runnig
@@ -433,11 +442,7 @@ int CgiProcessor::process()
 			execute();
 			return (_stopCgiSetErrorCode(), 1);
 		}
-		close(_sockets_tochild[1]);
-		close(_sockets_fromchild[1]);
-		Data::epollAddFd(_sockets_tochild[0]);
-		Data::epollAddFd(_sockets_fromchild[0]);
-		_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
+		_prepareSockets();
 	}
 	ioChild();
 	return (0);

@@ -40,8 +40,11 @@ class CgiProcessor {
 		const int &					_nfds;	
 		bool						_exited;
 
+		void						_readFromChild();
+		void						_writeToChild();
 		void						_stopCgiSetErrorCode();
 		bool						_createSockets();
+		void						_prepareSockets();
 		bool						isSocketReady(int socket, int macro);
 		char**						create_env();
 		char**						create_argv();
@@ -52,7 +55,7 @@ class CgiProcessor {
 		void						delete_chararr(char ** lines);
 		void						create_env_vector();
 		void						create_args_vector();
-		void						wait_for_child();
+		void						_wait_for_child();
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

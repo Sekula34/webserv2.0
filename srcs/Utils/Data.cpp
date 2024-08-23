@@ -129,7 +129,6 @@ void	Data::epollAddFd(int fd)
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = fd;
 
-	std::cout << "adding to epoll FD: " << fd << std::endl;
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, fd, &ev) == -1)
 		throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
@@ -137,7 +136,6 @@ void	Data::epollAddFd(int fd)
 
 void	Data::epollRemoveFd(int fd)
 {
-	std::cout << "removing epoll FD: " << fd << std::endl;
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
 		throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
