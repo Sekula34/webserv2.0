@@ -168,6 +168,11 @@ const NginnxReturn& DefaultSettings::getNginxReturn(void) const
 	return(_return);
 }
 
+const bool& DefaultSettings::getAutoindexFlag(void) const
+{
+	return (_autoindex);
+}
+
 const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
 {
 	std::string path = "";
