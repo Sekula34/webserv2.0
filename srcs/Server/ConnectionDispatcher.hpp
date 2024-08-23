@@ -9,7 +9,6 @@
 #include "../epoll/Client.hpp"
 #include "../Utils/Data.hpp"
 
-#define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
 
 
 /**

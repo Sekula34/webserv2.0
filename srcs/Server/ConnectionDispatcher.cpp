@@ -13,6 +13,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Response/Response.hpp"
 
+#define MAX_WAIT		0 //0 epoll coplete non block 6,7 % CPU
 
 volatile sig_atomic_t flag = 0 ;
 

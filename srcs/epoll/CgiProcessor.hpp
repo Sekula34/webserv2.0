@@ -38,6 +38,7 @@ class CgiProcessor {
 		int							_exitstatus;
 		const std::vector<Socket>&	_allSockets;
 		const int &					_nfds;	
+		bool						_exited;
 
 		bool						isSocketReady(int socket, int macro);
 		char**						create_env();
@@ -49,7 +50,7 @@ class CgiProcessor {
 		void						delete_chararr(char ** lines);
 		void						create_env_vector();
 		void						create_args_vector();
-		pid_t						wait_for_child();
+		void						wait_for_child();
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

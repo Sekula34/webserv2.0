@@ -25,6 +25,7 @@ _nfds(Data::getNfds())
 	_env = NULL;
 	_tmp = NULL;
 	_forked = false;
+	_exited = false;
 	create_env_vector();
 	create_args_vector();
 	_env = vec_to_chararr(_env_vec);
@@ -257,7 +258,7 @@ void	CgiProcessor::create_args_vector()
 {
 	// this is hardcoded now until parsing for CGI works
 	_args_vec.push_back("/usr/bin/python3");
-	_args_vec.push_back("/home/gabor/webserv/srcs/epoll/hello.py");
+	_args_vec.push_back("/home/gdanis/webserv/srcs/epoll/hello.py");
 }
 
 char**	CgiProcessor::vec_to_chararr(std::vector<std::string> list)
@@ -324,12 +325,11 @@ void	CgiProcessor::ioChild()
 {
 	int n = 0;
 
-	// want to check here: has write to CGI finished already && is the socketToChild part of epollreturn && is socketToChild ready  to be written to
 	if (!_client->hasWrittenToCgi && isSocketReady(_client->socket_tochild, EPOLLOUT))
 	{
+		std::cout << "writing to child" << std::endl;
  		write(_client->socket_tochild, "check this out\n", 15);
 		_client->hasWrittenToCgi = true;
-		_client->unsetsocket_tochild();
 		Data::epollRemoveFd(_client->socket_tochild);
 		close(_client->socket_tochild);
 		return ;
@@ -339,6 +339,8 @@ void	CgiProcessor::ioChild()
 		return ;
 
 	wait_for_child();
+	if (_client->waitreturn < 0)
+		return ;
 	if (!_client->hasReadFromCgi && isSocketReady(_client->socket_fromchild, EPOLLIN))
 	{
 		_client->clearRecvLine();
@@ -365,19 +367,22 @@ void	CgiProcessor::ioChild()
 	return ;
 }
 
-pid_t	CgiProcessor::wait_for_child()
+void	CgiProcessor::wait_for_child()
 {
 	int		status;
-
+	
+	if (_exited)
+		return ;
 	_client->waitreturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitreturn == -1)
-		return (_client->setErrorCode(500), 1);
+		_client->setErrorCode(500);
 	if (WIFEXITED(status))
 	{
 		std::cout << "child exited" << std::endl;
 		_exitstatus = WEXITSTATUS(status);
+		_exited = true;
 	}
-	return (_client->waitreturn);
+	return ;
 }
 
 // create new function write_to_child
