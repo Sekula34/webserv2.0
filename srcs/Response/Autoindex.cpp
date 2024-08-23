@@ -49,6 +49,11 @@ int& Autoindex::getStatusCode() const
 	return (_statusCode);
 }
 
+const std::string& Autoindex::getAutoIndexHtml() const
+{
+	return (_autoIndexHtml);
+}
+
 
 void Autoindex::_createHtmlMenu()
 {
@@ -74,7 +79,7 @@ void Autoindex::_createHtmlMenu()
 		perror("Reading dir");
 		_statusCode = 500;
 	}
-	_generateHtmlPage("Title");
+	_generateHtmlPage("Auto index of folder: " +_folderPath);
 }
 
 void Autoindex::_createAndStoreOneFileLink(const std::string fileEntry)

@@ -14,6 +14,7 @@ class Autoindex
 		~Autoindex();
 
 		int& getStatusCode() const;
+		const std::string& getAutoIndexHtml() const;
 
 	private:
 		Autoindex();
