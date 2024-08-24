@@ -274,42 +274,6 @@ std::string ResponseBody::_convertToServerPath(const LocationSettings& location)
     return serverPath;
 }
 
-bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const
-{
-    path.erase();
-    std::string fullpath = _client.header->urlSuffix->getPath();
-    std::cout << "Requested urlSuffix path  is " << fullpath << std::endl;
-    std::cout << "Location uri is" << location.getLocationUri();
-    std::string baseName = ParsingUtils::getBaseName(fullpath, location.getLocationUri());
-    Logger::info("base name is " + baseName, true);
-    if(baseName == "")
-        return location.setIndexPagePath(path);
-    std::string filePath = location.getRoot() + "/" + baseName; 
-    path = filePath;
-    std::cout << "File Path is [" << path << "]" << std::endl;
-    return FileUtils::isPathValid(filePath);
-}
-
-void ResponseBody::_fetchServerPage(const LocationSettings& location)
-{
-    Logger::info("Called fetching page", true);
-   // location.printLocationSettings();
-    std::string path;
-    bool found = _setFilePath(path, location);
-    if(found == true)
-    {
-        bool success = FileUtils::putFileInString(path, _response);
-        if(success == true)
-            _httpStatusCode = 200;
-        else
-            _renderServerErrorPage(500);
-    }
-    else if(found == false)
-    {
-        _renderServerErrorPage(404);
-    }
-}
-
 void ResponseBody::_generateServerResponse()
 {
     if(_client.header->getRequestLine().protocolVersion != "HTTP/1.1")

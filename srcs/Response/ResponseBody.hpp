@@ -27,7 +27,6 @@ class ResponseBody
 		void _generateServerResponse();
 		void _renderServerErrorPage(int errorCode);
 
-		void _fetchServerPage(const LocationSettings& location);
 
 		void _handlerGetMethod();
 		void _handleRedirect(const NginnxReturn& redirect);
@@ -48,7 +47,6 @@ class ResponseBody
 		 * @return std::string 
 		 */
 		std::string _convertToServerPath(const LocationSettings& location) const;
-		bool _setFilePath(std::string &filePath, const LocationSettings& location) const;
 
 
 };
