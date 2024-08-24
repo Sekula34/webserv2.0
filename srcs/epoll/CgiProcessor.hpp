@@ -22,15 +22,14 @@ class CgiProcessor {
 									CgiProcessor(Client& client);
 									~CgiProcessor(void);
 		int							process(void);
-		void						ioChild();
 
 	private:
 		Client *					_client;
 		int							_pid;
-		int							_sockets_tochild[2];
-		int							_sockets_fromchild[2];
-		std::vector<std::string>	_args_vec;
-		std::vector<std::string>	_env_vec;
+		int							_socketsToChild[2];
+		int							_socketsFromChild[2];
+		std::vector<std::string>	_argsVec;
+		std::vector<std::string>	_envVec;
 		char**						_args;
 		char**						_env;
 		char**						_tmp;
@@ -38,24 +37,25 @@ class CgiProcessor {
 		int							_exitstatus;
 		const std::vector<Socket>&	_allSockets;
 		const int &					_nfds;	
-		bool						_childExited;
+		std::string					_interpreterAbsPath;
+		std::string					_scriptAbsPath;
 
+		void						_ioChild();
+		bool						_checkInterpreterScript();
 		void						_readFromChild();
 		void						_writeToChild();
 		void						_stopCgiSetErrorCode();
 		bool						_createSockets();
 		void						_prepareSockets();
-		bool						isSocketReady(int socket, int macro);
-		char**						create_env();
-		char**						create_argv();
-		int							execute();
-		int							gen_body();
-		int							read_from_child();
-		char**						vec_to_chararr(std::vector<std::string>);
-		void						delete_chararr(char ** lines);
-		void						create_env_vector();
-		void						create_args_vector();
-		void						_wait_for_child();
+		bool						_isSocketReady(int socket, int macro);
+		char**						_create_env();
+		char**						_create_argv();
+		int							_execute();
+		char**						_vecToChararr(std::vector<std::string>);
+		void						_deleteChararr(char ** lines);
+		void						_createEnvVector();
+		void						_createArgsVector();
+		void						_waitForChild();
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

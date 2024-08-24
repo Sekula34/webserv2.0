@@ -14,7 +14,6 @@ class Socket;
 class Data {
 
 	public:
-		static char**							envp;
 
 		static int								getEpollFd();
 		static std::map<int, Client*> &			getClients();
@@ -28,11 +27,14 @@ class Data {
 		static void								epollRemoveFd(int fd);
 		static void								setEpollFd(int fd);
 		static void								setServerSockets(std::vector<Socket> * sockets);
+		static void								setEnvp(char** envp);
+		static std::string						findStringInEnvp(std::string str);
 
 
 												~Data(void);
 
 	private:
+		static char**							_envp;
 		static int								_epollfd;
 		static std::map<int, Client*> &			_clients;
 		static std::vector<Socket> *			_serverSockets;

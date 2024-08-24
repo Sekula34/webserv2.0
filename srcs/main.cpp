@@ -13,7 +13,7 @@ void ConnectionDispatcherTest(char** envp)
 {
 	ServersInfo serverInfo;
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
-	Data::envp = envp;
+	Data::setEnvp(envp);
 	SocketManager sockets(serverInfo.getUniquePorts());
 	ConnectionDispatcher dispatcher(sockets, serverInfo);
 	dispatcher.mainLoopEpoll();

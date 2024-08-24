@@ -23,11 +23,12 @@ _nfds(Data::getNfds())
 	_env = NULL;
 	_tmp = NULL;
 	_forked = false;
-	_childExited = false;
-	create_env_vector();
-	create_args_vector();
-	_env = vec_to_chararr(_env_vec);
-	_args = vec_to_chararr(_args_vec);
+	_createEnvVector();
+	_createArgsVector();
+	_env = _vecToChararr(_envVec);
+	_args = _vecToChararr(_argsVec);
+	_interpreterAbsPath = "";
+	_scriptAbsPath = "";
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -38,9 +39,9 @@ _nfds(Data::getNfds())
 CgiProcessor::~CgiProcessor (void)
 {
 	Logger::info("CgiProcessor destructor called"); std::cout << std::endl;
-	delete_chararr(_tmp);
-	delete_chararr(_args);
-	delete_chararr(_env);
+	_deleteChararr(_tmp);
+	_deleteChararr(_args);
+	_deleteChararr(_env);
 }
 
 /******************************************************************************/
@@ -101,7 +102,7 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 //		from the CGI, EOF will mark the end of the returned data.
 // The CGI should be run in the correct directory for relative path file access.
 
-std::string operating_system()
+std::string operatingSystem()
 {
     #ifdef _WIN32
     return "Windows 32-bit";
@@ -120,13 +121,13 @@ std::string operating_system()
     #endif
 }  
 
-void	CgiProcessor::create_env_vector()
+void	CgiProcessor::_createEnvVector()
 {
 	std::string	line;
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 
 	// CONTENT_LENGTH
@@ -137,20 +138,20 @@ void	CgiProcessor::create_env_vector()
 		ss << _client->getClientBody().size();
 		line += ss.str();
 	}
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
 	if (_client->header->getHeaderFields().find("Content-Type") != _client->header->getHeaderFields().end())
 		line +=_client->header->getHeaderFields().find("Content-Type")->second;
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 	
 
 	// GATEWAY_INTERFACE
 	line = "GATEWAY_INTERFACE=CGI/1.1"; 
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 
 	// PATH_INFO 
@@ -161,28 +162,28 @@ void	CgiProcessor::create_env_vector()
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
 	line = "PATH_INFO="; 
 	line += _client->header->urlSuffix->getPath();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 	
 
 	// PATH_TRANSLATED 
 	// The CGI should be run in the correct directory for relative path file access.
-	char buf[256];
-	getcwd(buf, sizeof(buf));
+	
+	std::string pwdstr = Data::findStringInEnvp("PWD=");
 	line = "PATH_TRANSLATED="; 
-	line += buf;
-	_env_vec.push_back(line);
+	line += pwdstr;
+	_envVec.push_back(line);
 	
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
 	line += _client->header->urlSuffix->getQueryParameters();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 	// REMOTE_ADDR
 	line = "REMOTE_ADDR="; 
 	line += _client->getClientIp();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 	// REMOTE_HOST -> not mandatory according to RFC
 
@@ -193,52 +194,50 @@ void	CgiProcessor::create_env_vector()
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
 	line += _client->header->getRequestLine().requestMethod;
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME"; 
 	line += _client->header->urlSuffix->getPath();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
 	line += _client->header->getHostName();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
 	ss2 << _client->header->getHostPort();
 	line += ss2.str();
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
 	line += _client->header->getRequestLine().protocolVersion;
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
 	line = "SERVER_SOFTWARE=webserv2.0 ("; 
-	line += operating_system();
+	line += operatingSystem();
 	line += ")"; 
-	_env_vec.push_back(line);
+	_envVec.push_back(line);
 }
 
-void	CgiProcessor::create_args_vector()
+void	CgiProcessor::_createArgsVector()
 {
 	// this is hardcoded now until parsing for CGI works
-	char buf[256];
-	getcwd(buf, sizeof(buf));
-	std::string s = buf;
-	// s += "/srcs/epoll/hello.py";
-	s += "/srcs/epoll/hello.py";
-	_args_vec.push_back("/usr/bin/python3");
-	_args_vec.push_back(s);
+	std::string s = Data::findStringInEnvp("PWD=");
+	std::cout << "PWD string: " << s << std::endl;
+	s += "/cgi-bin/python/io_test.py";
+	_argsVec.push_back("/usr/bin/python3");
+	_argsVec.push_back(s);
 }
 
-char**	CgiProcessor::vec_to_chararr(std::vector<std::string> list)
+char**	CgiProcessor::_vecToChararr(std::vector<std::string> list)
 {
 	int i = 0;
 	std::vector<std::string>::iterator it = list.begin();
@@ -258,7 +257,7 @@ char**	CgiProcessor::vec_to_chararr(std::vector<std::string> list)
 	_tmp = NULL;
 	return (result);
 }
-void	CgiProcessor::delete_chararr(char ** lines)
+void	CgiProcessor::_deleteChararr(char ** lines)
 {
 	if (!lines)
 		return ;
@@ -269,10 +268,10 @@ void	CgiProcessor::delete_chararr(char ** lines)
 	delete [] lines;
 }
 
-int	CgiProcessor::execute()
+int	CgiProcessor::_execute()
 {
-	close(_sockets_tochild[0]);
-	close(_sockets_fromchild[0]);
+	close(_socketsToChild[0]);
+	close(_socketsFromChild[0]);
 
 	// closes epollFd
 	// closes all ClientFds 
@@ -280,24 +279,24 @@ int	CgiProcessor::execute()
 	// closes Server Sockets
 	Data::closeAllFds();
 
- 	if (dup2(_sockets_tochild[1], STDIN_FILENO) == -1)
+ 	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
 	{
-		close(_sockets_fromchild[1]);
-		close(_sockets_tochild[1]);
+		close(_socketsFromChild[1]);
+		close(_socketsToChild[1]);
  		return (_stopCgiSetErrorCode(), 1);
 	}
-	close(_sockets_tochild[1]);
- 	if (dup2(_sockets_fromchild[1], STDOUT_FILENO) == -1)
+	close(_socketsToChild[1]);
+ 	if (dup2(_socketsFromChild[1], STDOUT_FILENO) == -1)
 	{
-		close(_sockets_fromchild[1]);
+		close(_socketsFromChild[1]);
  		return (_stopCgiSetErrorCode(), 1);
 	}
-	close(_sockets_fromchild[1]);
+	close(_socketsFromChild[1]);
  	int ret = execve(_args[0], _args, _env);
  	return (_stopCgiSetErrorCode(), ret);
 }
 
-bool	CgiProcessor::isSocketReady(int socket, int macro)
+bool	CgiProcessor::_isSocketReady(int socket, int macro)
 {
 	for (size_t i = 0; i < static_cast<size_t>(_nfds); ++i)
 	{
@@ -309,7 +308,7 @@ bool	CgiProcessor::isSocketReady(int socket, int macro)
 
 void	CgiProcessor::_writeToChild()
 {
-	if (_client->hasWrittenToCgi || !isSocketReady(_client->socketToChild, EPOLLOUT))
+	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
 	std::cout << "writing to child" << std::endl;
 	write(_client->socketToChild, "check this out\n", 15);
@@ -322,7 +321,7 @@ void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
 
-	if (!_client->hasReadFromCgi && isSocketReady(_client->socketFromChild, EPOLLIN))
+	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
 		_client->clearRecvLine();
 		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
@@ -342,14 +341,14 @@ void	CgiProcessor::_readFromChild()
 	}
 }
 
-void	CgiProcessor::ioChild()
+void	CgiProcessor::_ioChild()
 {
 	_writeToChild();
 	if (!_client->hasWrittenToCgi)
 		return ;
 
 	// running waitpid to know when childprocess has finished and quit if it crashes
-	_wait_for_child();
+	_waitForChild();
 	if (!_client->cgiRunning)
 		return ;
 
@@ -364,11 +363,11 @@ void	CgiProcessor::ioChild()
 	return ;
 }
 
-void	CgiProcessor::_wait_for_child()
+void	CgiProcessor::_waitForChild()
 {
 	int		status;
 	
-	if (_childExited)
+	if (_client->waitReturn > 0)
 		return ;
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitReturn == -1)
@@ -380,16 +379,16 @@ void	CgiProcessor::_wait_for_child()
 	{
 		// std::cout << "child exited" << std::endl;
 		_exitstatus = WEXITSTATUS(status);
-		_childExited = true;
+		// _childExited = true;
 	}
 	return ;
 }
 
 bool	CgiProcessor::_createSockets()
 {
-	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_tochild) < 0)
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _socketsToChild) < 0)
 		return (false);
-	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _sockets_fromchild) < 0)
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _socketsFromChild) < 0)
 		return (false);
 	return (true);
 }
@@ -402,20 +401,27 @@ void	CgiProcessor::_stopCgiSetErrorCode()
 
 void	CgiProcessor::_prepareSockets()
 {
-	close(_sockets_tochild[1]);
-	close(_sockets_fromchild[1]);
-	Data::epollAddFd(_sockets_tochild[0]);
-	Data::epollAddFd(_sockets_fromchild[0]);
-	_client->setChildSocket(_sockets_tochild[0], _sockets_fromchild[0]);
+	close(_socketsToChild[1]);
+	close(_socketsFromChild[1]);
+	Data::epollAddFd(_socketsToChild[0]);
+	Data::epollAddFd(_socketsFromChild[0]);
+	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
+
+// bool	CgiProcessor::_checkInterpreterScript()
+// {
+//
+// }
 
 int CgiProcessor::process()
 {
-	if (_client->waitReturn > 0)
-		return (0);
 	if (!_forked)
 	{
 		_forked = true;
+
+		// check whether interpreter and CGI script exist
+		// if (!_checkInterpreterScript())
+		// 	return (_stopCgiSetErrorCode(), 1);
 
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
@@ -424,15 +430,14 @@ int CgiProcessor::process()
 			return (_stopCgiSetErrorCode(), 1);
 		if (_pid == CHILD)
 		{
-
 			// runs execve on cgi-script
-			execute();
+			_execute();
 			return (_stopCgiSetErrorCode(), 1);
 		}
 
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets();
 	}
-	ioChild();
+	_ioChild();
 	return (0);
 }

@@ -62,7 +62,7 @@ Data &	Data::operator=(Data const & rhs)
 /******************************************************************************/
 
 int Data::_nfds = 0;
-char** Data::envp = NULL;
+char** Data::_envp = NULL;
 int Data::_epollfd = epoll_create(1);
 std::map<int, Client*> emptyClients;
 std::map<int, Client*>&	Data::_clients = emptyClients;
@@ -109,6 +109,31 @@ const std::vector<int> 		Data::getServerSocketFds()
 int &	Data::getNfds()
 {
 	return (_nfds);
+}
+
+void	Data::setEnvp(char** envvar)
+{
+	_envp = envvar;
+}
+
+std::string	Data::findStringInEnvp(std::string str)
+{
+	std::string tmp;
+	std::string substr;
+	std::size_t found;
+	for (size_t i = 0; _envp[i]; i++)
+	{
+		tmp = _envp[i];
+		found = tmp.find(str);
+  		if (found == 0)
+			break;
+	}
+	if (found == std::string::npos)
+		return (tmp = "");
+	found = tmp.find("=");
+	if(found != std::string::npos)
+		substr = tmp.substr(found + 1);
+	return (substr);
 }
 
 struct epoll_event*		Data::setEvents() 
