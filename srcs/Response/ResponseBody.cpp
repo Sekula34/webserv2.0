@@ -1,4 +1,5 @@
 #include "ResponseBody.hpp"
+#include <cstddef>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -179,10 +180,37 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
         //handle redirect
     }
     if(location.isMethodAllowed("GET"))
-        _fetchServerPage(location);
+    {
+        //_fetchServerPage(location);
+        _generateHtml(location);
+    }
     else
         _renderServerErrorPage(403);
     //access this site
+}
+
+void ResponseBody::_generateHtml(const LocationSettings& location)
+{
+    bool result =  _isFolderRequested(location);
+    (void) result;
+}
+
+bool ResponseBody::_isFolderRequested(const LocationSettings& location) const
+{
+    std::string serverFilePath = _convertToServerPath(location);   
+    if(_client.header->urlSuffix->getPath() == location.getLocationUri())
+        return true;
+    return false;
+}
+
+std::string ResponseBody::_convertToServerPath(const LocationSettings& location) const
+{
+    std::string serverPath(_client.header->urlSuffix->getPath());
+    size_t startingPos = 0;
+    size_t replaceLen = location.getLocationUri().size();
+    const std::string& replaceString(location.getRoot() + "/");
+    serverPath.replace(startingPos, replaceLen, replaceString);
+    return serverPath;
 }
 
 bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const

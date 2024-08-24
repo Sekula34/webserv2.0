@@ -4,6 +4,7 @@
 
 class Client;
 
+
 class ResponseBody
 {
 	public :
@@ -32,7 +33,23 @@ class ResponseBody
 		void _handleRedirect(const NginnxReturn& redirect);
 
 		void _processRequestedLocation(const LocationSettings& location);
-		void _generateHtml(void);
+		void _generateHtml(const LocationSettings& location);
+
+		/**
+		 * @brief check if requested stuff is file or folder
+		 * 
+		 * @return true if folder is requested
+		 * @return false if file is requested
+		 */
+		bool _isFolderRequested(const LocationSettings& location) const;
+
+		/**
+		 * @brief function that applie config root to requested location for accessing file relative to ./webserv executable
+		 * 
+		 * @param location 
+		 * @return std::string 
+		 */
+		std::string _convertToServerPath(const LocationSettings& location) const;
 		bool _setFilePath(std::string &filePath, const LocationSettings& location) const;
 
 
