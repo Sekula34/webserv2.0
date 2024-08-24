@@ -8,6 +8,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "../epoll/Client.hpp"
+#include "Autoindex.hpp"
 
 class Client;
 
@@ -191,17 +192,77 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
 
 void ResponseBody::_generateHtml(const LocationSettings& location)
 {
-    bool result =  _isFolderRequested(location);
-    (void) result;
+    std::string serverFilePath = _convertToServerPath(location);
+    int result = FileUtils::isPathFileOrFolder(serverFilePath, _httpStatusCode);
+    if(result == -1)
+        return;
+    if(result == 1)
+    {
+        _fileHtml(serverFilePath);
+        return;
+    }
+    else
+    {
+        _dirHtml(serverFilePath, location);
+    }
+    return;
 }
 
-bool ResponseBody::_isFolderRequested(const LocationSettings& location) const
+bool ResponseBody::_fileHtml(const std::string& serverFilePath)
 {
-    std::string serverFilePath = _convertToServerPath(location);   
-    if(_client.header->urlSuffix->getPath() == location.getLocationUri())
+    bool success = FileUtils::putFileInString(serverFilePath, _response);
+    if(success == true)
+    {
+        _httpStatusCode = 200;
         return true;
+    }
+    _renderServerErrorPage(404);
     return false;
 }
+
+void ResponseBody::_dirHtml(const std::string& serverFilePath, const LocationSettings& location)
+{
+    (void)serverFilePath;
+    Logger::info("Dir html", true);
+    if(_constructIndex(serverFilePath, location) == true)
+    {
+        _httpStatusCode = 200;
+        return;
+    }
+    _autoindexHtml(serverFilePath,location);
+}
+
+void ResponseBody::_autoindexHtml(const std::string& serverFilePath, const LocationSettings& location)
+{
+    if(location.getAutoindexFlag() == true)
+    {
+        _httpStatusCode = 0;
+        Autoindex autoindex(serverFilePath, _httpStatusCode);
+        _response = autoindex.getAutoIndexHtml();
+        if(autoindex.getStatusCode() != 0 && autoindex.getStatusCode() != 200)
+        {
+            _renderServerErrorPage(autoindex.getStatusCode());
+            return;
+        }
+        _httpStatusCode = 200;
+    }
+    else 
+    {
+        _renderServerErrorPage(404);
+    }
+}
+
+bool ResponseBody::_constructIndex(const std::string& serverFilePath, const LocationSettings& location)
+{
+    for(size_t i = 0; i < location.getIndexes().size(); i++)
+    {
+        std::string fileName = serverFilePath + (location.getIndexes()[i]);
+        if(_fileHtml(fileName) == true)
+            return true;
+    }
+    return false;
+}
+
 
 std::string ResponseBody::_convertToServerPath(const LocationSettings& location) const
 {

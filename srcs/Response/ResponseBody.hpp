@@ -35,14 +35,12 @@ class ResponseBody
 		void _processRequestedLocation(const LocationSettings& location);
 		void _generateHtml(const LocationSettings& location);
 
-		/**
-		 * @brief check if requested stuff is file or folder
-		 * 
-		 * @return true if folder is requested
-		 * @return false if file is requested
-		 */
-		bool _isFolderRequested(const LocationSettings& location) const;
+		bool _fileHtml(const std::string& serverFilePath);
 
+		void _dirHtml(const std::string& serverFilePath, const LocationSettings& location);
+		bool _constructIndex(const std::string& serverFilePath, const LocationSettings& location);
+
+		void _autoindexHtml(const std::string& serverFilePath ,const LocationSettings& location);
 		/**
 		 * @brief function that applie config root to requested location for accessing file relative to ./webserv executable
 		 * 
