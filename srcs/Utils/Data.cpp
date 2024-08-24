@@ -118,6 +118,25 @@ struct epoll_event*		Data::setEvents()
 
 void	Data::closeAllFds()
 {
+	// closing EpollFD
+	close(_epollfd);
+
+	// closing all Client Fds and all Sockets to possible Child Processes
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for(; it != _clients.end(); it++)
+	{
+		close(it->second->getFd());
+		if (it->second->socketToChild != DELETED)
+			close(it->second->socketToChild);
+		if (it->second->socketFromChild != DELETED)
+			close(it->second->socketFromChild);
+	}
+
+	// closing ServerSockets
+	std::vector<int>SocketFds = getServerSocketFds();
+	std::vector<int>::const_iterator itv = SocketFds.begin();
+	for (; itv != SocketFds.end(); itv++)
+		close(*itv);
 }
 
 void	Data::epollAddFd(int fd)

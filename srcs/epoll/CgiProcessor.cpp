@@ -274,16 +274,25 @@ int	CgiProcessor::execute()
 	close(_sockets_tochild[0]);
 	close(_sockets_fromchild[0]);
 
+	// closes epollFd
+	// closes all ClientFds 
+	// closes sockets to child processes in all other Clients
+	// closes Server Sockets
+	Data::closeAllFds();
+
  	if (dup2(_sockets_tochild[1], STDIN_FILENO) == -1)
- 		return (_client->setErrorCode(500), 1);
+	{
+		close(_sockets_fromchild[1]);
+		close(_sockets_tochild[1]);
+ 		return (_stopCgiSetErrorCode(), 1);
+	}
 	close(_sockets_tochild[1]);
  	if (dup2(_sockets_fromchild[1], STDOUT_FILENO) == -1)
- 		return (_client->setErrorCode(500), 1);
+	{
+		close(_sockets_fromchild[1]);
+ 		return (_stopCgiSetErrorCode(), 1);
+	}
 	close(_sockets_fromchild[1]);
-	close(Data::getEpollFd());
-	close(_client->getFd());
-	for(size_t i = 0; i < _allSockets.size(); i++)
-		close(Data::getServerSocketFds()[i]);
  	int ret = execve(_args[0], _args, _env);
  	return (_stopCgiSetErrorCode(), ret);
 }
