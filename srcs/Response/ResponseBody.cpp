@@ -120,12 +120,10 @@ void ResponseBody::_handlerGetMethod()
     Logger::info("Handling GET, ServerLocation", true);
     std::string path = _client.header->urlSuffix->getPath();
     Logger::info("Requsted url is "); std::cout << path << std::endl;
-    std::string serverLocation = _server->getLocationURIfromPath(path);
-    Logger::info("Server location resposible for reponse is " + serverLocation, true);
+    std::string serverLocationUri = _server->getLocationURIfromPath(path);
+    Logger::info("Server location resposible for reponse is " + serverLocationUri, true);
     bool found = true;
- //   Logger::info("Server that is responding is: "); std::cout << std::endl;
-    //_server.printServerSettings();
-    std::vector<LocationSettings>::const_iterator it = _server->fetchLocationWithUri(serverLocation, found);
+    std::vector<LocationSettings>::const_iterator it = _server->fetchLocationWithUri(serverLocationUri, found);
     if(found == true)
     {
         const LocationSettings& location = *it;

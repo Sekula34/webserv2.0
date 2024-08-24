@@ -6,6 +6,16 @@ class Client;
 
 class ResponseBody
 {
+	public :
+		//ResponseBody();
+		ResponseBody(const Client& client, const ServerSettings* server);
+		ResponseBody(const ResponseBody& source);
+		ResponseBody& operator=(const ResponseBody& source);
+		~ResponseBody();
+
+		const std::string& getResponse(void) const;
+		const int& getHttpStatusCode(void) const;
+
 	private :
 		const Client& _client;
 		const ServerSettings* _server; //do not delete here This class is not resposible for deleting this
@@ -22,18 +32,9 @@ class ResponseBody
 		void _handleRedirect(const NginnxReturn& redirect);
 
 		void _processRequestedLocation(const LocationSettings& location);
+		void _generateHtml(void);
 		bool _setFilePath(std::string &filePath, const LocationSettings& location) const;
 
-
-	public :
-		//ResponseBody();
-		ResponseBody(const Client& client, const ServerSettings* server);
-		ResponseBody(const ResponseBody& source);
-		ResponseBody& operator=(const ResponseBody& source);
-		~ResponseBody();
-
-		const std::string& getResponse(void) const;
-		const int& getHttpStatusCode(void) const;
 
 };
 
