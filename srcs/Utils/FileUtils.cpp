@@ -1,6 +1,8 @@
 #include "FileUtils.hpp"
 #include <asm-generic/errno.h>
 #include <cerrno>
+#include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include "Logger.hpp"
@@ -90,4 +92,44 @@ void FileUtils::_setDirFailStatusCode(int errnoNum, int& httpStatusCode)
 		return;
 	}
 	httpStatusCode = 500;
+}
+
+
+
+int FileUtils::isPathFileOrFolder(const std::string &serverFilePath, int& httpStatusCode)
+{
+	struct stat statBuf;
+	errno = 0;
+	int value = stat(serverFilePath.c_str(), &statBuf);
+	if(value != 0)
+	{
+		_setFileOrFolderStatusCode(errno, httpStatusCode);
+		return -1;
+	}
+	if(statBuf.st_mode & S_IFREG)
+	{
+		Logger::info("It is file", true);
+		return 1;
+	}
+	else if(statBuf.st_mode & S_IFDIR)
+	{
+		Logger::info("It is directory", true);
+		return 2;
+	}
+	else
+	{
+		Logger::info("Only God knows", true);
+		return 0;
+	}
+}
+
+void FileUtils::_setFileOrFolderStatusCode(int errnoNum, int& httpStatusCode)
+{
+	perror("File or Folder fail: ");
+	if(errnoNum == EACCES)
+		httpStatusCode = 403;
+	else if(errnoNum == EBADF || errnoNum == ENONET || errnoNum == 2)
+		httpStatusCode = 404;
+	else
+		httpStatusCode = 500;
 }

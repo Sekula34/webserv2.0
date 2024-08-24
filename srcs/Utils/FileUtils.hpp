@@ -18,8 +18,17 @@ class FileUtils
 
 		static bool isDirectoryValid(const std::string relativeDirPath, int& httpStatusCode);
 
+		/**
+		 * @brief check if filepath relative to executable is file or folder
+		 * 
+		 * @param serverFilePath 
+		 * @return int 1 File, 2-Folder -1 fail (Internal server), 0 Only God knows
+		 */
+		static int isPathFileOrFolder(const std::string& serverFilePath, int& httpStatusCode);
+
 	private:
 		static void _setDirFailStatusCode(int ernnoNum, int& httpStatusCode);
+		static void _setFileOrFolderStatusCode(int errnoNum, int& httpStatusCode);
 };
 
 #endif
