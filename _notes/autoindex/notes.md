@@ -43,3 +43,38 @@ maybe even generate file that will be later turn into string with Response body
 	(<a href="second.html">Go to Second Page</a>)
 	2. store that html link in some kind of vector
 3. Create some html file in which you will iterate thorugh vector of links and put them in string for return
+
+
+## New handle of GET request 
+
+Requested url is in client header ->urlSuffix -> getPath  
+server location that you are looking for is in _server -> getLocationURIFromPath  
+next Step is to get iterator for that server Location with function fetchLocation with Uri
+
+1. If found == true 
+	_process that location 
+2. else 
+	Redner Server Error page 404
+
+### Process that location 
+1. if location is redirected 
+	redirect and return 
+2. if method get is not allowed 
+	render server Error page 403 and return 
+3. Generate Html (fetch Server Page )
+
+#### Generate HTML 
+1. Check if requested thing after uri is file or folder 
+2. If File
+	Try To render this page 
+	success 200 return 
+	fail 404 return 
+3. If Folder 
+	Try to construct index 
+	If Success 200 retunr 
+	fail
+		Try to see if it is autoindex 
+		fail 404 return 
+		if it is try to rednder
+		success 200 
+		fail 500 
