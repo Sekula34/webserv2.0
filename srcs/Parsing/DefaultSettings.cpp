@@ -173,6 +173,11 @@ const bool& DefaultSettings::getAutoindexFlag(void) const
 	return (_autoindex);
 }
 
+const std::vector<std::string>& DefaultSettings::getIndexes() const 
+{
+	return (_index);
+} 
+
 const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
 {
 	std::string path = "";
