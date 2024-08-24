@@ -10,14 +10,15 @@ void all()
 	UnitTest::allTests();
 	ServerTest::runAllTests();
 	CHTest::runAllTests();
+	AutoindexTest::runAll();
 }
 
 int main()
 {
-	//AutoindexTest::runAll();
-	AutoindexTest::validSimpleTest();
+	//AutoindexTest::validSimpleTest();
+	//UnitTest::filerOrFolderBlock();
 	//UnitTest::testingOpeninDirBlock();
-	//all();
+	all();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();

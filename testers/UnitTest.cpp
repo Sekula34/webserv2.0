@@ -38,6 +38,29 @@ void UnitTest::stringEndCheck()
 	_testpassed();
 }
 
+void UnitTest::filerOrFolderTestCase(const std::string path, int expected, int expectedHttp)
+{
+	Logger::testCase("Testing file or folder function of path: ", path);
+	int httpStatus;
+	int result = FileUtils::isPathFileOrFolder(path, httpStatus);
+	assert(result == expected);
+	if(result == -1)
+	{
+		std::cout << "Real status code: " << httpStatus << "expected status code :" << expectedHttp << std::endl;
+		assert(httpStatus == expectedHttp);
+	}
+	_testpassed();
+}
+
+void UnitTest::filerOrFolderBlock()
+{
+	filerOrFolderTestCase("html", 2, 0);
+	filerOrFolderTestCase("html/403.html", 1, 0);
+	filerOrFolderTestCase("heheheheh", -1 , 404);
+	filerOrFolderTestCase("srcs/cgi/", 2, 0);
+	_testpassed(true);
+}
+
 void UnitTest::urlPathTesterBlock()
 {
 	urlPathTester("/path/to/resource", "/path/to/resource");
@@ -216,6 +239,7 @@ void UnitTest::allTests()
 	urlPathTesterBlock();
 	urlPathQueryBlock();
 	testingOpeninDirBlock();
+	filerOrFolderBlock();
 	//_serveTestCase();
 }
 
