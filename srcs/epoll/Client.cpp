@@ -17,19 +17,19 @@ Client::Client (void):
 _id(0),
 _fd(0),
 _start(std::clock()),
-_epollfd(0)
+_epollFd(0)
 { 	
 	// std::cout << "Client default constructor called" << std::endl;
 }
 
-Client::Client (int const fd, struct sockaddr client_addr, socklen_t addrlen):
+Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	_id(++client_cntr),
 	_fd(fd),
 	_start(std::clock()),
-	_epollfd(Data::getEpollFd()),
+	_epollFd(Data::getEpollFd()),
 	_cgi(NULL),
-	_client_addr(client_addr),
-	_addrlen(addrlen)
+	_clientAddr(clientAddr),
+	_addrLen(addrLen)
 {
 	_initVars();
 	_init_user_info();
@@ -44,11 +44,11 @@ Client::Client (int const fd, struct sockaddr client_addr, socklen_t addrlen):
 Client::~Client (void)
 {
 	close (_fd);
-	if (socket_tochild != DELETED)
-		close(socket_tochild);
-	if (socket_fromchild != DELETED)
-		close(socket_fromchild);
-	delete [] _recvline;
+	if (socketToChild != DELETED)
+		close(socketToChild);
+	if (socketFromChild != DELETED)
+		close(socketFromChild);
+	delete [] _recvLine;
 	delete header;
 	delete _response;
 	delete _cgi;
@@ -63,11 +63,11 @@ Client::Client(Client const & src):
 _id(++client_cntr),
 _fd(src._fd),
 _start(std::clock()),
-_epollfd(src._epollfd)
+_epollFd(src._epollFd)
 {
 	//std::cout << "Client copy constructor called" << std::endl;
-	_recvline = new unsigned char[MAXLINE];
-	memset(_recvline, 0, MAXLINE);
+	_recvLine = new unsigned char[MAXLINE];
+	memset(_recvLine, 0, MAXLINE);
 	*this = src;
 }
 
@@ -80,9 +80,9 @@ Client &	Client::operator=(Client const & rhs)
 	//std::cout << "Client Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
-		_readheader = rhs._readheader;
-		_readbody = rhs._readbody;
-		_writeclient = rhs._writeclient;
+		_readHeader = rhs._readHeader;
+		_readBody = rhs._readBody;
+		_writeClient = rhs._writeClient;
 	}
 	return (*this);
 }
@@ -129,31 +129,31 @@ std::string	Client::getMessage() const
 
 std::string	Client::getCgiMessage() const
 {
-	return (_cgimessage);
+	return (_cgiMessage);
 }
 
 unsigned char*	Client::getRecvLine() const
 {
-	return (_recvline);
+	return (_recvLine);
 }
 
 int	Client::getEpollFd() const
 {
-	return (_epollfd);
+	return (_epollFd);
 }
 bool	Client::getReadHeader() const
 {
-	return (_readheader);
+	return (_readHeader);
 }
 
 bool	Client::getReadBody() const
 {
-	return (_readbody);
+	return (_readBody);
 }
 
 bool	Client::getWriteClient() const
 {
-	return (_writeclient);
+	return (_writeClient);
 }
 
 int	Client::getErrorCode() const
@@ -163,7 +163,7 @@ int	Client::getErrorCode() const
 
 std::string const &	Client::getClientBody() const
 {
-	return (_client_body);
+	return (_clientBody);
 }
 
 CgiProcessor*	Client::getCgi() const
@@ -173,22 +173,22 @@ CgiProcessor*	Client::getCgi() const
 
 std::string	Client::getClientIp() const
 {
-	return (_client_ip);
+	return (_clientIp);
 }
 
 void	Client::setReadHeader(bool b)
 {
-	_readheader = b;
+	_readHeader = b;
 }
 
 void	Client::setReadBody(bool b)
 {
-	_readbody = b;
+	_readBody = b;
 }
 
 void	Client::setWriteClient(bool b)
 {
-	_writeclient = b;
+	_writeClient = b;
 }
 
 void	Client::setErrorCode(int c)
@@ -201,9 +201,9 @@ void	Client::setCgi(CgiProcessor* cgi)
 	_cgi = cgi;
 }
 
-void	Client::setAddrlen(socklen_t addrlen)
+void	Client::setAddrlen(socklen_t addrLen)
 {
-	_addrlen = addrlen;
+	_addrLen = addrLen;
 }
 
 /******************************************************************************/
@@ -229,17 +229,17 @@ bool	Client::check_timeout() const
 
 void		Client::addRecvLineToMessage()
 {
-	_message += (char *)_recvline;
+	_message += (char *)_recvLine;
 }
 
 void	Client::addRecvLineToCgiMessage()
 {
-	_cgimessage += (char *)_recvline;
+	_cgiMessage += (char *)_recvLine;
 }
 
 void	Client::clearRecvLine()
 {
-	memset(_recvline, 0, MAXLINE);
+	memset(_recvLine, 0, MAXLINE);
 }
 
 void	Client::clearMessage()
@@ -265,37 +265,37 @@ void Client::_initVars(void)
 {
 	hasWrittenToCgi = false;
 	hasReadFromCgi = false;
-	socket_fromchild = DELETED;
-	socket_tochild = DELETED;
-	waitreturn = 0;
-	cgi_checked = false;
+	socketFromChild = DELETED;
+	socketToChild = DELETED;
+	waitReturn = 0;
+	cgiChecked = false;
 	_errorCode = 0;
-	_readheader = true;
-	_readbody = false;
-	_writeclient = false;
-	_recvline = new unsigned char[MAXLINE];
-	memset(_recvline, 0, MAXLINE);
+	_readHeader = true;
+	_readBody = false;
+	_writeClient = false;
+	_recvLine = new unsigned char[MAXLINE];
+	memset(_recvLine, 0, MAXLINE);
 	header = NULL;
 	_response = NULL;
-	_client_body = "";
-	_cgi_output = "";
+	_clientBody = "";
+	_cgiOutput = "";
 	Cgi = NULL;
 	cgiRunning = true;
 }
 void	Client::setChildSocket(int to, int from)
 {
-	socket_tochild = to;
-	socket_fromchild = from;
+	socketToChild = to;
+	socketFromChild = from;
 }
 
 void	Client::unsetsocket_tochild()
 {
-	socket_tochild = DELETED;
+	socketToChild = DELETED;
 }
 
 void	Client::unsetsocket_fromchild()
 {
-	socket_fromchild = DELETED;
+	socketFromChild = DELETED;
 }
 
 void	Client::_init_user_info()
@@ -303,7 +303,7 @@ void	Client::_init_user_info()
 	std::string address;
 	std::stringstream ss;
 
-	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_client_addr;
+	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_clientAddr;
 	unsigned long num  = pV4Addr->sin_addr.s_addr;
 	num = ntohl(num);
 	ss << int((num&0xFF000000)>>24);
@@ -313,5 +313,5 @@ void	Client::_init_user_info()
 	ss << int((num&0xFF00)>>8);
 	ss << ".";
 	ss << int(num&0xFF);
-	_client_ip = ss.str();
+	_clientIp = ss.str();
 }

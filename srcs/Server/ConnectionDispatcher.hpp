@@ -25,34 +25,29 @@ class ConnectionDispatcher
 
 
 		void						mainLoopEpoll(void);
-		Client*						find_client_in_clients(int client_fd);
-		bool						read_fd(int fd, Client * client, int & n, int idx);
+		Client*						findClientInClients(int client_fd);
+		bool						readFd(int fd, Client & client, int & n, int idx);
 		bool						readHeader(Client& client,  int idx);
-		void						write_client(Client* client,  int idx);
-		void						clients_remove_fd(Client* client);
-		Client*						findSocketClient(int socket);
+		void						writeClient(Client& client,  int idx);
+		void						clientsRemoveFd(Client* client);
 		SocketManager &				_sockets;
 	
 	private :
-		std::map<int, Client *>&	_clients; //maybe private
-		std::map<int,Client*>		_child_sockets;
+		std::map<int, Client *>&	_clients;
 		ServersInfo &				_serversInfo;
 		const int					_epollfd;
 		int &						_nfds;
 		Client* 					_isClient(int fd);
-		bool						_isChildSocket(int fd);
 		bool						_handleServerSocket(size_t idx);
-		bool						_handleChildSocket(int socket, size_t idx);
-		// void						_prepareChildSockets();
 		void						_handleClient(Client& client, int idx);
-		bool						_checkReceiveError(Client* client, int n, int peek);
-		void						_checkEndHeader(Client* client, int n);
+		bool						_checkReceiveError(Client& client, int n, int peek);
+		void						_checkEndHeader(Client& client, int n);
 		void						_concatMessageAndPeek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
+		void						_checkCgi(Client& client);
 		void						_runCgi(Client& client);
 		void 						_epoll_accept_client(int listen_socket);
 		void						_processAnswer(Client& client);
-		void						_checkCgi(Client& client);
 		bool						_catchEpollErrorAndSignal();
 
 		/**

@@ -300,23 +300,23 @@ bool	CgiProcessor::isSocketReady(int socket, int macro)
 
 void	CgiProcessor::_writeToChild()
 {
-	if (_client->hasWrittenToCgi || !isSocketReady(_client->socket_tochild, EPOLLOUT))
+	if (_client->hasWrittenToCgi || !isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
 	std::cout << "writing to child" << std::endl;
-	write(_client->socket_tochild, "check this out\n", 15);
+	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
-	Data::epollRemoveFd(_client->socket_tochild);
-	close(_client->socket_tochild);
+	Data::epollRemoveFd(_client->socketToChild);
+	close(_client->socketToChild);
 }
 
 void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
 
-	if (!_client->hasReadFromCgi && isSocketReady(_client->socket_fromchild, EPOLLIN))
+	if (!_client->hasReadFromCgi && isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
 		_client->clearRecvLine();
-		n = recv(_client->socket_fromchild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		std::cout << "bytes read from child socket: " << n << std::endl;
 
 		// successful read, concat message
@@ -347,9 +347,9 @@ void	CgiProcessor::ioChild()
 	_readFromChild();
 	if (_client->hasReadFromCgi)
 	{
-		Data::epollRemoveFd(_client->socket_fromchild);
-		close(_client->socket_fromchild);
-		_client->_cgi_output = _client->getCgiMessage();
+		Data::epollRemoveFd(_client->socketFromChild);
+		close(_client->socketFromChild);
+		_client->_cgiOutput = _client->getCgiMessage();
 		_client->cgiRunning = false;
 	}
 	return ;
@@ -361,8 +361,8 @@ void	CgiProcessor::_wait_for_child()
 	
 	if (_childExited)
 		return ;
-	_client->waitreturn = waitpid(_pid, &status, WNOHANG);
-	if (_client->waitreturn == -1)
+	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
+	if (_client->waitReturn == -1)
 	{
 		_stopCgiSetErrorCode();
 		return ;
@@ -402,7 +402,7 @@ void	CgiProcessor::_prepareSockets()
 
 int CgiProcessor::process()
 {
-	if (_client->waitreturn > 0)
+	if (_client->waitReturn > 0)
 		return (0);
 	if (!_forked)
 	{

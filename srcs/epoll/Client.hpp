@@ -81,14 +81,12 @@ class Client {
 		 */
 		void				createClientHeader();
 		CgiProcessor*		Cgi;			
-		std::string			_cgi_output;
-		bool				cgi_checked;
+		std::string			_cgiOutput;
+		bool				cgiChecked;
 		ClientHeader*		header; //client Responsible for deleting
-		pid_t				waitreturn;
-		int					socketstatus_fromchild;
-		int					socketstatus_tochild;
-		int					socket_tochild;
-		int					socket_fromchild;
+		pid_t				waitReturn;
+		int					socketToChild;
+		int					socketFromChild;
 		bool				hasWrittenToCgi;
 		bool				hasReadFromCgi;
 		bool				cgiRunning;
@@ -98,20 +96,20 @@ class Client {
 		unsigned long const	_id;
 		int const			_fd;
 		std::clock_t const	_start;
-		int const			_epollfd;
+		int const			_epollFd;
 		std::string			_message;
-		std::string			_cgimessage;
-		std::string			_client_body; //maybe this will be replaced by body class
-		std::string			_response_body; // this will be replaced by respnse class
-		unsigned char*		_recvline;
-		bool				_readheader;
-		bool				_readbody;
-		bool				_writeclient;
+		std::string			_cgiMessage;
+		std::string			_clientBody; //maybe this will be replaced by body class
+		std::string			_responseBody; // this will be replaced by respnse class
+		unsigned char*		_recvLine;
+		bool				_readHeader;
+		bool				_readBody;
+		bool				_writeClient;
 		CgiProcessor*		_cgi;
 		Response*			_response; // client owns so it should delete
-		struct sockaddr		_client_addr;
-		std::string			_client_ip;
-		socklen_t			_addrlen;
+		struct sockaddr		_clientAddr;
+		std::string			_clientIp;
+		socklen_t			_addrLen;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);

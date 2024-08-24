@@ -92,10 +92,9 @@ Client* ConnectionDispatcher::_isClient(int fd)
 	if (it == _clients.end())
 		return (NULL);
 	return (it->second);
-
 }
 
-Client* ConnectionDispatcher::find_client_in_clients(int client_fd)
+Client* ConnectionDispatcher::findClientInClients(int client_fd)
 {
 	std::map<int, Client*>::iterator it = _clients.find(client_fd);
 	if (it == _clients.end())
@@ -107,13 +106,13 @@ Client* ConnectionDispatcher::find_client_in_clients(int client_fd)
 	return (it->second);
 }
 
-bool	ConnectionDispatcher::_checkReceiveError(Client* client, int n, int peek)
+bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
 	if (n <= 0 || peek < 0)
 	{
-		clients_remove_fd(client);
-		Data::epollRemoveFd(client->getFd());
-		delete client;
+		clientsRemoveFd(&client);
+		Data::epollRemoveFd(client.getFd());
+		delete &client;
 		if (n < 0 || peek < 0)
 			std::cout << "error: receive" << std::endl;
 		return (false);
@@ -121,13 +120,13 @@ bool	ConnectionDispatcher::_checkReceiveError(Client* client, int n, int peek)
 	return (true);
 }
 
-void	ConnectionDispatcher::_checkEndHeader(Client* client, int n)
+void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
 {
 	if (n < MAXLINE - 1)
 	{
 		//std::cout << std::endl << client->getMessage() << std::endl;
-		client->setReadHeader(false);
-		client->setWriteClient(true);
+		client.setReadHeader(false);
+		client.setWriteClient(true);
 	}
 }
 
@@ -141,26 +140,26 @@ void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int & pe
 	}
 }
 
-bool	ConnectionDispatcher::read_fd(int fd, Client * client, int & n, int idx)
+bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 {
 
 	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
-		client->clearRecvLine();
-		n = recv(fd, client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		client.clearRecvLine();
+		n = recv(fd, client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		return (true);
 	}
-	if (!client->check_timeout())
+	if (!client.check_timeout())
 	{
 		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
-		clients_remove_fd(client);
-		Data::epollRemoveFd(client->getFd());
-		delete client;
+		clientsRemoveFd(&client);
+		Data::epollRemoveFd(client.getFd());
+		delete &client;
 	}
 	return (false);
 }
 
-void	ConnectionDispatcher::clients_remove_fd(Client* client)
+void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 {
 	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
 	_clients[client->getFd()]->setWriteClient(false);
@@ -180,7 +179,7 @@ bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
 
 	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
 	// ALSO REMOVES CLIENT ON TIMEOUT
-	if (!read_fd(client.getFd(), &client, n, idx))
+	if (!readFd(client.getFd(), client, n, idx))
 		return (false);
 
 	// SUCCESSFUL RECIEVE -> ADDING BUFFER FILLED BY RECIEVE TO THE MESSAGE STRING
@@ -189,59 +188,33 @@ bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
 
 	// UNSUCCESSFUL RECIEVE AND INCOMPLETE HEADER 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
-	if (!_checkReceiveError(&client, n, peek))
+	if (!_checkReceiveError(client, n, peek))
 		return (false);
 // IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
-	_checkEndHeader(&client, n);
+	_checkEndHeader(client, n);
 	return (true);
 }
 
-void	ConnectionDispatcher::write_client(Client* client,  int idx)
+void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
 	if (Data::setEvents()[idx].events & EPOLLOUT)
 	{
-		bool result = client->getResponse()->sendResponse();
+		bool result = client.getResponse()->sendResponse();
 		if(result == true)
 			Logger::info("The response  was sent successfully", true);
 		else
 			Logger::warning("Sending response had some error");
-		clients_remove_fd(client);
-		Data::epollRemoveFd(client->getFd());
-		delete client;
+		clientsRemoveFd(&client);
+		Data::epollRemoveFd(client.getFd());
+		delete &client;
 	}
-}
-
-bool	ConnectionDispatcher::_isChildSocket(int fd)
-{
-	std::map<int, Client*>::iterator it = _clients.begin();
-	for (; it != _clients.end(); it++) {
-		if (it->second->socket_fromchild == fd)
-			return (true);
-		if (it->second->socket_tochild == fd)
-			return (true);
-	}
-	return (false);
-}
-
-Client*	ConnectionDispatcher::findSocketClient(int socket)
-{
-
-	std::map<int, Client*>::iterator it = _clients.begin(); 
-	for (; it != _clients.end(); it++)
-	{
-		if (it->second->socket_fromchild == socket)
-			return (it->second);
-		if (it->second->socket_tochild == socket)
-			return (it->second);
-	}
-	return (NULL);
 }
 
 void	ConnectionDispatcher::_checkCgi(Client& client)
 {
-	if (!client.cgi_checked && client.getErrorCode() == 0)
+	if (!client.cgiChecked && client.getErrorCode() == 0)
 	{
-		client.cgi_checked= true;
+		client.cgiChecked= true;
 		bool found = true;
 		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
 		if (!clientServer)
@@ -300,7 +273,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 
 	// WRITE PROCESSED ANSWER TO CLIENT
 	if (client.getWriteClient())
-		write_client(&client, idx);
+		writeClient(client, idx);
 }
 
 void ConnectionDispatcher::_processAnswer(Client& client)
