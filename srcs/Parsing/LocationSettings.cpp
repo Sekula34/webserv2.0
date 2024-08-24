@@ -141,13 +141,13 @@ bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 		bool found = FileUtils::isPathValid(path);
 		if(found == true)
 		{
-			Logger::info("FIle found");
+			Logger::info("File found");
 			pathToIndex = path;
 			return true;
 		}
 		else
 		{
-			Logger::warning("Filo not found");
+			Logger::warning("File is not found");
 		}
 	}
 	return false;
