@@ -57,6 +57,7 @@ const std::string& Autoindex::getAutoIndexHtml() const
 
 void Autoindex::_createHtmlMenu()
 {
+	errno = 0;
 	DIR* directory = opendir(_folderPath.c_str());
 	if(directory == NULL)
 	{
