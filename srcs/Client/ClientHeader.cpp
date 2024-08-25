@@ -1,6 +1,7 @@
 #include "ClientHeader.hpp"
 #include "../Utils/Logger.hpp"
 #include <cstddef>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "../Parsing/ParsingUtils.hpp"
@@ -127,6 +128,15 @@ const std::string& ClientHeader::getURLSuffix(void) const
 {
 	const RequestLine& line = getRequestLine();
 	return line.requestTarget;
+}
+
+std::string ClientHeader::getFullClientURL() const
+{
+	std::ostringstream oss;
+	oss << "http://";
+	oss << getHostName() <<":"<< getHostPort();
+	oss << getURLSuffix();
+	return oss.str();
 }
 
 const std::map<std::string, std::string> & ClientHeader::getHeaderFields() const
