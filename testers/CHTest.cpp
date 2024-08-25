@@ -1,6 +1,7 @@
 #include "CHTest.hpp"
 #include <cassert>
 #include "../srcs/Utils/Logger.hpp"
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -120,8 +121,16 @@ void CHTest::runAllTests()
 	testIfThereIsBody();
 	CHBlockTest();
 	copyTestBlock();
+	fullUrlTest();
 }
 
+void CHTest::fullUrlTest()
+{
+	Logger::testCase("Testing getting cliend full Url");
+	ClientHeader header(generateValidHttpReques());
+	assert(header.getFullClientURL() == "http://www.example.com:80/path/to/resource");
+	_testpassed();
+}
 
 void CHTest::uriTest()
 {

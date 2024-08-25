@@ -12,7 +12,7 @@ class CHTest : UnitTest
 	public:
 		static std::vector<std::pair<std::string, int> >messages;
 
-
+		static void fullUrlTest();
 		static void uriTest();
 		static void testIfThereIsBody();
 		static void runAllTests();

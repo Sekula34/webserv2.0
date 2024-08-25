@@ -18,7 +18,8 @@ int main()
 	//AutoindexTest::validSimpleTest();
 	//UnitTest::filerOrFolderBlock();
 	//UnitTest::testingOpeninDirBlock();
-	all();
+	//all();
+	CHTest::fullUrlTest();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();
