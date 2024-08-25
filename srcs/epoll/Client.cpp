@@ -6,6 +6,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
 #include <sstream>
+#include <cmath>
 
 
 /******************************************************************************/
@@ -221,9 +222,11 @@ void	Client::setAddrlen(socklen_t addrLen)
 
 bool	Client::checkTimeout() const
 {
-	if ( ((static_cast<double>(std::clock() - _start) * 1000)
-		/ CLOCKS_PER_SEC) > MAX_TIMEOUT)
+	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
+	if (diff > MAX_TIMEOUT)
 		return (false);
+	if (std::fmod(diff, 100) == 0)
+		std::cout << "timeout diff: " << diff << std::endl;
 	return (true);
 }
 

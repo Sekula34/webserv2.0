@@ -29,6 +29,7 @@ _nfds(Data::getNfds())
 	_createArgsVector();
 	_env = _vecToChararr(_envVec);
 	_args = _vecToChararr(_argsVec);
+	_killedChild = false;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -370,7 +371,10 @@ void	CgiProcessor::_readFromChild()
 
 		// invalid read, stop CGI and set errorcode = 500
 		if (n < 0)
+		{
+			std::cout << "setting cgiRunning to false in readFromChild because -1 from read" << std::endl;
 			_stopCgiSetErrorCode();
+		}
 
 		// EOF reached, child has gracefully shutdown connection
 		if (n == 0)
@@ -395,6 +399,7 @@ void	CgiProcessor::_ioChild()
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
 		_client->_cgiOutput = _client->getCgiMessage();
+		std::cout << "setting cgiRunning to false after reading from child finished" << std::endl;
 		_client->cgiRunning = false;
 	}
 	return ;
@@ -403,15 +408,16 @@ void	CgiProcessor::_ioChild()
 void	CgiProcessor::_waitForChild()
 {
 	int		status;
-	static int	once;
 	
 	if (_client->waitReturn > 0)
 		return ;
-	if (!_client->checkTimeout() && !once)
+	// std::cout << "### client with id: " << _client->getId() << "is in ioChild" << std::endl;
+	if (!_client->checkTimeout() && !_killedChild)
 	{
-		once = 1;
+		_killedChild = true;
 		Logger::warning("calling SIGKILL on child process: ");
 		std::cout << _pid << std::endl;
+		// kill(_pid, SIGKILL);
 		kill(_pid, SIGINT);
 	}
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
@@ -431,7 +437,7 @@ void	CgiProcessor::_waitForChild()
 		}
 		if (WIFEXITED(status))
 		{
-			Logger::info("child exited with status: ");
+			Logger::warning("child exited with status: ");
 			std::cout << WEXITSTATUS(status) << std::endl;
 			_exitstatus = WEXITSTATUS(status);
 			// _childExited = true;
@@ -451,6 +457,7 @@ bool	CgiProcessor::_createSockets()
 
 void	CgiProcessor::_stopCgiSetErrorCode()
 {
+	Logger::error("stopping CGI, setting Error Code to 500", true);
 	_client->setErrorCode(500);
 	_client->cgiRunning = false;
 }

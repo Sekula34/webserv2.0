@@ -41,6 +41,7 @@ class CgiProcessor {
 		std::string					_scriptAbsPath;
 		std::string					_scriptName;
 		std::string					_scriptLocation;
+		bool						_killedChild;
 
 		void						_ioChild();
 		void						_initScriptVars();
