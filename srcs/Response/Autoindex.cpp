@@ -10,8 +10,8 @@
 #include <sys/types.h>
 
 
-Autoindex::Autoindex(const std::string folderPath, int& statusCode)
-:_folderPath(folderPath), _statusCode(statusCode)
+Autoindex::Autoindex(const std::string folderPath, int& statusCode, const std::string linkBase)
+:_folderPath(folderPath), _statusCode(statusCode), _linkBase(linkBase)
 {
 	if(_statusCode != 0)
 	{
@@ -87,6 +87,12 @@ void Autoindex::_createAndStoreOneFileLink(const std::string fileName)
 {
 	std::ostringstream oss;
 	oss << "<a href=\"";
+	oss << _linkBase;
+	if(_linkBase.size() > 1 && _linkBase[_linkBase.size() - 1] != '/')
+	{
+		oss << "/";
+	}
+	//oss << "http://localhost:8080/autoindex/"; // full userUrl
 	oss << fileName; //file link
 	oss << "\">";
 	oss << fileName;

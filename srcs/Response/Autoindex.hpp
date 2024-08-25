@@ -8,7 +8,7 @@ class AutoindexTest;
 class Autoindex
 {
 	public :
-		Autoindex(const std::string folderPath, int& statusCode);
+		Autoindex(const std::string folderPath, int& statusCode, const std::string linkBase = "");
 		Autoindex(const Autoindex& source);
 		Autoindex& operator=(const Autoindex& source);
 		~Autoindex();
@@ -22,6 +22,7 @@ class Autoindex
 		std::vector<std::string> _fileLinks;
 		std::string _autoIndexHtml;
 		int& _statusCode;
+		const std::string _linkBase;
 		void _createHtmlMenu();
 		void _createAndStoreOneFileLink(const std::string fileEntry);
 		void _generateHtmlPage(const std::string pageTitle);
