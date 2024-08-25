@@ -149,7 +149,7 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		n = recv(fd, client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		return (true);
 	}
-	if (!client.check_timeout())
+	if (!client.checkTimeout())
 	{
 		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 		clientsRemoveFd(&client);

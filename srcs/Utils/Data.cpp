@@ -68,6 +68,8 @@ std::map<int, Client*> emptyClients;
 std::map<int, Client*>&	Data::_clients = emptyClients;
 std::vector<Socket> *	Data::_serverSockets = NULL;
 struct epoll_event	Data::_events[MAX_EVENTS];
+std::map<std::string, std::string> emptyLanguages;
+std::map<std::string, std::string> Data::_cgiLang = emptyLanguages;
 
 
 int	Data::getEpollFd()
@@ -184,6 +186,17 @@ void	Data::epollRemoveFd(int fd)
 	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
 		throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
 }
+
+const std::map<std::string, std::string>&	Data::getCgiLang()
+{
+	return (_cgiLang);
+}
+
+void	Data::setCgiLang(std::string suffix, std::string interpreter)
+{
+	_cgiLang[suffix] = interpreter;	
+}
+
 void	Data::setEpollFd(int fd)
 {
 	_epollfd = fd;

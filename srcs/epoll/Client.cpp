@@ -219,7 +219,7 @@ void	Client::setAddrlen(socklen_t addrLen)
 /******************************************************************************/
 
 
-bool	Client::check_timeout() const
+bool	Client::checkTimeout() const
 {
 	if ( ((static_cast<double>(std::clock() - _start) * 1000)
 		/ CLOCKS_PER_SEC) > MAX_TIMEOUT)

@@ -39,8 +39,11 @@ class CgiProcessor {
 		const int &					_nfds;	
 		std::string					_interpreterAbsPath;
 		std::string					_scriptAbsPath;
+		std::string					_scriptName;
+		std::string					_scriptLocation;
 
 		void						_ioChild();
+		void						_initScriptVars();
 		bool						_checkInterpreterScript();
 		void						_readFromChild();
 		void						_writeToChild();
@@ -56,6 +59,8 @@ class CgiProcessor {
 		void						_createEnvVector();
 		void						_createArgsVector();
 		void						_waitForChild();
+		std::string					getInterpreterPath(std::string suffix);
+		std::string					getScriptName(std::string suffix);
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

@@ -117,7 +117,7 @@ bool	read_client(struct epoll_event* events, std::map<int, Client *> & clients, 
 		n = recv(client->getFd(), client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		return (true);
 	}
-	if (!client->check_timeout())
+	if (!client->checkTimeout())
 	{
 		epoll_remove_client(events, clients, client);
 		delete client;

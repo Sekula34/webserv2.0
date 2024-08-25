@@ -2,6 +2,7 @@
 #include "../Server/SocketManager.hpp"
 #include "../Server/Socket.hpp"
 #include "../Utils/Data.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include "CgiProcessor.hpp"
 #include <unistd.h>
 
@@ -23,18 +24,18 @@ _nfds(Data::getNfds())
 	_env = NULL;
 	_tmp = NULL;
 	_forked = false;
+	_initScriptVars();
 	_createEnvVector();
 	_createArgsVector();
 	_env = _vecToChararr(_envVec);
 	_args = _vecToChararr(_argsVec);
-	_interpreterAbsPath = "";
-	_scriptAbsPath = "";
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
 /******************************************************************************/
 /*                                Destructor                                  */
 /******************************************************************************/
+
 
 CgiProcessor::~CgiProcessor (void)
 {
@@ -121,6 +122,61 @@ std::string operatingSystem()
     #endif
 }  
 
+std::string	CgiProcessor::getInterpreterPath(std::string suffix)
+{
+	std::string tmp;
+	std::vector<std::string> dirs = ParsingUtils::splitString(Data::findStringInEnvp("PATH="), ':');
+	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); it++)
+	{
+		tmp = *it + "/" + Data::getCgiLang().at(suffix);
+		// std::cout << "trying to access: " << tmp << std::endl;
+		if (access(tmp.c_str(), X_OK) == 0)	
+			return (tmp);
+	}
+	_stopCgiSetErrorCode();
+	return (tmp = "");
+}
+
+std::string	CgiProcessor::getScriptName(std::string suffix)
+{
+	std::vector<std::string> sections = ParsingUtils::splitString(_client->header->urlSuffix->getPath(), '/');
+	for (std::vector<std::string>::iterator it = sections.begin(); it != sections.end(); it++)
+	{
+		if ((*it).find(suffix) != std::string::npos)
+			return (*it);
+	}
+	_stopCgiSetErrorCode();
+	return ("");
+}
+
+void	CgiProcessor::_initScriptVars()
+{
+	// the suffix should come from url parser
+	std::string suffix = ".py";
+
+	// this location should come from parsing the config file
+	std::string location = "/cgi-bin/";
+
+	// this should happen when parsing the config file
+	Data::setCgiLang(suffix, "python3");
+
+	// go through PATH variable and check whether interpreter is installed
+	// if not installed stops Cgi sets 500 error
+	_interpreterAbsPath = getInterpreterPath(suffix);
+
+	_scriptName = getScriptName(suffix);
+
+	_scriptAbsPath = Data::findStringInEnvp("PWD=") + location
+		+ Data::getCgiLang().at(suffix) + "/" + _scriptName;
+
+	_scriptLocation = Data::findStringInEnvp("PWD=") + location
+		+ Data::getCgiLang().at(suffix) + "/";
+
+	std::cout << "absolute Path of script: " << _scriptAbsPath << std::endl;
+	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
+		_stopCgiSetErrorCode();
+}
+
 void	CgiProcessor::_createEnvVector()
 {
 	std::string	line;
@@ -168,10 +224,8 @@ void	CgiProcessor::_createEnvVector()
 
 	// PATH_TRANSLATED 
 	// The CGI should be run in the correct directory for relative path file access.
-	
-	std::string pwdstr = Data::findStringInEnvp("PWD=");
 	line = "PATH_TRANSLATED="; 
-	line += pwdstr;
+	line += _scriptAbsPath;
 	_envVec.push_back(line);
 	
 
@@ -199,7 +253,7 @@ void	CgiProcessor::_createEnvVector()
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
-	line = "SCRIPT_NAME"; 
+	line = "SCRIPT_NAME="; 
 	line += _client->header->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
@@ -229,12 +283,8 @@ void	CgiProcessor::_createEnvVector()
 
 void	CgiProcessor::_createArgsVector()
 {
-	// this is hardcoded now until parsing for CGI works
-	std::string s = Data::findStringInEnvp("PWD=");
-	std::cout << "PWD string: " << s << std::endl;
-	s += "/cgi-bin/python/io_test.py";
-	_argsVec.push_back("/usr/bin/python3");
-	_argsVec.push_back(s);
+	_argsVec.push_back(_interpreterAbsPath);
+	_argsVec.push_back(_scriptAbsPath);
 }
 
 char**	CgiProcessor::_vecToChararr(std::vector<std::string> list)
@@ -272,11 +322,6 @@ int	CgiProcessor::_execute()
 {
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
-
-	// closes epollFd
-	// closes all ClientFds 
-	// closes sockets to child processes in all other Clients
-	// closes Server Sockets
 	Data::closeAllFds();
 
  	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
@@ -292,8 +337,8 @@ int	CgiProcessor::_execute()
  		return (_stopCgiSetErrorCode(), 1);
 	}
 	close(_socketsFromChild[1]);
- 	int ret = execve(_args[0], _args, _env);
- 	return (_stopCgiSetErrorCode(), ret);
+ 	execve(_args[0], _args, _env);
+ 	exit (1);
 }
 
 bool	CgiProcessor::_isSocketReady(int socket, int macro)
@@ -310,7 +355,7 @@ void	CgiProcessor::_writeToChild()
 {
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
-	std::cout << "writing to child" << std::endl;
+	// std::cout << "writing to child" << std::endl;
 	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
 	Data::epollRemoveFd(_client->socketToChild);
@@ -325,7 +370,7 @@ void	CgiProcessor::_readFromChild()
 	{
 		_client->clearRecvLine();
 		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
-		std::cout << "bytes read from child socket: " << n << std::endl;
+		// std::cout << "bytes read from child socket: " << n << std::endl;
 
 		// successful read, concat message
 		if (n > 0)
@@ -353,7 +398,7 @@ void	CgiProcessor::_ioChild()
 		return ;
 
 	_readFromChild();
-	if (_client->hasReadFromCgi)
+	if (_client->hasReadFromCgi && _client->waitReturn > 0)
 	{
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
@@ -366,20 +411,39 @@ void	CgiProcessor::_ioChild()
 void	CgiProcessor::_waitForChild()
 {
 	int		status;
+	static int	once;
 	
 	if (_client->waitReturn > 0)
 		return ;
+	if (!_client->checkTimeout() && !once)
+	{
+		once = 1;
+		Logger::warning("calling SIGKILL on child process: ");
+		std::cout << _pid << std::endl;
+		kill(_pid, SIGKILL);
+	}
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitReturn == -1)
 	{
+		std::cout << "waitpid error, stopping CGI" << std::endl;
 		_stopCgiSetErrorCode();
 		return ;
 	}
-	if (WIFEXITED(status))
+	if (_client->waitReturn > 0)	
 	{
-		// std::cout << "child exited" << std::endl;
-		_exitstatus = WEXITSTATUS(status);
-		// _childExited = true;
+		if (WIFSIGNALED(status))
+		{
+			Logger::warning("child exited because of signal: ");
+			std::cout << WTERMSIG(status) << std::endl;
+			// _childExited = true;
+		}
+		if (WIFEXITED(status))
+		{
+			Logger::info("child exited with status: ");
+			std::cout << WEXITSTATUS(status) << std::endl;
+			_exitstatus = WEXITSTATUS(status);
+			// _childExited = true;
+		}
 	}
 	return ;
 }
@@ -418,10 +482,6 @@ int CgiProcessor::process()
 	if (!_forked)
 	{
 		_forked = true;
-
-		// check whether interpreter and CGI script exist
-		// if (!_checkInterpreterScript())
-		// 	return (_stopCgiSetErrorCode(), 1);
 
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())

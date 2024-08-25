@@ -70,7 +70,7 @@ class Client {
 		void				unsetsocket_fromchild();
 		void				addRecvLineToMessage();
 		void				addRecvLineToCgiMessage();
-		bool				check_timeout() const;
+		bool				checkTimeout() const;
 		void				resetChildSocketInMap(int fd);
 		void				clearMessage();
 		void				clearRecvLine();

@@ -21,7 +21,9 @@ class Data {
 		static const std::vector<Socket> &		getServerSockets();
 		static const std::vector<int> 			getServerSocketFds();
 		static int &							getNfds();
+		static const std::map<std::string, std::string>&	getCgiLang();
 		static struct epoll_event *				setEvents(); 
+		static void								setCgiLang(std::string suffix, std::string interpreter);
 		static void								closeAllFds();
 		static void								epollAddFd(int fd);
 		static void								epollRemoveFd(int fd);
@@ -40,6 +42,7 @@ class Data {
 		static std::vector<Socket> *			_serverSockets;
 		static struct epoll_event				_events[MAX_EVENTS];
 		static int								_nfds;
+		static std::map<std::string, std::string>	_cgiLang;
 
 												Data(void);
 												Data(Data const & src);
