@@ -83,13 +83,13 @@ void Autoindex::_createHtmlMenu()
 	_generateHtmlPage("Auto index of folder: " +_folderPath);
 }
 
-void Autoindex::_createAndStoreOneFileLink(const std::string fileEntry)
+void Autoindex::_createAndStoreOneFileLink(const std::string fileName)
 {
 	std::ostringstream oss;
 	oss << "<a href=\"";
-	oss << fileEntry;
+	oss << fileName; //file link
 	oss << "\">";
-	oss << fileEntry;
+	oss << fileName;
 	oss << "</a>";
 
 	const std::string stringLink = oss.str();
