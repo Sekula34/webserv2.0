@@ -94,14 +94,15 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 	fails to conform to this specification.
 */
 
-// create args checker -> check whether interpreter exists and binary exists
-// create timeout checker so that child process is terminated after certain time
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
-// Just remember that, for chunked request, your server needs to unchunk
-//		it, the CGI will expect EOF as end of the body.
-// Same things for the output of the CGI. If no content_length is returned
-//		from the CGI, EOF will mark the end of the returned data.
+// Just remember that, for chunked request, your server needs to unchunk it
+// If no content_length is returned from CGI, EOF will mark the end of the returned data.
 // The CGI should be run in the correct directory for relative path file access.
+// check return of write to child,
+// use send instead of write to child?
+// call write to child multiple times untill whole message has been written
+// finish alls meta-variables
+// check whether executable is link or not
 
 std::string operatingSystem()
 {
@@ -185,7 +186,6 @@ void	CgiProcessor::_createEnvVector()
 	line = "AUTH_TYPE=";											
 	_envVec.push_back(line);
 
-
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
 	if (_client->getClientBody().size() > 0)
@@ -196,19 +196,15 @@ void	CgiProcessor::_createEnvVector()
 	}
 	_envVec.push_back(line);
 
-
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
 	if (_client->header->getHeaderFields().find("Content-Type") != _client->header->getHeaderFields().end())
 		line +=_client->header->getHeaderFields().find("Content-Type")->second;
 	_envVec.push_back(line);
 
-	
-
 	// GATEWAY_INTERFACE
 	line = "GATEWAY_INTERFACE=CGI/1.1"; 
 	_envVec.push_back(line);
-
 
 	// PATH_INFO 
 	// Because you won’t call the CGI directly, use the full path as PATH_INFO.
@@ -220,14 +216,11 @@ void	CgiProcessor::_createEnvVector()
 	line += _client->header->urlSuffix->getPath();
 	_envVec.push_back(line);
 
-	
-
 	// PATH_TRANSLATED 
 	// The CGI should be run in the correct directory for relative path file access.
 	line = "PATH_TRANSLATED="; 
 	line += _scriptAbsPath;
 	_envVec.push_back(line);
-	
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
@@ -249,7 +242,6 @@ void	CgiProcessor::_createEnvVector()
 	line = "REQUEST_METHOD="; 
 	line += _client->header->getRequestLine().requestMethod;
 	_envVec.push_back(line);
-
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
@@ -420,7 +412,7 @@ void	CgiProcessor::_waitForChild()
 		once = 1;
 		Logger::warning("calling SIGKILL on child process: ");
 		std::cout << _pid << std::endl;
-		kill(_pid, SIGKILL);
+		kill(_pid, SIGINT);
 	}
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitReturn == -1)
@@ -471,11 +463,6 @@ void	CgiProcessor::_prepareSockets()
 	Data::epollAddFd(_socketsFromChild[0]);
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
-
-// bool	CgiProcessor::_checkInterpreterScript()
-// {
-//
-// }
 
 int CgiProcessor::process()
 {
