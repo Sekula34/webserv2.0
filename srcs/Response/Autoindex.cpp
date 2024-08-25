@@ -69,8 +69,12 @@ void Autoindex::_createHtmlMenu()
 	while (currentEntry != NULL)
 	{
 		if(iteration > 1)
-			_createAndStoreOneFileLink(currentEntry->d_name);
-		//std::cout << currentEntry->d_name << std::endl;
+		{
+			std::string fileName = currentEntry->d_name;
+			if(currentEntry->d_type == DT_DIR)
+				fileName += "/";
+			_createAndStoreOneFileLink(fileName);
+		}
 		currentEntry = readdir(directory);
 		iteration ++;
 	}
