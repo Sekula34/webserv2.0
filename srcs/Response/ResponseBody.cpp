@@ -240,7 +240,7 @@ void ResponseBody::_autoindexHtml(const std::string& serverFilePath, const Locat
     if(location.getAutoindexFlag() == true)
     {
         _httpStatusCode = 0;
-        Autoindex autoindex(serverFilePath, _httpStatusCode);
+        Autoindex autoindex(serverFilePath, _httpStatusCode, _client.header->getFullClientURL());
         _response = autoindex.getAutoIndexHtml();
         if(autoindex.getStatusCode() != 0 && autoindex.getStatusCode() != 200)
         {
