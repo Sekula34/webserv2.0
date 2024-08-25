@@ -2,6 +2,8 @@
 # define AUTOINDEX
 #include <string>
 #include <vector>
+#include <dirent.h>
+
 
 class AutoindexTest;
 
@@ -24,6 +26,7 @@ class Autoindex
 		int& _statusCode;
 		const std::string _linkBase;
 		void _createHtmlMenu();
+		void _createDirectoryLinks(DIR* directory);
 		void _createAndStoreOneFileLink(const std::string fileEntry);
 		void _generateHtmlPage(const std::string pageTitle);
 	friend AutoindexTest;

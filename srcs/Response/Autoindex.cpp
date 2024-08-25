@@ -4,7 +4,6 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
-#include <dirent.h>
 #include <ostream>
 #include <sstream>
 #include <sys/types.h>
@@ -64,6 +63,18 @@ void Autoindex::_createHtmlMenu()
 		_statusCode = 500;
 		return;
 	}
+	_createDirectoryLinks(directory);
+	closedir(directory);
+	if(errno)
+	{
+		perror("Reading dir");
+		_statusCode = 500;
+	}
+	_generateHtmlPage("Auto index of folder: " +_folderPath);
+}
+
+void Autoindex::_createDirectoryLinks(DIR* directory)
+{
 	dirent* currentEntry = readdir(directory);
 	size_t iteration = 0;
 	while (currentEntry != NULL)
@@ -78,13 +89,6 @@ void Autoindex::_createHtmlMenu()
 		currentEntry = readdir(directory);
 		iteration ++;
 	}
-	closedir(directory);
-	if(errno)
-	{
-		perror("Reading dir");
-		_statusCode = 500;
-	}
-	_generateHtmlPage("Auto index of folder: " +_folderPath);
 }
 
 void Autoindex::_createAndStoreOneFileLink(const std::string fileName)
