@@ -195,7 +195,10 @@ void ResponseBody::_generateHtml(const LocationSettings& location)
     std::string serverFilePath = _convertToServerPath(location);
     int result = FileUtils::isPathFileOrFolder(serverFilePath, _httpStatusCode);
     if(result == -1)
+    {
+        _renderServerErrorPage(_httpStatusCode);
         return;
+    }
     if(result == 1)
     {
         _fileHtml(serverFilePath);
