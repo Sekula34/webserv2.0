@@ -57,6 +57,7 @@ class Client {
 		std::string const &	getClientBody() const;
 		CgiProcessor*		getCgi() const;
 		std::string			getClientIp() const;
+		unsigned short		getClientdPort();
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
@@ -70,7 +71,7 @@ class Client {
 		void				unsetsocket_fromchild();
 		void				addRecvLineToMessage();
 		void				addRecvLineToCgiMessage();
-		bool				checkTimeout() const;
+		bool				checkTimeout();
 		void				resetChildSocketInMap(int fd);
 		void				clearMessage();
 		void				clearRecvLine();
@@ -110,6 +111,7 @@ class Client {
 		struct sockaddr		_clientAddr;
 		std::string			_clientIp;
 		socklen_t			_addrLen;
+		double				_clockstop;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);

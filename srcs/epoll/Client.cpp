@@ -6,7 +6,6 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
 #include <sstream>
-#include <cmath>
 
 
 /******************************************************************************/
@@ -220,13 +219,16 @@ void	Client::setAddrlen(socklen_t addrLen)
 /******************************************************************************/
 
 
-bool	Client::checkTimeout() const
+bool	Client::checkTimeout()
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
 	if (diff > MAX_TIMEOUT)
 		return (false);
-	if (std::fmod(diff, 100) == 0)
-		std::cout << "timeout diff: " << diff << std::endl;
+	if (diff > _clockstop) 
+	{
+		std::cout << "id: " << _id << ", " << diff / 1000 << " sec" << std::endl;
+		_clockstop += 1000;
+	}
 	return (true);
 }
 
@@ -284,6 +286,7 @@ void Client::_initVars(void)
 	_cgiOutput = "";
 	Cgi = NULL;
 	cgiRunning = true;
+	_clockstop = 1000;
 }
 void	Client::setChildSocket(int to, int from)
 {
@@ -301,6 +304,18 @@ void	Client::unsetsocket_fromchild()
 	socketFromChild = DELETED;
 }
 
+unsigned short	Client::getClientdPort()
+{
+	struct sockaddr_in local_addr;
+    socklen_t local_addr_len = sizeof(local_addr);
+    if (getsockname(_fd, (struct sockaddr *)&local_addr, &local_addr_len) == -1)
+	{
+		setErrorCode(500);
+		return (0);
+	}
+	return (ntohs(local_addr.sin_port));
+}
+
 void	Client::_init_user_info()
 {
 	std::string address;
@@ -308,6 +323,7 @@ void	Client::_init_user_info()
 
 	struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&_clientAddr;
 	unsigned long num  = pV4Addr->sin_addr.s_addr;
+
 	num = ntohl(num);
 	ss << int((num&0xFF000000)>>24);
 	ss << ".";

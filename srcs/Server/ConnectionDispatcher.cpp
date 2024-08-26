@@ -122,7 +122,7 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 
 void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
 {
-	if (n < MAXLINE - 1)
+	if (n < MAXLINE - 1 || client.getMessage().find("\r\n\r\n") != std::string::npos)
 	{
 		//std::cout << std::endl << client->getMessage() << std::endl;
 		client.setReadHeader(false);
@@ -190,6 +190,8 @@ bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
 	if (!_checkReceiveError(client, n, peek))
 		return (false);
+
+
 // IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
 	_checkEndHeader(client, n);
 	return (true);
@@ -199,7 +201,7 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
 	if (Data::setEvents()[idx].events & EPOLLOUT)
 	{
-		std::cout << "$$$$$$ trying to write client"<< std::endl;
+		std::cout << "$$$$$$ trying to write client: "<< client.getId() << std::endl;
 		bool result = client.getResponse()->sendResponse();
 		if(result == true)
 			Logger::info("The response  was sent successfully", true);

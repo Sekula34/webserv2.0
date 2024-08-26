@@ -100,13 +100,13 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
 // Just remember that, for chunked request, your server needs to unchunk it
+// parse header
+// if no header or incomplete header, create header
 // If no content_length is returned from CGI, EOF will mark the end of the returned data.
-// The CGI should be run in the correct directory for relative path file access.
 // check return of write to child,
 // use send instead of write to child?
 // call write to child multiple times untill whole message has been written
 // finish alls meta-variables
-// check whether executable is link or not
 
 std::string operatingSystem()
 {
@@ -162,6 +162,7 @@ bool	CgiProcessor::isRegularFile(std::string file)
 {
 	struct stat sb;
 
+
 	if (stat(file.c_str(), &sb) == -1)
 	{
 		Logger::error("stat failed in CGI", true);
@@ -186,11 +187,11 @@ void	CgiProcessor::_initScriptVars()
 	// the suffix should come from url parser
 	std::string suffix = ".py";
 
-	// this location should come from parsing the config file
-	std::string location = "/cgi-bin/";
-
 	// this should happen when parsing the config file
 	Data::setCgiLang(suffix, "python3");
+
+
+	std::string location = "/cgi-bin/";
 
 	// go through PATH variable and check whether interpreter is installed
 	// if not installed stops Cgi sets 500 error
@@ -206,8 +207,9 @@ void	CgiProcessor::_initScriptVars()
 		+ Data::getCgiLang().at(suffix) + "/" + _scriptName;
 
 	_scriptLocation = Data::findStringInEnvp("PWD=") + location
-		+ Data::getCgiLang().at(suffix) + "/";
+		+ Data::getCgiLang().at(suffix);
 
+	std::cout << _scriptAbsPath << std::endl;
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
 	{
 		Logger::warning("CGI script not executable: ");
@@ -215,7 +217,6 @@ void	CgiProcessor::_initScriptVars()
 		_stopCgiSetErrorCode();
 		return ;
 	}
-
 	if (!isRegularFile(_scriptAbsPath))
 		_stopCgiSetErrorCode();
 }
@@ -254,12 +255,14 @@ void	CgiProcessor::_createEnvVector()
 	// PATH_INFO usually is the part in the url that comes after
 	// the executable name and before the query string e.g.:
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
+	// actual PATH_INFO part is missing!!
 	line = "PATH_INFO="; 
-	line += _client->header->urlSuffix->getPath();
+	line += _scriptAbsPath;
 	_envVec.push_back(line);
 
 	// PATH_TRANSLATED 
-	// The CGI should be run in the correct directory for relative path file access.
+	// this should include PATH_INFO (the way RFC defines PATH_INFO)
+	// actual PATH_INFO part is missing!!
 	line = "PATH_TRANSLATED="; 
 	line += _scriptAbsPath;
 	_envVec.push_back(line);
@@ -357,11 +360,13 @@ int	CgiProcessor::_execute()
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
-	// change directory here,
-	// if not successful 
-		// close(_socketsFromChild[1]);
-		// close(_socketsToChild[1]);
-	// then throw exception or exit??
+	if (chdir(_scriptLocation.c_str()) == -1)
+	{
+		close(_socketsFromChild[1]);
+		close(_socketsToChild[1]);
+		throw std::runtime_error("chdir failed in CGI child process");
+	// exit (1); -> which one is correct?
+	}
 
  	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
 	{
@@ -378,7 +383,8 @@ int	CgiProcessor::_execute()
 	close(_socketsFromChild[1]);
  	execve(_args[0], _args, _env);
 	// what to do here? throw exception?
- 	exit (1);
+	throw std::runtime_error("chdir failed in CGI child process");
+ 	// exit (1);
 }
 
 bool	CgiProcessor::_isSocketReady(int socket, int macro)
@@ -478,14 +484,16 @@ void	CgiProcessor::_waitForChild()
 	{
 		if (WIFSIGNALED(status))
 		{
-			Logger::warning("child exited because of signal: ");
-			std::cout << WTERMSIG(status) << std::endl;
+			Logger::warning("child exited due to SIGNAL: ");
+			std::cout << WTERMSIG(status);
+			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			// _childExited = true;
 		}
 		if (WIFEXITED(status))
 		{
-			Logger::warning("child exited with status: ");
-			std::cout << WEXITSTATUS(status) << std::endl;
+			Logger::warning("child exited with code: ");
+			std::cout << WEXITSTATUS(status);
+			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			_exitstatus = WEXITSTATUS(status);
 			// _childExited = true;
 		}
@@ -504,7 +512,8 @@ bool	CgiProcessor::_createSockets()
 
 void	CgiProcessor::_stopCgiSetErrorCode()
 {
-	Logger::error("stopping CGI, setting Error Code to 500", true);
+	Logger::error("stopping CGI, errorcode 500 ");
+	std::cout << ",id: " << _client->getId() << std::endl;
 	_client->setErrorCode(500);
 	_client->cgiRunning = false;
 }

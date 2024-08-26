@@ -21,7 +21,7 @@ ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
 
 	if(client.getErrorCode() != 0)
 	{
-        _renderServerErrorPage(client.header->getErrorCode());
+        _renderServerErrorPage(client.getErrorCode());
         Logger::info("Generated Error page with code :"); std::cout << _httpStatusCode << std::endl;
     }else if(client.getCgi())
     {
