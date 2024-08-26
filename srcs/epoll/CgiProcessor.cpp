@@ -5,6 +5,9 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "CgiProcessor.hpp"
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -136,19 +139,46 @@ std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 			return (tmp);
 	}
 	_stopCgiSetErrorCode();
+	Logger::warning("CGI interpreter not installed:");
+	std::cout << Data::getCgiLang().at(suffix) << std::endl;
 	return (tmp = "");
 }
 
 std::string	CgiProcessor::getScriptName(std::string suffix)
 {
 	std::vector<std::string> sections = ParsingUtils::splitString(_client->header->urlSuffix->getPath(), '/');
-	for (std::vector<std::string>::iterator it = sections.begin(); it != sections.end(); it++)
+	std::vector<std::string>::iterator it = sections.begin();
+	for (; it != sections.end(); it++)
 	{
 		if ((*it).find(suffix) != std::string::npos)
 			return (*it);
 	}
+	Logger::warning("no valid CGI script name in URI", true);
 	_stopCgiSetErrorCode();
 	return ("");
+}
+
+bool	CgiProcessor::isRegularFile(std::string file)
+{
+	struct stat sb;
+
+	if (stat(file.c_str(), &sb) == -1)
+	{
+		Logger::error("stat failed in CGI", true);
+		return (false);
+	}
+
+	if ((sb.st_mode & S_IFMT) != S_IFREG)
+	{
+		Logger::warning("CGI: invalid filetype detected!", true);
+		return (false);
+	}
+	if (sb.st_nlink > 1)
+	{
+		Logger::warning("CGI: script can not be a link or linked to!", true);
+		return (false);
+	}
+	return (true);
 }
 
 void	CgiProcessor::_initScriptVars()
@@ -165,8 +195,12 @@ void	CgiProcessor::_initScriptVars()
 	// go through PATH variable and check whether interpreter is installed
 	// if not installed stops Cgi sets 500 error
 	_interpreterAbsPath = getInterpreterPath(suffix);
+	if (_interpreterAbsPath.empty())
+		return ;
 
 	_scriptName = getScriptName(suffix);
+	if (_scriptName.empty())
+		return ;
 
 	_scriptAbsPath = Data::findStringInEnvp("PWD=") + location
 		+ Data::getCgiLang().at(suffix) + "/" + _scriptName;
@@ -174,8 +208,15 @@ void	CgiProcessor::_initScriptVars()
 	_scriptLocation = Data::findStringInEnvp("PWD=") + location
 		+ Data::getCgiLang().at(suffix) + "/";
 
-	std::cout << "absolute Path of script: " << _scriptAbsPath << std::endl;
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
+	{
+		Logger::warning("CGI script not executable: ");
+		std::cout << _scriptAbsPath << std::endl;
+		_stopCgiSetErrorCode();
+		return ;
+	}
+
+	if (!isRegularFile(_scriptAbsPath))
 		_stopCgiSetErrorCode();
 }
 
@@ -316,6 +357,11 @@ int	CgiProcessor::_execute()
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
+	// change directory here,
+	// if not successful 
+		// close(_socketsFromChild[1]);
+		// close(_socketsToChild[1]);
+	// then throw exception or exit??
 
  	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
 	{
@@ -331,6 +377,7 @@ int	CgiProcessor::_execute()
 	}
 	close(_socketsFromChild[1]);
  	execve(_args[0], _args, _env);
+	// what to do here? throw exception?
  	exit (1);
 }
 

@@ -62,6 +62,7 @@ class CgiProcessor {
 		void						_waitForChild();
 		std::string					getInterpreterPath(std::string suffix);
 		std::string					getScriptName(std::string suffix);
+		bool						isRegularFile(std::string file);
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);
