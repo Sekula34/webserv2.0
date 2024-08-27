@@ -201,7 +201,6 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
 	if (Data::setEvents()[idx].events & EPOLLOUT)
 	{
-		std::cout << "$$$$$$ trying to write client: "<< client.getId() << std::endl;
 		bool result = client.getResponse()->sendResponse();
 		if(result == true)
 			Logger::info("The response  was sent successfully", true);
