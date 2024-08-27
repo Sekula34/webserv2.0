@@ -25,6 +25,8 @@ class CgiProcessor {
 		std::string					getInterpreterPath(std::string suffix);
 		std::string					getScriptName(std::string suffix);
 		int							getPid();
+		void						killChild();
+		bool						killedChild;
 
 	private:
 		Client *					_client;
@@ -44,7 +46,7 @@ class CgiProcessor {
 		std::string					_scriptAbsPath;
 		std::string					_scriptName;
 		std::string					_scriptLocation;
-		bool						_killedChild;
+		bool						_kill;
 
 		void						_ioChild();
 		void						_initScriptVars();
@@ -63,7 +65,7 @@ class CgiProcessor {
 		void						_createEnvVector();
 		void						_createArgsVector();
 		void						_waitForChild();
-		bool						isRegularFile(std::string file);
+		bool						_isRegularFile(std::string file);
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

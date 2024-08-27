@@ -358,22 +358,24 @@ void	ConnectionDispatcher::_shutdownCgiChildren()
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); it++)
 	{
-		if (it->second->getCgi() && it->second->waitReturn > 0)
-			kill(it->second->getCgi()->getPid(), SIGINT);
+		if (it->second->getCgi() && !it->second->getCgi()->killedChild)
+			it->second->getCgi()->killChild();
 	}
 }
 
 
 bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 {
-	if (_nfds == -1)
+	if (_nfds == -1 || flag)
 	{
-		if(flag)
+		if(flag == 1)
 		{
-			_shutdownCgiChildren();
+			flag++;
 			Logger::info("Turn off procedure triggered", true);
 		}
-		else
+		if (flag && _clients.size() != 0)
+			return(_shutdownCgiChildren(), true);
+		if (!flag)
 			Logger::error("Epoll wait failed", true);
 		return (false);
 	}
@@ -389,11 +391,10 @@ void ConnectionDispatcher::mainLoopEpoll()
 	_addServerSocketsToEpoll();
 	while(true)
 	{
-		// _prepareChildSockets();
-		_nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
 		if (!_catchEpollErrorAndSignal())
 			break;
-		for (size_t idx = 0; idx < static_cast<size_t>(_nfds); ++idx)
+		_nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
+		for (size_t idx = 0; idx < static_cast<size_t>(_nfds) && _nfds != -1; ++idx)
 		{
 			if (_handleServerSocket(idx) == true)
 				continue;

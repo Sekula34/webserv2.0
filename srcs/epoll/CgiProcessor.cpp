@@ -32,7 +32,8 @@ _nfds(Data::getNfds())
 	_createArgsVector();
 	_env = _vecToChararr(_envVec);
 	_args = _vecToChararr(_argsVec);
-	_killedChild = false;
+	killedChild = false;
+	_kill = false;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -164,7 +165,7 @@ std::string	CgiProcessor::getScriptName(std::string suffix)
 	return ("");
 }
 
-bool	CgiProcessor::isRegularFile(std::string file)
+bool	CgiProcessor::_isRegularFile(std::string file)
 {
 	struct stat sb;
 
@@ -223,7 +224,7 @@ void	CgiProcessor::_initScriptVars()
 		_stopCgiSetErrorCode();
 		return ;
 	}
-	if (!isRegularFile(_scriptAbsPath))
+	if (!_isRegularFile(_scriptAbsPath))
 		_stopCgiSetErrorCode();
 }
 
@@ -470,20 +471,24 @@ void	CgiProcessor::_ioChild()
 	return ;
 }
 
+void	CgiProcessor::killChild()
+{
+	_kill = true;	
+}
+
 void	CgiProcessor::_waitForChild()
 {
 	int		status;
 	
 	if (_client->waitReturn > 0)
 		return ;
-	// std::cout << "### client with id: " << _client->getId() << "is in ioChild" << std::endl;
-	if (!_client->checkTimeout() && !_killedChild)
+	if ((!_client->checkTimeout() && !killedChild) || _kill)
 	{
-		_killedChild = true;
-		Logger::warning("calling SIGKILL on child process: ");
+		_kill = false;
+		killedChild = true;
+		Logger::warning("calling SIGTERM on child process: ");
 		std::cout << _pid << std::endl;
-		// kill(_pid, SIGKILL);
-		kill(_pid, SIGINT);
+		kill(_pid, SIGTERM);
 	}
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitReturn == -1)
@@ -499,6 +504,7 @@ void	CgiProcessor::_waitForChild()
 			Logger::warning("child exited due to SIGNAL: ");
 			std::cout << WTERMSIG(status);
 			std::cout << ", ID: " << _client->getId() <<  std::endl;
+			_stopCgiSetErrorCode();
 			// _childExited = true;
 		}
 		if (WIFEXITED(status))
@@ -507,7 +513,8 @@ void	CgiProcessor::_waitForChild()
 			std::cout << WEXITSTATUS(status);
 			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			_exitstatus = WEXITSTATUS(status);
-			// _childExited = true;
+			if (_exitstatus != 0)
+				_stopCgiSetErrorCode();
 		}
 	}
 	return ;
@@ -556,6 +563,7 @@ int CgiProcessor::process()
 			return (_stopCgiSetErrorCode(), 1);
 		if (_pid == CHILD)
 		{
+			signal(SIGINT, SIG_IGN);
 			// runs execve on cgi-script
 			_execute();
 			return (_stopCgiSetErrorCode(), 1);
