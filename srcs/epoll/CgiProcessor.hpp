@@ -22,6 +22,9 @@ class CgiProcessor {
 									CgiProcessor(Client& client);
 									~CgiProcessor(void);
 		int							process(void);
+		std::string					getInterpreterPath(std::string suffix);
+		std::string					getScriptName(std::string suffix);
+		int							getPid();
 
 	private:
 		Client *					_client;
@@ -60,8 +63,6 @@ class CgiProcessor {
 		void						_createEnvVector();
 		void						_createArgsVector();
 		void						_waitForChild();
-		std::string					getInterpreterPath(std::string suffix);
-		std::string					getScriptName(std::string suffix);
 		bool						isRegularFile(std::string file);
 
 									CgiProcessor(void);

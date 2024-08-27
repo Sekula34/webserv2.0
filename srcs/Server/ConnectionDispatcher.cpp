@@ -13,7 +13,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Response/Response.hpp"
 
-#define MAX_WAIT		-1 //0 epoll coplete non block 6,7 % CPU
+#define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
 
 volatile sig_atomic_t flag = 0 ;
 
@@ -353,12 +353,26 @@ bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 	return false;
 }
 
+void	ConnectionDispatcher::_shutdownCgiChildren()
+{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for (; it != _clients.end(); it++)
+	{
+		if (it->second->getCgi() && it->second->waitReturn > 0)
+			kill(it->second->getCgi()->getPid(), SIGINT);
+	}
+}
+
+
 bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 {
 	if (_nfds == -1)
 	{
 		if(flag)
+		{
+			_shutdownCgiChildren();
 			Logger::info("Turn off procedure triggered", true);
+		}
 		else
 			Logger::error("Epoll wait failed", true);
 		return (false);

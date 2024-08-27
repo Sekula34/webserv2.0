@@ -74,6 +74,12 @@ CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
 	return (*this);
 }
 
+int	CgiProcessor::getPid()
+{
+	return (_pid);
+}
+
+
 /*
  * RFC 3875 - Common Gateway Protocol
  
@@ -372,18 +378,18 @@ int	CgiProcessor::_execute()
 	{
 		close(_socketsFromChild[1]);
 		close(_socketsToChild[1]);
- 		return (_stopCgiSetErrorCode(), 1);
+		throw std::runtime_error("dup2 failed in CGI child process");
 	}
 	close(_socketsToChild[1]);
  	if (dup2(_socketsFromChild[1], STDOUT_FILENO) == -1)
 	{
 		close(_socketsFromChild[1]);
- 		return (_stopCgiSetErrorCode(), 1);
+		throw std::runtime_error("dup2 failed in CGI child process");
 	}
 	close(_socketsFromChild[1]);
  	execve(_args[0], _args, _env);
 	// what to do here? throw exception?
-	throw std::runtime_error("chdir failed in CGI child process");
+	throw std::runtime_error("execve failed in CGI child process");
  	// exit (1);
 }
 
@@ -404,8 +410,11 @@ void	CgiProcessor::_writeToChild()
 	// std::cout << "writing to child" << std::endl;
 	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
+	Logger::warning("removing FD from epoll: ");
+	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollRemoveFd(_client->socketToChild);
 	close(_client->socketToChild);
+	_client->socketToChild = DELETED;
 }
 
 void	CgiProcessor::_readFromChild()
@@ -449,8 +458,11 @@ void	CgiProcessor::_ioChild()
 	_readFromChild();
 	if (_client->hasReadFromCgi && _client->waitReturn > 0)
 	{
+		Logger::warning("removing FD from epoll: ");
+		std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
+		_client->socketFromChild = DELETED;
 		_client->_cgiOutput = _client->getCgiMessage();
 		std::cout << "setting cgiRunning to false after reading from child finished" << std::endl;
 		_client->cgiRunning = false;
@@ -522,7 +534,11 @@ void	CgiProcessor::_prepareSockets()
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
+	Logger::warning("adding FD to epoll: ");
+	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsToChild[0]);
+	Logger::warning("adding FD to epoll: ");
+	std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsFromChild[0]);
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
