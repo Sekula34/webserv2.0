@@ -362,18 +362,19 @@ void	ConnectionDispatcher::_shutdownCgiChildren()
 	}
 }
 
-
 bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 {
 	if (_nfds == -1 || flag)
 	{
 		if(flag == 1)
 		{
+			signal(SIGINT, SIG_IGN);
 			flag++;
 			Logger::info("Turn off procedure triggered", true);
+			_shutdownCgiChildren();
 		}
 		if (flag && _clients.size() != 0)
-			return(_shutdownCgiChildren(), true);
+			return (true);
 		if (!flag)
 			Logger::error("Epoll wait failed", true);
 		return (false);

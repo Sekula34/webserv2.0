@@ -34,6 +34,7 @@ _nfds(Data::getNfds())
 	_args = _vecToChararr(_argsVec);
 	killedChild = false;
 	_kill = false;
+	_shutdownStart = 0;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -445,6 +446,7 @@ void	CgiProcessor::_readFromChild()
 	}
 }
 
+
 void	CgiProcessor::_ioChild()
 {
 	_writeToChild();
@@ -476,6 +478,19 @@ void	CgiProcessor::killChild()
 	_kill = true;	
 }
 
+void	CgiProcessor::_timeoutKillChild()
+{
+	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
+	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
+	{	
+		_shutdownStart = std::clock();
+		Logger::error("killing Child with PID: ");
+		std::cout << _pid << std::endl;
+		kill(_pid, SIGKILL);
+		// _stopCgiSetErrorCode();
+	}
+}
+
 void	CgiProcessor::_waitForChild()
 {
 	int		status;
@@ -484,12 +499,14 @@ void	CgiProcessor::_waitForChild()
 		return ;
 	if ((!_client->checkTimeout() && !killedChild) || _kill)
 	{
+		_shutdownStart = std::clock();
 		_kill = false;
 		killedChild = true;
 		Logger::warning("calling SIGTERM on child process: ");
 		std::cout << _pid << std::endl;
 		kill(_pid, SIGTERM);
 	}
+	_timeoutKillChild();
 	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
 	if (_client->waitReturn == -1)
 	{
@@ -505,7 +522,6 @@ void	CgiProcessor::_waitForChild()
 			std::cout << WTERMSIG(status);
 			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			_stopCgiSetErrorCode();
-			// _childExited = true;
 		}
 		if (WIFEXITED(status))
 		{

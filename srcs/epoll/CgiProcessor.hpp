@@ -47,6 +47,7 @@ class CgiProcessor {
 		std::string					_scriptName;
 		std::string					_scriptLocation;
 		bool						_kill;
+		std::clock_t				_shutdownStart;
 
 		void						_ioChild();
 		void						_initScriptVars();
@@ -66,6 +67,7 @@ class CgiProcessor {
 		void						_createArgsVector();
 		void						_waitForChild();
 		bool						_isRegularFile(std::string file);
+		void						_timeoutKillChild();
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);
