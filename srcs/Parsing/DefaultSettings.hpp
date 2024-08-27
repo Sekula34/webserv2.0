@@ -55,6 +55,8 @@ class DefaultSettings
 		const std::string& getRoot(void) const;
 		const std::string& getServerName(void) const;
 		const NginnxReturn& getNginxReturn(void) const;
+		const bool& getAutoindexFlag(void) const;
+		const std::vector<std::string>& getIndexes() const;
 
 		/**
 		 * @brief Get the Error Page Path

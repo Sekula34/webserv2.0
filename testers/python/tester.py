@@ -43,6 +43,34 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("Socket", respones.text)
 		Colors.test_passed()
 
+	def test_autoindex(self):
+		TestMyWebServer.print_test_title("Testing autoindex")
+		response = requests.get("http://localhost:8080/autoindex/")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("Auto index of folder:", response.text)
+		Colors.test_passed()
+
+	def test_autoindexSubfolder(self):
+		TestMyWebServer.print_test_title("Testing autoindex subfolder")
+		response = requests.get("http://localhost:8080/autoindex/subfolder/")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("Auto index of folder:", response.text)
+		Colors.test_passed()
+
+	def test_autoindexThatHaveIndex(self):
+		TestMyWebServer.print_test_title("Testing autoindex that have landing page")
+		response = requests.get("http://localhost:8080/hej/")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("Socket.hpp", response.text)
+		Colors.test_passed()
+
+	def test_autoindexBlocked(self):
+		TestMyWebServer.print_test_title("Testing autoindex that is blocked")
+		response = requests.get("http://localhost:8080/autoindexBlocked/")
+		self.assertEqual(response.status_code, 404)
+		self.assertIn("404", response.text)
+		Colors.test_passed()
+
 	def test_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()

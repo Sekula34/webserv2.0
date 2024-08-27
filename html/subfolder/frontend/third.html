@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Your Name</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            overflow: hidden;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #555;
+            color: white;
+        }
+        .portfolio {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .portfolio-item {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .portfolio-item img {
+            max-width: 100%;
+            height: auto;
+        }
+        .portfolio-item h3 {
+            margin-top: 10px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>My Portfolio</h1>
+</header>
+
+<nav>
+    <a href=first.html>Home</a>
+    <a href="second.html">second</a>
+
+</nav>
+
+<div class="portfolio">
+    <div class="portfolio-item">
+        <img src="image1.jpg" alt="Project 1">
+        <h3>Project Title 1</h3>
+        <p>Description of the project or image goes here.</p>
+    </div>
+
+    <div class="portfolio-item">
+        <img src="image2.jpg" alt="Project 2">
+        <h3>Project Title 2</h3>
+        <p>Description of the project or image goes here.</p>
+    </div>
+
+    <div class="portfolio-item">
+        <img src="image3.jpg" alt="Project 3">
+        <h3>Project Title 3</h3>
+        <p>Description of the project or image goes here.</p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 Your Name. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

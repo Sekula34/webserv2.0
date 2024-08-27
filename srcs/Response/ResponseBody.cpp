@@ -1,4 +1,5 @@
 #include "ResponseBody.hpp"
+#include <cstddef>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -7,6 +8,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "../epoll/Client.hpp"
+#include "Autoindex.hpp"
 
 class Client;
 
@@ -120,12 +122,10 @@ void ResponseBody::_handlerGetMethod()
     Logger::info("Handling GET, ServerLocation", true);
     std::string path = _client.header->urlSuffix->getPath();
     Logger::info("Requsted url is "); std::cout << path << std::endl;
-    std::string serverLocation = _server->getLocationURIfromPath(path);
-    Logger::info("Server location resposible for reponse is " + serverLocation, true);
+    std::string serverLocationUri = _server->getLocationURIfromPath(path);
+    Logger::info("Server location resposible for reponse is " + serverLocationUri, true);
     bool found = true;
- //   Logger::info("Server that is responding is: "); std::cout << std::endl;
-    //_server.printServerSettings();
-    std::vector<LocationSettings>::const_iterator it = _server->fetchLocationWithUri(serverLocation, found);
+    std::vector<LocationSettings>::const_iterator it = _server->fetchLocationWithUri(serverLocationUri, found);
     if(found == true)
     {
         const LocationSettings& location = *it;
@@ -181,46 +181,100 @@ void ResponseBody::_processRequestedLocation(const LocationSettings& location)
         //handle redirect
     }
     if(location.isMethodAllowed("GET"))
-        _fetchServerPage(location);
+    {
+        //_fetchServerPage(location);
+        _generateHtml(location);
+    }
     else
         _renderServerErrorPage(403);
     //access this site
 }
 
-bool ResponseBody::_setFilePath(std::string& path, const LocationSettings& location) const
+void ResponseBody::_generateHtml(const LocationSettings& location)
 {
-    path.erase();
-    std::string fullpath = _client.header->urlSuffix->getPath();
-    std::cout << "Requested urlSuffix path  is " << fullpath << std::endl;
-    std::cout << "Location uri is" << location.getLocationUri();
-    std::string baseName = ParsingUtils::getBaseName(fullpath, location.getLocationUri());
-    Logger::info("base name is " + baseName, true);
-    if(baseName == "")
-        return location.setIndexPagePath(path);
-    std::string filePath = location.getRoot() + "/" + baseName; 
-    path = filePath;
-    std::cout << "File Path is [" << path << "]" << std::endl;
-    return FileUtils::isPathValid(filePath);
+    std::string serverFilePath = _convertToServerPath(location);
+    int result = FileUtils::isPathFileOrFolder(serverFilePath, _httpStatusCode);
+    if(result == -1)
+    {
+        _renderServerErrorPage(_httpStatusCode);
+        return;
+    }
+    if(result == 1)
+    {
+        _fileHtml(serverFilePath);
+        return;
+    }
+    else
+    {
+        _dirHtml(serverFilePath, location);
+    }
+    return;
 }
 
-void ResponseBody::_fetchServerPage(const LocationSettings& location)
+bool ResponseBody::_fileHtml(const std::string& serverFilePath)
 {
-    Logger::info("Called fetching page", true);
-   // location.printLocationSettings();
-    std::string path;
-    bool found = _setFilePath(path, location);
-    if(found == true)
+    bool success = FileUtils::putFileInString(serverFilePath, _response);
+    if(success == true)
     {
-        bool success = FileUtils::putFileInString(path, _response);
-        if(success == true)
-            _httpStatusCode = 200;
-        else
-            _renderServerErrorPage(500);
+        _httpStatusCode = 200;
+        return true;
     }
-    else if(found == false)
+    _renderServerErrorPage(404);
+    return false;
+}
+
+void ResponseBody::_dirHtml(const std::string& serverFilePath, const LocationSettings& location)
+{
+    (void)serverFilePath;
+    Logger::info("Dir html", true);
+    if(_constructIndex(serverFilePath, location) == true)
+    {
+        _httpStatusCode = 200;
+        return;
+    }
+    _autoindexHtml(serverFilePath,location);
+}
+
+void ResponseBody::_autoindexHtml(const std::string& serverFilePath, const LocationSettings& location)
+{
+    if(location.getAutoindexFlag() == true)
+    {
+        _httpStatusCode = 0;
+        Autoindex autoindex(serverFilePath, _httpStatusCode, _client.header->getFullClientURL());
+        _response = autoindex.getAutoIndexHtml();
+        if(autoindex.getStatusCode() != 0 && autoindex.getStatusCode() != 200)
+        {
+            _renderServerErrorPage(autoindex.getStatusCode());
+            return;
+        }
+        _httpStatusCode = 200;
+    }
+    else 
     {
         _renderServerErrorPage(404);
     }
+}
+
+bool ResponseBody::_constructIndex(const std::string& serverFilePath, const LocationSettings& location)
+{
+    for(size_t i = 0; i < location.getIndexes().size(); i++)
+    {
+        std::string fileName = serverFilePath + (location.getIndexes()[i]);
+        if(_fileHtml(fileName) == true)
+            return true;
+    }
+    return false;
+}
+
+
+std::string ResponseBody::_convertToServerPath(const LocationSettings& location) const
+{
+    std::string serverPath(_client.header->urlSuffix->getPath());
+    size_t startingPos = 0;
+    size_t replaceLen = location.getLocationUri().size();
+    const std::string& replaceString(location.getRoot() + "/");
+    serverPath.replace(startingPos, replaceLen, replaceString);
+    return serverPath;
 }
 
 void ResponseBody::_generateServerResponse()

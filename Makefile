@@ -39,6 +39,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
 			srcs/Parsing/ServerSettings.cpp \
+			srcs/Response/Autoindex.cpp\
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
 			srcs/Response/ResponseHeader.cpp\
@@ -50,6 +51,7 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Utils/HttpStatusCode.cpp\
 			srcs/Utils/Logger.cpp\
 			srcs/Utils/UrlSuffix.cpp\
+			testers/AutoIndexTest.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
 			testers/CHTest.cpp
@@ -68,6 +70,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp\
 			srcs/Parsing/Configuration.hpp\
 			srcs/Parsing/ParsingUtils.hpp\
 			srcs/Parsing/ServerSettings.hpp\
+			srcs/Response/Autoindex.hpp\
 			srcs/Response/Response.hpp\
 			srcs/Response/ResponseBody.hpp\
 			srcs/Response/ResponseHeader.hpp\
@@ -79,6 +82,7 @@ HEADERS =	srcs/Client/ClientHeader.hpp\
 			srcs/Utils/HttpStatusCode.hpp\
 			srcs/Utils/Logger.hpp\
 			srcs/Utils/UrlSuffix.hpp\
+			testers/AutoIndexTest.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp\
 			testers/CHTest.hpp
@@ -92,7 +96,7 @@ OBJ = $(SRCS:%.cpp=$(OBJ_DIR)/%.o)
 OBJ_DIRS := $(sort $(dir $(OBJ)))
 
 #------------------------------------ CODE ------------------------------------#
-.PHONY: all clean fclean re bonus generate_test test
+.PHONY: all clean fclean re bonus generate_test test unitTest
 
 all: $(NAME)
 

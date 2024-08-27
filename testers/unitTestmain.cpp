@@ -1,6 +1,7 @@
 #include "ServerTest.hpp"
 #include "UnitTest.hpp"
 #include "CHTest.hpp"
+#include "AutoIndexTest.hpp"
 
 
 
@@ -9,11 +10,16 @@ void all()
 	UnitTest::allTests();
 	ServerTest::runAllTests();
 	CHTest::runAllTests();
+	AutoindexTest::runAll();
 }
 
 int main()
 {
-	all();
+	//AutoindexTest::validSimpleTest();
+	//UnitTest::filerOrFolderBlock();
+	//UnitTest::testingOpeninDirBlock();
+	//all();
+	CHTest::fullUrlTest();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();

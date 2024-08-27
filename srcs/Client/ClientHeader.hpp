@@ -52,6 +52,12 @@ class ClientHeader
 		const std::map<std::string, std::string> & getHeaderFields() const; 
 		const std::string& getURLSuffix() const;
 		bool isBodyExpected() const;
+		/**
+		 * @brief Get the Full Client URL 
+		 * 
+		 * @return std::string for example http://localhost:8080/autoindex/first.html
+		 */
+		std::string getFullClientURL() const;
 
 	private :
 		ClientHeader();

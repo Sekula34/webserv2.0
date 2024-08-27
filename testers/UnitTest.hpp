@@ -15,6 +15,9 @@ class UnitTest
 		static void _testpassed(bool block = false);
 		static const std::string _constFileFolder;
 	public:
+
+		static void filerOrFolderTestCase(const std::string path, int expected, int expectedHttp);
+		static void filerOrFolderBlock();
 		static void urlPathTester(std::string urlSuffix, std::string expectePath);
 		static void urlQueryTester(std::string suffixString, std::string expectedQuery);		
 
@@ -26,5 +29,8 @@ class UnitTest
 		static void configSyntaxBlock();
 		static void configNumberOfServersBlock();
 		static void testDirBlock();
+		static void testingOpeninDirBlock();
+		static void testOpeningDirCase(const std::string path, int expected_error);
+
 };
 #endif
