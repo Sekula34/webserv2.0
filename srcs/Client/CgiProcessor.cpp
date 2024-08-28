@@ -540,7 +540,7 @@ void	CgiProcessor::_waitForChild()
 	// waitpid fail
 	if (_client->waitReturn == -1)
 	{
-		std::cout << "waitpid error, stopping CGI" << std::endl;
+		Logger::error("waitpid, stopping CGI", true);
 		_stopCgiSetErrorCode();
 		return ;
 	}

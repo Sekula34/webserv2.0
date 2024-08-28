@@ -157,7 +157,7 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 	{
 		client.clearRecvLine();
 		n = recv(fd, client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
-		std::cout << "trying to read n: " << n << std::endl;
+		// std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
 	if (!client.checkTimeout())
