@@ -357,8 +357,8 @@ void	ConnectionDispatcher::_shutdownCgiChildren()
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); it++)
 	{
-		if (it->second->getCgi() && !it->second->getCgi()->killedChild)
-			it->second->getCgi()->killChild();
+		if (it->second->getCgi() && !it->second->getCgi()->sentSigterm)
+			it->second->getCgi()->terminateChild();
 	}
 }
 

@@ -32,9 +32,10 @@ _nfds(Data::getNfds())
 	_createArgsVector();
 	_env = _vecToChararr(_envVec);
 	_args = _vecToChararr(_argsVec);
-	killedChild = false;
-	_kill = false;
+	sentSigterm = false;
+	_terminate = false;
 	_shutdownStart = 0;
+	_sentSigkill = false;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -471,30 +472,33 @@ void	CgiProcessor::_ioChild()
 	return ;
 }
 
-void	CgiProcessor::killChild()
+void	CgiProcessor::terminateChild()
 {
-	_kill = true;	
+	_terminate = true;	
 }
 
 void	CgiProcessor::_timeoutKillChild()
 {
+	if (_sentSigkill)
+		return ;
 	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
 	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
 	{	
 		Logger::error("killing child process with PID: ");
 		std::cout << _pid << std::endl;
 		kill(_pid, SIGKILL);
+		_sentSigkill = true;
 	}
 }
 
 void	CgiProcessor::_handleChildTimeout()
 {
 	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
-	if ((!_client->checkTimeout() && !killedChild) || _kill)
+	if ((!_client->checkTimeout() && !sentSigterm) || _terminate)
 	{
 		_shutdownStart = std::clock();
-		_kill = false;
-		killedChild = true;
+		_terminate = false;
+		sentSigterm = true;
 		Logger::warning("calling SIGTERM on child process: ");
 		std::cout << _pid << std::endl;
 		kill(_pid, SIGTERM);

@@ -25,8 +25,8 @@ class CgiProcessor {
 		std::string					getInterpreterPath(std::string suffix);
 		std::string					getScriptName(std::string suffix);
 		int							getPid();
-		void						killChild();
-		bool						killedChild;
+		void						terminateChild();
+		bool						sentSigterm;
 
 	private:
 		Client *					_client;
@@ -46,7 +46,8 @@ class CgiProcessor {
 		std::string					_scriptAbsPath;
 		std::string					_scriptName;
 		std::string					_scriptLocation;
-		bool						_kill;
+		bool						_terminate;
+		bool						_sentSigkill;
 		std::clock_t				_shutdownStart;
 
 		void						_ioChild();
