@@ -36,6 +36,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 	_return = source._return;
 	_index = source._index;
 	_root = source._root;
+	m_cgiExtensions = source.m_cgiExtensions;
 	return (*this);
 }
 
@@ -148,6 +149,11 @@ void DefaultSettings::setServerName(std::string serverName)
 	_serverName = serverName;
 }
 
+void DefaultSettings::setCgiExtensions(std::vector<std::string> extensionVector)
+{
+	m_cgiExtensions = extensionVector;
+}
+
 const int& DefaultSettings::getPort(void) const
 {
 	return(_listenPort);
@@ -188,4 +194,9 @@ const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
 		path = it->second;
 	}
 	return path;
+}
+
+const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
+{
+	return m_cgiExtensions;
 }

@@ -27,6 +27,7 @@ class DefaultSettings
 		NginnxReturn _return;
 		std::vector<std::string> _index;
 		std::string _root;
+		std::vector<std::string> m_cgiExtensions;
 
 	public :
 		DefaultSettings(void);
@@ -47,6 +48,7 @@ class DefaultSettings
 		void setIndexes(std::vector<std::string> indexes);
 		void setRoot(std::string root);
 		void setServerName(std::string serverName);
+		void setCgiExtensions(std::vector<std::string> extensionsVector);
 		//applydirective maybe
 
 		void printAllSettings(void) const;
@@ -65,6 +67,8 @@ class DefaultSettings
 		 * @return const std::string path of errorPage path or "" if there is no such path
 		 */
 		const std::string getErrorPagePath(const int errorCode) const;
+
+		const std::vector<std::string>& getCgiExtensions(void) const;
 };
 
 #endif
