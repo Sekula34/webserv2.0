@@ -291,10 +291,12 @@ void ResponseBody::_generateServerResponse()
     else if(requstedMethod == "POST")
     {
         Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
+        _renderServerErrorPage(501);
     }
     else if(requstedMethod == "DELETE")
     {
         Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
+        _renderServerErrorPage(501);
     }
 }
 
