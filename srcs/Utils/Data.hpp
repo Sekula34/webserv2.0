@@ -22,8 +22,10 @@ class Data {
 		static const std::vector<int> 			getServerSocketFds();
 		static int &							getNfds();
 		static const std::map<std::string, std::string>&	getCgiLang();
+		static bool								isCgiExtensionValid(std::string cgiExtension);
 		static struct epoll_event *				setEvents(); 
 		static void								setCgiLang(std::string suffix, std::string interpreter);
+		static void								setAllCgiLang(void);
 		static void								closeAllFds();
 		static void								epollAddFd(int fd);
 		static void								epollRemoveFd(int fd);
@@ -42,7 +44,7 @@ class Data {
 		static std::vector<Socket> *			_serverSockets;
 		static struct epoll_event				_events[MAX_EVENTS];
 		static int								_nfds;
-		static std::map<std::string, std::string>	_cgiLang;
+		static std::map<std::string, std::string>	_cgiLang; //this is map to fill it .py python3 before parsing in constructor of cgi. Config file wil check this 
 
 												Data(void);
 												Data(Data const & src);
@@ -50,4 +52,3 @@ class Data {
 };
 
 #endif
-

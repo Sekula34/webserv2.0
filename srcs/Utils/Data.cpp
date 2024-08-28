@@ -3,6 +3,7 @@
 #include "../Client/Client.hpp"	
 #include "../Server/Socket.hpp"	
 #include <sys/epoll.h>
+#include <vector>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -98,6 +99,15 @@ int &	Data::getNfds()
 	return (_nfds);
 }
 
+bool Data::isCgiExtensionValid(std::string extension)
+{
+	if(_cgiLang.find(extension) == _cgiLang.end())
+	{
+		return false;
+	}
+	return true;
+}
+
 void	Data::setEnvp(char** envvar)
 {
 	_envp = envvar;
@@ -180,6 +190,12 @@ const std::map<std::string, std::string>&	Data::getCgiLang()
 void	Data::setCgiLang(std::string suffix, std::string interpreter)
 {
 	_cgiLang[suffix] = interpreter;	
+}
+
+
+void	Data::setAllCgiLang()
+{
+	Data::setCgiLang(".py", "python3");
 }
 
 void	Data::setEpollFd(int fd)
