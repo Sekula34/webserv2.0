@@ -207,6 +207,11 @@ void	Client::setAddrlen(socklen_t addrLen)
 	_addrLen = addrLen;
 }
 
+void	Client::appendClientBody(std::string s)
+{
+	_clientBody += s;
+}
+
 /******************************************************************************/
 /*                               Error Handling                               */
 /******************************************************************************/
@@ -262,7 +267,7 @@ void Client::createClientHeader()
 		return;
 	}
 	header = new ClientHeader(this->getMessage());
-	Logger::info("Client header created with : "); std::cout << _message;
+	// Logger::info("Client header created with : "); std::cout << _message;
 	if(header->getErrorCode() != 0)
 	{
 		Logger::warning("Client Header have error", false); std::cout << header->getErrorCode() << std::endl;

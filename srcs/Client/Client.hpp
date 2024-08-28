@@ -26,10 +26,9 @@
 // #define MAXLINE			493
 # define MAXLINE			40
 # define MAX_TIMEOUT		10000
-#define DELETED				-1 
+# define DELETED			-1 
 
 class CgiProcessor;
-
 
 class Client {
 
@@ -65,6 +64,7 @@ class Client {
 		void				setCgi(CgiProcessor* cgi);
 		void				setAddrlen(socklen_t addrlen);
 		void				setChildSocket(int in, int out);
+		void 				appendClientBody(std::string s);
 
 							//Client specific functions
 		void				unsetsocket_tochild();

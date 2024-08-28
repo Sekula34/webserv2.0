@@ -11,6 +11,7 @@
 #include <csignal>
 #include <fcntl.h>
 #include "../Utils/Logger.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include "../Response/Response.hpp"
 
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
@@ -260,6 +261,14 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	{
 		if(client.header->isBodyExpected() == true)
 		{
+			client.appendClientBody(ParsingUtils::extractAfterDelim(client.getMessage(), "\r\n\r\n"));
+			std::cout << "body that was read by readHeader:"<< std::endl << client.getClientBody() << std::endl;
+
+		
+			client.clearRecvLine();
+			int n = recv(client.getFd(), client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+			std::cout << "amount of bytes read: " << n << " body:" << std::endl << client.getRecvLine() << std::endl;
+
 			// READ BODY
 			// PROCESS BODY
 		}
