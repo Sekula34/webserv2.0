@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "../Utils/Logger.hpp"
 
 const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root"};
 
@@ -15,7 +16,7 @@ const std::string Directive::_validServerDirectives[] ={"listen", "host", "serve
 "error_page", "client_max_body_size", "return", "autoindex", "index", "root"};
 
 const std::string Directive:: _validLocationDirectives[] = {"error_page", "client_max_body_size", "return",
-"autoindex", "index", "limit_except", "root"};
+"autoindex", "index", "limit_except", "root", "extension"};
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
@@ -208,44 +209,28 @@ void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
 void Directive::apply(DefaultSettings& settings)
 {
 	if(_directiveName == "listen")
-	{
 		_applyListen(settings);
-	}
 	else if(_directiveName =="error_page")
-	{
 		_applyErrorPage(settings);
-	}
 	else if(_directiveName == "limit_except")
-	{
 		_applyLimitExcept(settings);
-	}
 	else if(_directiveName == "client_max_body_size")
-	{
 		_applyClientMaxBodySize(settings);
-	}
 	else if(_directiveName == "autoindex")
-	{
 		_apllyAutoIndex(settings);
-	}
 	else if(_directiveName == "return")
-	{
 		_applyReturn(settings);
-	}
 	else if(_directiveName == "index")
-	{
 		_applyIndex(settings);
-	}
 	else if(_directiveName == "root")
-	{
 		_apllyRoot(settings);
-	}
 	else if (_directiveName == "server_name")
-	{
 		_applyServerName(settings);
-	}
+	else if(_directiveName == "extension")
+		_applyCgiExtension(settings);
 	else 
 	{
-		std::cerr << "WARNING applying " << _directiveName << "Is not implemented yet " << std::endl;
+		Logger::warning("Applying directive: "); std::cout << _directiveName; Logger::warning("is not implemeted yet", true);
 	}
 }
 
@@ -383,6 +368,12 @@ void Directive::_applyClientMaxBodySize(DefaultSettings& settings)
 		throw InvalidDirectiveException();
 	}
 	settings.setClientMaxBodySize(clientMaxBodySize);
+}
+
+void Directive::_applyCgiExtension(DefaultSettings& settings)
+{
+	std::vector<std::string> extensions = ParsingUtils::splitString(_directiveValue, ' ');
+	settings.setCgiExtensions(extensions);
 }
 
 std::vector<Directive> Directive::getAllServerDirectives(const std::vector<Token>& allServerTokens)

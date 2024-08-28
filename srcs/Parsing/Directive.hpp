@@ -37,6 +37,7 @@ class Directive
 		void _applyIndex(DefaultSettings& settings);
 		void _apllyRoot(DefaultSettings& settings);
 		void _applyServerName(DefaultSettings& settings);
+		void _applyCgiExtension(DefaultSettings& settings);
 
 	public :
 		Directive();
