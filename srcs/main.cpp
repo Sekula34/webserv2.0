@@ -1,6 +1,7 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Server/ConnectionDispatcher.hpp"
 #include "Server/SocketManager.hpp"
+#include "Utils/Data.hpp"
 #include "Utils/Logger.hpp"
 #include <exception>
 #include <iostream>
@@ -11,6 +12,7 @@
 
 void ConnectionDispatcherTest(char** envp)
 {
+	Data::setAllCgiLang();
 	ServersInfo serverInfo;
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	Data::setEnvp(envp);
