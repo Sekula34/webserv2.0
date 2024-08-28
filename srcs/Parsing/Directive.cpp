@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include "../Utils/Logger.hpp"
+#include "../Utils/Data.hpp"
 
 const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root"};
 
@@ -373,6 +374,15 @@ void Directive::_applyClientMaxBodySize(DefaultSettings& settings)
 void Directive::_applyCgiExtension(DefaultSettings& settings)
 {
 	std::vector<std::string> extensions = ParsingUtils::splitString(_directiveValue, ' ');
+	for(size_t i = 0; i < extensions.size(); i++)
+	{
+		if(Data::isCgiExtensionValid(extensions[i]) == false)
+		{
+			Logger::error("There is no interpreter for :"); std::cout << extensions[i] << " ";
+			std::cout << "In line " << _dirLineNumber << std::endl;
+			throw InvalidDirectiveException();
+		}
+	}
 	settings.setCgiExtensions(extensions);
 }
 
