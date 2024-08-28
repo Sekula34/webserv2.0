@@ -5,8 +5,7 @@
 #include <sys/select.h>
 #include "SocketManager.hpp"
 #include "../Parsing/ServersInfo.hpp"
-#include "../epoll/Client.hpp"
-#include "../epoll/Client.hpp"
+#include "../Client/Client.hpp"
 #include "../Utils/Data.hpp"
 
 

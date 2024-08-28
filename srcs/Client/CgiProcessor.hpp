@@ -66,8 +66,11 @@ class CgiProcessor {
 		void						_createEnvVector();
 		void						_createArgsVector();
 		void						_waitForChild();
-		bool						_isRegularFile(std::string file);
+		void						_handleChildTimeout();
 		void						_timeoutKillChild();
+		bool						_isRegularFile(std::string file);
+		void						_closeCgi();
+		void						_handleReturnStatus(int status);
 
 									CgiProcessor(void);
 									CgiProcessor(CgiProcessor const & src);

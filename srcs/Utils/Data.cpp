@@ -1,6 +1,6 @@
 
 #include "Data.hpp"	
-#include "../epoll/Client.hpp"	
+#include "../Client/Client.hpp"	
 #include "../Server/Socket.hpp"	
 #include <sys/epoll.h>
 

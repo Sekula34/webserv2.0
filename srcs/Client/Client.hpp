@@ -5,7 +5,7 @@
 # include <string>
 # include <ctime>
 # include "../Client/ClientHeader.hpp"
-# include "../epoll/CgiProcessor.hpp"
+# include "CgiProcessor.hpp"
 # include "../Response/Response.hpp"
 # include "../Utils/Logger.hpp"
 # include "../Server/SocketManager.hpp"

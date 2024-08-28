@@ -224,7 +224,10 @@ bool	Client::checkTimeout()
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
 	if (diff > MAX_TIMEOUT)
+	{
+		Logger::warning("removing Client due to timeout", true);
 		return (false);
+	}
 	// if (diff > _clockstop) 
 	// {
 	// 	std::cout << "id: " << _id << ", " << diff / 1000 << " sec" << std::endl;

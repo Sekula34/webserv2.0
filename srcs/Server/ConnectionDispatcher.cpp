@@ -106,15 +106,26 @@ Client* ConnectionDispatcher::findClientInClients(int client_fd)
 	return (it->second);
 }
 
+void	ConnectionDispatcher::clientsRemoveFd(Client* client)
+{
+	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
+	client->setWriteClient(false);
+	
+	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
+	_clients.erase(client->getFd());
+}
+
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
 	if (n <= 0 || peek < 0)
 	{
+		if (n == 0)
+			Logger::warning("reading 0 bytes from client, deleting client", true);
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
 		if (n < 0 || peek < 0)
-			std::cout << "error: receive" << std::endl;
+			Logger::error("receiving from Client", true);
 		return (false);
 	}
 	return (true);
@@ -142,11 +153,11 @@ void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int & pe
 
 bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 {
-
 	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
 		client.clearRecvLine();
 		n = recv(fd, client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
 	if (!client.checkTimeout())
@@ -157,15 +168,6 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		delete &client;
 	}
 	return (false);
-}
-
-void	ConnectionDispatcher::clientsRemoveFd(Client* client)
-{
-	// WRITING TO CLIENT FD IS FROM NOW ON FORBIDDEN FOR THIS CLIENT INSTANCE
-	_clients[client->getFd()]->setWriteClient(false);
-	
-	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
-	_clients.erase(client->getFd());
 }
 
 bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
@@ -192,7 +194,8 @@ bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
 		return (false);
 
 
-// IF return of receive is smaller than buffer -> SET READHEADER FLAG TO FALSE
+	// IF return of receive is smaller than buffer, or contains end header \r\n\r\n
+	// -> we finish reading and SET READHEADER FLAG TO FALSE
 	_checkEndHeader(client, n);
 	return (true);
 }
@@ -225,9 +228,6 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 		ClientHeader* clientHeader = client.header;
 		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
 		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-		// Logger::warning(it->getLocationUri(), true);
-		// Logger::warning("", true);
-		// std::cout << found << std::endl;
 		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
 		{ 
 			Logger::warning("Cgi checked and it exist on this location", true);

@@ -28,8 +28,8 @@ NC := \033[0m # No color
 MAIN=srcs/main.cpp
 
 SRCS =		srcs/Client/ClientHeader.cpp\
-			srcs/epoll/Client.cpp \
-			srcs/epoll/CgiProcessor.cpp \
+			srcs/Client/Client.cpp \
+			srcs/Client/CgiProcessor.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
@@ -59,8 +59,8 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 
 
 HEADERS =	srcs/Client/ClientHeader.hpp\
-			srcs/epoll/Client.hpp\
-			srcs/epoll/CgiProcessor.hpp\
+			srcs/Client/Client.hpp\
+			srcs/Client/CgiProcessor.hpp\
 			srcs/Parsing/LocationSettings.hpp\
 			srcs/Parsing/ServersInfo.hpp\
 			srcs/Parsing/Token.hpp\

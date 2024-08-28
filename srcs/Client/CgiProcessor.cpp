@@ -170,7 +170,6 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 {
 	struct stat sb;
 
-
 	if (stat(file.c_str(), &sb) == -1)
 	{
 		Logger::error("stat failed in CGI", true);
@@ -373,9 +372,7 @@ int	CgiProcessor::_execute()
 		close(_socketsFromChild[1]);
 		close(_socketsToChild[1]);
 		throw std::runtime_error("chdir failed in CGI child process");
-	// exit (1); -> which one is correct?
 	}
-
  	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
 	{
 		close(_socketsFromChild[1]);
@@ -390,9 +387,7 @@ int	CgiProcessor::_execute()
 	}
 	close(_socketsFromChild[1]);
  	execve(_args[0], _args, _env);
-	// what to do here? throw exception?
 	throw std::runtime_error("execve failed in CGI child process");
- 	// exit (1);
 }
 
 bool	CgiProcessor::_isSocketReady(int socket, int macro)
@@ -409,7 +404,6 @@ void	CgiProcessor::_writeToChild()
 {
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
-	// std::cout << "writing to child" << std::endl;
 	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
 	Logger::warning("removing FD from epoll: ");
@@ -433,10 +427,10 @@ void	CgiProcessor::_readFromChild()
 		if (n > 0)
 			_client->addRecvLineToCgiMessage();
 
-		// invalid read, stop CGI and set errorcode = 500
+		// failed read, stop CGI and set errorcode = 500
 		if (n < 0)
 		{
-			std::cout << "setting cgiRunning to false in readFromChild because -1 from read" << std::endl;
+			Logger::warning("failed tor read from Child Process", true);
 			_stopCgiSetErrorCode();
 		}
 
@@ -446,6 +440,19 @@ void	CgiProcessor::_readFromChild()
 	}
 }
 
+void	CgiProcessor::_closeCgi()
+{
+	if (_client->hasReadFromCgi && _client->waitReturn > 0)
+	{
+		Logger::warning("removing FD from epoll: ");
+		std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
+		Data::epollRemoveFd(_client->socketFromChild);
+		close(_client->socketFromChild);
+		_client->socketFromChild = DELETED;
+		_client->_cgiOutput = _client->getCgiMessage();
+		_client->cgiRunning = false;
+	}
+}
 
 void	CgiProcessor::_ioChild()
 {
@@ -459,17 +466,8 @@ void	CgiProcessor::_ioChild()
 		return ;
 
 	_readFromChild();
-	if (_client->hasReadFromCgi && _client->waitReturn > 0)
-	{
-		Logger::warning("removing FD from epoll: ");
-		std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
-		Data::epollRemoveFd(_client->socketFromChild);
-		close(_client->socketFromChild);
-		_client->socketFromChild = DELETED;
-		_client->_cgiOutput = _client->getCgiMessage();
-		std::cout << "setting cgiRunning to false after reading from child finished" << std::endl;
-		_client->cgiRunning = false;
-	}
+
+	_closeCgi();
 	return ;
 }
 
@@ -483,20 +481,15 @@ void	CgiProcessor::_timeoutKillChild()
 	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
 	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
 	{	
-		_shutdownStart = std::clock();
-		Logger::error("killing Child with PID: ");
+		Logger::error("killing child process with PID: ");
 		std::cout << _pid << std::endl;
 		kill(_pid, SIGKILL);
-		// _stopCgiSetErrorCode();
 	}
 }
 
-void	CgiProcessor::_waitForChild()
+void	CgiProcessor::_handleChildTimeout()
 {
-	int		status;
-	
-	if (_client->waitReturn > 0)
-		return ;
+	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
 	if ((!_client->checkTimeout() && !killedChild) || _kill)
 	{
 		_shutdownStart = std::clock();
@@ -506,16 +499,12 @@ void	CgiProcessor::_waitForChild()
 		std::cout << _pid << std::endl;
 		kill(_pid, SIGTERM);
 	}
+	// if SIGTERM not successful send SIGKILL after MAX_TIMEOUT / 2
 	_timeoutKillChild();
-	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
-	if (_client->waitReturn == -1)
-	{
-		std::cout << "waitpid error, stopping CGI" << std::endl;
-		_stopCgiSetErrorCode();
-		return ;
-	}
-	if (_client->waitReturn > 0)	
-	{
+}
+
+void	CgiProcessor::_handleReturnStatus(int status)
+{
 		if (WIFSIGNALED(status))
 		{
 			Logger::warning("child exited due to SIGNAL: ");
@@ -525,14 +514,40 @@ void	CgiProcessor::_waitForChild()
 		}
 		if (WIFEXITED(status))
 		{
-			Logger::warning("child exited with code: ");
-			std::cout << WEXITSTATUS(status);
-			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			_exitstatus = WEXITSTATUS(status);
+			Logger::warning("child exited with code: ");
+			std::cout << _exitstatus;
+			std::cout << ", ID: " << _client->getId() <<  std::endl;
 			if (_exitstatus != 0)
 				_stopCgiSetErrorCode();
 		}
+}
+
+void	CgiProcessor::_waitForChild()
+{
+	int		status;
+	
+	// return if waitpid was already successful once
+	if (_client->waitReturn > 0)
+		return ;
+
+	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
+	_handleChildTimeout();
+
+	// WAITPID
+	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
+
+	// waitpid fail
+	if (_client->waitReturn == -1)
+	{
+		std::cout << "waitpid error, stopping CGI" << std::endl;
+		_stopCgiSetErrorCode();
+		return ;
 	}
+
+	// waitpid success
+	if (_client->waitReturn > 0)	
+		_handleReturnStatus(status);
 	return ;
 }
 
@@ -575,6 +590,7 @@ int CgiProcessor::process()
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
 			return (_stopCgiSetErrorCode(), 1);
+		// FORK!!
 		if ((_pid = fork()) == -1)
 			return (_stopCgiSetErrorCode(), 1);
 		if (_pid == CHILD)
@@ -584,7 +600,6 @@ int CgiProcessor::process()
 			_execute();
 			return (_stopCgiSetErrorCode(), 1);
 		}
-
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets();
 	}

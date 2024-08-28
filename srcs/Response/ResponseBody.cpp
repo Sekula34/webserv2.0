@@ -7,7 +7,7 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
-#include "../epoll/Client.hpp"
+#include "../Client/Client.hpp"
 #include "Autoindex.hpp"
 
 class Client;
