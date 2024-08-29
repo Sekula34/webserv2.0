@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "../Utils/Logger.hpp"
 
 std::vector<std::string> ParsingUtils::splitString(std::string fullString, char delimiter)
 {
@@ -160,6 +161,22 @@ std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 		PlainValue.erase(PlainValue.size() - 1);
 	}
 	return PlainValue;
+}
+
+std::string ParsingUtils::getFileNameFromUrl(std::string urlSuffixPath, std::string locationUri)
+{
+	std::string fileName;
+	Logger::warning("Called get file name from URL", true);
+	std::cout << "with [" <<urlSuffixPath << "] and [" << locationUri << "]" << std::endl;
+	size_t pos = urlSuffixPath.find(locationUri);
+	if(pos == std::string::npos)
+	{
+		Logger::error("Cannot find locatoin uri in suffix path, this should not happend ever", true);
+		return "";
+	}
+	fileName = urlSuffixPath.substr(pos + locationUri.size());
+	std::cout << "file name is " << fileName << std::endl;
+	return fileName;
 }
 
 const char * ParsingUtils::InvalidConversion::what() const throw()

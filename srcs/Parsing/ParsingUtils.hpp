@@ -92,6 +92,16 @@ class ParsingUtils
 		 */
 		static std::string getHttpPlainValue(std::string fieldValue);
 
+		/**
+		 * @brief Get the File Name From Urlsuffix, 
+		 	example hej/i/am/filip.py/anotherfolder/file/
+		 * 
+		 * @param urlSuffixPath like hej/i/am/filip.py/anotherfolder/file/
+		 * @param locationUri  like hej/i/
+		 * @return std::string  am/filip.py/anotherfolder/file or "" if there is no file either location is full path or not match
+		 */
+		static std::string getFileNameFromUrl(std::string urlSuffixPath, std::string locationUri);
+
 		class InvalidConversion : public std::exception
 		{
 			const char * what() const throw();
