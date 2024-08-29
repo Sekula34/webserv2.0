@@ -1,4 +1,5 @@
 #include "UrlSuffix.hpp"
+#include "Data.hpp"
 #include "Logger.hpp"
 #include <cstddef>
 #include "../Parsing/ParsingUtils.hpp"
@@ -40,11 +41,54 @@ const std::string& UrlSuffix::getQueryParameters() const
 	return (_queryParameters);
 }
 
+const std::string& UrlSuffix::getCgiScriptName() const 
+{
+	return (_cgiScriptName);
+}
+
+const std::string& UrlSuffix::getCgiScriptExtension() const
+{
+	return (_cgiScriptExtenstion);
+}
+
+const std::string& UrlSuffix::getCgiPathInfo() const 
+{
+	return (_cgiPathInfo);
+}
+
+bool UrlSuffix::setCgiScriptName(std::string scriptWithExtension)
+{
+	//check if script name have valid extension
+	size_t dotPos = scriptWithExtension.rfind(".");
+	if(dotPos == std::string::npos)
+		return false;
+	std::string extension = scriptWithExtension.substr(dotPos);
+	if(Data::isCgiExtensionValid(extension) == true)
+	{
+		_cgiScriptName = scriptWithExtension;
+		_setCgiScriptExtension(extension);
+		return true;
+	}
+	return  false;
+}
+
+
+void UrlSuffix::setCgiPathInfo(std::string cgiPathInfo)
+{
+	_cgiPathInfo = cgiPathInfo;
+}
+
+void UrlSuffix::_setCgiScriptExtension(std::string extension)
+{
+	_cgiScriptExtenstion = extension;	
+}
 
 void UrlSuffix::_initVars()
 {
 	_path = "";
 	_queryParameters = "";
+	_cgiScriptExtenstion = "";
+	_cgiScriptName = "";
 }
 
 void UrlSuffix::_setAllVars()
