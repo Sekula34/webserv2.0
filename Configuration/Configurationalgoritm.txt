@@ -52,7 +52,14 @@ goes through every token
 }
 
 Configuring Cgi
-		location /cgi- bin {
-			handler /bin/python3;
-			extension .py;
+		location /cgi-bin {
+			extension .py .perl .php; #// config file error if there 
 		}
+
+localhost:9090/filip/hello.py   cgi on 
+after hello.py /folder/folder  # this is path_info 
+
+location could be folder.py in that case we are not sure 
+
+after actual script hello.py hoperfully first everythins is path info and this must be folder that is in root/cgi-bin/nameofinterperter/path_info 
+script .py is first .py after location 
