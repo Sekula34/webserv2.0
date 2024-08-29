@@ -152,3 +152,10 @@ bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 	}
 	return false;
 }
+
+bool LocationSettings::isCgiLocation(void) const
+{
+	if(getCgiExtensions().size() == 0)
+		return false;
+	return true;
+}

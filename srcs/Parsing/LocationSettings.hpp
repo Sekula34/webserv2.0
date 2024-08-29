@@ -39,6 +39,7 @@ class LocationSettings : public DefaultSettings
 		 * @return false if file dont exist, path to index will be ""
 		 */
 		bool setIndexPagePath(std::string& pathToIndex) const;
+		bool isCgiLocation(void) const;
 };
 
 class FindByUri
