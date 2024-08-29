@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include "../Utils/Logger.hpp"
 #include "../Response/Response.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
 
@@ -220,20 +221,88 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 	if (!client.cgiChecked && client.getErrorCode() == 0)
 	{
 		client.cgiChecked= true;
-		bool found = true;
 		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
 		if (!clientServer)
 			return ;
 
-		ClientHeader* clientHeader = client.header;
-		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
-		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
-		{ 
-			Logger::warning("Cgi checked and it exist on this location", true);
+		bool locFound = false;
+		std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, *clientServer, locFound);
+		if(locFound)
+		{
+			Logger::info("Cgi checked and it exist on this location :", false); std::cout << location->getLocationUri() << std::endl;
+			_parseCgiURLInfo(*location, client);
 			client.setCgi(new CgiProcessor(client));
 		}
 	}
+}
+
+void ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
+{
+	Logger::info("Called cgi parse url", true);
+	std::string fileName = ParsingUtils::getFileNameFromUrl(client.header->urlSuffix->getPath(), cgiLocation.getLocationUri());
+	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/");
+	if(scriptName == "")
+		scriptName = fileName;
+	if(client.header->urlSuffix->setCgiScriptName(scriptName) == false)
+	{
+		Logger::warning("Implemted  some error code that is not correct");
+		client.setErrorCode(400);
+		return;
+	}
+	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
+	_setCgiPathInfo(client.header->urlSuffix->getPath(), scriptPath, client);
+	Logger::info("Script name and file extension are setted and path info are setted ", false);
+	std::cout << client.header->urlSuffix->getCgiScriptName() << " " << client.header->urlSuffix->getCgiScriptExtension() << " ";
+	std::cout << client.header->urlSuffix->getCgiPathInfo() << std::endl;
+}
+
+void ConnectionDispatcher::_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client)
+{
+	size_t pathInfoPos = urlpath.find(scriptPath);
+	if(pathInfoPos == std::string::npos)
+	{
+		Logger::error("Set cgi path this should never happend");
+		return;
+	}
+	std::string pathInfo = urlpath.substr(pathInfoPos + scriptPath.size());
+	if(_isCgiPathInfoValid(pathInfo) == false)
+	{
+		Logger::error("not valid cgi path");
+		client.setErrorCode(400);
+		return;
+	}
+	client.header->urlSuffix->setCgiPathInfo(pathInfo);
+}
+
+bool ConnectionDispatcher::_isCgiPathInfoValid(std::string pathInfo)
+{
+	if(pathInfo.find("/..") != std::string::npos || pathInfo.find("~") != std::string::npos)
+	{
+		return false;
+	}
+	return true;
+}
+
+std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocation(Client& client, const ServerSettings& cgiServer, bool& foundLoc)
+{
+	foundLoc = false;
+	ClientHeader* clientHeader = client.header;
+	if(clientHeader == NULL)
+	{
+		Logger::error("prepare for cgi client header is NULL this should not happen ever", true);
+		foundLoc = false;
+		return cgiServer.getServerLocations().end();
+	}
+	std::string ServerLocation = cgiServer.getLocationURIfromPath(clientHeader->urlSuffix->getPath());
+	bool found = true;
+	std::vector<LocationSettings>::const_iterator it = cgiServer.fetchLocationWithUri(ServerLocation, found);
+	if(found == false || it->isCgiLocation() == false)
+	{
+		foundLoc = false;
+		return cgiServer.getServerLocations().end();
+	}
+	foundLoc = true;
+	return it;
 }
 
 void	ConnectionDispatcher::_runCgi(Client& client)

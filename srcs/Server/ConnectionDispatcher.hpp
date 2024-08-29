@@ -44,6 +44,10 @@ class ConnectionDispatcher
 		void						_concatMessageAndPeek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
 		void						_checkCgi(Client& client);
+		void 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);
+		void						_setCgiPathInfo(const std::string& fullUrl, const std::string fileName, Client& client);
+		bool						_isCgiPathInfoValid(std::string pathInfo);
+		std::vector<LocationSettings>::const_iterator	_setCgiLocation(Client& client, const ServerSettings& cgiServer, bool& foundLoc);
 		void						_runCgi(Client& client);
 		void 						_epoll_accept_client(int listen_socket);
 		void						_processAnswer(Client& client);
