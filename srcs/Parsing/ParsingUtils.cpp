@@ -166,8 +166,6 @@ std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 std::string ParsingUtils::getFileNameFromUrl(std::string urlSuffixPath, std::string locationUri)
 {
 	std::string fileName;
-	Logger::warning("Called get file name from URL", true);
-	std::cout << "with [" <<urlSuffixPath << "] and [" << locationUri << "]" << std::endl;
 	size_t pos = urlSuffixPath.find(locationUri);
 	if(pos == std::string::npos)
 	{
@@ -175,7 +173,6 @@ std::string ParsingUtils::getFileNameFromUrl(std::string urlSuffixPath, std::str
 		return "";
 	}
 	fileName = urlSuffixPath.substr(pos + locationUri.size());
-	std::cout << "file name is " << fileName << std::endl;
 	return fileName;
 }
 
