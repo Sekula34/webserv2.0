@@ -13,16 +13,18 @@ class Message {
 						// canonical
 						Message(void);
 		virtual			~Message(void);
+		void			addStr(const std::string & s);
 
 						// set and get
 
 						//Message specific functions
 	private:
 		std::list<Node> _chain;	
+		std::list<Node>::iterator _it;	
+		void			checkNodeComplete();
 						Message(Message const & src);
 		Message &		operator=(Message const & rhs);
 };
 
-std::ostream &			operator<<(std::ostream & o, Message const & rhs);
 #endif
 

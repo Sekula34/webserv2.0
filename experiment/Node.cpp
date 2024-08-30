@@ -57,6 +57,17 @@ Node &	Node::operator=(Node const & rhs)
 	}
 	return (*this);
 }
+
+void	Node::concatString(const std::string & s)
+{
+	_str += s;
+}
+
+void	Node::setState(int state)
+{
+	_state = state;
+}
+
 std::string	Node::getStringChunked()
 {
 	if (_type == CHUNK)
@@ -69,6 +80,16 @@ std::string	Node::getStringUnchunked()
 	if (_type == CHUNK)
 		return (_unChunk());
 	return (_str);
+}
+
+const int &		Node::getType() const
+{
+	return (_type);
+}
+
+const int &		Node::getState() const
+{
+	return (_state);
 }
 
 std::string	Node::_chunk()
