@@ -1,6 +1,7 @@
-
 #include "Node.hpp"
 #include <sstream>
+
+
 
 
 /******************************************************************************/
@@ -8,17 +9,21 @@
 /******************************************************************************/
 
 Node::Node (void):
-_state(0),
+_state(INCOMPLETE),
 _type(0),
-_str("")
+_str(""),
+_bufferPos(0),
+_btr(0)
 {
 	std::cout << "Node default constructor called" << std::endl;
 }
 
 Node::Node (const std::string & str, int type):
-_state(0),
+_state(INCOMPLETE),
 _type(type),
-_str(str)
+_str(str),
+_bufferPos(0),
+_btr(0)
 {
 	std::cout << "Node default constructor called" << std::endl;
 }
@@ -56,11 +61,6 @@ Node &	Node::operator=(Node const & rhs)
 	{
 	}
 	return (*this);
-}
-
-void	Node::concatString(const std::string & s)
-{
-	_str += s;
 }
 
 void	Node::setState(int state)
@@ -114,4 +114,92 @@ std::string	Node::_unChunk()
 		found += 2;
 	uc_str = _str.substr(found, _str.size() - found - 2);
 	return (uc_str);
+}
+
+std::string	Node::_getRemainDel(const std::string & del)
+{
+	std::string	tmp = "";
+	size_t		found = 0;
+
+	for (size_t i = 0; i < del.size(); i++)
+	{
+		tmp = del.substr(0, del.size() - i);
+		found = _str.rfind(tmp);
+		if (found == std::string::npos)
+			continue;
+		if (found == _str.size() - (tmp.size()))
+			return (del.substr(tmp.size(), del.size()));
+	}
+	return (del);
+}
+
+size_t	ft_strstr(char *str, std::string remainDel)
+{
+	size_t	i = 0;
+	size_t	j = 0;
+
+	if (!str || !remainDel.c_str())
+		return (0);
+	if (remainDel.c_str()[j] == '\0')
+		return (0);
+	while (i < MAXLINE)
+	{
+		while (str[i + j] == remainDel.c_str()[j])
+		{
+			j++;
+			if (remainDel.c_str()[j] == '\0')
+				return (i);
+		}
+		j = 0;
+		i++;
+	}
+	return (0);
+}
+
+bool	Node::checkRemainDelIsCharStart(std::string remainDel, char* buffer)
+{
+	for (size_t i = 0; i < remainDel.size(); i++)
+	{
+		if (remainDel.c_str()[i] != buffer[i + _bufferPos])	
+			return (false);
+	}
+	return (true);
+}
+
+void	Node::calcBtr(char* buffer, std::string del)
+{
+	std::string remainDel = _getRemainDel(del);
+	if (remainDel.size() < del.size() && checkRemainDelIsCharStart(remainDel, buffer))
+		_btr = remainDel.size();
+	else
+	{
+		size_t	tmp = ft_strstr(buffer, remainDel);
+		if (tmp == 0)
+		{
+			_btr = (MAXLINE - 1);
+			return ;
+		}
+		_btr = tmp + remainDel.size();
+	}
+}
+
+void	Node::concatString(char* buffer)
+{
+	std::string	del;
+
+	if (_type == HEADER)
+	{
+		del = {'\r','\n','\r','\n'};
+		calcBtr(buffer, del);
+	}
+	if (_type == CHUNK)
+	{
+		del = {'\r','\n'};
+		calcBtr(buffer, del);
+
+	}
+	std::string tmp(_str.size() + _btr, '0');
+	
+	for (size_t i = 0; i < _btr; i++)
+		_str += buffer[_bufferPos + i];
 }

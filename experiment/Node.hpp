@@ -2,6 +2,8 @@
 #ifndef NODE_HPP
 # define NODE_HPP
 
+# define	MAXLINE		40
+
 # define	HEADER		0
 # define	BODY		1
 # define	CHUNK		2
@@ -25,20 +27,27 @@ class Node {
 							// set and get
 		void				setString(const std::string & s);
 		void				setState(int state);
-		void				concatString(const std::string & s);
+		void				concatString(char* buffer);
 		std::string			getStringUnchunked();
 		std::string			getStringChunked();
 		const int &			getType() const;
 		const int &			getState() const;
 
 							//Node specific functions
-		std::string			_chunk();
-		std::string			_unChunk();
 
 	private:
 		int					_state;
 		const int			_type;
 		std::string 		_str;
+		size_t				_bufferPos;
+		size_t				_btr;
+
+		std::string			_chunk();
+		std::string			_unChunk();
+		std::string			_getRemainDel(const std::string & del);
+		bool				checkRemainDelIsCharStart(std::string remainDel, char* buffer);
+		void				calcBtr(char* buffer, std::string del);
+
 		Node &				operator=(Node const & rhs);
 };
 

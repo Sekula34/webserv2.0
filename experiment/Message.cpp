@@ -46,7 +46,7 @@ Message &	Message::operator=(Message const & rhs)
 	return (*this);
 }
 
-void	Message::checkNodeComplete()
+void	Message::_checkNodeComplete()
 {
 	// is HEADER complete?
 	if (_it->getType() == HEADER)
@@ -72,9 +72,8 @@ void	Message::checkNodeComplete()
 
 }
 
-void	Message::addStr(const std::string & buffer)
+void	Message::addStr(char* buffer)
 {
-
 	//add buffer to Node String
 	_it->concatString(buffer);
 

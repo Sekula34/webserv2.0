@@ -13,7 +13,7 @@ class Message {
 						// canonical
 						Message(void);
 		virtual			~Message(void);
-		void			addStr(const std::string & s);
+		void			addStr(char* buffer);
 
 						// set and get
 
@@ -21,7 +21,8 @@ class Message {
 	private:
 		std::list<Node> _chain;	
 		std::list<Node>::iterator _it;	
-		void			checkNodeComplete();
+		void			_checkNodeComplete();
+		std::string		_delimiter(std::string & str);
 						Message(Message const & src);
 		Message &		operator=(Message const & rhs);
 };
