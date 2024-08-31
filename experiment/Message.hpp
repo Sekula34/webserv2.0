@@ -10,21 +10,24 @@ class Node;
 class Message {
 
 	public:
-						// canonical
-						Message(void);
-		virtual			~Message(void);
-		void			addStr(char* buffer);
+									// canonical
+									Message(void);
+		virtual						~Message(void);
+		void						bufferToNodes(char* buffer, size_t num);
+		void						printChain();
 
-						// set and get
+									// set and get
 
-						//Message specific functions
+									//Message specific functions
 	private:
-		std::list<Node> _chain;	
-		std::list<Node>::iterator _it;	
-		void			_checkNodeComplete();
-		std::string		_delimiter(std::string & str);
-						Message(Message const & src);
-		Message &		operator=(Message const & rhs);
+		std::list<Node> 			_chain;	
+		size_t						_bufferPos;
+		std::list<Node>::iterator	_it;	
+
+		void						_checkNodeComplete();
+		std::string					_delimiter(std::string & str);
+									Message(Message const & src);
+		Message &					operator=(Message const & rhs);
 };
 
 #endif

@@ -4,17 +4,27 @@
 # include "Node.hpp"
 # include <fcntl.h>
 # include <unistd.h>
+# include <string.h>
 
 int main()
 {
-	int fd = open("message", O_RDONLY);
 	char	buffer[MAXLINE];
 	class Message m;
+	size_t	num;
 
 
-	read(fd, buffer, MAXLINE - 1);
+	int fd = open("request", O_RDONLY);
+	while (true)
+	{
+		memset(buffer, 0, MAXLINE);
+		if ((num = read(fd, buffer, MAXLINE)) <= 0)
+			break;
+		m.bufferToNodes(buffer, num);
+	}
+	m.printChain();
+	close (fd);
 
-	m.addStr(buffer);
+	
 
 
 

@@ -19,7 +19,7 @@ class Node {
 
 	public:
 							// canonical
-							Node (const std::string & str, int type);
+							Node (const std::string & str, int type, size_t bufferPos);
 							~Node(void);
 							Node(void);
 							Node(Node const & src);
@@ -27,7 +27,7 @@ class Node {
 							// set and get
 		void				setString(const std::string & s);
 		void				setState(int state);
-		void				concatString(char* buffer);
+		void				concatString(char* buffer, size_t & bufferPos, size_t num);
 		std::string			getStringUnchunked();
 		std::string			getStringChunked();
 		const int &			getType() const;
@@ -45,8 +45,8 @@ class Node {
 		std::string			_chunk();
 		std::string			_unChunk();
 		std::string			_getRemainDel(const std::string & del);
-		bool				checkRemainDelIsCharStart(std::string remainDel, char* buffer);
-		void				calcBtr(char* buffer, std::string del);
+		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer);
+		void				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
 
 		Node &				operator=(Node const & rhs);
 };

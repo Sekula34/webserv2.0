@@ -9,9 +9,10 @@
 Message::Message (void)
 {
 
-	_chain.push_back(Node("", HEADER));
-	_it = _chain.begin();
 	std::cout << "Message default constructor called" << std::endl;
+	_chain.push_back(Node("", HEADER, _bufferPos));
+	_it = _chain.begin();
+	_bufferPos = 0;
 }
 
 /******************************************************************************/
@@ -72,9 +73,32 @@ void	Message::_checkNodeComplete()
 
 }
 
-void	Message::addStr(char* buffer)
+void	Message::printChain()
 {
-	//add buffer to Node String
-	_it->concatString(buffer);
-
+	for(std::list<Node>::iterator it = _chain.begin(); it != _chain.end(); it++)
+	{
+		if (it->getType() == HEADER)
+			std::cout << "Node Type: HEADER, string: " << std::endl;
+		if (it->getType() == BODY)
+			std::cout << "Node Type: BODY, string: " << std::endl;
+ 		std::cout << it->getStringUnchunked() << std::endl;
+	}
 }
+
+void	Message::bufferToNodes(char* buffer, size_t num)
+{
+	size_t	bufferPos = 0;
+	//add buffer to Node String
+	while (bufferPos < num)
+	{
+		_it->concatString(buffer, bufferPos, num);
+		_checkNodeComplete();
+		if (_it->getState() == COMPLETE)
+		{
+			if (_it->getType() == HEADER)
+				_chain.push_back(Node("", BODY, _bufferPos));
+			_it++;
+		}
+	}
+}
+

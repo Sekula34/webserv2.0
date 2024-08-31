@@ -18,11 +18,11 @@ _btr(0)
 	std::cout << "Node default constructor called" << std::endl;
 }
 
-Node::Node (const std::string & str, int type):
+Node::Node (const std::string & str, int type, size_t bufferPos):
 _state(INCOMPLETE),
 _type(type),
 _str(str),
-_bufferPos(0),
+_bufferPos(bufferPos),
 _btr(0)
 {
 	std::cout << "Node default constructor called" << std::endl;
@@ -133,18 +133,18 @@ std::string	Node::_getRemainDel(const std::string & del)
 	return (del);
 }
 
-size_t	ft_strstr(char *str, std::string remainDel)
+size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
 {
-	size_t	i = 0;
+	size_t	i = bufferPos;
 	size_t	j = 0;
 
-	if (!str || !remainDel.c_str())
+	if (!buffer || !remainDel.c_str())
 		return (0);
 	if (remainDel.c_str()[j] == '\0')
 		return (0);
-	while (i < MAXLINE)
+	while (i < num)
 	{
-		while (str[i + j] == remainDel.c_str()[j])
+		while (buffer[i + j] == remainDel.c_str()[j])
 		{
 			j++;
 			if (remainDel.c_str()[j] == '\0')
@@ -156,7 +156,7 @@ size_t	ft_strstr(char *str, std::string remainDel)
 	return (0);
 }
 
-bool	Node::checkRemainDelIsCharStart(std::string remainDel, char* buffer)
+bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer)
 {
 	for (size_t i = 0; i < remainDel.size(); i++)
 	{
@@ -166,40 +166,45 @@ bool	Node::checkRemainDelIsCharStart(std::string remainDel, char* buffer)
 	return (true);
 }
 
-void	Node::calcBtr(char* buffer, std::string del)
+void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
 {
 	std::string remainDel = _getRemainDel(del);
-	if (remainDel.size() < del.size() && checkRemainDelIsCharStart(remainDel, buffer))
+	if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
 		_btr = remainDel.size();
 	else
 	{
-		size_t	tmp = ft_strstr(buffer, remainDel);
+		size_t	tmp = ft_strstr(buffer, remainDel, bufferPos, num);
 		if (tmp == 0)
 		{
-			_btr = (MAXLINE - 1);
+			_btr = (num);
 			return ;
 		}
 		_btr = tmp + remainDel.size();
 	}
 }
 
-void	Node::concatString(char* buffer)
+void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 {
 	std::string	del;
 
 	if (_type == HEADER)
 	{
 		del = {'\r','\n','\r','\n'};
-		calcBtr(buffer, del);
+		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == CHUNK)
 	{
 		del = {'\r','\n'};
-		calcBtr(buffer, del);
-
+		_calcBtr(buffer, del, bufferPos, num);
+	}
+	if (_type == BODY)
+	{
+		_btr = 26 - _str.size();
 	}
 	std::string tmp(_str.size() + _btr, '0');
 	
 	for (size_t i = 0; i < _btr; i++)
-		_str += buffer[_bufferPos + i];
+		_str += buffer[bufferPos + i];
+	bufferPos += _btr;
+	// std::cout << std::endl  << "string in node: " << std::endl << std::endl << _str << std::endl << std::endl;
 }
