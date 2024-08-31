@@ -2,7 +2,7 @@
 #ifndef NODE_HPP
 # define NODE_HPP
 
-# define	MAXLINE		40
+# define	MAXLINE		3000
 
 # define	HEADER		0
 # define	BODY		1

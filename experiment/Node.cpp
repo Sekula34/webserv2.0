@@ -169,7 +169,8 @@ bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer)
 void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
 {
 	std::string remainDel = _getRemainDel(del);
-	if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
+	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
+	if (_bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
 		_btr = remainDel.size();
 	else
 	{
@@ -186,6 +187,7 @@ void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t nu
 void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 {
 	std::string	del;
+	size_t i = 0;
 
 	if (_type == HEADER)
 	{
@@ -199,12 +201,14 @@ void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 	}
 	if (_type == BODY)
 	{
-		_btr = 26 - _str.size();
+		_btr = 27 - _str.size();
 	}
 	std::string tmp(_str.size() + _btr, '0');
 	
-	for (size_t i = 0; i < _btr; i++)
+	for (; i < _btr && i < num - bufferPos; i++)
+	{
 		_str += buffer[bufferPos + i];
-	bufferPos += _btr;
+	}
+	bufferPos += i;
 	// std::cout << std::endl  << "string in node: " << std::endl << std::endl << _str << std::endl << std::endl;
 }
