@@ -9,10 +9,12 @@
 Message::Message (void)
 {
 
-	std::cout << "Message default constructor called" << std::endl;
+	// std::cout << "Message default constructor called" << std::endl;
 	_chain.push_back(Node("", HEADER, _bufferPos));
 	_it = _chain.begin();
 	_bufferPos = 0;
+	_chunked = false;
+	_trailer = false;
 }
 
 /******************************************************************************/
@@ -21,7 +23,7 @@ Message::Message (void)
 
 Message::~Message (void)
 {
-	std::cout << "Message destructor called" << std::endl;
+	// std::cout << "Message destructor called" << std::endl;
 }
 
 /******************************************************************************/
@@ -47,7 +49,7 @@ Message &	Message::operator=(Message const & rhs)
 	return (*this);
 }
 
-void	Message::_checkNodeComplete()
+void	Message::_isNodeComplete()
 {
 	// is HEADER complete?
 	if (_it->getType() == HEADER)
@@ -85,20 +87,46 @@ void	Message::printChain()
 	}
 }
 
+void	Message::_addNewNode()
+{
+	// create REGULAR BODY NODE if message unchunked and header is complete
+	if (_it->getType() == HEADER && !_chunked)
+		_chain.push_back(Node("", BODY, _bufferPos));
+
+	// create CHUNKED BODY NODE if message is chunked and body is complete
+	if (_it->getType() != LCHUNK && _chunked)
+		_chain.push_back(Node("", CHUNK, _bufferPos));
+
+	// create TRAILER NODE if message is chunked and has trailer and last chunk is complete
+	if (_it->getType() == LCHUNK && _trailer)
+		_chain.push_back(Node("", TRAILER, _bufferPos));
+	_it++;
+	if (_it->getType() == BODY)
+		_it->setBodySize(27);
+}
+
+void	Message::_parseNode()
+{
+	// if chunk read chunk header and set _btr
+	// if chunk header is size 0 set Type to LCHUNK
+	
+	if (_it->getState() != COMPLETE)
+		return ;
+
+	// if header, create new ClientHeader with Filips code
+	
+	// if Trailer, complete the header with info from trailer
+}
+
 void	Message::bufferToNodes(char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
-	//add buffer to Node String
 	while (bufferPos < num)
 	{
 		_it->concatString(buffer, bufferPos, num);
-		_checkNodeComplete();
+		_isNodeComplete();
+		_parseNode();
 		if (_it->getState() == COMPLETE)
-		{
-			if (_it->getType() == HEADER)
-				_chain.push_back(Node("", BODY, _bufferPos));
-			_it++;
-		}
+			_addNewNode();
 	}
 }
-

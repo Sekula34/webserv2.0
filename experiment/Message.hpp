@@ -23,9 +23,14 @@ class Message {
 		std::list<Node> 			_chain;	
 		size_t						_bufferPos;
 		std::list<Node>::iterator	_it;	
+		bool						_chunked;
+		bool						_trailer;
 
-		void						_checkNodeComplete();
+		void						_isNodeComplete();
 		std::string					_delimiter(std::string & str);
+		void						_parseNode();
+		void						_addNewNode();
+
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);
 };
