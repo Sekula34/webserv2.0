@@ -21,7 +21,6 @@ class Message {
 									//Message specific functions
 	private:
 		std::list<Node> 			_chain;	
-		size_t						_bufferPos;
 		std::list<Node>::iterator	_it;	
 		bool						_chunked;
 		bool						_trailer;

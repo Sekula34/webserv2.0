@@ -12,7 +12,6 @@ Node::Node (void):
 _state(INCOMPLETE),
 _type(0),
 _str(""),
-_bufferPos(0),
 _btr(0),
 _chunkSize(0),
 _bodySize(0)
@@ -20,11 +19,10 @@ _bodySize(0)
 	// std::cout << "Node default constructor called" << std::endl;
 }
 
-Node::Node (const std::string & str, int type, size_t bufferPos):
+Node::Node (const std::string & str, int type):
 _state(INCOMPLETE),
 _type(type),
 _str(str),
-_bufferPos(bufferPos),
 _btr(0),
 _chunkSize(0),
 _bodySize(0)

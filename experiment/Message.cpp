@@ -10,9 +10,8 @@ Message::Message (void)
 {
 
 	// std::cout << "Message default constructor called" << std::endl;
-	_chain.push_back(Node("", HEADER, _bufferPos));
+	_chain.push_back(Node("", HEADER));
 	_it = _chain.begin();
-	_bufferPos = 0;
 	_chunked = false;
 	_trailer = false;
 }
@@ -79,11 +78,13 @@ void	Message::printChain()
 {
 	for(std::list<Node>::iterator it = _chain.begin(); it != _chain.end(); it++)
 	{
-		if (it->getType() == HEADER)
-			std::cout << "Node Type: HEADER, string: " << std::endl;
-		if (it->getType() == BODY)
-			std::cout << "Node Type: BODY, string: " << std::endl;
- 		std::cout << it->getStringUnchunked() << std::endl;
+		// if (it->getType() == HEADER)
+		// 	std::cout << "Node Type: HEADER, string: " << std::endl;
+		// if (it->getType() == BODY)
+		// 	std::cout << "Node Type: BODY, string: " << std::endl;
+ 		std::cout << it->getStringUnchunked();
+		// if (it->getType() == BODY)
+		// 	std::cout << std::endl;
 	}
 }
 
@@ -91,15 +92,15 @@ void	Message::_addNewNode()
 {
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked)
-		_chain.push_back(Node("", BODY, _bufferPos));
+		_chain.push_back(Node("", BODY));
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete
 	if (_it->getType() != LCHUNK && _chunked)
-		_chain.push_back(Node("", CHUNK, _bufferPos));
+		_chain.push_back(Node("", CHUNK));
 
 	// create TRAILER NODE if message is chunked and has trailer and last chunk is complete
 	if (_it->getType() == LCHUNK && _trailer)
-		_chain.push_back(Node("", TRAILER, _bufferPos));
+		_chain.push_back(Node("", TRAILER));
 	_it++;
 	if (_it->getType() == BODY)
 		_it->setBodySize(27);

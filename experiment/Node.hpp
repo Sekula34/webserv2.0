@@ -20,7 +20,7 @@ class Node {
 
 	public:
 							// canonical
-							Node (const std::string & str, int type, size_t bufferPos);
+							Node (const std::string & str, int type);
 							~Node(void);
 							Node(void);
 							Node(Node const & src);
