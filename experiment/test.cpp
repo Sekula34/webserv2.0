@@ -13,7 +13,7 @@ int main()
 	size_t	num;
 
 
-	int fd = open("request", O_RDONLY);
+	int fd = open("chunked_request", O_RDONLY);
 	while (true)
 	{
 		memset(buffer, 0, MAXLINE);

@@ -33,7 +33,11 @@ class Node {
 		std::string			getStringChunked();
 		const int &			getType() const;
 		const int &			getState() const;
+		bool				getChunkHeader() const;
+		size_t				getChunkSize() const;
+		void				setChunkHeader(bool b);
 		void				setBodySize(const size_t size);
+		void				setChunkSize(const size_t size);
 
 							//Node specific functions
 
@@ -45,6 +49,7 @@ class Node {
 		size_t				_btr;
 		size_t				_chunkSize;
 		size_t				_bodySize;
+		bool				_chunkHeader;
 
 		std::string			_chunk();
 		std::string			_unChunk();

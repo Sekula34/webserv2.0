@@ -14,7 +14,8 @@ _type(0),
 _str(""),
 _btr(0),
 _chunkSize(0),
-_bodySize(0)
+_bodySize(0),
+_chunkHeader(false)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -25,7 +26,8 @@ _type(type),
 _str(str),
 _btr(0),
 _chunkSize(0),
-_bodySize(0)
+_bodySize(0),
+_chunkHeader(false)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -84,14 +86,39 @@ std::string	Node::getStringUnchunked()
 	return (_str);
 }
 
-const int &		Node::getType() const
+const int &	Node::getType() const
 {
 	return (_type);
 }
 
-const int &		Node::getState() const
+const int &	Node::getState() const
 {
 	return (_state);
+}
+
+bool	Node::getChunkHeader() const
+{
+	return (_chunkHeader);
+}
+
+size_t	Node::getChunkSize() const
+{
+	return (_chunkSize);
+}
+
+void	Node::setChunkHeader(bool b)
+{
+	_chunkHeader = b;
+}
+
+void	Node::setChunkSize(const size_t size)
+{
+	_chunkSize = size;
+}
+
+void	Node::setBodySize(const size_t size)
+{
+	_bodySize = size;
 }
 
 std::string	Node::_chunk()
@@ -135,23 +162,19 @@ std::string	Node::_getRemainDel(const std::string & del)
 	return (del);
 }
 
-void	Node::setBodySize(const size_t size)
-{
-	_bodySize = size;
-}
 
 size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
 {
-	size_t	i = bufferPos;
+	size_t	i = 0;
 	size_t	j = 0;
 
 	if (!buffer || !remainDel.c_str())
 		return (0);
 	if (remainDel.c_str()[j] == '\0')
 		return (0);
-	while (i < num)
+	while (i + bufferPos < num)
 	{
-		while (buffer[i + j] == remainDel.c_str()[j])
+		while (buffer[i + j + bufferPos] == remainDel.c_str()[j])
 		{
 			j++;
 			if (remainDel.c_str()[j] == '\0')
@@ -177,14 +200,14 @@ void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t nu
 {
 	std::string remainDel = _getRemainDel(del);
 	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
-	if (_bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
+	if (bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
 		_btr = remainDel.size();
 	else
 	{
 		size_t	tmp = ft_strstr(buffer, remainDel, bufferPos, num);
 		if (tmp == 0)
 		{
-			_btr = (num);
+			_btr = num;
 			return ;
 		}
 		_btr = tmp + remainDel.size();
@@ -199,15 +222,16 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 		del = {'\r','\n','\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
-	if (_type == CHUNK || _type == LCHUNK)
+	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
 		del = {'\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)
 		_btr = _bodySize - _str.size();
-	if ((_type == CHUNK || LCHUNK) && _chunkSize)
-		_btr = _chunkSize - _str.size();
+	if ((_type == CHUNK || LCHUNK) && _chunkHeader)
+		_btr = _chunkSize + 2; // - _str.size + sizeo of chunk Header!!!!;
+		// _btr = _chunkSize + 2 - _str.size();
 }
 
 void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)

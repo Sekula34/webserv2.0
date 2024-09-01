@@ -1,6 +1,7 @@
 
 #include "Message.hpp"
 #include "Node.hpp"
+#include <sstream>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -48,43 +49,19 @@ Message &	Message::operator=(Message const & rhs)
 	return (*this);
 }
 
-void	Message::_isNodeComplete()
-{
-	// is HEADER complete?
-	if (_it->getType() == HEADER)
-	{
-		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
-			_it->setState(COMPLETE);
-	}
-
-	// is CHUNK complete?
-	if (_it->getType() == CHUNK)
-	{
-		size_t left = 0;
-		size_t right = 0;
-
-		left = _it->getStringUnchunked().find("\r\n");
-		right = _it->getStringUnchunked().rfind("\r\n");
-
-		if (left != std::string::npos && right != std::string::npos && left != right)	
-			_it->setState(COMPLETE);
-	}
-
-	// is BODY complete
-
-}
-
 void	Message::printChain()
 {
 	for(std::list<Node>::iterator it = _chain.begin(); it != _chain.end(); it++)
 	{
-		// if (it->getType() == HEADER)
-		// 	std::cout << "Node Type: HEADER, string: " << std::endl;
-		// if (it->getType() == BODY)
-		// 	std::cout << "Node Type: BODY, string: " << std::endl;
+		if (it->getType() == HEADER)
+			std::cout << "Node Type: HEADER, string: " << std::endl;
+		if (it->getType() == BODY)
+			std::cout << "Node Type: BODY, string: " << std::endl;
+		if (it->getType() == CHUNK)
+			std::cout << "Node Type: CHUNK, string: " << std::endl;
  		std::cout << it->getStringUnchunked();
-		// if (it->getType() == BODY)
-		// 	std::cout << std::endl;
+		if (it->getType() != BODY)
+			std::cout << std::endl;
 	}
 }
 
@@ -106,15 +83,65 @@ void	Message::_addNewNode()
 		_it->setBodySize(27);
 }
 
+size_t	calcChunkSize(std::string s)
+{
+	size_t	x;   
+	std::stringstream ss;
+	ss << std::hex << s;
+	ss >> x;
+	return (x);	
+}
+
+
+void	Message::_isNodeComplete()
+{
+	// is HEADER complete?
+	if (_it->getType() == HEADER)
+	{
+		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
+			_it->setState(COMPLETE);
+	}
+
+	// is CHUNK HEADER complete?
+	if (_it->getType() == CHUNK && !_it->getChunkHeader())
+	{
+		if (_it->getStringChunked().find("\r\n") != std::string::npos)
+			_it->setChunkHeader(true);
+	}
+
+	// is CHUNK complete?
+	if (_it->getType() == CHUNK && _it->getChunkHeader())
+	{
+		size_t left = 0;
+		size_t right = 0;
+
+		left = _it->getStringChunked().find("\r\n");
+		right = _it->getStringChunked().rfind("\r\n");
+
+		if (left != std::string::npos && right != std::string::npos && left != right)	
+			_it->setState(COMPLETE);
+	}
+
+	// is BODY complete
+
+}
+
+
 void	Message::_parseNode()
 {
 	// if chunk read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
+	if (_it->getType() == CHUNK && _it->getChunkHeader() && _it->getChunkSize() == 0)
+		_it->setChunkSize(calcChunkSize(_it->getStringChunked()));
 	
 	if (_it->getState() != COMPLETE)
 		return ;
 
 	// if header, create new ClientHeader with Filips code
+	if (_it->getType() == HEADER)
+	{
+		_chunked = true;
+	}
 	
 	// if Trailer, complete the header with info from trailer
 }
@@ -127,7 +154,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_it->concatString(buffer, bufferPos, num);
 		_isNodeComplete();
 		_parseNode();
-		if (_it->getState() == COMPLETE)
+		if (_it->getState() == COMPLETE && (bufferPos < num))
 			_addNewNode();
 	}
 }
