@@ -132,7 +132,10 @@ void	Message::_parseNode()
 	// if chunk read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
 	if (_it->getType() == CHUNK && _it->getChunkHeader() && _it->getChunkSize() == 0)
+	{
+		_it->setChunkHeaderSize(_it->getStringChunked().size());
 		_it->setChunkSize(calcChunkSize(_it->getStringChunked()));
+	}
 	
 	if (_it->getState() != COMPLETE)
 		return ;

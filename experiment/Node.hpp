@@ -2,7 +2,9 @@
 #ifndef NODE_HPP
 # define NODE_HPP
 
-# define	MAXLINE		3000
+#ifndef MAXLINE
+# define	MAXLINE		4
+#endif
 
 # define	HEADER		0
 # define	BODY		1
@@ -26,9 +28,9 @@ class Node {
 							Node(Node const & src);
 
 							// set and get
+		void				concatString(char* buffer, size_t & bufferPos, size_t num);
 		void				setString(const std::string & s);
 		void				setState(int state);
-		void				concatString(char* buffer, size_t & bufferPos, size_t num);
 		std::string			getStringUnchunked();
 		std::string			getStringChunked();
 		const int &			getType() const;
@@ -38,6 +40,7 @@ class Node {
 		void				setChunkHeader(bool b);
 		void				setBodySize(const size_t size);
 		void				setChunkSize(const size_t size);
+		void				setChunkHeaderSize(const size_t size);
 
 							//Node specific functions
 
@@ -45,16 +48,16 @@ class Node {
 		int					_state;
 		const int			_type;
 		std::string 		_str;
-		size_t				_bufferPos;
 		size_t				_btr;
 		size_t				_chunkSize;
+		size_t				_chunkHeaderSize;
 		size_t				_bodySize;
 		bool				_chunkHeader;
 
 		std::string			_chunk();
 		std::string			_unChunk();
 		std::string			_getRemainDel(const std::string & del);
-		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer);
+		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos);
 		void				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
 		void				_setBtr(char* buffer, size_t & bufferPos, size_t num);
 

@@ -1,0 +1,16 @@
+Node Type: HEADER, string: 
+POST /test HTTP/1.1
+Host: foo.example
+Content-Type: application/x-www-form-urlencoded
+Transfer-Encoding: chunked
+
+
+
+Node Type: CHUNK, string: 
+Hello1
+Node Type: CHUNK, string: 
+Hello2
+Node Type: CHUNK, string: 
+Hello3
+Node Type: CHUNK, string: 
+Hello4

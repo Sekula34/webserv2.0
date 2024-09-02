@@ -14,6 +14,7 @@ _type(0),
 _str(""),
 _btr(0),
 _chunkSize(0),
+_chunkHeaderSize(0),
 _bodySize(0),
 _chunkHeader(false)
 {
@@ -26,6 +27,7 @@ _type(type),
 _str(str),
 _btr(0),
 _chunkSize(0),
+_chunkHeaderSize(0),
 _bodySize(0),
 _chunkHeader(false)
 {
@@ -48,7 +50,12 @@ Node::~Node (void)
 Node::Node(Node const & src):
 _state(src._state),
 _type(src._type),
-_str(src._str)
+_str(src._str),
+_btr(src._btr),
+_chunkSize(src._chunkSize),
+_chunkHeaderSize(src._chunkHeaderSize),
+_bodySize(src._bodySize),
+_chunkHeader(src._chunkHeader)
 {
 	//std::cout << "Node copy constructor called" << std::endl;
 	*this = src;
@@ -120,6 +127,10 @@ void	Node::setBodySize(const size_t size)
 {
 	_bodySize = size;
 }
+void	Node::setChunkHeaderSize(const size_t size)
+{
+	_chunkHeaderSize = size;
+}
 
 std::string	Node::_chunk()
 {
@@ -186,11 +197,13 @@ size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t
 	return (0);
 }
 
-bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer)
+bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos)
 {
+	if (remainDel.size() + bufferPos > MAXLINE)
+		return (false);
 	for (size_t i = 0; i < remainDel.size(); i++)
 	{
-		if (remainDel.c_str()[i] != buffer[i + _bufferPos])	
+		if (remainDel.c_str()[i] != buffer[i + bufferPos])	
 			return (false);
 	}
 	return (true);
@@ -200,7 +213,7 @@ void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t nu
 {
 	std::string remainDel = _getRemainDel(del);
 	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
-	if (bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
+	if (bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer, bufferPos))
 		_btr = remainDel.size();
 	else
 	{
@@ -230,8 +243,7 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	if (_type == BODY)
 		_btr = _bodySize - _str.size();
 	if ((_type == CHUNK || LCHUNK) && _chunkHeader)
-		_btr = _chunkSize + 2; // - _str.size + sizeo of chunk Header!!!!;
-		// _btr = _chunkSize + 2 - _str.size();
+		_btr = _chunkSize + 2 - _str.size() + _chunkHeaderSize;
 }
 
 void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
