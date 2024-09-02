@@ -3,7 +3,7 @@
 # define NODE_HPP
 
 #ifndef MAXLINE
-# define	MAXLINE		20
+# define	MAXLINE		200
 #endif
 
 # define	HEADER		0
@@ -38,6 +38,7 @@ class Node {
 		const int &			getState() const;
 		bool				getChunkHeader() const;
 		size_t				getChunkSize() const;
+		size_t				getBodySize() const;
 		void				setType(int type);
 		void				setChunkHeader(bool b);
 		void				setBodySize(const size_t size);
@@ -46,14 +47,14 @@ class Node {
 
 
 	private:
-		int					_state;
-		int					_type;
-		std::string 		_str;
-		size_t				_btr;
-		size_t				_chunkSize;
-		size_t				_chunkHeaderSize;
-		size_t				_bodySize;
-		bool				_chunkHeader;
+		int					_state; // Node is complete
+		int					_type; // could be of type: HEADER, BODY, CHUNK, LCHUNK, TRAILER
+		std::string 		_str; // the content of message in node
+		size_t				_btr; // bytes to read from the buffer
+		size_t				_chunkSize; // the size of of CHUNK BODY
+		size_t				_chunkHeaderSize; // size of CHUNK HEADER
+		size_t				_bodySize; // if this node is a BODY this will be it's size
+		bool				_chunkHeader; // flag to indicate that we have set chunkSize
 
 							//Node specific functions
 		std::string			_chunk();

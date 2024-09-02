@@ -21,11 +21,11 @@ class Message {
 
 									//Message specific functions
 	private:
-		std::list<Node> 			_chain;	
-		std::list<Node>::iterator	_it;	
-		bool						_chunked;
-		bool						_trailer;
-		int							_state;
+		std::list<Node> 			_chain;	 // linked list of nodes
+		std::list<Node>::iterator	_it;	// pointing to current node in chain
+		bool						_chunked; // this is a chunked request
+		bool						_trailer; // we are expecting a trailer as last node
+		int							_state; // message is complete
 
 		void						_isNodeComplete();
 		void						_parseNode();

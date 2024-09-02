@@ -138,7 +138,7 @@ void	Node::setType(int type)
 }
 
 std::string	Node::_chunk()
-{
+{	
 	std::stringstream ss;
 	std::string result;
 	std::string del = {'\r','\n'};
@@ -150,6 +150,8 @@ std::string	Node::_chunk()
 
 std::string	Node::_unChunk()
 {
+	if (_str.size() == 0)
+		return (std::cout << "can't unchunk empty string", "");
 	std::string uc_str;
 	std::string del = {'\r', '\n'};
 	std::size_t found = 0;
@@ -157,6 +159,8 @@ std::string	Node::_unChunk()
 	found = _str.find(del);
 	if (found != std::string::npos)
 		found += 2;
+	else
+		return (_str);
 	uc_str = _str.substr(found, _str.size() - found - 2);
 	return (uc_str);
 }
@@ -178,6 +182,10 @@ std::string	Node::_getRemainDel(const std::string & del)
 	return (del);
 }
 
+size_t	Node::getBodySize() const
+{
+	return (_bodySize);
+}
 
 size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
 {
@@ -248,20 +256,21 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	if (_type == BODY)
 		_btr = _bodySize - _str.size();
 	if ((_type == CHUNK || LCHUNK) && _chunkHeader)
-		_btr = _chunkSize + 2 - _str.size() + _chunkHeaderSize;
+		_btr =  _chunkHeaderSize + _chunkSize + 2 - _str.size() ;
 }
 
 void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 {
 	size_t i = 0;
 
-	// create new string as seldom as possible
-	// std::string tmp(_str.size() + _btr, '0');
 	
 	// sets variable _btr, which is the bytes to read from buffer
 	// _btr is based on finding the delimiter of Header and Chunk in buffer
 	// or on bodysize and chunksize if applicable
 	_setBtr(buffer, bufferPos, num);
+
+	// increase the size of string so it can hold the new bytes (_btr)
+	_str.reserve(_str.size() + _btr);
 
 	// fill the string with chars from buffer up to _btr or end of filled part of buffer
 	for (; i < _btr && i < num - bufferPos; i++)

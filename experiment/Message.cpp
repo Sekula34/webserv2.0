@@ -67,9 +67,7 @@ void	Message::printChain()
 			std::cout << "Node Type: CHUNK, string: " << std::endl;
 		if (it->getType() == LCHUNK)
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
- 		std::cout << it->getStringUnchunked();
-		if (it->getType() != BODY)
-			std::cout << std::endl;
+ 		std::cout << it->getStringUnchunked() << std::endl << std::endl;
 	}
 }
 
@@ -103,8 +101,8 @@ size_t	calcChunkSize(std::string s)
 
 void	Message::_isNodeComplete()
 {
-	// is HEADER complete?
-	if (_it->getType() == HEADER)
+	// is HEADER of TRAILER complete?
+	if (_it->getType() == HEADER || _it->getType() == TRAILER)
 	{
 		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
 			_it->setState(COMPLETE);
@@ -117,8 +115,8 @@ void	Message::_isNodeComplete()
 			_it->setChunkHeader(true);
 	}
 
-	// is CHUNK complete?
-	if (_it->getType() == CHUNK && _it->getChunkHeader())
+	// is CHUNK or LCHUNK complete?
+	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
 	{
 		size_t left = 0;
 		size_t right = 0;
@@ -129,15 +127,12 @@ void	Message::_isNodeComplete()
 		if (left != std::string::npos && right != std::string::npos && left != right)	
 			_it->setState(COMPLETE);
 	}
-
-	// is LCHUNK complete?
-	if (_it->getType() == LCHUNK)
+	if (_it->getType() == BODY)
 	{
-		if (_it->getStringChunked() == "0\r\n\r\n")	
+		if (_it->getBodySize() == _it->getStringUnchunked().size())	
 			_it->setState(COMPLETE);
 	}
 }
-
 
 void	Message::_parseNode()
 {
@@ -159,13 +154,15 @@ void	Message::_parseNode()
 	if (_it->getState() != COMPLETE)
 		return ;
 
-	if (_it->getType() == LCHUNK && !_trailer)
+	if ((_it->getType() == LCHUNK && !_trailer)
+		|| _it->getType() == BODY || _it->getType() == TRAILER)
 		_state = COMPLETE;
 
 	// if header, create new ClientHeader with Filips code
 	if (_it->getType() == HEADER)
 	{
 		_chunked = true;
+		// _trailer = true;
 	}
 	
 	// if Trailer, complete the header with info from trailer
@@ -180,6 +177,9 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_isNodeComplete();
 		_parseNode();
 		if (_it->getState() == COMPLETE && (bufferPos < num) && _state == INCOMPLETE)
+		{
+			// std::cout << _it->getStringUnchunked() << std::endl;
 			_addNewNode();
+		}
 	}
 }
