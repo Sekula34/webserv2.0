@@ -13,4 +13,6 @@ Hello2
 Node Type: CHUNK, string: 
 Hello3
 Node Type: CHUNK, string: 
-Hello4
+Hello
+Node Type: LAST CHUNK, string: 
+

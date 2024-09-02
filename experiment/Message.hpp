@@ -17,6 +17,7 @@ class Message {
 		void						printChain();
 
 									// set and get
+		int							getState() const;
 
 									//Message specific functions
 	private:
@@ -24,9 +25,9 @@ class Message {
 		std::list<Node>::iterator	_it;	
 		bool						_chunked;
 		bool						_trailer;
+		int							_state;
 
 		void						_isNodeComplete();
-		std::string					_delimiter(std::string & str);
 		void						_parseNode();
 		void						_addNewNode();
 

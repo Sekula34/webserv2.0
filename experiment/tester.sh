@@ -7,7 +7,7 @@ TEMP_OUTPUT="temp_output.txt"
 
 # Initialize MAXLINE value
 MAXLINE=1
-MAX_LIMIT=5
+MAX_LIMIT=100
 
 # Flag to track if any mismatch occurred
 mismatch_found=false

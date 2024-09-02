@@ -15,6 +15,7 @@ Message::Message (void)
 	_it = _chain.begin();
 	_chunked = false;
 	_trailer = false;
+	_state = INCOMPLETE;
 }
 
 /******************************************************************************/
@@ -49,6 +50,11 @@ Message &	Message::operator=(Message const & rhs)
 	return (*this);
 }
 
+int	Message::getState() const
+{
+	return (_state);
+}
+
 void	Message::printChain()
 {
 	for(std::list<Node>::iterator it = _chain.begin(); it != _chain.end(); it++)
@@ -59,6 +65,8 @@ void	Message::printChain()
 			std::cout << "Node Type: BODY, string: " << std::endl;
 		if (it->getType() == CHUNK)
 			std::cout << "Node Type: CHUNK, string: " << std::endl;
+		if (it->getType() == LCHUNK)
+			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
  		std::cout << it->getStringUnchunked();
 		if (it->getType() != BODY)
 			std::cout << std::endl;
@@ -122,23 +130,37 @@ void	Message::_isNodeComplete()
 			_it->setState(COMPLETE);
 	}
 
-	// is BODY complete
-
+	// is LCHUNK complete?
+	if (_it->getType() == LCHUNK)
+	{
+		if (_it->getStringChunked() == "0\r\n\r\n")	
+			_it->setState(COMPLETE);
+	}
 }
 
 
 void	Message::_parseNode()
 {
-	// if chunk read chunk header and set _btr
+	// if message is chunked -> read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
 	if (_it->getType() == CHUNK && _it->getChunkHeader() && _it->getChunkSize() == 0)
 	{
+		// save the size of the chunk header, in order to be able to calculate
+		// the full length of chunk: chunk header + chunk body defined by hex number in chunk header
 		_it->setChunkHeaderSize(_it->getStringChunked().size());
+
+		// save the size of the expected chunk body (save the hex number from first line)
 		_it->setChunkSize(calcChunkSize(_it->getStringChunked()));
+
+		if (_it->getChunkSize() == 0)
+			_it->setType(LCHUNK);
 	}
 	
 	if (_it->getState() != COMPLETE)
 		return ;
+
+	if (_it->getType() == LCHUNK && !_trailer)
+		_state = COMPLETE;
 
 	// if header, create new ClientHeader with Filips code
 	if (_it->getType() == HEADER)
@@ -152,12 +174,12 @@ void	Message::_parseNode()
 void	Message::bufferToNodes(char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
-	while (bufferPos < num)
+	while (bufferPos < num && _state == INCOMPLETE)
 	{
 		_it->concatString(buffer, bufferPos, num);
 		_isNodeComplete();
 		_parseNode();
-		if (_it->getState() == COMPLETE && (bufferPos < num))
+		if (_it->getState() == COMPLETE && (bufferPos < num) && _state == INCOMPLETE)
 			_addNewNode();
 	}
 }

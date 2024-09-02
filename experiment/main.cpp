@@ -8,9 +8,9 @@
 
 int main()
 {
-	char	buffer[MAXLINE];
-	class Message m;
-	size_t	num;
+	char			buffer[MAXLINE];
+	class Message	m;
+	size_t			num;
 
 
 	int fd = open("chunked_request", O_RDONLY);
@@ -20,6 +20,8 @@ int main()
 		if ((num = read(fd, buffer, MAXLINE)) <= 0)
 			break;
 		m.bufferToNodes(buffer, num);
+		if (m.getState() == COMPLETE)
+			break;
 	}
 	m.printChain();
 	close (fd);

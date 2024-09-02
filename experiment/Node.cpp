@@ -81,14 +81,14 @@ void	Node::setState(int state)
 
 std::string	Node::getStringChunked()
 {
-	if (_type == CHUNK)
+	if (_type == CHUNK || _type == LCHUNK)
 		return (_str);
 	return (_chunk());
 }
 
 std::string	Node::getStringUnchunked()
 {
-	if (_type == CHUNK)
+	if (_type == CHUNK || _type == LCHUNK)
 		return (_unChunk());
 	return (_str);
 }
@@ -130,6 +130,11 @@ void	Node::setBodySize(const size_t size)
 void	Node::setChunkHeaderSize(const size_t size)
 {
 	_chunkHeaderSize = size;
+}
+
+void	Node::setType(int type)
+{
+	_type = type;	
 }
 
 std::string	Node::_chunk()
