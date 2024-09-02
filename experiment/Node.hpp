@@ -17,6 +17,7 @@
 # define	ERROR		-1
 
 # include <iostream>
+# include <sstream>
 
 class Node {
 
@@ -55,6 +56,7 @@ class Node {
 		size_t				_chunkHeaderSize; // size of CHUNK HEADER
 		size_t				_bodySize; // if this node is a BODY this will be it's size
 		bool				_chunkHeader; // flag to indicate that we have set chunkSize
+		// std::stringstream 	_ss;
 
 							//Node specific functions
 		std::string			_chunk();

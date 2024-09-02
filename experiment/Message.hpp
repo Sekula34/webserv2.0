@@ -4,6 +4,7 @@
 
 # include <iostream>
 # include <list>
+# include <sstream>
 
 class Node;
 
@@ -26,10 +27,12 @@ class Message {
 		bool						_chunked; // this is a chunked request
 		bool						_trailer; // we are expecting a trailer as last node
 		int							_state; // message is complete
+		std::stringstream 			_ss;
 
 		void						_isNodeComplete();
 		void						_parseNode();
 		void						_addNewNode();
+		size_t						_calcChunkSize(std::string s);
 
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);

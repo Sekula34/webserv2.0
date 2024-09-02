@@ -67,6 +67,8 @@ void	Message::printChain()
 			std::cout << "Node Type: CHUNK, string: " << std::endl;
 		if (it->getType() == LCHUNK)
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
+		if (it->getType() == TRAILER)
+			std::cout << "Node Type: TRAILER, string: " << std::endl;
  		std::cout << it->getStringUnchunked() << std::endl << std::endl;
 	}
 }
@@ -75,7 +77,27 @@ void	Message::_addNewNode()
 {
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked)
-		_chain.push_back(Node("", BODY));
+	{
+		std::string target("Content-Length:");
+		size_t found =_it->getStringUnchunked().find(target);
+		found += target.length();
+		size_t endl = _it->getStringUnchunked().find("\n", found);
+		std::string number = _it->getStringUnchunked().substr(found + 1, endl - found);
+		_ss.clear();
+		_ss.str("");
+		_ss << number;
+		size_t bodySize;
+		_ss >> bodySize;
+		_it->setBodySize(bodySize);
+		found = _it->getStringUnchunked().find("Trailer");
+		if (found != std::string::npos)
+			_trailer = true;
+		found = _it->getStringUnchunked().find("chunked");
+		if (found != std::string::npos)
+			_chunked = true;
+		if (!_chunked)
+			_chain.push_back(Node("", BODY));
+	}
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete
 	if (_it->getType() != LCHUNK && _chunked)
@@ -86,15 +108,16 @@ void	Message::_addNewNode()
 		_chain.push_back(Node("", TRAILER));
 	_it++;
 	if (_it->getType() == BODY)
-		_it->setBodySize(27);
+		_it->setBodySize(_chain.begin()->getBodySize());
 }
 
-size_t	calcChunkSize(std::string s)
+size_t	Message::_calcChunkSize(std::string s)
 {
 	size_t	x;   
-	std::stringstream ss;
-	ss << std::hex << s;
-	ss >> x;
+	_ss.clear();
+	_ss.str("");
+	_ss << std::hex << s;
+	_ss >> x;
 	return (x);	
 }
 
@@ -145,7 +168,7 @@ void	Message::_parseNode()
 		_it->setChunkHeaderSize(_it->getStringChunked().size());
 
 		// save the size of the expected chunk body (save the hex number from first line)
-		_it->setChunkSize(calcChunkSize(_it->getStringChunked()));
+		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
 
 		if (_it->getChunkSize() == 0)
 			_it->setType(LCHUNK);
@@ -161,7 +184,7 @@ void	Message::_parseNode()
 	// if header, create new ClientHeader with Filips code
 	if (_it->getType() == HEADER)
 	{
-		_chunked = true;
+		// _chunked = true;
 		// _trailer = true;
 	}
 	
