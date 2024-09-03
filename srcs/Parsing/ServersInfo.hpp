@@ -24,7 +24,7 @@ class ServersInfo
 		std::vector<ServerSettings> _getAllServersIdWithPort(int port) const;
 
 	public :
-		ServersInfo(std::string configPath = "Configuration/config_files/simple_nginx_conf.conf");
+		ServersInfo(std::string configPath = "configuration_files/default.conf");
 		ServersInfo(const ServersInfo& source);
 		ServersInfo& operator=(const ServersInfo& source);
 		~ServersInfo();
