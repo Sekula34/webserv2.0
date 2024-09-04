@@ -78,6 +78,7 @@ void	Message::_addNewNode()
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked)
 	{
+		// PARSING, THIS IS TEMPORARY AND WILL BE DONE BY FILIPS CLASS
 		std::string target("Content-Length:");
 		size_t found =_it->getStringUnchunked().find(target);
 		found += target.length();
@@ -95,6 +96,9 @@ void	Message::_addNewNode()
 		found = _it->getStringUnchunked().find("chunked");
 		if (found != std::string::npos)
 			_chunked = true;
+		// TEMPORARY CODE END
+		
+
 		if (!_chunked)
 			_chain.push_back(Node("", BODY));
 	}
@@ -118,6 +122,8 @@ size_t	Message::_calcChunkSize(std::string s)
 	_ss.str("");
 	_ss << std::hex << s;
 	_ss >> x;
+	if (_ss.fail())
+		_state = ERROR;
 	return (x);	
 }
 
@@ -141,15 +147,15 @@ void	Message::_isNodeComplete()
 	// is CHUNK or LCHUNK complete?
 	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
 	{
-		size_t left = 0;
-		size_t right = 0;
-
-		left = _it->getStringChunked().find("\r\n");
-		right = _it->getStringChunked().rfind("\r\n");
-
-		if (left != std::string::npos && right != std::string::npos && left != right)	
+		if(_it->getChunkHeaderSize() + _it->getChunkSize() + 2 == _it->getStringChunked().length())
 			_it->setState(COMPLETE);
+		if (_it->getState() == COMPLETE
+	  		&& (_it->getStringChunked()[_it->getStringChunked().length() - 2] != '\r'
+	  		|| _it->getStringChunked()[_it->getStringChunked().length() - 1] != '\n'))
+			_state = ERROR;
 	}
+
+	// is BODY complete?
 	if (_it->getType() == BODY)
 	{
 		if (_it->getBodySize() == _it->getStringUnchunked().size())	

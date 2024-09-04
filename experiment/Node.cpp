@@ -110,10 +110,16 @@ size_t	Node::getChunkSize() const
 	return (_chunkSize);
 }
 
+size_t	Node::getChunkHeaderSize()
+{
+	return (_chunkHeaderSize);
+}
+
 void	Node::setChunkHeader(bool b)
 {
 	_chunkHeader = b;
 }
+
 
 void	Node::setChunkSize(const size_t size)
 {

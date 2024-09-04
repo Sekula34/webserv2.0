@@ -40,6 +40,7 @@ class Node {
 		bool				getChunkHeader() const;
 		size_t				getChunkSize() const;
 		size_t				getBodySize() const;
+		size_t				getChunkHeaderSize();
 		void				setType(int type);
 		void				setChunkHeader(bool b);
 		void				setBodySize(const size_t size);

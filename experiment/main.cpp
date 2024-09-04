@@ -21,10 +21,13 @@ int main()
 		if ((num = read(fd, buffer, MAXLINE)) <= 0)
 			break;
 		m.bufferToNodes(buffer, num);
-		if (m.getState() == COMPLETE)
+		if (m.getState() == COMPLETE || m.getState() == ERROR)
 			break;
 	}
-	m.printChain();
+	if (m.getState() == ERROR)
+		std::cout << "Invalid Request from Client!" << std::endl;
+	else
+		m.printChain();
 	close (fd);
 
 	
