@@ -184,8 +184,6 @@ void	Message::_parseNode()
 	// if header, create new ClientHeader with Filips code
 	if (_it->getType() == HEADER)
 	{
-		// _chunked = true;
-		// _trailer = true;
 	}
 	
 	// if Trailer, complete the header with info from trailer
@@ -199,10 +197,8 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_it->concatString(buffer, bufferPos, num);
 		_isNodeComplete();
 		_parseNode();
-		if (_it->getState() == COMPLETE && (bufferPos < num) && _state == INCOMPLETE)
-		{
-			// std::cout << _it->getStringUnchunked() << std::endl;
+		// _checkNode();
+		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
-		}
 	}
 }
