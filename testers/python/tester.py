@@ -2,6 +2,7 @@ import requests
 import unittest
 from colors import Colors
 import CustomRequst
+import time 
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -93,6 +94,16 @@ class TestMyWebServer(unittest.TestCase):
 		TestMyWebServer.print_test_title("Testing short invalid request")
 		response = CustomRequst.short_invalid_request()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+
+	def test_cgi_io_test(self):
+		TestMyWebServer.print_test_title("Testing cgi io test")
+		start = time.time()
+		response = requests.get("http://localhost:9090/cgi-bin/io_test.py")
+		end = time.time()
+		print("Response took: {0} seconds".format(end - start))
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("Environment Variables", response.text)
 		Colors.test_passed()
 
 	def spammer(self, numberOfRequest = 500):
