@@ -8,6 +8,8 @@
 #include <vector>
 #include <sstream>
 
+#define VALID_URI_CHARS "-_.~"
+
 class ParsingUtils 
 {
 	public :
@@ -65,6 +67,8 @@ class ParsingUtils
 		static std::string getBaseName(const std::string& fullUrl, const std::string& ServerLocationString);
 		static size_t stringToSizeT(std::string string);
 		static bool isStringEnd(const std::string toCheck, const std::string expectedEnd);
+		static std::string	uriEncode(bool encodeSpaceAsPlus, const std::string& input);
+		static std::string	uriDecode(bool decodePlusAsSpace, const std::string& input);
 		/**
 		 * @brief return substring from 0 till delimiter is found example for header till /r/n/r/n is found
 		 * if delimiter is not found return empty string. 
