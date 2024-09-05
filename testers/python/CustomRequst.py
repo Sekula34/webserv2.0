@@ -29,7 +29,8 @@ class CustomRequest():
 		#print(decoded_response)
 		sock.close()
 		end = time.time()
-		print("Response took: {0} seconds".format(end - start))
+		miliseconds = round((end - start) * 1000, 3)
+		print("Response took: {0} milliseconds(ms)".format(miliseconds))
 		return decoded_response
 		
 
