@@ -2,6 +2,9 @@
 #include "Message.hpp"
 #include "Node.hpp"
 #include <sstream>
+#include <cmath>
+
+#define MAX_CHUNKSIZE	20
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -193,6 +196,24 @@ void	Message::_parseNode()
 	}
 	
 	// if Trailer, complete the header with info from trailer
+}
+
+size_t	Message::_calcChunkDivisor()
+{
+	std::list<Node>::iterator it = _chain.begin();
+	for (; it != _chain.end(); it++)
+	{
+		if(it->getType() == BODY) 
+			break;
+	}
+	if (it == _chain.end() || MAX_CHUNKSIZE <= 0)
+	{
+		std::cout << "Can not calculate maximum chunk size!" << std::endl;
+		return (0);
+	}
+	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
+	std::cout << "Max Chunksize: " << ceiling << std::endl;
+	return (ceiling);
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)

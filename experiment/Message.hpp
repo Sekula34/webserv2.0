@@ -33,6 +33,7 @@ class Message {
 		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
+		size_t						_calcChunkDivisor();
 
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);

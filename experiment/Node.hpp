@@ -49,7 +49,7 @@ class Node {
 
 
 	private:
-		int					_state; // Node is complete
+		int					_state; // Node can be COMPLETE or INCOMPLETE
 		int					_type; // could be of type: HEADER, BODY, CHUNK, LCHUNK, TRAILER
 		std::string 		_str; // the content of message in node
 		size_t				_btr; // bytes to read from the buffer
