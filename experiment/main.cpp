@@ -27,7 +27,13 @@ int main()
 	if (m.getState() == ERROR)
 		std::cout << "Invalid Request from Client!" << std::endl;
 	else
+	{
 		m.printChain();
+		m._bodyToChunks();
+		m.printChain();
+		m._chunksToBody();
+		m.printChain();
+	}
 	close (fd);
 
 	

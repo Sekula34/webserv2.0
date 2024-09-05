@@ -16,6 +16,8 @@ class Message {
 		virtual						~Message(void);
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
+		void						_bodyToChunks();
+		void						_chunksToBody();
 
 									// set and get
 		int							getState() const;
@@ -35,7 +37,6 @@ class Message {
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
-		void						_bodyToChunks();
 		Node						_newChunkNode(size_t size);
 
 									Message(Message const & src);

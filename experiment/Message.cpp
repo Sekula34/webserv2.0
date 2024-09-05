@@ -4,7 +4,7 @@
 #include <sstream>
 #include <cmath>
 
-#define MAX_CHUNKSIZE	20
+#define MAX_CHUNKSIZE	30
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -217,7 +217,7 @@ size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
 		return (0);
 	}
 	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
-	int result = it->getBodySize() / ceiling;
+	int result = std::ceil(static_cast<double>(it->getBodySize()) / ceiling);
 	return (result);
 }
 
@@ -244,6 +244,7 @@ void	Message::_bodyToChunks()
 	
 	currentNode = _chain.begin();
 
+	_chain.pop_back();
 	while (remainSize)
 	{
 		if (remainSize > optimalSize)
@@ -251,15 +252,32 @@ void	Message::_bodyToChunks()
 		else
 			sizeInNode = remainSize;
 		remainSize -= sizeInNode;
+		_chain.push_back((_newChunkNode(sizeInNode)));
 		currentNode++;
-		_chain.emplace(currentNode, (_newChunkNode(sizeInNode)));
 		currentNode->setStringChunked(str.substr(strPos, sizeInNode));	
 		strPos +=sizeInNode;
 	}
-	// insert zero chunk
-	_chain.pop_back();
-	_chain.emplace_back((_newChunkNode(sizeInNode)));
+	_chain.push_back(_newChunkNode(0));
+	_chain.back().setType(LCHUNK);
+	_chain.back().setString("0\r\n\r\n");
+}
 
+void	Message::_chunksToBody()
+{
+	std::string str= "";
+	std::list<Node>::iterator it = _chain.begin();
+	std::list<Node>::iterator tmp;
+	it++;
+	while (it != _chain.end())
+	{
+		str += it->getStringUnchunked();
+		tmp = it;	
+		it++;
+		_chain.erase(tmp);
+	}
+	_chain.push_back(Node(str, BODY));
+	_chain.back().setBodySize(str.size());
+	_chain.back().setState(COMPLETE);
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)
