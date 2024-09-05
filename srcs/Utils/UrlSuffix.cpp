@@ -102,8 +102,8 @@ void UrlSuffix::_parseAndSetPath()
 	size_t questionMarkPos = _urlSuffix.find_first_of("?");
 	if(questionMarkPos == std::string::npos)
 		_path = _urlSuffix;
-	_path = _urlSuffix.substr(0, questionMarkPos);
-	
+	_path = _urlSuffix.substr(0, questionMarkPos); // This _path is percent-encoded (%20).
+	_path = ParsingUtils::uriDecode(false, _path); // Now this _path is decoded.
 }
 
 void UrlSuffix::_parseAndSetQuerryParameters()
