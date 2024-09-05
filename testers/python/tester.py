@@ -3,6 +3,7 @@ import unittest
 from colors import Colors
 import CustomRequst
 import time
+import utils
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -107,9 +108,11 @@ class TestMyWebServer(unittest.TestCase):
 
 	def test_all_cgi_scripts(self):
 		TestMyWebServer.print_test_title("Testing cgi")
+		utils.create_python_test_files()
 		cgi_scripts = {"hard.py" : 500, "io_test.py" : 200, "kill.py" : 500, "link_dummy.py" : 500, "loop.py" : 500, "soft.py" : 500}
 		for script_name, status_code in cgi_scripts.items():
 			self.__cgiTest("http://localhost:9090/cgi-bin/" + script_name, status_code, "")
+		utils.delete_python_test_files()
 
 	def spammer(self, url, numberOfRequest = 50):
 		accepted_count = 0
