@@ -70,6 +70,16 @@ Node &	Node::operator=(Node const & rhs)
 	}
 	return (*this);
 }
+void	Node::setString(const std::string & s)
+{
+	_str = s;
+}
+
+void	Node::setStringChunked(const std::string & s)
+{
+	_str = s;
+	_chunk();
+}
 
 void	Node::setState(int state)
 {

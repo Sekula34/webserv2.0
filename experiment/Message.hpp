@@ -33,7 +33,10 @@ class Message {
 		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
-		size_t						_calcChunkDivisor();
+		void						_findBody(std::list<Node>::iterator& it);
+		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
+		void						_bodyToChunks();
+		Node						_newChunkNode(size_t size);
 
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);

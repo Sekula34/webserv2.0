@@ -32,6 +32,7 @@ class Node {
 
 							// set and get
 		void				setString(const std::string & s);
+		void				setStringChunked(const std::string & s);
 		void				setState(int state);
 		std::string			getStringUnchunked();
 		std::string			getStringChunked();
@@ -60,9 +61,9 @@ class Node {
 		// std::stringstream 	_ss;
 
 							//Node specific functions
+		std::string			_getRemainDel(const std::string & del);
 		std::string			_chunk();
 		std::string			_unChunk();
-		std::string			_getRemainDel(const std::string & del);
 		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos);
 		void				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
 		void				_setBtr(char* buffer, size_t & bufferPos, size_t num);

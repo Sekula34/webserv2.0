@@ -198,22 +198,68 @@ void	Message::_parseNode()
 	// if Trailer, complete the header with info from trailer
 }
 
-size_t	Message::_calcChunkDivisor()
+void	Message::_findBody(std::list<Node>::iterator& it)
 {
-	std::list<Node>::iterator it = _chain.begin();
+	it = _chain.begin();
 	for (; it != _chain.end(); it++)
 	{
 		if(it->getType() == BODY) 
-			break;
+			return;
 	}
+}
+
+size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
+{
+	_findBody(it);
 	if (it == _chain.end() || MAX_CHUNKSIZE <= 0)
 	{
 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
 		return (0);
 	}
 	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
-	std::cout << "Max Chunksize: " << ceiling << std::endl;
-	return (ceiling);
+	int result = it->getBodySize() / ceiling;
+	return (result);
+}
+
+Node	Message::_newChunkNode(size_t size)
+{
+	Node	node;
+	node.setType(CHUNK);
+	node.setState(COMPLETE);
+	node.setChunkHeader(true);
+	node.setChunkSize(size);
+
+	return (node);
+}
+
+void	Message::_bodyToChunks()
+{
+	std::list<Node>::iterator it;
+	std::list<Node>::iterator currentNode;
+	size_t	optimalSize = _calcOptimalChunkSize(it);
+	size_t	remainSize = it->getBodySize();
+	std::string str = it->getStringUnchunked();	
+	size_t	sizeInNode = 0;
+	size_t	strPos = 0;
+	
+	currentNode = _chain.begin();
+
+	while (remainSize)
+	{
+		if (remainSize > optimalSize)
+			sizeInNode = optimalSize;
+		else
+			sizeInNode = remainSize;
+		remainSize -= sizeInNode;
+		currentNode++;
+		_chain.emplace(currentNode, (_newChunkNode(sizeInNode)));
+		currentNode->setStringChunked(str.substr(strPos, sizeInNode));	
+		strPos +=sizeInNode;
+	}
+	// insert zero chunk
+	_chain.pop_back();
+	_chain.emplace_back((_newChunkNode(sizeInNode)));
+
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)
