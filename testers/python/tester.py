@@ -2,7 +2,7 @@ import requests
 import unittest
 from colors import Colors
 import CustomRequst
-import time 
+import time
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -105,12 +105,11 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 
-	def test_cgi_io_test(self):
-		TestMyWebServer.print_test_title("Testing cgi io test")
-		response = TestMyWebServer.send_get("http://localhost:9090/cgi-bin/io_test.py")
-		self.assertEqual(response.status_code, 200)
-		self.assertIn("Environment Variables", response.text)
-		Colors.test_passed()
+	def test_all_cgi_scripts(self):
+		TestMyWebServer.print_test_title("Testing cgi")
+		cgi_scripts = {"hard.py" : 500, "io_test.py" : 200, "kill.py" : 500, "link_dummy.py" : 500, "loop.py" : 500, "soft.py" : 500}
+		for script_name, status_code in cgi_scripts.items():
+			self.__cgiTest("http://localhost:9090/cgi-bin/" + script_name, status_code, "")
 
 	def spammer(self, url, numberOfRequest = 50):
 		accepted_count = 0
@@ -138,3 +137,9 @@ class TestMyWebServer(unittest.TestCase):
 		else:
 			result = Colors.color_text(result, Colors.FAIL)
 		print(result)
+
+	def __cgiTest(self, url, expected_status, expected_text):
+		TestMyWebServer.print_test_title("Testing cgi: " + url)
+		response = TestMyWebServer.send_get(url)
+		self.assertEqual(response.status_code, expected_status)
+		self.assertIn(expected_text, response.text)
