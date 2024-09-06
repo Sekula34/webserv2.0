@@ -18,20 +18,19 @@ LocationSettings::LocationSettings(const DefaultSettings& settings, const Token&
 std::vector<Token>& serverTokens)
 :DefaultSettings(settings),_locationToken(locationToken)
 {
-	//std::cout << "Trying to create with " << std::endl;
-	//server.printAllSettings();
-	//_locationToken.printTokenInfo();
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
-	//std::cout << "uri is [" << _uri << "] " << std::endl;
 	_locationDirectives = _setLocationDirectives();
-	//Directive::printAllDirectives(_locationDirectives);
 	Directive::applyAllDirectives(_locationDirectives, (*this));
-	//std::cout <<"DEBUGG" << std::endl;
-	//printLocationSettings();
-	//Directive::printAllDirectives(_locationDirectives);
-	//std::cout << "Server directives in Location settings are " << std::endl;
-	//Directive::printAllDirectives(_serverDirectives);
+}
+LocationSettings::LocationSettings(const DefaultSettings& settings,
+std::vector<Token>& serverTokens)
+:DefaultSettings(settings)
+{
+	_parentServerTokens = serverTokens;
+	_uri = "/";
+	_locationDirectives = _setLocationDirectives();
+	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 
 LocationSettings::LocationSettings(const LocationSettings& source)
