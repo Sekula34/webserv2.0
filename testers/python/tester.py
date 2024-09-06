@@ -82,6 +82,13 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("404", response.text)
 		Colors.test_passed()
 
+	def test_url_decode(self):
+		TestMyWebServer.print_test_title("Testing url decoding")
+		response = TestMyWebServer.send_get("http://localhost:8080/autoindex/subfolder/frontend/fancy%20space%20.html")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("space in file name", response.text)
+		Colors.test_passed()
+
 	def test_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()
