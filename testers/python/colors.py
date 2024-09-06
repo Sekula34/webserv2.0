@@ -25,6 +25,11 @@ class Colors:
 	def test_passed():
 		print(f"{Colors.OKGREEN}Test passed ✅ {Colors.ENDC}")
 
+	@staticmethod 
+	def print_warning(text):
+		colored_text = Colors.color_text(text, Colors.WARNING)
+		print(text)
+
 		
 
 
