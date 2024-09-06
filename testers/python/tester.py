@@ -24,6 +24,12 @@ class TestMyWebServer(unittest.TestCase):
 		miliseconds = round((end - start) * 1000, 3)
 		print("Response took: {0} milliseconds(ms)".format(miliseconds))
 		return response
+	
+	@staticmethod
+	def cgi_prompt():
+		question = Colors.color_text("Do you want to run cgi tester. Some test cases take 15 seconds because of timeout. \n\t 1 - Yes \n\t 2 - No\nAnswer: ", Colors.BOLD)
+		answer = input(question)
+		return answer
 
 	def test_home_page(self):
 		TestMyWebServer.print_test_title("Home page")
@@ -82,6 +88,13 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("404", response.text)
 		Colors.test_passed()
 
+	def test_url_decode(self):
+		TestMyWebServer.print_test_title("Testing url decoding")
+		response = TestMyWebServer.send_get("http://localhost:8080/autoindex/subfolder/frontend/fancy%20space%20.html")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("space in file name", response.text)
+		Colors.test_passed()
+
 	def test_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()
@@ -108,6 +121,9 @@ class TestMyWebServer(unittest.TestCase):
 
 	def test_all_cgi_scripts(self):
 		TestMyWebServer.print_test_title("Testing cgi")
+		if(TestMyWebServer.cgi_prompt() == "2"):
+			Colors.print_warning("Cgi testing is skipped")
+			return
 		utils.create_python_test_files()
 		cgi_scripts = {"hard.py" : 500, "io_test.py" : 200, "kill.py" : 500, "link_dummy.py" : 500, "loop.py" : 500, "soft.py" : 500}
 		for script_name, status_code in cgi_scripts.items():
