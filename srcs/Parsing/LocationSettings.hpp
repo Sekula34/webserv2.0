@@ -21,6 +21,7 @@ class LocationSettings : public DefaultSettings
 	public :
 		LocationSettings();
 		LocationSettings(const DefaultSettings& settings, const Token& locationToken, std::vector<Token>& serverTokens);
+		LocationSettings(const DefaultSettings& settings, std::vector<Token>& serverTokens);
 		LocationSettings(const LocationSettings& source);
 		LocationSettings& operator=(const LocationSettings& source);
 		~LocationSettings();

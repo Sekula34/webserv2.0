@@ -19,19 +19,8 @@ ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vect
 {
 	_serverTokens = Token::getAllServerTokens(serverId, allTokens);
 	_serverDirectives = Directive::getAllServerDirectives(_serverTokens);
-	//applyallServerDirectives
 	_applyAllServerLevelDirectives();
-	//printAllSettings();
-	//getAlllocations
 	_serverLocations = _setServerLocations();
-	// if(serverId == 1)
-	// {
-	// 	LocationSettings::printAllLocationSettings(_serverLocations);
-	// }
-	//_serverLocations[0].printLocationSettings();
-	//std::cout <<"Size of server locations is " << _serverLocations.size() << std::endl;
-	//apllyAlllocation Settings
-	//Directive::printAllDirectives(_serverDirectives);
 }
 ServerSettings::ServerSettings(const ServerSettings& source)
 : DefaultSettings(source), _serverId(source._serverId)
@@ -61,13 +50,32 @@ std::vector<LocationSettings> ServerSettings::_setServerLocations()
 	{
 		if(_serverTokens[i].getCurrentTokenContextType() == LOCATION)
 		{
-			//LocationSettings location(server, serverTokens[i]);
 			LocationSettings location(*this, _serverTokens[i], _serverTokens);
 			serverLocations.push_back(location);
 		}
 	}
+	if(_hasDefaultLocation(serverLocations) == false)
+		_generateDefaultLocation(serverLocations);
 	return serverLocations;
 }
+
+bool ServerSettings::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
+{
+	std::vector<LocationSettings>::const_iterator it = serverLocation.begin();
+	for(;it != serverLocation.end(); it++)
+	{
+		if(it->getLocationUri() == "/")
+			return true;
+	}
+	return false;
+}
+
+void ServerSettings::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
+{
+	LocationSettings location(*this, _serverTokens);
+	serverLocation.push_back(location);
+}
+
 //apply every directive server have //but only on server level check path. Not location Level
 void ServerSettings::_applyAllServerLevelDirectives()
 {
@@ -96,6 +104,7 @@ std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) 
 		toTry = ParsingUtils::getDirName(toTry);
 	}
 }
+
 void ServerSettings::addDirectiveToServer(Directive directive)
 {
 	_serverDirectives.push_back(directive);

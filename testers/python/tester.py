@@ -49,6 +49,18 @@ class TestMyWebServer(unittest.TestCase):
 		response = requests.put("http://localhost:9090/")
 		self.assertEqual(response.status_code, 405)
 		Colors.test_passed()
+
+	def test_server_no_location(self):
+		TestMyWebServer.print_test_title("Server no location")
+		response = TestMyWebServer.send_get("http://localhost:8989/")
+		self.assertEqual(response.status_code, 200)
+		Colors.test_passed()
+
+	def test_server_no_location(self):
+		TestMyWebServer.print_test_title("Server no location test 2")
+		response = TestMyWebServer.send_get("http://localhost:8989/amanemoj/")
+		self.assertEqual(response.status_code, 404)
+		Colors.test_passed()
 	
 	def test_other_file(self):
 		TestMyWebServer.print_test_title("Files that are not part of location")
