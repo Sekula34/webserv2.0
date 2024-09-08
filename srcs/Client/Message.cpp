@@ -2,9 +2,11 @@
 #include "Message.hpp"
 #include "Node.hpp"
 #include "ClientHeader.hpp"
+#include "Client.hpp"
 #include "../Utils/Logger.hpp"
 #include <sstream>
 #include <cmath>
+
 
 
 #define MAX_CHUNKSIZE	30
@@ -69,6 +71,19 @@ ClientHeader*	Message::getClientHeader() const
 const std::list<Node>&	Message::getChain() const
 {
 	return (_chain);
+}
+
+const std::string	Message::getBodyString() 
+{
+	std::list<Node>::iterator it;
+
+	if (_chunked)
+	{
+		_chunksToBody();
+		_chunked = false;
+	}
+	_findBody(it);
+	return (it->getStringUnchunked());
 }
 
 void	Message::printChain()
@@ -314,6 +329,8 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 
 void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 {
+	size_t a = MAXLINE;
+	std::cout << a << std::endl;
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
@@ -321,6 +338,8 @@ void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 		_isNodeComplete();
 		_parseNode(bufferPos, num);
 		// _checkNode();
+		if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
+			_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 	}

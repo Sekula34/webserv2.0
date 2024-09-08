@@ -157,7 +157,7 @@ std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 
 std::string	CgiProcessor::getScriptName(std::string suffix)
 {
-	std::vector<std::string> sections = ParsingUtils::splitString(_client->header->urlSuffix->getPath(), '/');
+	std::vector<std::string> sections = ParsingUtils::splitString(_client->getClientMsg()->getClientHeader()->urlSuffix->getPath(), '/');
 	std::vector<std::string>::iterator it = sections.begin();
 	for (; it != sections.end(); it++)
 	{
@@ -251,8 +251,8 @@ void	CgiProcessor::_createEnvVector()
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
-	if (_client->header->getHeaderFields().find("Content-Type") != _client->header->getHeaderFields().end())
-		line +=_client->header->getHeaderFields().find("Content-Type")->second;
+	if (_client->getClientMsg()->getClientHeader()->getHeaderFields().find("Content-Type") != _client->getClientMsg()->getClientHeader()->getHeaderFields().end())
+		line +=_client->getClientMsg()->getClientHeader()->getHeaderFields().find("Content-Type")->second;
 	_envVec.push_back(line);
 
 	// GATEWAY_INTERFACE
@@ -279,7 +279,7 @@ void	CgiProcessor::_createEnvVector()
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
-	line += _client->header->urlSuffix->getQueryParameters();
+	line += _client->getClientMsg()->getClientHeader()->urlSuffix->getQueryParameters();
 	_envVec.push_back(line);
 
 	// REMOTE_ADDR
@@ -295,30 +295,30 @@ void	CgiProcessor::_createEnvVector()
 	
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
-	line += _client->header->getRequestLine().requestMethod;
+	line += _client->getClientMsg()->getClientHeader()->getRequestLine().requestMethod;
 	_envVec.push_back(line);
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
-	line += _client->header->urlSuffix->getPath();
+	line += _client->getClientMsg()->getClientHeader()->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
-	line += _client->header->getHostName();
+	line += _client->getClientMsg()->getClientHeader()->getHostName();
 	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
-	ss2 << _client->header->getHostPort();
+	ss2 << _client->getClientMsg()->getClientHeader()->getHostPort();
 	line += ss2.str();
 	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
-	line += _client->header->getRequestLine().protocolVersion;
+	line += _client->getClientMsg()->getClientHeader()->getRequestLine().protocolVersion;
 	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
@@ -407,6 +407,9 @@ void	CgiProcessor::_writeToChild()
 {
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
+
+	// FIXME: here wrtie will have to be called until written bites equal message size
+	// TODO: implement writing the body of unchunked Client Message into socket with SEND
 	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
 	Logger::warning("removing FD from epoll: ");
@@ -420,15 +423,20 @@ void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
 
+
 	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
+
+		if (!_client->getServerMsg())
+			_client->setServerMsg(new Message());
+
 		_client->clearRecvLine();
-		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
 		// std::cout << "bytes read from child socket: " << n << std::endl;
 
 		// successful read -> concat message
 		if (n > 0)
-			_client->addRecvLineToCgiMessage();
+			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), n);
 
 		// failed read -> stop CGI and set errorcode = 500
 		if (n < 0)
@@ -452,7 +460,7 @@ void	CgiProcessor::_closeCgi()
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
 		_client->socketFromChild = DELETED;
-		_client->_cgiOutput = _client->getCgiMessage();
+		// _client->_cgiOutput = _client->getCgiMessage();
 		_client->cgiRunning = false;
 	}
 }

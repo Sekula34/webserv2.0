@@ -52,6 +52,10 @@ end = """
   </body>
 </html>
 """
+print("Connection: close\n")
+print("Content-Language: en\n")
+print("\r\n\r\n")
+
 print(start)
 
 

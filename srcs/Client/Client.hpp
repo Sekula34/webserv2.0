@@ -1,5 +1,3 @@
-
-
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 # include <string>
@@ -22,9 +20,7 @@
 # include <map>
 //# include "CgiProcessor.hpp"
 
-// #define MAXLINE			4096
-// #define MAXLINE			493
-# define MAXLINE			400
+# define MAXLINE			4096
 # define MAX_TIMEOUT		10000
 # define DELETED			-1 
 
@@ -60,7 +56,9 @@ class Client {
 		unsigned short		getClientdPort();
 		Client*				getClient()const;
 		Message*			getClientMsg()const;
+		Message*			getServerMsg()const;
 		void				setClientMsg(Message* m);
+		void				setServerMsg(Message* m);
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
@@ -88,7 +86,7 @@ class Client {
 		CgiProcessor*		Cgi;			
 		std::string			_cgiOutput;
 		bool				cgiChecked;
-		ClientHeader*		header; //client Responsible for deleting
+		// ClientHeader*		header; //client Responsible for deleting
 		pid_t				waitReturn;
 		int					socketToChild;
 		int					socketFromChild;
@@ -105,6 +103,7 @@ class Client {
 		unsigned char*		_recvLine;
 		CgiProcessor*		_cgi;
 		Message*			_clientMsg;	// client owns so it should delete
+		Message*			_serverMsg;	// client owns so it should delete
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_clientAddr;
 		std::string			_clientIp;

@@ -52,10 +52,11 @@ Client::~Client (void)
 	if (socketFromChild != DELETED)
 		close(socketFromChild);
 	delete [] _recvLine;
-	delete header;
+	// delete header;
 	delete _response;
 	delete _cgi;
 	delete _clientMsg;
+	delete _serverMsg;
 }
 
 /******************************************************************************/
@@ -127,6 +128,11 @@ Message*	Client::getClientMsg()const
 	return (_clientMsg);
 }
 
+Message*	Client::getServerMsg()const
+{
+	return (_clientMsg);
+}
+
 
 unsigned char*	Client::getRecvLine() const
 {
@@ -172,6 +178,12 @@ void	Client::setClientMsg(Message* m)
 {
 	_clientMsg = m;
 }
+
+void	Client::setServerMsg(Message* m)
+{
+	_serverMsg = m;
+}
+
 void	Client::setWriteClient(bool b)
 {
 	_writeClient = b;
@@ -243,13 +255,14 @@ void Client::_initVars(void)
 	_errorCode = 0;
 	_recvLine = new unsigned char[MAXLINE];
 	memset(_recvLine, 0, MAXLINE);
-	header = NULL;
+	// header = NULL;
 	_response = NULL;
 	_cgiOutput = "";
 	Cgi = NULL;
 	cgiRunning = true;
 	_clockstop = 1000;
 	_clientMsg = NULL;;
+	_serverMsg = NULL;;
 	_writeClient = false;
 }
 

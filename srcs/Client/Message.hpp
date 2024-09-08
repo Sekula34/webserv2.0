@@ -24,6 +24,7 @@ class Message {
 		int							getState() const;
 		ClientHeader*				getClientHeader() const;
 		const std::list<Node>&		getChain() const;
+		const std::string			getBodyString();
 
 									//Message specific functions
 	private:
