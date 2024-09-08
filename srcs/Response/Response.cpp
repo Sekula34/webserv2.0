@@ -10,8 +10,10 @@
 #include "../Client/Client.hpp"
 
 Response::Response(const Client& client, const ServerSettings* server)
-:_client(client), _server(server) ,_responseHeader(NULL)
-,_responseBody(client, _server)
+:_client(client),
+_server(server),
+_responseHeader(NULL),
+_responseBody(client, _server)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }

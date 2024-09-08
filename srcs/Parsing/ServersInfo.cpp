@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "../Utils/Logger.hpp"
 #include "../Utils/HttpStatusCode.hpp"
+#include "../Client/Message.hpp"
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -165,9 +166,9 @@ bool ServersInfo::_validateClientHeader(const ClientHeader* header) const
 
 const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
-	if(_validateClientHeader(client.header) == false)
+	if(_validateClientHeader(client.getClientMsg()->getClientHeader()) == false)
 		return NULL;
-	const ServerSettings* toReturn = getServerByPort(client.header->getHostPort(), client.header->getHostName());
+	const ServerSettings* toReturn = getServerByPort(client.getClientMsg()->getClientHeader()->getHostPort(), client.getClientMsg()->getClientHeader()->getHostName());
 	return toReturn;
 }
 

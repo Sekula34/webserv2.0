@@ -121,6 +121,8 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
 	// this checks every time we go through loop. Maybe not necessary
+	if (client.getClientMsg()->getClientHeader()
+		&& client.getClientMsg()->getChain().begin()->getState() == COMPLETE)
 	client.setErrorCode(client.getClientMsg()->getClientHeader()->getErrorCode()); 
 
 	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
@@ -197,7 +199,7 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 {
 	if (!client.cgiChecked && client.getErrorCode() == 0)
 	{
-		client.cgiChecked= true;
+		client.cgiChecked = true;
 		bool found = true;
 		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
 		if (!clientServer)
@@ -259,9 +261,9 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 
 	client.getClientMsg()->printChain();
 	//run cgi if cgi on and only if there is no error in client so far
-	_runCgi(client);
-	if (client.getCgi() && client.cgiRunning)
-		return ;
+	// _runCgi(client);
+	// if (client.getCgi() && client.cgiRunning)
+	// 	return ;
 
 	// PROCESS ANSWER
 	_processAnswer(client);

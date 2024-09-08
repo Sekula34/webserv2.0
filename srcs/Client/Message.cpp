@@ -22,6 +22,7 @@ Message::Message (void)
 	_chunked = false;
 	_trailer = false;
 	_state = INCOMPLETE;
+	_header = NULL;
 }
 
 /******************************************************************************/
