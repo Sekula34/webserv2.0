@@ -4,6 +4,8 @@
 #include "../Utils/Data.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "CgiProcessor.hpp"
+#include "Message.hpp"
+#include "Node.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -239,10 +241,10 @@ void	CgiProcessor::_createEnvVector()
 
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
-	if (_client->getClientBody().size() > 0)
+	if (_client->getClientMsg()->getChain().begin()->getBodySize() > 0)
 	{
 		std::stringstream ss;
-		ss << _client->getClientBody().size();
+		ss << _client->getClientMsg()->getChain().begin()->getBodySize();
 		line += ss.str();
 	}
 	_envVec.push_back(line);
@@ -414,6 +416,7 @@ void	CgiProcessor::_writeToChild()
 	_client->socketToChild = DELETED;
 }
 
+/*
 void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
@@ -424,11 +427,11 @@ void	CgiProcessor::_readFromChild()
 		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
 		// std::cout << "bytes read from child socket: " << n << std::endl;
 
-		// successful read, concat message
+		// successful read -> concat message
 		if (n > 0)
 			_client->addRecvLineToCgiMessage();
 
-		// failed read, stop CGI and set errorcode = 500
+		// failed read -> stop CGI and set errorcode = 500
 		if (n < 0)
 		{
 			Logger::warning("failed tor read from Child Process", true);
@@ -454,6 +457,7 @@ void	CgiProcessor::_closeCgi()
 		_client->cgiRunning = false;
 	}
 }
+*/
 
 void	CgiProcessor::_ioChild()
 {
@@ -466,9 +470,11 @@ void	CgiProcessor::_ioChild()
 	if (!_client->cgiRunning)
 		return ;
 
+	/*
 	_readFromChild();
 
 	_closeCgi();
+	*/
 	return ;
 }
 

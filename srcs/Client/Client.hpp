@@ -24,11 +24,12 @@
 
 // #define MAXLINE			4096
 // #define MAXLINE			493
-# define MAXLINE			40
+# define MAXLINE			400
 # define MAX_TIMEOUT		10000
 # define DELETED			-1 
 
 class CgiProcessor;
+class Message;
 
 class Client {
 
@@ -57,6 +58,9 @@ class Client {
 		CgiProcessor*		getCgi() const;
 		std::string			getClientIp() const;
 		unsigned short		getClientdPort();
+		Client*				getClient()const;
+		Message*			getClientMsg()const;
+		void				setClientMsg(Message* m);
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
@@ -98,20 +102,15 @@ class Client {
 		int const			_fd;
 		std::clock_t const	_start;
 		int const			_epollFd;
-		std::string			_message;
-		std::string			_cgiMessage;
-		std::string			_clientBody; //maybe this will be replaced by body class
-		std::string			_responseBody; // this will be replaced by respnse class
 		unsigned char*		_recvLine;
-		bool				_readHeader;
-		bool				_readBody;
-		bool				_writeClient;
 		CgiProcessor*		_cgi;
+		Message*			_clientMsg;	// client owns so it should delete
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_clientAddr;
 		std::string			_clientIp;
 		socklen_t			_addrLen;
 		double				_clockstop;
+		bool				_writeClient;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);

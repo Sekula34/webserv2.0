@@ -1,8 +1,11 @@
 
 #include "Message.hpp"
 #include "Node.hpp"
+#include "ClientHeader.hpp"
+#include "../Utils/Logger.hpp"
 #include <sstream>
 #include <cmath>
+
 
 #define MAX_CHUNKSIZE	30
 
@@ -57,6 +60,15 @@ int	Message::getState() const
 {
 	return (_state);
 }
+ClientHeader*	Message::getClientHeader() const
+{
+	return (_header);
+}
+
+const std::list<Node>&	Message::getChain() const
+{
+	return (_chain);
+}
 
 void	Message::printChain()
 {
@@ -76,127 +88,6 @@ void	Message::printChain()
 	}
 }
 
-void	Message::_addNewNode()
-{
-	// create REGULAR BODY NODE if message unchunked and header is complete
-	if (_it->getType() == HEADER && !_chunked)
-	{
-		// PARSING, THIS IS TEMPORARY AND WILL BE DONE BY FILIPS CLASS
-		std::string target("Content-Length:");
-		size_t found =_it->getStringUnchunked().find(target);
-		found += target.length();
-		size_t endl = _it->getStringUnchunked().find("\n", found);
-		std::string number = _it->getStringUnchunked().substr(found + 1, endl - found);
-		_ss.clear();
-		_ss.str("");
-		_ss << number;
-		size_t bodySize;
-		_ss >> bodySize;
-		_it->setBodySize(bodySize);
-		found = _it->getStringUnchunked().find("Trailer");
-		if (found != std::string::npos)
-			_trailer = true;
-		found = _it->getStringUnchunked().find("chunked");
-		if (found != std::string::npos)
-			_chunked = true;
-		// TEMPORARY CODE END
-		
-
-		if (!_chunked)
-			_chain.push_back(Node("", BODY));
-	}
-
-	// create CHUNKED BODY NODE if message is chunked and body is complete
-	if (_it->getType() != LCHUNK && _chunked)
-		_chain.push_back(Node("", CHUNK));
-
-	// create TRAILER NODE if message is chunked and has trailer and last chunk is complete
-	if (_it->getType() == LCHUNK && _trailer)
-		_chain.push_back(Node("", TRAILER));
-	_it++;
-	if (_it->getType() == BODY)
-		_it->setBodySize(_chain.begin()->getBodySize());
-}
-
-size_t	Message::_calcChunkSize(std::string s)
-{
-	size_t	x;   
-	_ss.clear();
-	_ss.str("");
-	_ss << std::hex << s;
-	_ss >> x;
-	if (_ss.fail())
-		_state = ERROR;
-	return (x);	
-}
-
-
-void	Message::_isNodeComplete()
-{
-	// is HEADER of TRAILER complete?
-	if (_it->getType() == HEADER || _it->getType() == TRAILER)
-	{
-		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
-			_it->setState(COMPLETE);
-	}
-
-	// is CHUNK HEADER complete?
-	if (_it->getType() == CHUNK && !_it->getChunkHeader())
-	{
-		if (_it->getStringChunked().find("\r\n") != std::string::npos)
-			_it->setChunkHeader(true);
-	}
-
-	// is CHUNK or LCHUNK complete?
-	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
-	{
-		if(_it->getChunkHeaderSize() + _it->getChunkSize() + 2 == _it->getStringChunked().length())
-			_it->setState(COMPLETE);
-		if (_it->getState() == COMPLETE
-	  		&& (_it->getStringChunked()[_it->getStringChunked().length() - 2] != '\r'
-	  		|| _it->getStringChunked()[_it->getStringChunked().length() - 1] != '\n'))
-			_state = ERROR;
-	}
-
-	// is BODY complete?
-	if (_it->getType() == BODY)
-	{
-		if (_it->getBodySize() == _it->getStringUnchunked().size())	
-			_it->setState(COMPLETE);
-	}
-}
-
-void	Message::_parseNode()
-{
-	// if message is chunked -> read chunk header and set _btr
-	// if chunk header is size 0 set Type to LCHUNK
-	if (_it->getType() == CHUNK && _it->getChunkHeader() && _it->getChunkSize() == 0)
-	{
-		// save the size of the chunk header, in order to be able to calculate
-		// the full length of chunk: chunk header + chunk body defined by hex number in chunk header
-		_it->setChunkHeaderSize(_it->getStringChunked().size());
-
-		// save the size of the expected chunk body (save the hex number from first line)
-		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
-
-		if (_it->getChunkSize() == 0)
-			_it->setType(LCHUNK);
-	}
-	
-	if (_it->getState() != COMPLETE)
-		return ;
-
-	if ((_it->getType() == LCHUNK && !_trailer)
-		|| _it->getType() == BODY || _it->getType() == TRAILER)
-		_state = COMPLETE;
-
-	// if header, create new ClientHeader with Filips code
-	if (_it->getType() == HEADER)
-	{
-	}
-	
-	// if Trailer, complete the header with info from trailer
-}
 
 void	Message::_findBody(std::list<Node>::iterator& it)
 {
@@ -280,7 +171,143 @@ void	Message::_chunksToBody()
 	_chain.back().setState(COMPLETE);
 }
 
-void	Message::bufferToNodes(char* buffer, size_t num)
+void	Message::_createClientHeader()
+{
+	if(_header != NULL)
+	{
+		return;
+	}
+	_header = new ClientHeader(_chain.begin()->getStringUnchunked());
+	// Logger::info("Client header created with : "); std::cout << _message;
+	if(_header->getErrorCode() != 0)
+	{
+		Logger::warning("Found Error in Client Header", false); std::cout << _header->getErrorCode() << std::endl;
+		// need to pass this to Client!!
+		// setErrorCode(_header->getErrorCode());
+	}
+}
+
+void	Message::_headerInfoToNode()
+{
+		// set BODY SIZE from header
+		std::map<std::string, std::string>::const_iterator found = _header->getHeaderFields().find("Content-Length");
+		if (found != _header->getHeaderFields().end())
+		{
+			_ss.clear();
+			_ss.str("");
+			_ss << _header->getHeaderFields().at("Content-Length");
+			int num;
+			_ss >> num;
+			_it->setBodySize(num);
+		}
+		if (_header->getHeaderFields().find("Trailer") != _header->getHeaderFields().end())
+			_trailer = true;
+		found = _header->getHeaderFields().find("Transfer-Encoding");
+		if (found != _header->getHeaderFields().end() && found->second.find("chunked") != std::string::npos)
+			_chunked = true;
+
+}
+
+void	Message::_addNewNode()
+{
+	// create REGULAR BODY NODE if message unchunked and header is complete
+	if (_it->getType() == HEADER && !_chunked && _header)
+	{
+		_headerInfoToNode();
+		if (!_chunked)
+			_chain.push_back(Node("", BODY, _it->getBodySize()));
+	}
+
+	// create CHUNKED BODY NODE if message is chunked and body is complete
+	if (_it->getType() != LCHUNK && _chunked)
+		_chain.push_back(Node("", CHUNK));
+
+	// create TRAILER NODE if message is chunked and has trailer and last chunk is complete
+	if (_it->getType() == LCHUNK && _trailer)
+		_chain.push_back(Node("", TRAILER));
+	_it++;
+}
+
+size_t	Message::_calcChunkSize(std::string s)
+{
+	size_t	x;   
+	_ss.clear();
+	_ss.str("");
+	_ss << std::hex << s;
+	_ss >> x;
+	if (_ss.fail())
+		_state = ERROR;
+	return (x);	
+}
+
+
+void	Message::_isNodeComplete()
+{
+	// is HEADER of TRAILER complete?
+	if (_it->getType() == HEADER || _it->getType() == TRAILER)
+	{
+		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
+			_it->setState(COMPLETE);
+	}
+
+	// is CHUNK HEADER complete?
+	if (_it->getType() == CHUNK && !_it->getChunkHeader())
+	{
+		if (_it->getStringChunked().find("\r\n") != std::string::npos)
+			_it->setChunkHeader(true);
+	}
+
+	// is CHUNK or LCHUNK complete?
+	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
+	{
+		if(_it->getChunkHeaderSize() + _it->getChunkSize() + 2 == _it->getStringChunked().length())
+			_it->setState(COMPLETE);
+		if (_it->getState() == COMPLETE
+	  		&& (_it->getStringChunked()[_it->getStringChunked().length() - 2] != '\r'
+	  		|| _it->getStringChunked()[_it->getStringChunked().length() - 1] != '\n'))
+			_state = ERROR;
+	}
+
+	// is BODY complete?
+	if (_it->getType() == BODY)
+	{
+		if (_it->getBodySize() == _it->getStringUnchunked().size())	
+			_it->setState(COMPLETE);
+	}
+}
+
+void	Message::_parseNode()
+{
+	// if message is chunked -> read chunk header and set _btr
+	// if chunk header is size 0 set Type to LCHUNK
+	if (_it->getType() == CHUNK && _it->getChunkHeader() && _it->getChunkSize() == 0)
+	{
+		// save the size of the chunk header, in order to be able to calculate
+		// the full length of chunk: chunk header + chunk body defined by hex number in chunk header
+		_it->setChunkHeaderSize(_it->getStringChunked().size());
+
+		// save the size of the expected chunk body (save the hex number from first line)
+		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
+
+		if (_it->getChunkSize() == 0)
+			_it->setType(LCHUNK);
+	}
+	
+	if (_it->getState() != COMPLETE)
+		return ;
+
+	if ((_it->getType() == LCHUNK && !_trailer)
+		|| _it->getType() == BODY || _it->getType() == TRAILER)
+		_state = COMPLETE;
+
+	// if header, create new ClientHeader
+	if (_it->getType() == HEADER)
+		_createClientHeader();
+	
+	// if Trailer, complete the header with info from trailer
+}
+
+void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)

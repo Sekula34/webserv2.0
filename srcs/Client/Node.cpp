@@ -31,6 +31,19 @@ _chunkHeader(false)
 	// std::cout << "Node default constructor called" << std::endl;
 }
 
+Node::Node (const std::string & str, int type, size_t size):
+_state(INCOMPLETE),
+_type(type),
+_str(str),
+_btr(0),
+_chunkSize(0),
+_chunkHeaderSize(0),
+_bodySize(size),
+_chunkHeader(false)
+{
+	// std::cout << "Node default constructor called" << std::endl;
+}
+
 /******************************************************************************/
 /*                                Destructor                                  */
 /******************************************************************************/
@@ -200,7 +213,7 @@ size_t	Node::getBodySize() const
 	return (_bodySize);
 }
 
-size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
+size_t	ft_strstr(unsigned char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
 {
 	size_t	i = 0;
 	size_t	j = 0;
@@ -223,7 +236,7 @@ size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t
 	return (0);
 }
 
-bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos)
+bool	Node::_checkRemainDelIsBufStart(std::string remainDel, unsigned char* buffer, size_t bufferPos)
 {
 	if (remainDel.size() + bufferPos > MAXLINE)
 		return (false);
@@ -235,7 +248,7 @@ bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t
 	return (true);
 }
 
-void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
+void	Node::_calcBtr(unsigned char* buffer, std::string del, size_t & bufferPos, size_t num)
 {
 	std::string remainDel = _getRemainDel(del);
 	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
@@ -253,7 +266,7 @@ void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t nu
 	}
 }
 
-void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
+void	Node::_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num)
 {
 	std::string	del;
 	if (_type == HEADER || _type == TRAILER)
@@ -272,7 +285,7 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 		_btr =  _chunkHeaderSize + _chunkSize + 2 - _str.size() ;
 }
 
-void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
+void	Node::concatString(unsigned char* buffer, size_t & bufferPos, size_t num)
 {
 	size_t i = 0;
 

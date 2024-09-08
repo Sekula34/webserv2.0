@@ -7,6 +7,7 @@
 # include <sstream>
 
 class Node;
+class ClientHeader;
 
 class Message {
 
@@ -14,13 +15,15 @@ class Message {
 									// canonical
 									Message(void);
 		virtual						~Message(void);
-		void						bufferToNodes(char* buffer, size_t num);
+		void						bufferToNodes(unsigned char* buffer, size_t num);
 		void						printChain();
 		void						_bodyToChunks();
 		void						_chunksToBody();
 
 									// set and get
 		int							getState() const;
+		ClientHeader*				getClientHeader() const;
+		const std::list<Node>&		getChain() const;
 
 									//Message specific functions
 	private:
@@ -30,6 +33,7 @@ class Message {
 		bool						_trailer; // we are expecting a trailer as last node
 		int							_state; // message is complete
 		std::stringstream 			_ss;
+		ClientHeader*				_header;
 
 		void						_isNodeComplete();
 		void						_parseNode();
@@ -38,6 +42,8 @@ class Message {
 		void						_findBody(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
 		Node						_newChunkNode(size_t size);
+		void						_createClientHeader();
+		void						_headerInfoToNode();
 
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);

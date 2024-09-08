@@ -29,6 +29,8 @@ MAIN=srcs/main.cpp
 
 SRCS =		srcs/Client/ClientHeader.cpp\
 			srcs/Client/Client.cpp \
+			srcs/Client/Message.cpp \
+			srcs/Client/Node.cpp \
 			srcs/Client/CgiProcessor.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
@@ -61,6 +63,8 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 HEADERS =	srcs/Client/ClientHeader.hpp\
 			srcs/Client/Client.hpp\
 			srcs/Client/CgiProcessor.hpp\
+			srcs/Client/Message.hpp \
+			srcs/Client/Node.hpp \
 			srcs/Parsing/LocationSettings.hpp\
 			srcs/Parsing/ServersInfo.hpp\
 			srcs/Parsing/Token.hpp\
