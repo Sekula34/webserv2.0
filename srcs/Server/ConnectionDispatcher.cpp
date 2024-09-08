@@ -257,6 +257,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (!s || !client.getClientMsg() || client.getClientMsg()->getState() == INCOMPLETE)
 		return ;
 
+	client.getClientMsg()->printChain();
 	//run cgi if cgi on and only if there is no error in client so far
 	_runCgi(client);
 	if (client.getCgi() && client.cgiRunning)

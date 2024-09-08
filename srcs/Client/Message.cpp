@@ -316,6 +316,8 @@ void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 		_isNodeComplete();
 		_parseNode();
 		// _checkNode();
+		if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
+			_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 	}
