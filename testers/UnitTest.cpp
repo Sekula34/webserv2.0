@@ -217,6 +217,7 @@ void UnitTest::configSyntaxBlock()
 	_configFileSyntaxCheck(folder + "simpleServer.conf", false);
 	_configFileSyntaxCheck(folder + "ThreeServers.conf", false);
 	_configFileSyntaxCheck(folder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
+	_configFileSyntaxCheck(folder + "ErrorOutOfRange.conf", true);
 	return _testpassed(true);
 }
 
