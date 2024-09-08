@@ -123,7 +123,9 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 	// this checks every time we go through loop. Maybe not necessary
 	if (client.getClientMsg()->getClientHeader()
 		&& client.getClientMsg()->getChain().begin()->getState() == COMPLETE)
-	client.setErrorCode(client.getClientMsg()->getClientHeader()->getErrorCode()); 
+	{
+		client.setErrorCode(client.getClientMsg()->getClientHeader()->getErrorCode()); 
+	}
 
 	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
 	{
@@ -205,7 +207,7 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 		if (!clientServer)
 			return ;
 
-		ClientHeader* clientHeader = client.header;
+		ClientHeader* clientHeader = client.getClientMsg()->getClientHeader();
 		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
 		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
 		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
@@ -255,15 +257,14 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 {
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
-	bool s = readClient(client, idx);
-	if (!s || !client.getClientMsg() || client.getClientMsg()->getState() == INCOMPLETE)
+	bool b = readClient(client, idx);
+	if (!b || !client.getClientMsg() || client.getClientMsg()->getState() == INCOMPLETE)
 		return ;
 
-	client.getClientMsg()->printChain();
 	//run cgi if cgi on and only if there is no error in client so far
-	// _runCgi(client);
-	// if (client.getCgi() && client.cgiRunning)
-	// 	return ;
+	_runCgi(client);
+	if (client.getCgi() && client.cgiRunning)
+		return ;
 
 	// PROCESS ANSWER
 	_processAnswer(client);

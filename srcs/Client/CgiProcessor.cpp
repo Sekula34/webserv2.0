@@ -416,7 +416,6 @@ void	CgiProcessor::_writeToChild()
 	_client->socketToChild = DELETED;
 }
 
-/*
 void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
@@ -457,7 +456,6 @@ void	CgiProcessor::_closeCgi()
 		_client->cgiRunning = false;
 	}
 }
-*/
 
 void	CgiProcessor::_ioChild()
 {
@@ -470,11 +468,9 @@ void	CgiProcessor::_ioChild()
 	if (!_client->cgiRunning)
 		return ;
 
-	/*
 	_readFromChild();
 
 	_closeCgi();
-	*/
 	return ;
 }
 

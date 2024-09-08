@@ -36,7 +36,7 @@ class Message {
 		ClientHeader*				_header;
 
 		void						_isNodeComplete();
-		void						_parseNode();
+		void						_parseNode(size_t bufferPos, size_t num);
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);

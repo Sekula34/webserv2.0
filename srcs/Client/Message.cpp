@@ -277,7 +277,7 @@ void	Message::_isNodeComplete()
 	}
 }
 
-void	Message::_parseNode()
+void	Message::_parseNode(size_t bufferPos, size_t num)
 {
 	// if message is chunked -> read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
@@ -303,7 +303,11 @@ void	Message::_parseNode()
 
 	// if header, create new ClientHeader
 	if (_it->getType() == HEADER)
+	{
 		_createClientHeader();
+		if (num < MAXLINE && bufferPos == num)
+			_state = COMPLETE;
+	}
 	
 	// if Trailer, complete the header with info from trailer
 }
@@ -315,10 +319,8 @@ void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 	{
 		_it->concatString(buffer, bufferPos, num);
 		_isNodeComplete();
-		_parseNode();
+		_parseNode(bufferPos, num);
 		// _checkNode();
-		if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
-			_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 	}
