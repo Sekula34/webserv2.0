@@ -27,7 +27,8 @@ NC := \033[0m # No color
 
 MAIN=srcs/main.cpp
 
-SRCS =		srcs/Client/ClientHeader.cpp\
+SRCS =		srcs/Client/AHeader.cpp\
+			srcs/Client/ClientHeader.cpp\
 			srcs/Client/Client.cpp \
 			srcs/Client/Message.cpp \
 			srcs/Client/Node.cpp \
@@ -56,11 +57,13 @@ SRCS =		srcs/Client/ClientHeader.cpp\
 			testers/AutoIndexTest.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
-			testers/CHTest.cpp
+			testers/CHTest.cpp \
+			testers/HeaderTester.cpp
 			# $(MAIN)\
 
 
-HEADERS =	srcs/Client/ClientHeader.hpp\
+HEADERS =	srcs/Client/AHeader.hpp\
+			srcs/Client/ClientHeader.hpp\
 			srcs/Client/Client.hpp\
 			srcs/Client/CgiProcessor.hpp\
 			srcs/Client/Message.hpp \
@@ -89,7 +92,8 @@ HEADERS =	srcs/Client/ClientHeader.hpp\
 			testers/AutoIndexTest.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp\
-			testers/CHTest.hpp
+			testers/CHTest.hpp\
+			testers/HeaderTester.hpp
 			
 
 OBJ_DIR = obj
