@@ -6,7 +6,7 @@
 class HeaderTester : UnitTest
 {
 	public:
-		static void testAll();
+		static void runAll();
 
 	private:
 };

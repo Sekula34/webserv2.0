@@ -2,6 +2,7 @@
 #include "UnitTest.hpp"
 #include "CHTest.hpp"
 #include "AutoIndexTest.hpp"
+#include "HeaderTester.hpp"
 
 
 
@@ -11,6 +12,8 @@ void all()
 	ServerTest::runAllTests();
 	CHTest::runAllTests();
 	AutoindexTest::runAll();
+	HeaderTester::runAll();
+
 }
 
 int main()
@@ -19,7 +22,8 @@ int main()
 	//UnitTest::filerOrFolderBlock();
 	//UnitTest::testingOpeninDirBlock();
 	//all();
-	CHTest::fullUrlTest();
+	//CHTest::fullUrlTest();
+	HeaderTester::runAll();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();
