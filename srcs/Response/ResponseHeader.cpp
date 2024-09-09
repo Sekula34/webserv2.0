@@ -3,21 +3,24 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include <cstddef>
 #include <ostream>
+#include <sstream>
 
 ResponseHeader::ResponseHeader(const int& httpCode, size_t contentLength)
 :_httpCode(httpCode)
 {
 	_fillStatusLineElements();
-	_headerFields["Connection"] = "close";
+	m_headerFields["Connection"] = "close";
 	if(contentLength != 0)
 	{
-		_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
-		_headerFields["Content-Language"] = "en";
+		m_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
+		m_headerFields["Content-Language"] = "en";
 	}
 }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)
-:_httpCode(source._httpCode), _statusLine(source._statusLine), _headerFields(source._headerFields)
+:AHeader(),
+_httpCode(source._httpCode),
+_statusLine(source._statusLine)
 {
 
 }
@@ -32,7 +35,12 @@ ResponseHeader::~ResponseHeader()
 {
 }
 
-
+std::string ResponseHeader::getStartLine() const 
+{
+	std::ostringstream oss;
+	oss << _statusLine.HttpVersion << " " << _statusLine.statusCode << " " << _statusLine.ReasonPhrase;
+	return oss.str();
+}
 
 
 void ResponseHeader::_fillStatusLineElements()
@@ -55,37 +63,11 @@ std::string ResponseHeader::_getStatusLineAsString() const
 	return statusLine;
 }
 
-std::string ResponseHeader::_getOneHeaderFieldAsString(std::string key, std::string value) const 
-{
-	std::string oneHeaderField;
-	oneHeaderField += key;
-	oneHeaderField += ": ";
-	oneHeaderField += value;
-	oneHeaderField += "\r\n";
-	return oneHeaderField;
-}
-
-// "Content-Type: text/html\r\n"
-// "Content-Length: 48\r\n"
-// "Connection: close\r\n"
-std::string ResponseHeader::_getAllHeaderFieldsAsString() const
-{
-	std::string headerFields;
-	std::map<std::string, std::string>::const_iterator it;
-	for(it = _headerFields.begin(); it != _headerFields.end(); it++)
-	{
-		headerFields += _getOneHeaderFieldAsString(it->first, it->second);
-	}
-	return headerFields;
-}
-
-
-
 std::string ResponseHeader::turnResponseHeaderToString(void) const
 {
 	std::string fullHeader;
 	fullHeader += _getStatusLineAsString();
-	fullHeader += _getAllHeaderFieldsAsString();
+	fullHeader += p_getAllHeaderFieldsAsString();
 	return fullHeader;
 }
 

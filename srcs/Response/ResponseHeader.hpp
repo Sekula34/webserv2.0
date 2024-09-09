@@ -1,9 +1,9 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
+#include "../Client/AHeader.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>
-#include <map>
 
 struct StatusLineElements
 {
@@ -12,17 +12,13 @@ struct StatusLineElements
 	std::string ReasonPhrase;
 };
 
-class ResponseHeader
+class ResponseHeader : public AHeader
 {
 	private:
 		const int& _httpCode;
 		StatusLineElements _statusLine;
-		std::map<std::string, std::string> _headerFields;
-
 		void _fillStatusLineElements();
 		std::string _getStatusLineAsString() const;
-		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;
-		std::string _getAllHeaderFieldsAsString() const;
 
 	public:
 		ResponseHeader(const int& httpCode, size_t contentLength);
@@ -30,6 +26,7 @@ class ResponseHeader
 		ResponseHeader& operator=(const ResponseHeader& source);
 		~ResponseHeader();
 
+		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
