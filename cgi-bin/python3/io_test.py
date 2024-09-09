@@ -52,8 +52,11 @@ end = """
   </body>
 </html>
 """
+
+print("HTTP/1.1 200 OK")
 print("Connection: close\n")
 print("Content-Language: en\n")
+print("Content-Length: 1000")
 print("\r\n\r\n")
 
 print(start)

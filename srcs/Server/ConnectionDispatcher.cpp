@@ -235,6 +235,9 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (!client.getClientMsg())
 		client.setClientMsg(new Message());
 
+	if (client.getClientMsg()->getState() == COMPLETE)
+		return (true);
+
 	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
 	// ALSO REMOVES CLIENT ON TIMEOUT
 	if (!readFd(client.getFd(), client, n, idx))

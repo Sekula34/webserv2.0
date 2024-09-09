@@ -130,7 +130,7 @@ Message*	Client::getClientMsg()const
 
 Message*	Client::getServerMsg()const
 {
-	return (_clientMsg);
+	return (_serverMsg);
 }
 
 

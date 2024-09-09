@@ -447,7 +447,10 @@ void	CgiProcessor::_readFromChild()
 
 		// EOF reached, child has gracefully shutdown connection
 		if (n == 0)
+		{
+			_client->getServerMsg()->printChain();
 			_client->hasReadFromCgi = true;
+		}
 	}
 }
 

@@ -190,9 +190,7 @@ void	Message::_chunksToBody()
 void	Message::_createClientHeader()
 {
 	if(_header != NULL)
-	{
 		return;
-	}
 	_header = new ClientHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
 	if(_header->getErrorCode() != 0)
@@ -343,4 +341,5 @@ void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 	}
+	printChain();
 }
