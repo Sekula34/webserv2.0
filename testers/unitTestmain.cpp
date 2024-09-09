@@ -21,9 +21,9 @@ int main()
 	//AutoindexTest::validSimpleTest();
 	//UnitTest::filerOrFolderBlock();
 	//UnitTest::testingOpeninDirBlock();
-	//all();
-	//CHTest::fullUrlTest();
-	HeaderTester::runAll();
+	all();
+	//CHTest::runAllTests();
+	//HeaderTester::runAll();
 	//UnitTest::stringDelimCheck();
 	//UnitTest::urlPathTesterBlock();
 	//UnitTest::urlPathQueryBlock();
