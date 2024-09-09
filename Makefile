@@ -28,7 +28,6 @@ NC := \033[0m # No color
 MAIN=srcs/main.cpp
 
 SRCS =		srcs/Client/AHeader.cpp\
-			srcs/Client/ClientHeader.cpp\
 			srcs/Client/Client.cpp \
 			srcs/Client/Message.cpp \
 			srcs/Client/Node.cpp \
@@ -63,7 +62,6 @@ SRCS =		srcs/Client/AHeader.cpp\
 
 
 HEADERS =	srcs/Client/AHeader.hpp\
-			srcs/Client/ClientHeader.hpp\
 			srcs/Client/Client.hpp\
 			srcs/Client/CgiProcessor.hpp\
 			srcs/Client/Message.hpp \
