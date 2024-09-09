@@ -20,8 +20,8 @@ class Node {
 
 	public:
 							// canonical
-							Node (const std::string & str, int type);
-							Node (const std::string & str, int type, size_t size);
+							Node (const std::string & str, int type, bool r);
+							Node (const std::string & str, int type, size_t size, bool r);
 							~Node(void);
 							Node(void);
 							Node(Node const & src);
@@ -56,6 +56,7 @@ class Node {
 		size_t				_chunkHeaderSize; // size of CHUNK HEADER
 		size_t				_bodySize; // if this node is a BODY this will be it's size
 		bool				_chunkHeader; // flag to indicate that we have set chunkSize
+		bool				_request;
 		// std::stringstream 	_ss;
 
 							//Node specific functions

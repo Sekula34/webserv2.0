@@ -428,7 +428,7 @@ void	CgiProcessor::_readFromChild()
 	{
 
 		if (!_client->getServerMsg())
-			_client->setServerMsg(new Message());
+			_client->setServerMsg(new Message(false));
 
 		_client->clearRecvLine();
 		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
@@ -449,6 +449,7 @@ void	CgiProcessor::_readFromChild()
 		if (n == 0)
 		{
 			_client->getServerMsg()->printChain();
+			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
 		}
 	}

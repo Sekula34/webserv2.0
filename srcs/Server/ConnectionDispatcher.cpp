@@ -233,7 +233,7 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 
 	// allocate new Message instance if necessary
 	if (!client.getClientMsg())
-		client.setClientMsg(new Message());
+		client.setClientMsg(new Message(true));
 
 	if (client.getClientMsg()->getState() == COMPLETE)
 		return (true);

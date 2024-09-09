@@ -30,7 +30,6 @@ ResponseHeader& ResponseHeader::operator=(const ResponseHeader& source)
 
 ResponseHeader::~ResponseHeader()
 {
-
 }
 
 

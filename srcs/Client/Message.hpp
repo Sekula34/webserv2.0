@@ -13,7 +13,7 @@ class Message {
 
 	public:
 									// canonical
-									Message(void);
+									Message(bool r);
 		virtual						~Message(void);
 		void						bufferToNodes(unsigned char* buffer, size_t num);
 		void						printChain();
@@ -22,6 +22,7 @@ class Message {
 
 									// set and get
 		int							getState() const;
+		void						setState(int s);
 		ClientHeader*				getClientHeader() const;
 		const std::list<Node>&		getChain() const;
 		const std::string			getBodyString();
@@ -32,7 +33,8 @@ class Message {
 		std::list<Node>::iterator	_it;	// pointing to current node in chain
 		bool						_chunked; // this is a chunked request
 		bool						_trailer; // we are expecting a trailer as last node
-		int							_state; // message is complete
+		int							_state; // message can be: COMPLETE, INCOMPLETE, ERROR
+		bool						_request;
 		std::stringstream 			_ss;
 		ClientHeader*				_header;
 
@@ -46,6 +48,7 @@ class Message {
 		void						_createClientHeader();
 		void						_headerInfoToNode();
 
+									Message(void);
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);
 };

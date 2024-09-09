@@ -14,12 +14,13 @@ _btr(0),
 _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(0),
-_chunkHeader(false)
+_chunkHeader(false),
+_request(true)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
 
-Node::Node (const std::string & str, int type):
+Node::Node (const std::string & str, int type, bool request):
 _state(INCOMPLETE),
 _type(type),
 _str(str),
@@ -27,12 +28,13 @@ _btr(0),
 _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(0),
-_chunkHeader(false)
+_chunkHeader(false),
+_request(request)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
 
-Node::Node (const std::string & str, int type, size_t size):
+Node::Node (const std::string & str, int type, size_t size, bool request):
 _state(INCOMPLETE),
 _type(type),
 _str(str),
@@ -40,7 +42,8 @@ _btr(0),
 _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(size),
-_chunkHeader(false)
+_chunkHeader(false),
+_request(request)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -281,7 +284,12 @@ void	Node::_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num)
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)
-		_btr = _bodySize - _str.size();
+	{
+		if (_request)
+			_btr = _bodySize - _str.size();
+		else
+			_btr = num - bufferPos;
+	}
 	if ((_type == CHUNK || LCHUNK) && _chunkHeader)
 		_btr =  _chunkHeaderSize + _chunkSize + 2 - _str.size() ;
 }

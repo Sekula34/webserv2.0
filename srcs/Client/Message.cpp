@@ -15,11 +15,25 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
+Message::Message (bool request)
+{
+
+	// std::cout << "Message default constructor called" << std::endl;
+	_request = request;
+	_chain.push_back(Node("", HEADER, _request));
+	_it = _chain.begin();
+	_chunked = false;
+	_trailer = false;
+	_state = INCOMPLETE;
+	_header = NULL;
+}
+
 Message::Message (void)
 {
 
 	// std::cout << "Message default constructor called" << std::endl;
-	_chain.push_back(Node("", HEADER));
+	_request = true;
+	_chain.push_back(Node("", HEADER, _request));
 	_it = _chain.begin();
 	_chunked = false;
 	_trailer = false;
@@ -63,6 +77,7 @@ int	Message::getState() const
 {
 	return (_state);
 }
+
 ClientHeader*	Message::getClientHeader() const
 {
 	return (_header);
@@ -84,6 +99,11 @@ const std::string	Message::getBodyString()
 	}
 	_findBody(it);
 	return (it->getStringUnchunked());
+}
+
+void	Message::setState(int s)
+{
+	_state = s;
 }
 
 void	Message::printChain()
@@ -182,7 +202,7 @@ void	Message::_chunksToBody()
 		it++;
 		_chain.erase(tmp);
 	}
-	_chain.push_back(Node(str, BODY));
+	_chain.push_back(Node(str, BODY, _request));
 	_chain.back().setBodySize(str.size());
 	_chain.back().setState(COMPLETE);
 }
@@ -234,11 +254,11 @@ void	Message::_addNewNode()
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete
 	if (_it->getType() != LCHUNK && _chunked)
-		_chain.push_back(Node("", CHUNK));
+		_chain.push_back(Node("", CHUNK, _request));
 
 	// create TRAILER NODE if message is chunked and has trailer and last chunk is complete
 	if (_it->getType() == LCHUNK && _trailer)
-		_chain.push_back(Node("", TRAILER));
+		_chain.push_back(Node("", TRAILER, _request));
 	_it++;
 }
 
