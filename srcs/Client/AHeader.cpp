@@ -11,7 +11,7 @@ AHeader::AHeader(const std::string& headerSection)
 {
 	if(_fillHeaderFieldMap() == false)
 	{
-		Logger::error("Error whil filling header field map", true);
+		Logger::error("Error while filling header field map", true);
 		return;
 	}
 	Logger::info("Header fileds map is successfully filled", true);
@@ -25,6 +25,7 @@ AHeader::AHeader(const AHeader& source)
 
 AHeader& AHeader::operator=(const AHeader& source)
 {
+	(void) source;
 	Logger::warning("Why is AHeader = operator called??");
 	return *this;
 }
@@ -55,6 +56,7 @@ bool AHeader::_fillHeaderFieldMap()
 std::vector<std::string> AHeader::_getHeaderFields() const
 {
 	std::vector<std::string> headerFields =  ParsingUtils::splitString(m_headerSection, "\r\n");
+	headerFields.erase(headerFields.end() - 1);
 	return headerFields;
 }
 
