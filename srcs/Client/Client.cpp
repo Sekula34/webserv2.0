@@ -229,13 +229,13 @@ void	Client::clearMessage()
 {
 }
 
-// void Client::createClientHeader()
+// void Client::createRequestHeader()
 // {
 // 	if(header != NULL)
 // 	{
 // 		return;
 // 	}
-// 	header = new ClientHeader(this->getMessage());
+// 	header = new RequestHeader(this->getMessage());
 // 	// Logger::info("Client header created with : "); std::cout << _message;
 // 	if(header->getErrorCode() != 0)
 // 	{
