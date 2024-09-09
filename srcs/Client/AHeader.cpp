@@ -6,6 +6,13 @@
 #include <string>
 #include <vector>
 
+
+
+AHeader::AHeader()
+{
+
+}
+
 AHeader::AHeader(const std::string& headerSection)
 : m_headerSection(headerSection),
 m_httpErrorCode(0)
@@ -45,11 +52,27 @@ const std::map<std::string, std::string>& AHeader::getHeaderFieldMap() const
 {
 	return m_headerFields;
 }
+void AHeader::setOneHeaderField(std::string key, std::string value)
+{
+	m_headerFields[key] = value;
+}
 
 void AHeader::p_setHttpStatusCode(int httpCode)
 {
 	m_httpErrorCode = httpCode;
 }
+
+std::string AHeader::p_getAllHeaderFieldsAsString() const
+{
+	std::string headerFields;
+	std::map<std::string, std::string>::const_iterator it;
+	for(it = m_headerFields.begin(); it != m_headerFields.end(); it++)
+	{
+		headerFields += _getOneHeaderFieldAsString(it->first, it->second);
+	}
+	return headerFields;
+}
+
 
 const int& AHeader::getHttpStatusCode(void) const
 {
@@ -88,6 +111,16 @@ std::vector<std::string> AHeader::_getHeaderFields() const
 	std::vector<std::string> headerFields =  ParsingUtils::splitString(m_headerSection, "\r\n");
 	headerFields.erase(headerFields.end() - 1);
 	return headerFields;
+}
+
+std::string AHeader::_getOneHeaderFieldAsString(std::string key, std::string value) const 
+{
+	std::string oneHeaderField;
+	oneHeaderField += key;
+	oneHeaderField += ": ";
+	oneHeaderField += value;
+	oneHeaderField += "\r\n";
+	return oneHeaderField;
 }
 
 bool AHeader::_setOneHeaderField(std::string keyAndValue)
