@@ -92,14 +92,18 @@ std::vector<std::string> AHeader::_getHeaderFields() const
 
 bool AHeader::_setOneHeaderField(std::string keyAndValue)
 {
-	std::vector<std::string> connected = ParsingUtils::splitString(keyAndValue, ':');
-	if(connected.size() < 2)
+	std::string key = ParsingUtils::extractUntilDelim(keyAndValue, ":");
+	key.erase(key.end() - 1);
+	std::string plainKey = ParsingUtils::getHttpPlainValue(key);
+	std::string value = ParsingUtils::extractAfterDelim(keyAndValue, ":");
+	value = ParsingUtils::getHttpPlainValue(value);
+	if(key == "" || value == "")
 	{
-		Logger::warning("Header filed syntax is in client Header is invalid ");
+		Logger::warning("Something is off");
 		return false;
 	}
-	std::string key = connected[0];
-	std::string value = ParsingUtils::getHttpPlainValue(connected[1]);
+		//std::string key = connected[0];
+		//std::string value = ParsingUtils::getHttpPlainValue(connected[1]);
 	m_headerFields[key] = value;
 	return true;
 }
