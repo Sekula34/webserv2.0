@@ -275,12 +275,16 @@ void	Node::_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num)
 	std::string	del;
 	if (_type == HEADER || _type == TRAILER)
 	{
-		del = {'\r','\n','\r','\n'};
+		if (_request)
+			del = {'\r','\n','\r','\n'};
+		else
+			del = {'\n','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
-		del = {'\r','\n'};
+		if (_request)
+			del = {'\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)

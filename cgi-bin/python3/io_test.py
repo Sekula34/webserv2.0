@@ -53,11 +53,11 @@ end = """
 </html>
 """
 
-print("HTTP/1.1 200 OK")
+print("HTTP/1.1 200 OK\n")
 print("Connection: close\n")
 print("Content-Language: en\n")
-print("Content-Length: 1000")
-print("\r\n\r\n")
+print("Content-Length: 1000\n")
+print("\n\n")
 
 print(start)
 
