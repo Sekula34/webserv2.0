@@ -57,7 +57,7 @@ void UnitTest::filerOrFolderBlock()
 	filerOrFolderTestCase("html", 2, 0);
 	filerOrFolderTestCase("html/403.html", 1, 0);
 	filerOrFolderTestCase("heheheheh", -1 , 404);
-	filerOrFolderTestCase("srcs/cgi/", 2, 0);
+	filerOrFolderTestCase("cgi-bin", 2, 0);
 	_testpassed(true);
 }
 
