@@ -58,8 +58,7 @@ SRCS =		srcs/Client/AHeader.cpp\
 			testers/AutoIndexTest.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
-			testers/CHTest.cpp \
-			testers/HeaderTester.cpp
+			testers/RequestHeaderTester.cpp\
 			# $(MAIN)\
 
 
@@ -94,8 +93,7 @@ HEADERS =	srcs/Client/AHeader.hpp\
 			testers/AutoIndexTest.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp\
-			testers/CHTest.hpp\
-			testers/HeaderTester.hpp
+			testers/RequestHeaderTester.hpp\
 			
 
 OBJ_DIR = obj
