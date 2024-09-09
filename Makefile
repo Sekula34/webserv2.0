@@ -33,6 +33,7 @@ SRCS =		srcs/Client/AHeader.cpp\
 			srcs/Client/Message.cpp \
 			srcs/Client/Node.cpp \
 			srcs/Client/CgiProcessor.cpp \
+			srcs/Client/RequestHeader.cpp \
 			srcs/Parsing/LocationSettings.cpp \
 			srcs/Parsing/ServersInfo.cpp \
 			srcs/Parsing/Token.cpp \
@@ -68,6 +69,7 @@ HEADERS =	srcs/Client/AHeader.hpp\
 			srcs/Client/CgiProcessor.hpp\
 			srcs/Client/Message.hpp \
 			srcs/Client/Node.hpp \
+			srcs/Client/RequestHeader.hpp \
 			srcs/Parsing/LocationSettings.hpp\
 			srcs/Parsing/ServersInfo.hpp\
 			srcs/Parsing/Token.hpp\
