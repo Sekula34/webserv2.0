@@ -16,23 +16,26 @@ class AHeader
 		AHeader(const AHeader& source);
 		AHeader& operator=(const AHeader& source);
 		//TODO: make destructor virtual
-		~AHeader();
+		virtual ~AHeader();
 
 		const std::map<std::string, std::string>& getHeaderFieldMap() const;
+		const int& getHttpStatusCode(void) const;
+		bool isBodyExpected() const;
 
 	protected:
 		std::map<std::string, std::string> m_headerFields;
-		int m_httpErrorCode;
 		const std::string m_headerSection; //without start line in string; expected to be delimited by /r/n
+		int m_httpErrorCode;
 		//TODO: uncomment this abstract function 
+		virtual std::string getStartLine() const = 0;
 		//virtual std::string getStartLine() = 0
 		void p_setHttpStatusCode(int httpCode);
-		int& p_getHttpStatusCode(void) const;
 
 	private:
 		bool _fillHeaderFieldMap();
 		bool _setOneHeaderField(std::string keyAndValue);
 		std::vector<std::string> _getHeaderFields() const;
+		bool _checkHeaderFields(void);
 		
 		
 		friend std::ostream& operator <<(std::ostream& os, const AHeader& header);

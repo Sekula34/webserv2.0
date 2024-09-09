@@ -7,11 +7,17 @@
 #include <vector>
 
 AHeader::AHeader(const std::string& headerSection)
-: m_headerSection(headerSection)
+: m_headerSection(headerSection),
+m_httpErrorCode(0)
 {
 	if(_fillHeaderFieldMap() == false)
 	{
 		Logger::error("Error while filling header field map", true);
+		return;
+	}
+	if(_checkHeaderFields() == false)
+	{
+		Logger::error("checking header fields failed", true);
 		return;
 	}
 	Logger::info("Header fileds map is successfully filled", true);
@@ -38,6 +44,30 @@ AHeader::~AHeader()
 const std::map<std::string, std::string>& AHeader::getHeaderFieldMap() const
 {
 	return m_headerFields;
+}
+
+void AHeader::p_setHttpStatusCode(int httpCode)
+{
+	m_httpErrorCode = httpCode;
+}
+
+const int& AHeader::getHttpStatusCode(void) const
+{
+	return m_httpErrorCode;
+}
+
+
+bool AHeader::isBodyExpected() const
+{
+	std::string s = "chunked";
+	if(m_headerFields.find("Content-Length") != m_headerFields.end()
+	|| (m_headerFields.find("Transfer-Encoding") != m_headerFields.end()
+		&& m_headerFields.at("Transfer-Encoding") == "chunked"))
+	{
+		std::cout << "body should be read!" << std::endl;
+		return true;
+	}
+	return false;
 }
 
 
@@ -71,6 +101,20 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 	std::string key = connected[0];
 	std::string value = ParsingUtils::getHttpPlainValue(connected[1]);
 	m_headerFields[key] = value;
+	return true;
+}
+
+bool AHeader::_checkHeaderFields(void)
+{
+	//check if there is authorization
+	std::string authorizationKey = "Authorization";
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find((authorizationKey));
+	if(it != m_headerFields.end())
+	{
+		Logger::error("Authorization is not supported", true);
+		p_setHttpStatusCode(403);
+		return false;
+	}
 	return true;
 }
 
