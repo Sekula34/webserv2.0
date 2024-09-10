@@ -24,6 +24,7 @@ class RequestHeaderTester : UnitTest
 		static void compare(const RequestHeader& actual,const std::pair<std::string, int>& expected);
 		static void simplePrint();
 		static std::string generateValidHttpReques();
+		static void cgiResponseHeader();
 	private:
 		//static const client
 

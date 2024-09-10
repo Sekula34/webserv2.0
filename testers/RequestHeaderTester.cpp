@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include "../srcs/Parsing/ParsingUtils.hpp"
+#include "../srcs/Response/ResponseHeader.hpp"
 
 std::string RequestHeaderTester::generateValidHttpReques()
 {
@@ -121,6 +122,7 @@ void RequestHeaderTester::runAllTests()
 	CHBlockTest();
 	copyTestBlock();
 	fullUrlTest();
+	cgiResponseHeader();
 }
 
 void RequestHeaderTester::fullUrlTest()
@@ -245,4 +247,20 @@ void RequestHeaderTester::testIfThereIsBody()
 	RequestHeader head2(generateValidHttpReques());
 	assert(head2.isBodyExpected() == false);
 	_testpassed();
+}
+
+void RequestHeaderTester::cgiResponseHeader()
+{
+	std::string cgiResponse = "HTTP/1.1 200 OK\n\
+Connection: close\n\
+Content-Language: en\n\
+Content-Length: 1000\n";
+
+	std::string cgiResponseNoStatus = "Connection: close\n\
+Content-Language: en\n\
+Content-Length: 1000\n";
+	ResponseHeader* cgi = ResponseHeader::createCgiResponseHeader(cgiResponseNoStatus, "\n");
+	delete cgi;
+	cgi = ResponseHeader::createCgiResponseHeader(cgiResponse, "\n");
+	delete cgi;
 }
