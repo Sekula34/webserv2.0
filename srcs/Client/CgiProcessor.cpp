@@ -367,6 +367,7 @@ void	CgiProcessor::_deleteChararr(char ** lines)
 
 int	CgiProcessor::_execute()
 {
+	signal(SIGINT, SIG_IGN);
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
