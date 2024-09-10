@@ -15,5 +15,6 @@ void all()
 
 int main()
 {
+	//RequestHeaderTester::cgiResponseHeader();
 	all();
 }
