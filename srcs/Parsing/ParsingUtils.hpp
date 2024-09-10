@@ -92,6 +92,8 @@ class ParsingUtils
 		 */
 		static std::string getHttpPlainValue(std::string fieldValue);
 
+		static std::string replaceAllCharsInString(std::string fullString, const std::string oldChar, const std::string neuChar);
+
 		class InvalidConversion : public std::exception
 		{
 			const char * what() const throw();

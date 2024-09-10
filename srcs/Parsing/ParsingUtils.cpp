@@ -162,6 +162,19 @@ std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 	return PlainValue;
 }
 
+std::string ParsingUtils::replaceAllCharsInString(std::string fullString, const std::string oldChar, const std::string neuChar)
+{
+	std::string neuString(fullString);
+	size_t pos = neuString.find(oldChar);
+	while(pos != std::string::npos)
+	{
+		neuString.replace(pos, oldChar.size(), neuChar);
+		pos += neuChar.size();
+		pos = neuString.find(oldChar, pos);
+	}
+	return neuString;
+}
+
 const char * ParsingUtils::InvalidConversion::what() const throw()
 {
 	return("Exception: Invalid Converion");
