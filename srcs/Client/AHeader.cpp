@@ -126,7 +126,8 @@ std::string AHeader::_getOneHeaderFieldAsString(std::string key, std::string val
 bool AHeader::_setOneHeaderField(std::string keyAndValue)
 {
 	std::string key = ParsingUtils::extractUntilDelim(keyAndValue, ":");
-	key.erase(key.end() - 1);
+	if(key != "")
+		key.erase(key.end() - 1);
 	std::string plainKey = ParsingUtils::getHttpPlainValue(key);
 	std::string value = ParsingUtils::extractAfterDelim(keyAndValue, ":");
 	value = ParsingUtils::getHttpPlainValue(value);
