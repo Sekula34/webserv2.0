@@ -59,9 +59,11 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 	return fullHeader;
 }
 
-ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, const std::string cgiHeaderDelimiter)
+ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
-	std::string toReplace = cgiHeaderDelimiter;
+	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
+	cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
+	std::string toReplace = cgiHeaderFieldDelimiter;
 	std::string httpDelimiter = "\r\n";
 	std::string aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
 	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200);

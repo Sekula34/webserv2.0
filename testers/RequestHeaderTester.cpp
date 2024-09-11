@@ -254,13 +254,20 @@ void RequestHeaderTester::cgiResponseHeader()
 	std::string cgiResponse = "Status: 404 OK\n\
 Connection: close\n\
 Content-Language: en\n\
-Content-Length: 1000\n";
+Content-Length: 1000\n\
+\n"
+;
 
 	std::string cgiResponseNoStatus = "Connection: close\n\
 Content-Language: en\n\
-Content-Length: 1000\n";
+Content-Length: 1000\n\
+\n";
 	ResponseHeader* cgi = ResponseHeader::createCgiResponseHeader(cgiResponseNoStatus, "\n");
+	if (cgi == NULL)
+		assert(0 == 1);
+	assert(cgi->getHttpStatusCode() == 0);
 	delete cgi;
 	cgi = ResponseHeader::createCgiResponseHeader(cgiResponse, "\n");
+	assert(cgi->getHttpStatusCode() == 0);
 	delete cgi;
 }

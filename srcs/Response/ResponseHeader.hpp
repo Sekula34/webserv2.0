@@ -24,7 +24,7 @@ class ResponseHeader : public AHeader
 
 		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
-		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, std::string cgiHeaderDelimiter);
+		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
 		void changeHttpCode(int newHttpCode);
 
 	private:

@@ -133,6 +133,7 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 	value = ParsingUtils::getHttpPlainValue(value);
 	if(key == "" || value == "")
 	{
+		p_setHttpStatusCode(500);
 		Logger::warning("Something is off");
 		return false;
 	}
