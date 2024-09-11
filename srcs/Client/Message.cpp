@@ -1,7 +1,7 @@
 
 #include "Message.hpp"
 #include "Node.hpp"
-#include "ClientHeader.hpp"
+#include "RequestHeader.hpp"
 #include "Client.hpp"
 #include "../Utils/Logger.hpp"
 #include <sstream>
@@ -78,7 +78,7 @@ int	Message::getState() const
 	return (_state);
 }
 
-ClientHeader*	Message::getClientHeader() const
+RequestHeader*	Message::getRequestHeader() const
 {
 	return (_header);
 }
@@ -207,37 +207,37 @@ void	Message::_chunksToBody()
 	_chain.back().setState(COMPLETE);
 }
 
-void	Message::_createClientHeader()
+void	Message::_createRequestHeader()
 {
 	if(_header != NULL)
 		return;
-	_header = new ClientHeader(_chain.begin()->getStringUnchunked());
+	_header = new RequestHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
-	if(_header->getErrorCode() != 0)
+	if(_header->getHttpStatusCode() != 0)
 	{
-		Logger::warning("Found Error in Client Header", false); std::cout << _header->getErrorCode() << std::endl;
+		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
 		// need to pass this to Client!!
-		// setErrorCode(_header->getErrorCode());
+		// setErrorCode(_header->getHttpStatusCode());
 	}
 }
 
 void	Message::_headerInfoToNode()
 {
 		// set BODY SIZE from header
-		std::map<std::string, std::string>::const_iterator found = _header->getHeaderFields().find("Content-Length");
-		if (found != _header->getHeaderFields().end())
+		std::map<std::string, std::string>::const_iterator found = _header->getHeaderFieldMap().find("Content-Length");
+		if (found != _header->getHeaderFieldMap().end())
 		{
 			_ss.clear();
 			_ss.str("");
-			_ss << _header->getHeaderFields().at("Content-Length");
+			_ss << _header->getHeaderFieldMap().at("Content-Length");
 			int num;
 			_ss >> num;
 			_it->setBodySize(num);
 		}
-		if (_header->getHeaderFields().find("Trailer") != _header->getHeaderFields().end())
+		if (_header->getHeaderFieldMap().find("Trailer") != _header->getHeaderFieldMap().end())
 			_trailer = true;
-		found = _header->getHeaderFields().find("Transfer-Encoding");
-		if (found != _header->getHeaderFields().end() && found->second.find("chunked") != std::string::npos)
+		found = _header->getHeaderFieldMap().find("Transfer-Encoding");
+		if (found != _header->getHeaderFieldMap().end() && found->second.find("chunked") != std::string::npos)
 			_chunked = true;
 
 }
@@ -334,10 +334,10 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 		|| _it->getType() == BODY || _it->getType() == TRAILER)
 		_state = COMPLETE;
 
-	// if header, create new ClientHeader
+	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
 	{
-		_createClientHeader();
+		_createRequestHeader();
 		if (num < MAXLINE && bufferPos == num)
 			_state = COMPLETE;
 	}

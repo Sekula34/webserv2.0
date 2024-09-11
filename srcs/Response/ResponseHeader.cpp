@@ -3,21 +3,33 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include <cstddef>
 #include <ostream>
+#include <sstream>
+#include <vector>
+
+
+ResponseHeader::ResponseHeader(std::string headerSection, const int httpCode)
+:AHeader(headerSection),
+_httpCode(httpCode)
+{
+	_fillStatusLineElements();
+}
 
 ResponseHeader::ResponseHeader(const int& httpCode, size_t contentLength)
 :_httpCode(httpCode)
 {
 	_fillStatusLineElements();
-	_headerFields["Connection"] = "close";
+	m_headerFields["Connection"] = "close";
 	if(contentLength != 0)
 	{
-		_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
-		_headerFields["Content-Language"] = "en";
+		m_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
+		m_headerFields["Content-Language"] = "en";
 	}
 }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)
-:_httpCode(source._httpCode), _statusLine(source._statusLine), _headerFields(source._headerFields)
+:AHeader(),
+_httpCode(source._httpCode),
+_statusLine(source._statusLine)
 {
 
 }
@@ -32,8 +44,64 @@ ResponseHeader::~ResponseHeader()
 {
 }
 
+std::string ResponseHeader::getStartLine() const 
+{
+	std::ostringstream oss;
+	oss << _statusLine.HttpVersion << " " << _statusLine.statusCode << " " << _statusLine.ReasonPhrase;
+	return oss.str();
+}
 
+std::string ResponseHeader::turnResponseHeaderToString(void) const
+{
+	std::string fullHeader;
+	fullHeader += _getStatusLineAsString();
+	fullHeader += p_getAllHeaderFieldsAsString();
+	return fullHeader;
+}
 
+ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, const std::string cgiHeaderDelimiter)
+{
+	std::string toReplace = cgiHeaderDelimiter;
+	std::string httpDelimiter = "\r\n";
+	std::string aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
+	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200);
+	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
+		return NULL;
+	if(toReturn->_cgiStatusLine() == true)
+	{
+		std::cout << "I have status line " << std::endl;
+		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
+		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
+		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
+		toReturn->changeHttpCode(newHttpCode);
+	}
+	return toReturn;
+}
+
+void ResponseHeader::changeHttpCode(int newHttpCode)
+{
+	_httpCode = newHttpCode;
+	_fillStatusLineElements();
+}
+
+bool ResponseHeader::_setStatusLine(StatusLineElements& elem, std::string line)
+{
+	std::vector<std::string> elements = ParsingUtils::splitString(line, ' ');
+	if(elements.size() != 3)
+		return false;
+	elem.HttpVersion = elements[0];
+	elem.statusCode = ParsingUtils::stringToSizeT(elements[1]);
+	elem.ReasonPhrase = HttpStatusCode::getReasonPhrase(elem.statusCode);
+	return true;
+}
+
+bool ResponseHeader::_cgiStatusLine() const
+{
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find("Status");
+	if(it != m_headerFields.end())
+		return true;
+	return false;
+}
 
 void ResponseHeader::_fillStatusLineElements()
 {
@@ -55,39 +123,6 @@ std::string ResponseHeader::_getStatusLineAsString() const
 	return statusLine;
 }
 
-std::string ResponseHeader::_getOneHeaderFieldAsString(std::string key, std::string value) const 
-{
-	std::string oneHeaderField;
-	oneHeaderField += key;
-	oneHeaderField += ": ";
-	oneHeaderField += value;
-	oneHeaderField += "\r\n";
-	return oneHeaderField;
-}
-
-// "Content-Type: text/html\r\n"
-// "Content-Length: 48\r\n"
-// "Connection: close\r\n"
-std::string ResponseHeader::_getAllHeaderFieldsAsString() const
-{
-	std::string headerFields;
-	std::map<std::string, std::string>::const_iterator it;
-	for(it = _headerFields.begin(); it != _headerFields.end(); it++)
-	{
-		headerFields += _getOneHeaderFieldAsString(it->first, it->second);
-	}
-	return headerFields;
-}
-
-
-
-std::string ResponseHeader::turnResponseHeaderToString(void) const
-{
-	std::string fullHeader;
-	fullHeader += _getStatusLineAsString();
-	fullHeader += _getAllHeaderFieldsAsString();
-	return fullHeader;
-}
 
 std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj)
 {

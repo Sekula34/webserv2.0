@@ -2,7 +2,7 @@
 # define CLIENT_HPP
 # include <string>
 # include <ctime>
-# include "../Client/ClientHeader.hpp"
+# include "../Client/RequestHeader.hpp"
 # include "CgiProcessor.hpp"
 # include "../Response/Response.hpp"
 # include "../Utils/Logger.hpp"
@@ -82,11 +82,11 @@ class Client {
 		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor
 		 * 
 		 */
-		void				createClientHeader();
+		void				createRequestHeader();
 		CgiProcessor*		Cgi;			
 		std::string			_cgiOutput;
 		bool				cgiChecked;
-		// ClientHeader*		header; //client Responsible for deleting
+		// RequestHeader*		header; //client Responsible for deleting
 		pid_t				waitReturn;
 		int					socketToChild;
 		int					socketFromChild;

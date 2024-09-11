@@ -129,12 +129,13 @@ bool ParsingUtils::isStringEnd(const std::string toCheck,const std::string expec
 	return true;
 }
 
-std::string ParsingUtils::extractUntilDelim(const std::string fullString, const std::string delimiter)
+std::string ParsingUtils::extractUntilDelim(const std::string fullString, const std::string delimiter, bool includeDelim)
 {
 	std::string::size_type pos = fullString.find(delimiter);
 	if(pos == std::string::npos)
 		return "";
-	pos += delimiter.length();
+	if(includeDelim)
+		pos += delimiter.length();
 	return fullString.substr(0, pos);
 }
 
@@ -160,6 +161,19 @@ std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 		PlainValue.erase(PlainValue.size() - 1);
 	}
 	return PlainValue;
+}
+
+std::string ParsingUtils::replaceAllCharsInString(std::string fullString, const std::string oldChar, const std::string neuChar)
+{
+	std::string neuString(fullString);
+	size_t pos = neuString.find(oldChar);
+	while(pos != std::string::npos)
+	{
+		neuString.replace(pos, oldChar.size(), neuChar);
+		pos += neuChar.size();
+		pos = neuString.find(oldChar, pos);
+	}
+	return neuString;
 }
 
 const char * ParsingUtils::InvalidConversion::what() const throw()

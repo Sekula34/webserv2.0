@@ -157,7 +157,7 @@ std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 
 std::string	CgiProcessor::getScriptName(std::string suffix)
 {
-	std::vector<std::string> sections = ParsingUtils::splitString(_client->getClientMsg()->getClientHeader()->urlSuffix->getPath(), '/');
+	std::vector<std::string> sections = ParsingUtils::splitString(_client->getClientMsg()->getRequestHeader()->urlSuffix->getPath(), '/');
 	std::vector<std::string>::iterator it = sections.begin();
 	for (; it != sections.end(); it++)
 	{
@@ -251,8 +251,8 @@ void	CgiProcessor::_createEnvVector()
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
-	if (_client->getClientMsg()->getClientHeader()->getHeaderFields().find("Content-Type") != _client->getClientMsg()->getClientHeader()->getHeaderFields().end())
-		line +=_client->getClientMsg()->getClientHeader()->getHeaderFields().find("Content-Type")->second;
+	if (_client->getClientMsg()->getRequestHeader()->getHeaderFieldMap().find("Content-Type") != _client->getClientMsg()->getRequestHeader()->getHeaderFieldMap().end())
+		line +=_client->getClientMsg()->getRequestHeader()->getHeaderFieldMap().find("Content-Type")->second;
 	_envVec.push_back(line);
 
 	// GATEWAY_INTERFACE
@@ -279,7 +279,7 @@ void	CgiProcessor::_createEnvVector()
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
-	line += _client->getClientMsg()->getClientHeader()->urlSuffix->getQueryParameters();
+	line += _client->getClientMsg()->getRequestHeader()->urlSuffix->getQueryParameters();
 	_envVec.push_back(line);
 
 	// REMOTE_ADDR
@@ -295,30 +295,30 @@ void	CgiProcessor::_createEnvVector()
 	
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
-	line += _client->getClientMsg()->getClientHeader()->getRequestLine().requestMethod;
+	line += _client->getClientMsg()->getRequestHeader()->getRequestLine().requestMethod;
 	_envVec.push_back(line);
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
-	line += _client->getClientMsg()->getClientHeader()->urlSuffix->getPath();
+	line += _client->getClientMsg()->getRequestHeader()->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
-	line += _client->getClientMsg()->getClientHeader()->getHostName();
+	line += _client->getClientMsg()->getRequestHeader()->getHostName();
 	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
-	ss2 << _client->getClientMsg()->getClientHeader()->getHostPort();
+	ss2 << _client->getClientMsg()->getRequestHeader()->getHostPort();
 	line += ss2.str();
 	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
-	line += _client->getClientMsg()->getClientHeader()->getRequestLine().protocolVersion;
+	line += _client->getClientMsg()->getRequestHeader()->getRequestLine().protocolVersion;
 	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
