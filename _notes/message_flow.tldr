@@ -41,90 +41,11 @@
 			"typeName": "document"
 		},
 		{
-			"id": "pointer:pointer",
-			"typeName": "pointer",
-			"x": 2040.7967095742895,
-			"y": 1256.9990116694826,
-			"lastActivityTimestamp": 1725897569533,
-			"meta": {}
-		},
-		{
 			"meta": {},
 			"id": "page:page",
 			"name": "Page 1",
 			"index": "a1",
 			"typeName": "page"
-		},
-		{
-			"followingUserId": null,
-			"opacityForNextShape": 1,
-			"stylesForNextShape": {
-				"tldraw:geo": "rectangle",
-				"tldraw:size": "m",
-				"tldraw:fill": "none",
-				"tldraw:color": "yellow"
-			},
-			"brush": null,
-			"scribbles": [],
-			"cursor": {
-				"type": "default",
-				"rotation": 0
-			},
-			"isFocusMode": false,
-			"exportBackground": true,
-			"isDebugMode": false,
-			"isToolLocked": false,
-			"screenBounds": {
-				"x": 0,
-				"y": 0,
-				"w": 1872,
-				"h": 903
-			},
-			"insets": [
-				false,
-				false,
-				true,
-				false
-			],
-			"zoomBrush": null,
-			"isGridMode": false,
-			"isPenMode": false,
-			"chatMessage": "",
-			"isChatting": false,
-			"highlightedUserIds": [],
-			"isFocused": true,
-			"devicePixelRatio": 2.4,
-			"isCoarsePointer": false,
-			"isHoveringCanvas": true,
-			"openMenus": [],
-			"isChangingStyle": false,
-			"isReadonly": false,
-			"meta": {},
-			"duplicateProps": null,
-			"id": "instance:instance",
-			"currentPageId": "page:page",
-			"typeName": "instance"
-		},
-		{
-			"editingShapeId": null,
-			"croppingShapeId": null,
-			"selectedShapeIds": [],
-			"hoveredShapeId": null,
-			"erasingShapeIds": [],
-			"hintingShapeIds": [],
-			"focusedGroupId": null,
-			"meta": {},
-			"id": "instance_page_state:page:page",
-			"pageId": "page:page",
-			"typeName": "instance_page_state"
-		},
-		{
-			"x": 959.2609365356027,
-			"y": 69.43597132865955,
-			"z": 0.4493246993930005,
-			"meta": {},
-			"id": "camera:page:page",
-			"typeName": "camera"
 		},
 		{
 			"meta": {},
@@ -1227,8 +1148,8 @@
 			"typeName": "shape"
 		},
 		{
-			"x": 527.3967009589016,
-			"y": 898.4278669535474,
+			"x": 692.8316649854769,
+			"y": 781.2447674347233,
 			"rotation": 0,
 			"isLocked": false,
 			"opacity": 1,
@@ -1243,12 +1164,12 @@
 				"labelColor": "black",
 				"bend": 0,
 				"start": {
-					"x": 204.05540911754974,
-					"y": 215.19177185939566
+					"x": 135.31605180738052,
+					"y": 504.6180277523488
 				},
 				"end": {
-					"x": -83.70429108923639,
-					"y": -245.09277558398105
+					"x": -90.5974145903437,
+					"y": -238.19965208287374
 				},
 				"arrowheadStart": "none",
 				"arrowheadEnd": "arrow",
@@ -1258,7 +1179,7 @@
 				"scale": 1
 			},
 			"parentId": "page:page",
-			"index": "aQAe5",
+			"index": "aPGV75hL",
 			"typeName": "shape"
 		},
 		{
@@ -1471,23 +1392,6 @@
 			"typeName": "shape"
 		},
 		{
-			"meta": {},
-			"id": "binding:IJdSvcC8YCfaHhFYLKWWv",
-			"type": "arrow",
-			"fromId": "shape:Bf9mMLQ5NiaHnuXBc6yta",
-			"toId": "shape:uxnBgQREFAKKMfvXdeQIN",
-			"props": {
-				"isPrecise": true,
-				"isExact": false,
-				"normalizedAnchor": {
-					"x": 0.5418377139826851,
-					"y": 0.33347523950116154
-				},
-				"terminal": "end"
-			},
-			"typeName": "binding"
-		},
-		{
 			"x": 970.0887714098021,
 			"y": 1280.2680601495408,
 			"rotation": 0,
@@ -1568,23 +1472,6 @@
 			"parentId": "page:page",
 			"index": "aP6LH",
 			"typeName": "shape"
-		},
-		{
-			"meta": {},
-			"id": "binding:qLEWsiyr8mOBc1honlMfG",
-			"type": "arrow",
-			"fromId": "shape:Bf9mMLQ5NiaHnuXBc6yta",
-			"toId": "shape:hWLEgCi-t8W7UecyxaETO",
-			"props": {
-				"isPrecise": true,
-				"isExact": false,
-				"normalizedAnchor": {
-					"x": 0.4266428653697487,
-					"y": 0.3361649324509753
-				},
-				"terminal": "start"
-			},
-			"typeName": "binding"
 		},
 		{
 			"meta": {},
@@ -1718,6 +1605,118 @@
 			"parentId": "page:page",
 			"index": "aRB5E",
 			"typeName": "shape"
+		},
+		{
+			"id": "pointer:pointer",
+			"typeName": "pointer",
+			"x": 605.1133718473011,
+			"y": 544.0004927172738,
+			"lastActivityTimestamp": 1726055451874,
+			"meta": {}
+		},
+		{
+			"followingUserId": null,
+			"opacityForNextShape": 1,
+			"stylesForNextShape": {},
+			"brush": null,
+			"scribbles": [],
+			"cursor": {
+				"type": "grabbing",
+				"rotation": 0
+			},
+			"isFocusMode": false,
+			"exportBackground": true,
+			"isDebugMode": false,
+			"isToolLocked": false,
+			"screenBounds": {
+				"x": 0,
+				"y": 0,
+				"w": 1872,
+				"h": 903
+			},
+			"insets": [
+				false,
+				false,
+				true,
+				false
+			],
+			"zoomBrush": null,
+			"isGridMode": false,
+			"isPenMode": false,
+			"chatMessage": "",
+			"isChatting": false,
+			"highlightedUserIds": [],
+			"isFocused": true,
+			"devicePixelRatio": 1,
+			"isCoarsePointer": false,
+			"isHoveringCanvas": true,
+			"openMenus": [],
+			"isChangingStyle": false,
+			"isReadonly": false,
+			"meta": {},
+			"duplicateProps": null,
+			"id": "instance:instance",
+			"currentPageId": "page:page",
+			"typeName": "instance"
+		},
+		{
+			"editingShapeId": null,
+			"croppingShapeId": null,
+			"selectedShapeIds": [
+				"shape:Bf9mMLQ5NiaHnuXBc6yta"
+			],
+			"hoveredShapeId": "shape:4e1yKfwn3vHQmRtSl38iG",
+			"erasingShapeIds": [],
+			"hintingShapeIds": [
+				"shape:DZPaaLeoaiqzCXjWnK_1r"
+			],
+			"focusedGroupId": null,
+			"meta": {},
+			"id": "instance_page_state:page:page",
+			"pageId": "page:page",
+			"typeName": "instance_page_state"
+		},
+		{
+			"x": 1111.2743799284183,
+			"y": -154.53901490471094,
+			"z": 0.5802884569466139,
+			"meta": {},
+			"id": "camera:page:page",
+			"typeName": "camera"
+		},
+		{
+			"meta": {},
+			"id": "binding:8J0pK0WwVgdVKxuM5n-8b",
+			"type": "arrow",
+			"fromId": "shape:Bf9mMLQ5NiaHnuXBc6yta",
+			"toId": "shape:hWLEgCi-t8W7UecyxaETO",
+			"props": {
+				"isPrecise": false,
+				"isExact": false,
+				"normalizedAnchor": {
+					"x": 0.39943316733906253,
+					"y": 0.4592263083096452
+				},
+				"terminal": "start"
+			},
+			"typeName": "binding"
+		},
+		{
+			"meta": {},
+			"id": "binding:vKTHNVoe8KJF5wfYL0O7x",
+			"type": "arrow",
+			"fromId": "shape:Bf9mMLQ5NiaHnuXBc6yta",
+			"toId": "shape:DZPaaLeoaiqzCXjWnK_1r",
+			"props": {
+				"isPrecise": true,
+				"isExact": false,
+				"normalizedAnchor": {
+					"x": 0.3196253248105024,
+					"y": 0.9947901620866018
+				},
+				"terminal": "end"
+			},
+			"typeName": "binding"
 		}
 	]
 }
