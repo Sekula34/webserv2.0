@@ -283,7 +283,12 @@ void	Message::_isNodeComplete()
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
 	{
-		if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
+		std::string del;
+		if (_request)
+			del = "\r\n\r\n";
+		else
+			del = "\n\n";
+		if (_it->getStringUnchunked().find(del) != std::string::npos)	
 			_it->setState(COMPLETE);
 	}
 

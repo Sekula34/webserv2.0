@@ -62,6 +62,10 @@ std::string Response::_createResponseString(void)
 	oss << _responseHeader->turnResponseHeaderToString();
 	oss << "\r\n";
 	oss << _responseBody.getResponse();
+
+
+	std::cout << "oss full response" << std::endl;
+	std::cout << oss.str() << std::endl;
 	return oss.str();
 }
 
