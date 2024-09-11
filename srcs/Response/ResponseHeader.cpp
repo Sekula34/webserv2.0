@@ -64,21 +64,24 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 	std::string toReplace = cgiHeaderDelimiter;
 	std::string httpDelimiter = "\r\n";
 	std::string aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
-	std::string firstLine = ParsingUtils::extractUntilDelim(aHeaderString, httpDelimiter);
-	int statusCode;  
-	if(_cgiStatusLine(firstLine) == true)
+	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200);
+	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
+		return NULL;
+	if(toReturn->_cgiStatusLine() == true)
 	{
-		aHeaderString.erase(0, firstLine.size());
-		StatusLineElements elem;
-		if(_setStatusLine(elem, firstLine) == true)
-			statusCode = elem.statusCode;
-		else
-		 	statusCode = 500;
+		std::cout << "I have status line " << std::endl;
+		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
+		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
+		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
+		toReturn->changeHttpCode(newHttpCode);
 	}
-	else
-		statusCode = 200;
-	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, statusCode);
 	return toReturn;
+}
+
+void ResponseHeader::changeHttpCode(int newHttpCode)
+{
+	_httpCode = newHttpCode;
+	_fillStatusLineElements();
 }
 
 bool ResponseHeader::_setStatusLine(StatusLineElements& elem, std::string line)
@@ -92,9 +95,10 @@ bool ResponseHeader::_setStatusLine(StatusLineElements& elem, std::string line)
 	return true;
 }
 
-bool ResponseHeader::_cgiStatusLine(std::string firstLine)
+bool ResponseHeader::_cgiStatusLine() const
 {
-	if(firstLine.find(":") == std::string::npos)
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find("Status");
+	if(it != m_headerFields.end())
 		return true;
 	return false;
 }

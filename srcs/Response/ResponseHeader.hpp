@@ -25,14 +25,15 @@ class ResponseHeader : public AHeader
 		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
 		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, std::string cgiHeaderDelimiter);
-	
+		void changeHttpCode(int newHttpCode);
+
 	private:
-		const int _httpCode;
+		int _httpCode;
 		StatusLineElements _statusLine;
 		void _fillStatusLineElements();
 		std::string _getStatusLineAsString() const;
 
-		static bool _cgiStatusLine(std::string firstLine);
+		bool _cgiStatusLine() const;
 		static bool _setStatusLine(StatusLineElements& elem, std::string line);
 
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
