@@ -30,7 +30,6 @@ Message::Message (bool request)
 
 Message::Message (void)
 {
-
 	// std::cout << "Message default constructor called" << std::endl;
 	_request = true;
 	_chain.push_back(Node("", HEADER, _request));
@@ -47,6 +46,7 @@ Message::Message (void)
 
 Message::~Message (void)
 {
+	delete _header;
 	// std::cout << "Message destructor called" << std::endl;
 }
 
@@ -78,7 +78,7 @@ int	Message::getState() const
 	return (_state);
 }
 
-RequestHeader*	Message::getRequestHeader() const
+AHeader*	Message::getHeader() const
 {
 	return (_header);
 }
@@ -207,11 +207,14 @@ void	Message::_chunksToBody()
 	_chain.back().setState(COMPLETE);
 }
 
-void	Message::_createRequestHeader()
+void	Message::_createHeader()
 {
 	if(_header != NULL)
 		return;
-	_header = new RequestHeader(_chain.begin()->getStringUnchunked());
+	if (_request)
+		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
+	else
+		_header = new ResponseHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
 	if(_header->getHttpStatusCode() != 0)
 	{
@@ -337,7 +340,7 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
 	{
-		_createRequestHeader();
+		_createHeader();
 		if (num < MAXLINE && bufferPos == num)
 			_state = COMPLETE;
 	}

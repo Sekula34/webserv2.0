@@ -166,10 +166,10 @@ bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
 
 const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
-	if(_validateRequestHeader(client.getClientMsg()->getRequestHeader()) == false)
+	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
 		return NULL;
-	int portNumber = client.getClientMsg()->getRequestHeader()->getHostPort();
-	const ServerSettings* toReturn = getServerByPort(portNumber, client.getClientMsg()->getRequestHeader()->getHostName());
+	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
+	const ServerSettings* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
 	return toReturn;
 }
 

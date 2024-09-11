@@ -121,10 +121,10 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
 	// this checks every time we go through loop. Maybe not necessary
-	if (client.getClientMsg()->getRequestHeader()
+	if (client.getClientMsg()->getHeader()
 		&& client.getClientMsg()->getChain().begin()->getState() == COMPLETE)
 	{
-		client.setErrorCode(client.getClientMsg()->getRequestHeader()->getHttpStatusCode()); 
+		client.setErrorCode(client.getClientMsg()->getHeader()->getHttpStatusCode()); 
 	}
 
 	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
@@ -207,7 +207,7 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 		if (!clientServer)
 			return ;
 
-		RequestHeader* clientHeader = client.getClientMsg()->getRequestHeader();
+		RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
 		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
 		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
 		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe

@@ -8,6 +8,7 @@
 
 class Node;
 class RequestHeader;
+class AHeader;
 
 class Message {
 
@@ -23,7 +24,7 @@ class Message {
 									// set and get
 		int							getState() const;
 		void						setState(int s);
-		RequestHeader*				getRequestHeader() const;
+		AHeader*				getHeader() const;
 		const std::list<Node>&		getChain() const;
 		const std::string			getBodyString();
 
@@ -36,7 +37,7 @@ class Message {
 		int							_state; // message can be: COMPLETE, INCOMPLETE, ERROR
 		bool						_request;
 		std::stringstream 			_ss;
-		RequestHeader*				_header;
+		AHeader*					_header;
 
 		void						_isNodeComplete();
 		void						_parseNode(size_t bufferPos, size_t num);
@@ -45,7 +46,7 @@ class Message {
 		void						_findBody(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
 		Node						_newChunkNode(size_t size);
-		void						_createRequestHeader();
+		void						_createHeader();
 		void						_headerInfoToNode();
 
 									Message(void);

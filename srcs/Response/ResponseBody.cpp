@@ -121,7 +121,7 @@ void ResponseBody::_renderServerErrorPage(int errorCode)
 void ResponseBody::_handlerGetMethod()
 {
     Logger::info("Handling GET, ServerLocation", true);
-    std::string path = _client.getClientMsg()->getRequestHeader()->urlSuffix->getPath();
+    std::string path = static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->urlSuffix->getPath();
     Logger::info("Requsted url is "); std::cout << path << std::endl;
     std::string serverLocationUri = _server->getLocationURIfromPath(path);
     Logger::info("Server location resposible for reponse is " + serverLocationUri, true);
@@ -241,7 +241,7 @@ void ResponseBody::_autoindexHtml(const std::string& serverFilePath, const Locat
     if(location.getAutoindexFlag() == true)
     {
         _httpStatusCode = 0;
-        Autoindex autoindex(serverFilePath, _httpStatusCode, _client.getClientMsg()->getRequestHeader()->getFullClientURL());
+        Autoindex autoindex(serverFilePath, _httpStatusCode, static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getFullClientURL());
         _response = autoindex.getAutoIndexHtml();
         if(autoindex.getStatusCode() != 0 && autoindex.getStatusCode() != 200)
         {
@@ -270,7 +270,7 @@ bool ResponseBody::_constructIndex(const std::string& serverFilePath, const Loca
 
 std::string ResponseBody::_convertToServerPath(const LocationSettings& location) const
 {
-    std::string serverPath(_client.getClientMsg()->getRequestHeader()->urlSuffix->getPath());
+    std::string serverPath(static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->urlSuffix->getPath());
     size_t startingPos = 0;
     size_t replaceLen = location.getLocationUri().size();
     const std::string& replaceString(location.getRoot() + "/");
@@ -280,11 +280,11 @@ std::string ResponseBody::_convertToServerPath(const LocationSettings& location)
 
 void ResponseBody::_generateServerResponse()
 {
-    if(_client.getClientMsg()->getRequestHeader()->getRequestLine().protocolVersion != "HTTP/1.1")
+    if(static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getRequestLine().protocolVersion != "HTTP/1.1")
     {
         _renderServerErrorPage(505);
     }
-    std::string requstedMethod = _client.getClientMsg()->getRequestHeader()->getRequestLine().requestMethod;
+    std::string requstedMethod = static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getRequestLine().requestMethod;
     if(requstedMethod == "GET")
     {
         _handlerGetMethod();
