@@ -72,7 +72,7 @@ class ParsingUtils
 		 * @param delimiter 
 		 * @return std::string Delimiter is included
 		 */
-		static std::string extractUntilDelim(const std::string fullString, const std::string delimiter);
+		static std::string extractUntilDelim(const std::string fullString, const std::string delimiter, bool includeDelim = true);
 		static std::string extractAfterDelim(const std::string fullString, const std::string delimiter);
 		/**
 		 * @brief Get the Dir Name dir name. Dir name of /hej/filip2/donot.txt
