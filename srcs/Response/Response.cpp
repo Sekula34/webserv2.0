@@ -64,8 +64,8 @@ std::string Response::_createResponseString(void)
 	oss << _responseBody.getResponse();
 
 
-	std::cout << "oss full response" << std::endl;
-	std::cout << oss.str() << std::endl;
+	// std::cout << "oss full response" << std::endl;
+	// std::cout << oss.str() << std::endl;
 	return oss.str();
 }
 

@@ -2,8 +2,10 @@
 #include "Message.hpp"
 #include "Node.hpp"
 #include "RequestHeader.hpp"
+#include "../Response/ResponseHeader.hpp"
 #include "Client.hpp"
 #include "../Utils/Logger.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include <sstream>
 #include <cmath>
 
@@ -214,7 +216,16 @@ void	Message::_createHeader()
 	if (_request)
 		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
 	else
-		_header = new ResponseHeader(_chain.begin()->getStringUnchunked());
+	{
+		Logger::error("content of header node in CGI Response:");
+	std::cout << _chain.begin()->getStringUnchunked() << std::endl;
+		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n");
+		std::cout << "**** CGI RESPONSE HEADER map values" << std::endl;
+		ParsingUtils::printMap(_header->getHeaderFieldMap());
+	}
+
+	 
+		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
 	if(_header->getHttpStatusCode() != 0)
 	{
@@ -289,7 +300,10 @@ void	Message::_isNodeComplete()
 		else
 			del = "\n\n";
 		if (_it->getStringUnchunked().find(del) != std::string::npos)	
+		{
+			std::cout << "my delimiter size is: " << del.size()  << std::endl;
 			_it->setState(COMPLETE);
+		}
 	}
 
 	// is CHUNK HEADER complete?
@@ -355,8 +369,6 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 
 void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 {
-	size_t a = MAXLINE;
-	std::cout << a << std::endl;
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
@@ -369,5 +381,5 @@ void	Message::bufferToNodes(unsigned char* buffer, size_t num)
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 	}
-	printChain();
+	// printChain();
 }

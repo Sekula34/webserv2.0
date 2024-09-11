@@ -44,9 +44,6 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 
 Client::~Client (void)
 {
-	Logger::info("Client destructed, unique ID: "); std::cout << _id;
-	std::cout << " FD: "; std::cout << _fd << std::endl;
-	close (_fd);
 	if (socketToChild != DELETED)
 		close(socketToChild);
 	if (socketFromChild != DELETED)
@@ -57,6 +54,9 @@ Client::~Client (void)
 	delete _cgi;
 	delete _clientMsg;
 	delete _serverMsg;
+	Logger::info("Client destructed, unique ID: "); std::cout << _id;
+	std::cout << " FD: "; std::cout << _fd << std::endl;
+	close (_fd);
 }
 
 /******************************************************************************/
