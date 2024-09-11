@@ -251,7 +251,7 @@ void RequestHeaderTester::testIfThereIsBody()
 
 void RequestHeaderTester::cgiResponseHeader()
 {
-	std::string cgiResponse = "HTTP/1.1 200 OK\n\
+	std::string cgiResponse = "Status: 404 OK\n\
 Connection: close\n\
 Content-Language: en\n\
 Content-Length: 1000\n";
