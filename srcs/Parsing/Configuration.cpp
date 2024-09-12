@@ -65,7 +65,7 @@ void Configuration::_checkFileAccessType() const
 	std::ifstream file(_filePath.c_str());
 	if(file.good() == false)
 	{
-		std::cerr << "Opening file failed. Check if file exist (maybe typo) and if you have reading permmision." << std::endl;
+		std::cerr << "Opening file [" << _filePath <<"] failed. Check if file exist (maybe typo) and if you have reading permmision." << std::endl;
 		throw InvalidConfigFileException();
 	}
 	struct stat fileStat;

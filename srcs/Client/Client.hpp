@@ -1,10 +1,8 @@
-
-
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 # include <string>
 # include <ctime>
-# include "../Client/ClientHeader.hpp"
+# include "../Client/RequestHeader.hpp"
 # include "CgiProcessor.hpp"
 # include "../Response/Response.hpp"
 # include "../Utils/Logger.hpp"
@@ -22,14 +20,13 @@
 # include <map>
 //# include "CgiProcessor.hpp"
 
-// #define MAXLINE			4096
-// #define MAXLINE			493
-# define MAXLINE			40
+// # define MAXLINE			4096
+# define MAXLINE			1
 # define MAX_TIMEOUT		10000
-#define DELETED				-1 
+# define DELETED			-1 
 
 class CgiProcessor;
-
+class Message;
 
 class Client {
 
@@ -48,7 +45,7 @@ class Client {
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
 		std::string			getCgiMessage() const;
-		unsigned char*		getRecvLine() const;
+		char*				getRecvLine() const;
 		int					getEpollFd() const;
 		int					getErrorCode() const;
 		bool				getReadHeader() const;
@@ -58,6 +55,11 @@ class Client {
 		CgiProcessor*		getCgi() const;
 		std::string			getClientIp() const;
 		unsigned short		getClientdPort();
+		Client*				getClient()const;
+		Message*			getClientMsg()const;
+		Message*			getServerMsg()const;
+		void				setClientMsg(Message* m);
+		void				setServerMsg(Message* m);
 		void				setErrorCode(int e);
 		void				setReadHeader(bool b);
 		void				setReadBody(bool b);
@@ -65,6 +67,7 @@ class Client {
 		void				setCgi(CgiProcessor* cgi);
 		void				setAddrlen(socklen_t addrlen);
 		void				setChildSocket(int in, int out);
+		void 				appendClientBody(std::string s);
 
 							//Client specific functions
 		void				unsetsocket_tochild();
@@ -80,11 +83,11 @@ class Client {
 		 * @brief Create a Client Header that is stored in _header and should be deleted in destructor
 		 * 
 		 */
-		void				createClientHeader();
+		void				createRequestHeader();
 		CgiProcessor*		Cgi;			
 		std::string			_cgiOutput;
 		bool				cgiChecked;
-		ClientHeader*		header; //client Responsible for deleting
+		// RequestHeader*		header; //client Responsible for deleting
 		pid_t				waitReturn;
 		int					socketToChild;
 		int					socketFromChild;
@@ -98,20 +101,16 @@ class Client {
 		int const			_fd;
 		std::clock_t const	_start;
 		int const			_epollFd;
-		std::string			_message;
-		std::string			_cgiMessage;
-		std::string			_clientBody; //maybe this will be replaced by body class
-		std::string			_responseBody; // this will be replaced by respnse class
-		unsigned char*		_recvLine;
-		bool				_readHeader;
-		bool				_readBody;
-		bool				_writeClient;
+		char* 				_recvLine;
 		CgiProcessor*		_cgi;
+		Message*			_clientMsg;	// client owns so it should delete
+		Message*			_serverMsg;	// client owns so it should delete
 		Response*			_response; // client owns so it should delete
 		struct sockaddr		_clientAddr;
 		std::string			_clientIp;
 		socklen_t			_addrLen;
 		double				_clockstop;
+		bool				_writeClient;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);

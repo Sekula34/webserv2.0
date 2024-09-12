@@ -4,6 +4,8 @@
 #include "../Utils/Data.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "CgiProcessor.hpp"
+#include "Message.hpp"
+#include "Node.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -155,7 +157,7 @@ std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 
 std::string	CgiProcessor::getScriptName(std::string suffix)
 {
-	std::vector<std::string> sections = ParsingUtils::splitString(_client->header->urlSuffix->getPath(), '/');
+	std::vector<std::string> sections = ParsingUtils::splitString((static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getPath(), '/');
 	std::vector<std::string>::iterator it = sections.begin();
 	for (; it != sections.end(); it++)
 	{
@@ -239,18 +241,18 @@ void	CgiProcessor::_createEnvVector()
 
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
-	if (_client->getClientBody().size() > 0)
+	if (_client->getClientMsg()->getChain().begin()->getBodySize() > 0)
 	{
 		std::stringstream ss;
-		ss << _client->getClientBody().size();
+		ss << _client->getClientMsg()->getChain().begin()->getBodySize();
 		line += ss.str();
 	}
 	_envVec.push_back(line);
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
-	if (_client->header->getHeaderFields().find("Content-Type") != _client->header->getHeaderFields().end())
-		line +=_client->header->getHeaderFields().find("Content-Type")->second;
+	if (_client->getClientMsg()->getHeader()->getHeaderFieldMap().find("Content-Type") != _client->getClientMsg()->getHeader()->getHeaderFieldMap().end())
+		line +=_client->getClientMsg()->getHeader()->getHeaderFieldMap().find("Content-Type")->second;
 	_envVec.push_back(line);
 
 	// GATEWAY_INTERFACE
@@ -277,7 +279,7 @@ void	CgiProcessor::_createEnvVector()
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
-	line += _client->header->urlSuffix->getQueryParameters();
+	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getQueryParameters();
 	_envVec.push_back(line);
 
 	// REMOTE_ADDR
@@ -293,30 +295,30 @@ void	CgiProcessor::_createEnvVector()
 	
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
-	line += _client->header->getRequestLine().requestMethod;
+	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getRequestLine().requestMethod;
 	_envVec.push_back(line);
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
-	line += _client->header->urlSuffix->getPath();
+	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
-	line += _client->header->getHostName();
+	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getHostName();
 	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
-	ss2 << _client->header->getHostPort();
+	ss2 << (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getHostPort();
 	line += ss2.str();
 	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
-	line += _client->header->getRequestLine().protocolVersion;
+	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getRequestLine().protocolVersion;
 	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
@@ -365,6 +367,7 @@ void	CgiProcessor::_deleteChararr(char ** lines)
 
 int	CgiProcessor::_execute()
 {
+	signal(SIGINT, SIG_IGN);
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
@@ -405,6 +408,9 @@ void	CgiProcessor::_writeToChild()
 {
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
+
+	// FIXME: here wrtie will have to be called until written bites equal message size
+	// TODO: implement writing the body of unchunked Client Message into socket with SEND
 	write(_client->socketToChild, "check this out\n", 15);
 	_client->hasWrittenToCgi = true;
 	Logger::warning("removing FD from epoll: ");
@@ -418,17 +424,22 @@ void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
 
+
 	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
+
+		if (!_client->getServerMsg())
+			_client->setServerMsg(new Message(false));
+
 		_client->clearRecvLine();
-		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
 		// std::cout << "bytes read from child socket: " << n << std::endl;
 
-		// successful read, concat message
+		// successful read -> concat message
 		if (n > 0)
-			_client->addRecvLineToCgiMessage();
+			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), n);
 
-		// failed read, stop CGI and set errorcode = 500
+		// failed read -> stop CGI and set errorcode = 500
 		if (n < 0)
 		{
 			Logger::warning("failed tor read from Child Process", true);
@@ -437,7 +448,11 @@ void	CgiProcessor::_readFromChild()
 
 		// EOF reached, child has gracefully shutdown connection
 		if (n == 0)
+		{
+			// _client->getServerMsg()->printChain();
+			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
+		}
 	}
 }
 
@@ -450,7 +465,7 @@ void	CgiProcessor::_closeCgi()
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
 		_client->socketFromChild = DELETED;
-		_client->_cgiOutput = _client->getCgiMessage();
+		// _client->_cgiOutput = _client->getCgiMessage();
 		_client->cgiRunning = false;
 	}
 }

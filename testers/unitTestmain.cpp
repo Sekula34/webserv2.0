@@ -1,6 +1,6 @@
 #include "ServerTest.hpp"
 #include "UnitTest.hpp"
-#include "CHTest.hpp"
+#include "RequestHeaderTester.hpp"
 #include "AutoIndexTest.hpp"
 
 
@@ -9,7 +9,7 @@ void all()
 {
 	UnitTest::allTests();
 	ServerTest::runAllTests();
-	CHTest::runAllTests();
+	RequestHeaderTester::runAllTests();
 	AutoindexTest::runAll();
 }
 
@@ -18,6 +18,7 @@ int main()
 	//AutoindexTest::validSimpleTest();
 	//UnitTest::filerOrFolderBlock();
 	//UnitTest::testingOpeninDirBlock();
+	RequestHeaderTester::cgiResponseHeader();
 	UnitTest::configSyntaxBlock();
 	//all();
 	//CHTest::fullUrlTest();
@@ -27,4 +28,5 @@ int main()
 	//UnitTest::urlFragmetBlock();
 	//CHTest::uriTest();
 	//UnitTest::urlValid();
+	//all();
 }

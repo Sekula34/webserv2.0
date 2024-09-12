@@ -20,7 +20,7 @@ class ServersInfo
 
 		void _setHttpDirectives(void);
 		bool _isTokenHttpDirective(const Token& toCheck) const;
-		bool _validateClientHeader(const ClientHeader* header) const;
+		bool _validateRequestHeader(const RequestHeader* header) const;
 		std::vector<ServerSettings> _getAllServersIdWithPort(int port) const;
 
 	public :

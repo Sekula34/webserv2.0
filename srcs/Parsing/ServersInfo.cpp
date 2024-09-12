@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "../Utils/Logger.hpp"
 #include "../Utils/HttpStatusCode.hpp"
+#include "../Client/Message.hpp"
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -146,16 +147,16 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 }
 
 
-bool ServersInfo::_validateClientHeader(const ClientHeader* header) const
+bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
 {
 	if(header == NULL)
 	{
 		Logger::warning("Trying to get Client Server with client that have no header");
 		return false;
 	}
-	if(header->getErrorCode() == 400) // or check if code is 400 
+	if(header->getHttpStatusCode() == 400) // or check if code is 400 
 	{
-		const std::string reason = HttpStatusCode::getReasonPhrase(header->getErrorCode());
+		const std::string reason = HttpStatusCode::getReasonPhrase(header->getHttpStatusCode());
 		Logger::warning("Client send " + reason, true);
 		Logger::warning("There is no filled info in header for finding server", true);
 		return false;
@@ -165,9 +166,10 @@ bool ServersInfo::_validateClientHeader(const ClientHeader* header) const
 
 const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
-	if(_validateClientHeader(client.header) == false)
+	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
 		return NULL;
-	const ServerSettings* toReturn = getServerByPort(client.header->getHostPort(), client.header->getHostName());
+	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
+	const ServerSettings* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
 	return toReturn;
 }
 
