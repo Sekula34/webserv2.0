@@ -355,7 +355,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
-	client.getServerMsg()->printChain();
+	// client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 
@@ -366,7 +366,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 
 void ConnectionDispatcher::_processAnswer(Client& client)
 {
-	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
+	Logger::info("Process answer for client: ");std::cout << client.getId() << std::endl;  
 	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)

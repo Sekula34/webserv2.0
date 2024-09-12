@@ -226,7 +226,7 @@ void	Message::_createHeader()
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
-	if(_header->getHttpStatusCode() != 0)
+	if(_header && _header->getHttpStatusCode() != 0)
 	{
 		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
 		// need to pass this to Client!!
@@ -236,6 +236,8 @@ void	Message::_createHeader()
 
 void	Message::_headerInfoToNode()
 {
+	if (!_header)
+		return ;
 	// set BODY SIZE from header
 	std::map<std::string, std::string>::const_iterator found = _header->getHeaderFieldMap().find("Content-Length");
 	if (found != _header->getHeaderFieldMap().end())

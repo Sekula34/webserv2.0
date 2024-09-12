@@ -457,6 +457,7 @@ void	CgiProcessor::_readFromChild()
 			// _client->getServerMsg()->printChain();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
+			_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
 		}
 	}
 }

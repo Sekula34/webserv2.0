@@ -62,13 +62,25 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
 	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
-	cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
-	std::string toReplace = cgiHeaderFieldDelimiter;
-	std::string httpDelimiter = "\r\n";
-	std::string aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
-	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200);
+	std::string aHeaderString = "\r\n\r\n";
+	ResponseHeader* toReturn;
+	if (pos != std::string::npos)
+	{
+		cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
+		std::string toReplace = cgiHeaderFieldDelimiter;
+		std::string httpDelimiter = "\r\n";
+		aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
+		toReturn = new ResponseHeader(aHeaderString, 200);
+	}
+	else
+		toReturn = new ResponseHeader(aHeaderString, 200);
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
-		return NULL;
+	{
+		// if one server gets invalid response for anothe -> bad getaway 502
+		if (toReturn)
+			toReturn->p_setHttpStatusCode(502);
+		return toReturn;
+	}
 	if(toReturn->_cgiStatusLine() == true)
 	{
 		std::cout << "I have status line " << std::endl;
