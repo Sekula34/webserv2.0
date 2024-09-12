@@ -24,9 +24,12 @@ class Message {
 									// set and get
 		int							getState() const;
 		void						setState(int s);
-		AHeader*				getHeader() const;
+		AHeader*					getHeader() const;
 		const std::list<Node>&		getChain() const;
 		const std::string			getBodyString();
+		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
+		void						_createHeader();
+		void						_headerInfoToNode();
 
 									//Message specific functions
 	private:
@@ -39,15 +42,15 @@ class Message {
 		std::stringstream 			_ss;
 		AHeader*					_header;
 
-		void						_isNodeComplete();
+		void						_isNodeComplete(size_t bufferPos, size_t num);
 		void						_parseNode(size_t bufferPos, size_t num);
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
 		Node						_newChunkNode(size_t size);
-		void						_createHeader();
-		void						_headerInfoToNode();
+		// void						_createHeader();
+		// void						_headerInfoToNode();
 
 									Message(void);
 									Message(Message const & src);

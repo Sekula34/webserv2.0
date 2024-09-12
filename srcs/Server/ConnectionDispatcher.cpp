@@ -136,7 +136,11 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
 		if (n < 0 || peek < 0)
+		{
+
+			std::cout << "n: " << n << " peek: " << peek  << std::endl;
 			Logger::error("receiving from Client", true);
+		}
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
 		return (false);
@@ -158,7 +162,8 @@ void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
 {
 	if (n > 0)
 	{
-		if (n == MAXLINE && client->getClientMsg()->getChain().begin()->getState() == INCOMPLETE)
+		// if (n == MAXLINE && client->getClientMsg()->getChain().begin()->getState() == INCOMPLETE)
+		if (n == MAXLINE && client->getClientMsg()->getState() == INCOMPLETE)
 			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 	}
 }
@@ -172,9 +177,24 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		// std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
+
+	//handeling the case where we receive a Request from Client that has no proper delimiter
+	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
+		&& client.getClientMsg()->getState() == INCOMPLETE)
+	{
+		// if we are at header, set header to complete and parse the header 
+		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
+		{
+			client.getClientMsg()->_createHeader();
+			client.getClientMsg()->_headerInfoToNode();
+		}
+		client.getClientMsg()->getIterator()->setState(COMPLETE);
+		client.getClientMsg()->setState(COMPLETE);
+	}
+
+	// if no activity from Client then delete Client
 	if (!client.checkTimeout())
 	{
-		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
@@ -247,7 +267,7 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
 
 	// PEEK IN ORDER TO RULE OUT THE POSSIBILITY OF BLOCKING ON NEXT READ
-	_peek(&client, n, peek);
+	// _peek(&client, n, peek);
 
 	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
