@@ -195,11 +195,10 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 void	CgiProcessor::_initScriptVars()
 {
 	// the suffix should come from url parser
-	std::string suffix = ".py";
+	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
 
 	// this should happen when parsing the config file
-	Data::setCgiLang(suffix, "python3");
-
+	// Data::setCgiLang(suffix, "python3");
 
 	std::string location = "/cgi-bin/";
 
@@ -209,7 +208,8 @@ void	CgiProcessor::_initScriptVars()
 	if (_interpreterAbsPath.empty())
 		return ;
 
-	_scriptName = getScriptName(suffix);
+	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
+	// _scriptName = getScriptName(suffix);
 	if (_scriptName.empty())
 		return ;
 
@@ -325,6 +325,11 @@ void	CgiProcessor::_createEnvVector()
 	line = "SERVER_SOFTWARE=webserv2.0 ("; 
 	line += operatingSystem();
 	line += ")"; 
+	_envVec.push_back(line);
+
+	// root of document
+	line = "DOCUMENT_ROOT="; 
+	line += _scriptLocation;
 	_envVec.push_back(line);
 }
 

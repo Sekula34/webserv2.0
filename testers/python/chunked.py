@@ -2,7 +2,7 @@ import http.client
 
 # Define the server and endpoint
 host = "localhost"
-port = 9090
+port = 7171
 endpoint = "/"
 
 # Create the connection with the specified port

@@ -1,3 +1,4 @@
+content = """
 POST /test HTTP/1.1
 Host: foo.example
 Content-Type: application/x-www-form-urlencoded
@@ -28,3 +29,5 @@ Expires: Wed, 21 Oct 2015 07:28:00 GMT
 
 
 Don't print this!!!!
+"""
+print (content)
