@@ -232,13 +232,14 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 		{
 			Logger::info("Cgi checked and it exist on this location :", false); std::cout << location->getLocationUri() << std::endl;
 			_parseCgiURLInfo(*location, client);
-		RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
-		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
-		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
-		{ 
-			Logger::warning("Cgi checked and it exist on this location", true);
-			client.setCgi(new CgiProcessor(client));
+			RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
+			std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
+			std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
+			if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
+			{ 
+				Logger::warning("Cgi checked and it exist on this location", true);
+				client.setCgi(new CgiProcessor(client));
+			}
 		}
 	}
 }
@@ -246,21 +247,21 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 void ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
 {
 	Logger::info("Called cgi parse url", true);
-	std::string fileName = ParsingUtils::getFileNameFromUrl(client.header->urlSuffix->getPath(), cgiLocation.getLocationUri());
+	std::string fileName = ParsingUtils::getFileNameFromUrl( static_cast<RequestHeader *>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), cgiLocation.getLocationUri());
 	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/");
 	if(scriptName == "")
 		scriptName = fileName;
-	if(client.header->urlSuffix->setCgiScriptName(scriptName) == false)
+	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false)
 	{
 		Logger::warning("Implemted  some error code that is not correct");
 		client.setErrorCode(400);
 		return;
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
-	_setCgiPathInfo(client.header->urlSuffix->getPath(), scriptPath, client);
+	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
 	Logger::info("Script name and file extension are setted and path info are setted ", false);
-	std::cout << client.header->urlSuffix->getCgiScriptName() << " " << client.header->urlSuffix->getCgiScriptExtension() << " ";
-	std::cout << client.header->urlSuffix->getCgiPathInfo() << std::endl;
+	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptName() << " " << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension() << " ";
+	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiPathInfo() << std::endl;
 }
 
 void ConnectionDispatcher::_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client)
@@ -278,7 +279,7 @@ void ConnectionDispatcher::_setCgiPathInfo(const std::string& urlpath, const std
 		client.setErrorCode(400);
 		return;
 	}
-	client.header->urlSuffix->setCgiPathInfo(pathInfo);
+	static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiPathInfo(pathInfo);
 }
 
 bool ConnectionDispatcher::_isCgiPathInfoValid(std::string pathInfo)
@@ -293,7 +294,7 @@ bool ConnectionDispatcher::_isCgiPathInfoValid(std::string pathInfo)
 std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocation(Client& client, const ServerSettings& cgiServer, bool& foundLoc)
 {
 	foundLoc = false;
-	ClientHeader* clientHeader = client.header;
+	RequestHeader* clientHeader =  static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
 	if(clientHeader == NULL)
 	{
 		Logger::error("prepare for cgi client header is NULL this should not happen ever", true);
