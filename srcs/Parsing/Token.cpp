@@ -66,7 +66,7 @@ void Token::_checkOneToken(void)
 	}
 	else if(_type == DIRECTIVE)
 	{
-
+		//MR_NOTE: This is checked later in directives.
 	}
 }
 
@@ -87,7 +87,7 @@ void Token::_contextChecker(void)
 				_contextType = SERVER;
 			return;
 		}
-		if(_info.compare(0,location.size(),location) == 0)
+		if(_info.compare(0,location.size(),location) == 0) // MR_NOTE: Location has always some path. so that's why is not only "Location".
 		{
 			_contextType = LOCATION;
 			//std::cout << _info << " is " << location << std::endl;

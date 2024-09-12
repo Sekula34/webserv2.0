@@ -63,12 +63,12 @@ void Configuration::_checkFileAccessType() const
 		throw InvalidConfigFileException();
 	}
 	std::ifstream file(_filePath.c_str());
-	if(file.good() == false)
+	if(file.good() == false) // MR_SEARCH: is goot ok to check like this?
 	{
 		std::cerr << "Opening file [" << _filePath <<"] failed. Check if file exist (maybe typo) and if you have reading permmision." << std::endl;
 		throw InvalidConfigFileException();
 	}
-	struct stat fileStat;
+	struct stat fileStat; // MR_SEARCH: is goot ok to check like this?
 	if(stat(_filePath.c_str(), &fileStat) != 0)
 	{
 		throw std::runtime_error("Stat function failed");

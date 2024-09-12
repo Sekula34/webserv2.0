@@ -28,6 +28,7 @@ class ServersInfo
 		ServersInfo(const ServersInfo& source);
 		ServersInfo& operator=(const ServersInfo& source);
 		~ServersInfo();
+		//MR_TODO: Need Default constructor to be OCF.
 
 		void printAllServersInfo(void) const;
 		const std::vector<ServerSettings>& getAllServers(void) const;
