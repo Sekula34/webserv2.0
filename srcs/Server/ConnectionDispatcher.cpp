@@ -136,11 +136,7 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
 		if (n < 0 || peek < 0)
-		{
-
-			std::cout << "n: " << n << " peek: " << peek  << std::endl;
 			Logger::error("receiving from Client", true);
-		}
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
 		return (false);
@@ -178,9 +174,10 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		return (true);
 	}
 
-	//handeling the case where we receive a Request from Client that has no proper delimiter
+	// handeling the case where we receive a Request from Client that has no proper delimiter
 	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
-		&& client.getClientMsg()->getState() == INCOMPLETE)
+		&& client.getClientMsg()->getState() == INCOMPLETE
+		&& client.getClientMsg()->getIterator()->getStringUnchunked().size() != 0)
 	{
 		// if we are at header, set header to complete and parse the header 
 		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
@@ -264,7 +261,8 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 		return (false);
 
 	// ADD BUFFER TO THE MESSAGE CLASS INSTANCE
-	client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
+	if (n > 0)
+		client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
 
 	// PEEK IN ORDER TO RULE OUT THE POSSIBILITY OF BLOCKING ON NEXT READ
 	// _peek(&client, n, peek);

@@ -69,7 +69,8 @@ _btr(src._btr),
 _chunkSize(src._chunkSize),
 _chunkHeaderSize(src._chunkHeaderSize),
 _bodySize(src._bodySize),
-_chunkHeader(src._chunkHeader)
+_chunkHeader(src._chunkHeader),
+_request(src._request)
 {
 	//std::cout << "Node copy constructor called" << std::endl;
 	*this = src;

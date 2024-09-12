@@ -221,13 +221,7 @@ void	Message::_createHeader()
 	if (_request)
 		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
 	else
-	{
-		Logger::error("content of header node in CGI Response:");
-		std::cout << _chain.begin()->getStringUnchunked() << std::endl;
 		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n");
-		std::cout << "**** CGI RESPONSE HEADER map values" << std::endl;
-		ParsingUtils::printMap(_header->getHeaderFieldMap());
-	}
 
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
@@ -302,10 +296,7 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 		else
 			del = "\n\n";
 		if (_it->getStringUnchunked().find(del) != std::string::npos)	
-		{
-			std::cout << "my delimiter size is: " << del.size()  << std::endl;
 			_it->setState(COMPLETE);
-		}
 		if (num < MAXLINE && bufferPos == num)
 			_it->setState(COMPLETE);
 	}
