@@ -122,7 +122,7 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
 	// this checks every time we go through loop. Maybe not necessary
-	if (client.getClientMsg()->getHeader()
+	if (client.getClientMsg() && client.getClientMsg()->getHeader()
 		&& client.getClientMsg()->getChain().begin()->getState() == COMPLETE)
 	{
 		client.setErrorCode(client.getClientMsg()->getHeader()->getHttpStatusCode()); 

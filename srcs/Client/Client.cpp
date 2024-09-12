@@ -54,6 +54,8 @@ Client::~Client (void)
 	delete _cgi;
 	delete _clientMsg;
 	delete _serverMsg;
+	_clientMsg = NULL;
+	_serverMsg = NULL;
 	Logger::info("Client destructed, unique ID: "); std::cout << _id;
 	std::cout << " FD: "; std::cout << _fd << std::endl;
 	close (_fd);
@@ -264,8 +266,8 @@ void Client::_initVars(void)
 	Cgi = NULL;
 	cgiRunning = true;
 	_clockstop = 1000;
-	_clientMsg = NULL;;
-	_serverMsg = NULL;;
+	_clientMsg = NULL;
+	_serverMsg = NULL;
 	_writeClient = false;
 }
 
