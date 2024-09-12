@@ -10,8 +10,10 @@
 #include "../Client/Client.hpp"
 
 Response::Response(const Client& client, const ServerSettings* server)
-:_client(client), _server(server) ,_responseHeader(NULL)
-,_responseBody(client, _server)
+:_client(client),
+_server(server),
+_responseHeader(NULL),
+_responseBody(client, _server)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
@@ -60,6 +62,10 @@ std::string Response::_createResponseString(void)
 	oss << _responseHeader->turnResponseHeaderToString();
 	oss << "\r\n";
 	oss << _responseBody.getResponse();
+
+
+	// std::cout << "oss full response" << std::endl;
+	// std::cout << oss.str() << std::endl;
 	return oss.str();
 }
 

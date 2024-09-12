@@ -1,15 +1,15 @@
-#include "CHTest.hpp"
+#include "RequestHeaderTester.hpp"
 #include <cassert>
 #include "../srcs/Utils/Logger.hpp"
-#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
 #include "../srcs/Parsing/ParsingUtils.hpp"
+#include "../srcs/Response/ResponseHeader.hpp"
 
-std::string CHTest::generateValidHttpReques()
+std::string RequestHeaderTester::generateValidHttpReques()
 {
 	std::string valid = "GET /path/to/resource HTTP/1.1\r\n\
 Host: www.example.com\r\n\
@@ -49,7 +49,7 @@ Connection: keep-alive\r\n\
 }
 std::string invalidHttp(void)
 {
-	std::string valid = "GET /path/to/resource HTTP/2\r\n \
+	std::string valid = "GET /path/to/resource HTTP/2\r\n\
 Host: www.example.com\r\n\
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36\r\n\
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n\
@@ -113,83 +113,89 @@ Connection: keep-alive\r\n\
 	return withBody;
 }
 
-std::vector<std::pair<std::string, int> > CHTest::messages;
+std::vector<std::pair<std::string, int> > RequestHeaderTester::messages;
 
 
-void CHTest::runAllTests()
+void RequestHeaderTester::runAllTests()
 {
 	testIfThereIsBody();
 	CHBlockTest();
 	copyTestBlock();
 	fullUrlTest();
+	cgiResponseHeader();
 }
 
-void CHTest::fullUrlTest()
+void RequestHeaderTester::fullUrlTest()
 {
 	Logger::testCase("Testing getting cliend full Url");
-	ClientHeader header(generateValidHttpReques());
+	RequestHeader header(generateValidHttpReques());
 	assert(header.getFullClientURL() == "http://www.example.com:80/path/to/resource");
 	_testpassed();
 }
 
-void CHTest::uriTest()
+void RequestHeaderTester::uriTest()
 {
 	Logger::testCase("Testing uri");
-	ClientHeader header(generateComplexValid());
+	RequestHeader header(generateComplexValid());
 	std::string uri = header.getURLSuffix();
 	std::cout << "Uri is: [" << uri << "]"<< std::endl;
 }
 
-void CHTest::copyTest(const std::string fullMessage)
+void RequestHeaderTester::copyTest(const std::string fullMessage)
 {
 	Logger::testCase("Testing copy construcotr", "to be same");
-	ClientHeader first(fullMessage);
-	ClientHeader &second(first);
-	assert(first.getErrorCode() == second.getErrorCode());
+	RequestHeader first(fullMessage);
+	RequestHeader &second(first);
+	assert(first.getHttpStatusCode() == second.getHttpStatusCode());
 	assert(first.getURLSuffix() == second.getURLSuffix());
 	_testpassed();
 }
 
 
-void CHTest::compare(const ClientHeader& actual, const std::pair<std::string, int>& expected)
+void RequestHeaderTester::compare(const RequestHeader& actual, const std::pair<std::string, int>& expected)
 {
 	Logger::testCase("Comparing", ". Expected error code is"); 
-	std::cout << expected.second <<", actual: " << actual.getErrorCode() << std::endl;
+	std::cout << expected.second <<", actual: " << actual.getHttpStatusCode() << std::endl;
 	assert(actual.getFullMessage() == ParsingUtils::extractUntilDelim(expected.first, "\r\n\r\n"));
-	assert(actual.getErrorCode() == expected.second);
+	assert(actual.getHttpStatusCode() == expected.second);
 }
 
-void CHTest::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
+void RequestHeaderTester::testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected)
 {
 	Logger::testCase("Testing simple header", fullMessage);
-	ClientHeader header(fullMessage);
+	RequestHeader header(fullMessage);
 	compare(header, expected);
 	
 	std::cout << header.getFullMessage() << std::endl;
 	_testpassed();
 }
 
-void CHTest::simplePrint()
+void RequestHeaderTester::simplePrint()
 {
 	Logger::testCase("Simple", "something");
-	ClientHeader header(generateValidHttpReques());
-	ParsingUtils::printMap(header._headerFields);
+	RequestHeader header(generateValidHttpReques());
+	std::cout << header << std::endl;
 }
 
 
 
-void CHTest::CHBlockTest()
+void RequestHeaderTester::CHBlockTest()
 {
 	InitVector();
 	for(size_t i = 0; i < messages.size(); i++)
 	{
+		std::cout << "Test case " << i << std::endl;
+		if(i == 2)
+		{
+			std::cout << "Debug this" << std::endl;
+		}
 		testCHcase(messages[i].first, messages[i]);
 	}
 	_testpassed(true);
 }
 
 
-void CHTest::InitVector()
+void RequestHeaderTester::InitVector()
 {
 	std::pair<std::string, int> pair;
 	pair.first = generateValidHttpReques();
@@ -226,19 +232,42 @@ void CHTest::InitVector()
 
 }
 
-void CHTest::copyTestBlock()
+void RequestHeaderTester::copyTestBlock()
 {
 	copyTest(generateValidHttpReques());
 	copyTest(invalidFirtLineRequest());
 	_testpassed(true);
 }
 
-void CHTest::testIfThereIsBody()
+void RequestHeaderTester::testIfThereIsBody()
 {
 	Logger::testCase("Testing if ch expect body", "");
-	ClientHeader header(validWithContent());
+	RequestHeader header(validWithContent());
 	assert(header.isBodyExpected() == true);
-	ClientHeader head2(generateValidHttpReques());
+	RequestHeader head2(generateValidHttpReques());
 	assert(head2.isBodyExpected() == false);
 	_testpassed();
+}
+
+void RequestHeaderTester::cgiResponseHeader()
+{
+	std::string cgiResponse = "Status: 404 OK\n\
+Connection: close\n\
+Content-Language: en\n\
+Content-Length: 1000\n\
+\n"
+;
+
+	std::string cgiResponseNoStatus = "Connection: close\n\
+Content-Language: en\n\
+Content-Length: 1000\n\
+\n";
+	ResponseHeader* cgi = ResponseHeader::createCgiResponseHeader(cgiResponseNoStatus, "\n");
+	if (cgi == NULL)
+		assert(0 == 1);
+	assert(cgi->getHttpStatusCode() == 0);
+	delete cgi;
+	cgi = ResponseHeader::createCgiResponseHeader(cgiResponse, "\n");
+	assert(cgi->getHttpStatusCode() == 0);
+	delete cgi;
 }

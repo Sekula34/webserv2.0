@@ -1,5 +1,3 @@
-#include "ConnectionDispatcher.hpp"
-#include "SocketManager.hpp"
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -10,7 +8,12 @@
 #include <iostream>
 #include <csignal>
 #include <fcntl.h>
+#include "ConnectionDispatcher.hpp"
+#include "SocketManager.hpp"
+#include "../Client/Message.hpp"
+#include "../Client/Node.hpp"
 #include "../Utils/Logger.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include "../Response/Response.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 
@@ -118,36 +121,46 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 {
-	if (n <= 0 || peek < 0)
+	// this checks every time we go through loop. Maybe not necessary
+	if (client.getClientMsg()->getHeader()
+		&& client.getClientMsg()->getChain().begin()->getState() == COMPLETE)
+	{
+		client.setErrorCode(client.getClientMsg()->getHeader()->getHttpStatusCode()); 
+	}
+
+	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
 	{
 		if (n == 0)
 			Logger::warning("reading 0 bytes from client, deleting client", true);
+		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
 		if (n < 0 || peek < 0)
 			Logger::error("receiving from Client", true);
+		if (client.getClientMsg()->getState() == ERROR)
+			Logger::error("Invalid Request", true);
 		return (false);
 	}
 	return (true);
 }
 
-void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
-{
-	if (n < MAXLINE - 1 || client.getMessage().find("\r\n\r\n") != std::string::npos)
-	{
-		//std::cout << std::endl << client->getMessage() << std::endl;
-		client.setReadHeader(false);
-		client.setWriteClient(true);
-	}
-}
+// void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
+// {
+// 	if (n < MAXLINE - 1 || client.getMessage().find("\r\n\r\n") != std::string::npos)
+// 	{
+// 		//std::cout << std::endl << client->getMessage() << std::endl;
+// 		client.setReadHeader(false);
+// 		client.setWriteClient(true);
+// 	}
+// }
 
-void	ConnectionDispatcher::_concatMessageAndPeek(Client* client, int n, int & peek)
+void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
 {
 	if (n > 0)
 	{
-		client->addRecvLineToMessage();
-		if (n == MAXLINE - 1 && client->getMessage().find("\r\n\r\n") == std::string::npos)
+		// if (n == MAXLINE && client->getClientMsg()->getChain().begin()->getState() == INCOMPLETE)
+		if (n == MAXLINE && client->getClientMsg()->getState() == INCOMPLETE)
 			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
 	}
 }
@@ -157,48 +170,34 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
 		client.clearRecvLine();
-		n = recv(fd, client.getRecvLine(), MAXLINE - 1, MSG_DONTWAIT);
+		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT);
 		// std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
+
+	// handeling the case where we receive a Request from Client that has no proper delimiter
+	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
+		&& client.getClientMsg()->getState() == INCOMPLETE
+		&& client.getClientMsg()->getIterator()->getStringUnchunked().size() != 0)
+	{
+		// if we are at header, set header to complete and parse the header 
+		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
+		{
+			client.getClientMsg()->_createHeader();
+			client.getClientMsg()->_headerInfoToNode();
+		}
+		client.getClientMsg()->getIterator()->setState(COMPLETE);
+		client.getClientMsg()->setState(COMPLETE);
+	}
+
+	// if no activity from Client then delete Client
 	if (!client.checkTimeout())
 	{
-		// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
 		delete &client;
 	}
 	return (false);
-}
-
-bool	ConnectionDispatcher::readHeader(Client& client,  int idx)
-{
-	int			n = 0;
-	int			peek = 0;
-
-	// ON CONSTRUCTION READHEAD IS TRUE AND IS SET TO FALSE WHEN HEADER COMPLETELY READ
-	if (!client.getReadHeader())
-		return (true);
-
-	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
-	// ALSO REMOVES CLIENT ON TIMEOUT
-	if (!readFd(client.getFd(), client, n, idx))
-		return (false);
-
-	// SUCCESSFUL RECIEVE -> ADDING BUFFER FILLED BY RECIEVE TO THE MESSAGE STRING
-	// peek in order to rule out the possibility to block on next read
-	_concatMessageAndPeek(&client, n, peek);
-
-	// UNSUCCESSFUL RECIEVE AND INCOMPLETE HEADER 
-	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
-	if (!_checkReceiveError(client, n, peek))
-		return (false);
-
-
-	// IF return of receive is smaller than buffer, or contains end header \r\n\r\n
-	// -> we finish reading and SET READHEADER FLAG TO FALSE
-	_checkEndHeader(client, n);
-	return (true);
 }
 
 void	ConnectionDispatcher::writeClient(Client& client,  int idx)
@@ -221,6 +220,8 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 	if (!client.cgiChecked && client.getErrorCode() == 0)
 	{
 		client.cgiChecked= true;
+		client.cgiChecked = true;
+		bool found = true;
 		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
 		if (!clientServer)
 			return ;
@@ -231,6 +232,12 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 		{
 			Logger::info("Cgi checked and it exist on this location :", false); std::cout << location->getLocationUri() << std::endl;
 			_parseCgiURLInfo(*location, client);
+		RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
+		std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
+		std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
+		if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
+		{ 
+			Logger::warning("Cgi checked and it exist on this location", true);
 			client.setCgi(new CgiProcessor(client));
 		}
 	}
@@ -313,37 +320,55 @@ void	ConnectionDispatcher::_runCgi(Client& client)
 	client.getCgi()->process();
 }
 
+bool	ConnectionDispatcher::readClient(Client& client,  int idx)
+{
+	int			n = 0;
+	int			peek = 0;
+
+	// allocate new Message instance if necessary
+	if (!client.getClientMsg())
+		client.setClientMsg(new Message(true));
+
+	if (client.getClientMsg()->getState() == COMPLETE)
+		return (true);
+
+	// CHECK IF WE ARE ALLOWED TO READ FROM CLIENT. IF YES READ, IF NO -> RETURN
+	// ALSO REMOVES CLIENT ON TIMEOUT
+	if (!readFd(client.getFd(), client, n, idx))
+		return (false);
+
+	// ADD BUFFER TO THE MESSAGE CLASS INSTANCE
+	if (n > 0)
+		client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
+
+	// PEEK IN ORDER TO RULE OUT THE POSSIBILITY OF BLOCKING ON NEXT READ
+	// _peek(&client, n, peek);
+
+	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
+	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
+	if (!_checkReceiveError(client, n, peek))
+		return (false);
+
+	return (true);
+}
 
 void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 {
 	// READ_HEADER RETURNS FALSE WHEN ERR WHILE READING HEADER -> CLIENT IS DELETED
-	if (!readHeader(client, idx))
+	bool b = readClient(client, idx);
+	if (!b || !client.getClientMsg() || client.getClientMsg()->getState() == INCOMPLETE)
 		return ;
-	
-	// HANDLE HEADER
-	if(client.getReadHeader() == false)
-		client.createClientHeader();
 
-	// HANDLE BODY
-	if(client.header != NULL)
-	{
-		if(client.header->isBodyExpected() == true)
-		{
-			// READ BODY
-			// PROCESS BODY
-		}
+	//run cgi if cgi on and only if there is no error in client so far
+	_runCgi(client);
+	if (client.getCgi() && client.cgiRunning)
+		return ;
 
-		//run cgi if cgi on and only if there is no error in client so far
-		_runCgi(client);
-		if (client.getCgi() && client.cgiRunning)
-			return ;
-
-		// PROCESS ANSWER
-		_processAnswer(client);
-	}
+	// PROCESS ANSWER
+	_processAnswer(client);
 
 	// WRITE PROCESSED ANSWER TO CLIENT
-	if (client.getWriteClient())
+	if (client.getResponse())
 		writeClient(client, idx);
 }
 

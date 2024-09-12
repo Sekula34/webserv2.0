@@ -1,9 +1,9 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
+#include "../Client/AHeader.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>
-#include <map>
 
 struct StatusLineElements
 {
@@ -12,32 +12,31 @@ struct StatusLineElements
 	std::string ReasonPhrase;
 };
 
-class ResponseHeader
+class ResponseHeader : public AHeader
 {
-	private:
-		const int& _httpCode;
-		StatusLineElements _statusLine;
-		std::map<std::string, std::string> _headerFields;
-
-		void _fillStatusLineElements();
-		std::string _getStatusLineAsString() const;
-		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;
-		std::string _getAllHeaderFieldsAsString() const;
 
 	public:
+		ResponseHeader(std::string header, const int httpCode = 200);
 		ResponseHeader(const int& httpCode, size_t contentLength);
 		ResponseHeader(const ResponseHeader& source);
 		ResponseHeader& operator=(const ResponseHeader& source);
 		~ResponseHeader();
 
+		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
+		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
+		void changeHttpCode(int newHttpCode);
+
+	private:
+		int _httpCode;
+		StatusLineElements _statusLine;
+		void _fillStatusLineElements();
+		std::string _getStatusLineAsString() const;
+
+		bool _cgiStatusLine() const;
+		static bool _setStatusLine(StatusLineElements& elem, std::string line);
 
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
-
-		/*void setContentLength(int contentLength);
-		void setDate(void);
-		void setContentLanguage(std::string language = "en");
-		*/
 };
 
 #endif

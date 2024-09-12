@@ -26,7 +26,7 @@ class ConnectionDispatcher
 		void						mainLoopEpoll(void);
 		Client*						findClientInClients(int client_fd);
 		bool						readFd(int fd, Client & client, int & n, int idx);
-		bool						readHeader(Client& client,  int idx);
+		bool						readClient(Client& client,  int idx);
 		void						writeClient(Client& client,  int idx);
 		void						clientsRemoveFd(Client* client);
 		SocketManager &				_sockets;
@@ -41,7 +41,7 @@ class ConnectionDispatcher
 		void						_handleClient(Client& client, int idx);
 		bool						_checkReceiveError(Client& client, int n, int peek);
 		void						_checkEndHeader(Client& client, int n);
-		void						_concatMessageAndPeek(Client* client, int n, int & peek);
+		void						_peek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
 		void						_checkCgi(Client& client);
 		void 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);

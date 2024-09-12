@@ -9,6 +9,7 @@
 ClientHeader::ClientHeader(const std::string message)
 :_message(ParsingUtils::extractUntilDelim(message, "\r\n\r\n"))
 {
+	std::cout << "Client Header:" << std::endl << _message << std::endl;
 	_constructFunction();
 }
 
@@ -146,8 +147,14 @@ const std::map<std::string, std::string> & ClientHeader::getHeaderFields() const
 
 bool ClientHeader::isBodyExpected() const
 {
-	if(_headerFields.find("Content-Length") != _headerFields.end())
+	std::string s = "chunked";
+	if(_headerFields.find("Content-Length") != _headerFields.end()
+	|| (_headerFields.find("Transfer-Encoding") != _headerFields.end()
+		&& _headerFields.at("Transfer-Encoding") == "chunked"))
+	{
+		std::cout << "body should be read!" << std::endl;
 		return true;
+	}
 	return false;
 }
 

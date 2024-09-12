@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include "Message.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
 #include <sstream>
@@ -43,17 +44,19 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 
 Client::~Client (void)
 {
-	Logger::info("Client destructed, unique ID: "); std::cout << _id;
-	std::cout << " FD: "; std::cout << _fd << std::endl;
-	close (_fd);
 	if (socketToChild != DELETED)
 		close(socketToChild);
 	if (socketFromChild != DELETED)
 		close(socketFromChild);
 	delete [] _recvLine;
-	delete header;
+	// delete header;
 	delete _response;
 	delete _cgi;
+	delete _clientMsg;
+	delete _serverMsg;
+	Logger::info("Client destructed, unique ID: "); std::cout << _id;
+	std::cout << " FD: "; std::cout << _fd << std::endl;
+	close (_fd);
 }
 
 /******************************************************************************/
@@ -81,9 +84,6 @@ Client &	Client::operator=(Client const & rhs)
 	//std::cout << "Client Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
-		_readHeader = rhs._readHeader;
-		_readBody = rhs._readBody;
-		_writeClient = rhs._writeClient;
 	}
 	return (*this);
 }
@@ -123,15 +123,16 @@ int	Client::getFd() const
 	return (_fd);
 }
 
-std::string	Client::getMessage() const
+Message*	Client::getClientMsg()const
 {
-	return (_message);
+	return (_clientMsg);
 }
 
-std::string	Client::getCgiMessage() const
+Message*	Client::getServerMsg()const
 {
-	return (_cgiMessage);
+	return (_serverMsg);
 }
+
 
 unsigned char*	Client::getRecvLine() const
 {
@@ -142,29 +143,10 @@ int	Client::getEpollFd() const
 {
 	return (_epollFd);
 }
-bool	Client::getReadHeader() const
-{
-	return (_readHeader);
-}
-
-bool	Client::getReadBody() const
-{
-	return (_readBody);
-}
-
-bool	Client::getWriteClient() const
-{
-	return (_writeClient);
-}
 
 int	Client::getErrorCode() const
 {
 	return (_errorCode);
-}
-
-std::string const &	Client::getClientBody() const
-{
-	return (_clientBody);
 }
 
 CgiProcessor*	Client::getCgi() const
@@ -175,21 +157,6 @@ CgiProcessor*	Client::getCgi() const
 std::string	Client::getClientIp() const
 {
 	return (_clientIp);
-}
-
-void	Client::setReadHeader(bool b)
-{
-	_readHeader = b;
-}
-
-void	Client::setReadBody(bool b)
-{
-	_readBody = b;
-}
-
-void	Client::setWriteClient(bool b)
-{
-	_writeClient = b;
 }
 
 void	Client::setErrorCode(int c)
@@ -206,6 +173,22 @@ void	Client::setAddrlen(socklen_t addrLen)
 {
 	_addrLen = addrLen;
 }
+
+void	Client::setClientMsg(Message* m)
+{
+	_clientMsg = m;
+}
+
+void	Client::setServerMsg(Message* m)
+{
+	_serverMsg = m;
+}
+
+void	Client::setWriteClient(bool b)
+{
+	_writeClient = b;
+}
+
 
 /******************************************************************************/
 /*                               Error Handling                               */
@@ -236,15 +219,6 @@ bool	Client::checkTimeout()
 	return (true);
 }
 
-void		Client::addRecvLineToMessage()
-{
-	_message += (char *)_recvLine;
-}
-
-void	Client::addRecvLineToCgiMessage()
-{
-	_cgiMessage += (char *)_recvLine;
-}
 
 void	Client::clearRecvLine()
 {
@@ -255,20 +229,20 @@ void	Client::clearMessage()
 {
 }
 
-void Client::createClientHeader()
-{
-	if(header != NULL)
-	{
-		return;
-	}
-	header = new ClientHeader(this->getMessage());
-	Logger::info("Client header created with : "); std::cout << _message;
-	if(header->getErrorCode() != 0)
-	{
-		Logger::warning("Client Header have error", false); std::cout << header->getErrorCode() << std::endl;
-		setErrorCode(header->getErrorCode());
-	}
-}
+// void Client::createRequestHeader()
+// {
+// 	if(header != NULL)
+// 	{
+// 		return;
+// 	}
+// 	header = new RequestHeader(this->getMessage());
+// 	// Logger::info("Client header created with : "); std::cout << _message;
+// 	if(header->getErrorCode() != 0)
+// 	{
+// 		Logger::warning("Client Header have error", false); std::cout << header->getErrorCode() << std::endl;
+// 		setErrorCode(header->getErrorCode());
+// 	}
+// }
 
 void Client::_initVars(void)
 {
@@ -279,19 +253,19 @@ void Client::_initVars(void)
 	waitReturn = 0;
 	cgiChecked = false;
 	_errorCode = 0;
-	_readHeader = true;
-	_readBody = false;
-	_writeClient = false;
 	_recvLine = new unsigned char[MAXLINE];
 	memset(_recvLine, 0, MAXLINE);
-	header = NULL;
+	// header = NULL;
 	_response = NULL;
-	_clientBody = "";
 	_cgiOutput = "";
 	Cgi = NULL;
 	cgiRunning = true;
 	_clockstop = 1000;
+	_clientMsg = NULL;;
+	_serverMsg = NULL;;
+	_writeClient = false;
 }
+
 void	Client::setChildSocket(int to, int from)
 {
 	socketToChild = to;
