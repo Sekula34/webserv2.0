@@ -1,5 +1,5 @@
 #pragma once 
-#include "../srcs/Client/ClientHeader.hpp"
+#include "../srcs/Client/RequestHeader.hpp"
 #include "UnitTest.hpp"
 #include <string>
 #include <utility>
@@ -7,7 +7,7 @@
 
 
 
-class CHTest : UnitTest
+class RequestHeaderTester : UnitTest
 {
 	public:
 		static std::vector<std::pair<std::string, int> >messages;
@@ -21,9 +21,10 @@ class CHTest : UnitTest
 		static void InitVector();
 		static void testCHcase(const std::string fullMessage, const std::pair<std::string, int>& expected);
 		static void CHBlockTest();
-		static void compare(const ClientHeader& actual,const std::pair<std::string, int>& expected);
+		static void compare(const RequestHeader& actual,const std::pair<std::string, int>& expected);
 		static void simplePrint();
 		static std::string generateValidHttpReques();
+		static void cgiResponseHeader();
 	private:
 		//static const client
 

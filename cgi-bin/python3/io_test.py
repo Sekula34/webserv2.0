@@ -48,10 +48,20 @@ start = """
 </head>
 <body>
 """
+
 end = """
   </body>
 </html>
 """
+
+# print("Connection: close\n")
+# print("Content-Language: en\n")
+# print("Content-Length: 1000\n")
+#
+print("Content-Type: text/html")
+print("Language: English")
+print("")
+
 print(start)
 
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>checking CGI meta variables</title>
+            <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+            margin: 30px;
+            padding: 30px;
+            font-size: 20px;
+        }
+        h1, h2, h3 {
+            margin: 15px;
+        }
+        h1 {
+            font-size: 2.5em;
+        }
+        h2 {
+            font-size: 2em;
+        }
+        h3 {
+            font-size: 1.75em;
+        }
+        p {
+            font-size: 0.75em;
+            background-color: #1e1e1e;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Environment Variables:</h3>
+<p>FCGI_ROLE=RESPONDER</p>
+<p>QUERY_STRING=</p>
+<p>REQUEST_METHOD=GET</p>
+<p>CONTENT_TYPE=</p>
+<p>CONTENT_LENGTH=</p>
+<p>SCRIPT_NAME=/cgi-bin/io_test.py</p>
+<p>REQUEST_URI=/cgi-bin/io_test.py</p>
+<p>DOCUMENT_URI=/cgi-bin/io_test.py</p>
+<p>DOCUMENT_ROOT=/var/www</p>
+<p>SERVER_PROTOCOL=HTTP/1.1</p>
+<p>REQUEST_SCHEME=http</p>
+<p>GATEWAY_INTERFACE=CGI/1.1</p>
+<p>SERVER_SOFTWARE=nginx/1.22.1</p>
+<p>REMOTE_ADDR=10.0.2.2</p>
+<p>REMOTE_PORT=36046</p>
+<p>REMOTE_USER=</p>
+<p>SERVER_ADDR=10.0.2.15</p>
+<p>SERVER_PORT=80</p>
+<p>SERVER_NAME=_</p>
+<p>REDIRECT_STATUS=200</p>
+<p>SCRIPT_FILENAME=/var/www/cgi-bin/io_test.py</p>
+<p>HTTPS=</p>
+<p>HTTP_HOST=localhost:8181</p>
+<p>HTTP_USER_AGENT=Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0</p>
+<p>HTTP_ACCEPT=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8</p>
+<p>HTTP_ACCEPT_LANGUAGE=en-US,en;q=0.5</p>
+<p>HTTP_ACCEPT_ENCODING=gzip, deflate, br, zstd</p>
+<p>HTTP_DNT=1</p>
+<p>HTTP_CONNECTION=keep-alive</p>
+<p>HTTP_COOKIE=io=2bzx23Y0m_x0MQYFAAAA</p>
+<p>HTTP_UPGRADE_INSECURE_REQUESTS=1</p>
+<p>HTTP_SEC_FETCH_DEST=document</p>
+<p>HTTP_SEC_FETCH_MODE=navigate</p>
+<p>HTTP_SEC_FETCH_SITE=none</p>
+<p>HTTP_SEC_FETCH_USER=?1</p>
+<p>HTTP_PRIORITY=u=0, i</p>
+<p>LANG=en_US.UTF-8</p>
+<p>LANGUAGE=en_US:en</p>
+<p>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</p>
+<p>HOME=/var/www</p>
+<p>LOGNAME=www-data</p>
+<p>USER=www-data</p>
+<p>INVOCATION_ID=126cdf29587f42ed92bc8c7d1f34d347</p>
+<p>JOURNAL_STREAM=8:15436</p>
+<p>SYSTEMD_EXEC_PID=728</p>
+<p>DAEMON_OPTS=-f</p>
+
+<p>Received from stdin:</p>
+</body>
