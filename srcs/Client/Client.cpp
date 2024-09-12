@@ -70,7 +70,7 @@ _start(std::clock()),
 _epollFd(src._epollFd)
 {
 	//std::cout << "Client copy constructor called" << std::endl;
-	_recvLine = new unsigned char[MAXLINE];
+	_recvLine = new char[MAXLINE];
 	memset(_recvLine, 0, MAXLINE);
 	*this = src;
 }
@@ -134,7 +134,7 @@ Message*	Client::getServerMsg()const
 }
 
 
-unsigned char*	Client::getRecvLine() const
+char*	Client::getRecvLine() const
 {
 	return (_recvLine);
 }
@@ -253,7 +253,10 @@ void Client::_initVars(void)
 	waitReturn = 0;
 	cgiChecked = false;
 	_errorCode = 0;
-	_recvLine = new unsigned char[MAXLINE];
+	_recvLine = NULL;
+	_recvLine = new char[MAXLINE];
+
+	std::cout << " this is size of MAXLINE Buffer: " << sizeof(_recvLine) << "this is MAXLINE: " << MAXLINE << std::endl;
 	memset(_recvLine, 0, MAXLINE);
 	// header = NULL;
 	_response = NULL;

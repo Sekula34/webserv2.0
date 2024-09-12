@@ -367,7 +367,7 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 	// if Trailer, complete the header with info from trailer
 }
 
-void	Message::bufferToNodes(unsigned char* buffer, size_t num)
+void	Message::bufferToNodes(char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)

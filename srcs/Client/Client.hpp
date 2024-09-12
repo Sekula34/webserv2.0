@@ -45,7 +45,7 @@ class Client {
 		std::clock_t		getStartTime() const;
 		std::string			getMessage() const;
 		std::string			getCgiMessage() const;
-		unsigned char*		getRecvLine() const;
+		char*				getRecvLine() const;
 		int					getEpollFd() const;
 		int					getErrorCode() const;
 		bool				getReadHeader() const;
@@ -101,7 +101,7 @@ class Client {
 		int const			_fd;
 		std::clock_t const	_start;
 		int const			_epollFd;
-		unsigned char*		_recvLine;
+		char* 				_recvLine;
 		CgiProcessor*		_cgi;
 		Message*			_clientMsg;	// client owns so it should delete
 		Message*			_serverMsg;	// client owns so it should delete

@@ -16,7 +16,7 @@ class Message {
 									// canonical
 									Message(bool r);
 		virtual						~Message(void);
-		void						bufferToNodes(unsigned char* buffer, size_t num);
+		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
 		void						_bodyToChunks();
 		void						_chunksToBody();

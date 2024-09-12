@@ -218,30 +218,37 @@ size_t	Node::getBodySize() const
 	return (_bodySize);
 }
 
-size_t	ft_strstr(unsigned char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
+size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t num)
 {
 	size_t	i = 0;
 	size_t	j = 0;
 
-	if (!buffer || !remainDel.c_str())
+
+	// std::cout << "buffer: " << buffer << std::endl;
+	// std::cout << "remainDel: " << remainDel << std::endl;
+	// std::cout << "bufferPos: " << bufferPos << std::endl;
+	// std::cout << "num: " << num << std::endl;
+
+	if (!buffer || remainDel.empty())
 		return (0);
 	if (remainDel.c_str()[j] == '\0')
 		return (0);
+	// while (i + j + bufferPos < num)
 	while (i + bufferPos < num)
 	{
-		while (buffer[i + j + bufferPos] == remainDel.c_str()[j])
+		j = 0;
+		while (i + j + bufferPos < num && buffer[i + j + bufferPos] == remainDel.c_str()[j])
 		{
 			j++;
 			if (remainDel.c_str()[j] == '\0')
 				return (i);
 		}
-		j = 0;
 		i++;
 	}
 	return (0);
 }
 
-bool	Node::_checkRemainDelIsBufStart(std::string remainDel, unsigned char* buffer, size_t bufferPos)
+bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos)
 {
 	if (remainDel.size() + bufferPos > MAXLINE)
 		return (false);
@@ -253,7 +260,7 @@ bool	Node::_checkRemainDelIsBufStart(std::string remainDel, unsigned char* buffe
 	return (true);
 }
 
-void	Node::_calcBtr(unsigned char* buffer, std::string del, size_t & bufferPos, size_t num)
+void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
 {
 	std::string remainDel = _getRemainDel(del);
 	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
@@ -271,7 +278,7 @@ void	Node::_calcBtr(unsigned char* buffer, std::string del, size_t & bufferPos, 
 	}
 }
 
-void	Node::_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num)
+void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 {
 	std::string	del;
 	if (_type == HEADER || _type == TRAILER)
@@ -299,7 +306,7 @@ void	Node::_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num)
 		_btr =  _chunkHeaderSize + _chunkSize + 2 - _str.size() ;
 }
 
-void	Node::concatString(unsigned char* buffer, size_t & bufferPos, size_t num)
+void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 {
 	size_t i = 0;
 

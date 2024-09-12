@@ -26,7 +26,7 @@ class Node {
 							Node(void);
 							Node(Node const & src);
 
-		void				concatString(unsigned char* buffer, size_t & bufferPos, size_t num);
+		void				concatString(char* buffer, size_t & bufferPos, size_t num);
 
 							// set and get
 		void				setString(const std::string & s);
@@ -63,9 +63,9 @@ class Node {
 		std::string			_getRemainDel(const std::string & del);
 		std::string			_chunk();
 		std::string			_unChunk();
-		bool				_checkRemainDelIsBufStart(std::string remainDel, unsigned char* buffer, size_t bufferPos);
-		void				_calcBtr(unsigned char* buffer, std::string del, size_t & bufferPos, size_t num);
-		void				_setBtr(unsigned char* buffer, size_t & bufferPos, size_t num);
+		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos);
+		void				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
+		void				_setBtr(char* buffer, size_t & bufferPos, size_t num);
 
 		Node &				operator=(Node const & rhs);
 };
