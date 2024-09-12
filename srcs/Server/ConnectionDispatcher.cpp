@@ -145,16 +145,6 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 	return (true);
 }
 
-// void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
-// {
-// 	if (n < MAXLINE - 1 || client.getMessage().find("\r\n\r\n") != std::string::npos)
-// 	{
-// 		//std::cout << std::endl << client->getMessage() << std::endl;
-// 		client.setReadHeader(false);
-// 		client.setWriteClient(true);
-// 	}
-// }
-
 void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
 {
 	if (n > 0)
@@ -365,6 +355,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
+	client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 
