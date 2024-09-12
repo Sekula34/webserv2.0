@@ -42,6 +42,7 @@ RequestHeader::RequestHeader(const RequestHeader& source)
 
 }
 
+
 RequestHeader& RequestHeader::operator=(const RequestHeader& source)
 {
 	(void) source;
@@ -51,7 +52,7 @@ RequestHeader& RequestHeader::operator=(const RequestHeader& source)
 
 RequestHeader::~RequestHeader()
 {
-	
+	delete urlSuffix;
 }
 
 std::string RequestHeader::getStartLine() const 
