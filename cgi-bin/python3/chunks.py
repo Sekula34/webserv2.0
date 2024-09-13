@@ -1,33 +1,18 @@
-content = """
-POST /test HTTP/1.1
-Host: foo.example
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 27
-Transfer-Encoding: chunked
-Trailer: Expires
+print("Content-Type: text")
+print("Transfer-Encoding: chunked\n")
 
-
-1
-1
-2
-22
-3
-333
-4
-4444
-5
-55555
-2A
-Lorem ipsum dolor sit amet, consetetur sad
-1A5
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna ali
-0
-
-Forgotten-Encoding: forgt to tell you about this in the first header
-Expires: Wed, 21 Oct 2015 07:28:00 GMT
-
-
-
-Don't print this!!!!
-"""
-print (content)
+print("1\r")
+print("1\r")
+print("2\r")
+print("22\r")
+print("3\r")
+print("333\r")
+print("4\r")
+print("4444\r")
+print("5\r")
+print("55555\r")
+print("2A\r")
+print("Lorem ipsum dolor sit amet, consetetur sad\r")
+print("1A5\r")
+print("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna ali\r")
+print("0\r")

@@ -140,6 +140,8 @@ std::string operatingSystem()
 
 std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 {
+	if (suffix == "")
+		return suffix;
 	std::string tmp;
 	std::vector<std::string> dirs = ParsingUtils::splitString(Data::findStringInEnvp("PATH="), ':');
 	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); it++)
@@ -206,7 +208,10 @@ void	CgiProcessor::_initScriptVars()
 	// if not installed stops Cgi sets 500 error
 	_interpreterAbsPath = getInterpreterPath(suffix);
 	if (_interpreterAbsPath.empty())
+	{
+		_stopCgiSetErrorCode();
 		return ;
+	}
 
 	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
 	// _scriptName = getScriptName(suffix);
