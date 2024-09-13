@@ -355,7 +355,8 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
-	client.getServerMsg()->printChain();
+	// if (client.getServerMsg())
+	// 	client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 

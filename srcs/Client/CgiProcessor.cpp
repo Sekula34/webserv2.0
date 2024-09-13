@@ -596,6 +596,8 @@ void	CgiProcessor::_stopCgiSetErrorCode()
 	std::cout << ",id: " << _client->getId() << std::endl;
 	_client->setErrorCode(500);
 	_client->cgiRunning = false;
+	delete _client->getServerMsg();
+	_client->setServerMsg(NULL);
 }
 
 void	CgiProcessor::_prepareSockets()
