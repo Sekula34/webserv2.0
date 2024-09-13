@@ -5,6 +5,9 @@
 class FileUtils
 {
 	public :
+
+		static void setConfigFilePath(const std::string &configFilePath);
+		static const std::string& getConfigFilePath(); 
 		static bool isPathValid(const std::string relativeFilePath);
 		/**
 		 * @brief put file in string 
@@ -27,6 +30,7 @@ class FileUtils
 		static int isPathFileOrFolder(const std::string& serverFilePath, int& httpStatusCode);
 
 	private:
+		static std::string _configFilePath;
 		static void _setDirFailStatusCode(int ernnoNum, int& httpStatusCode);
 		static void _setFileOrFolderStatusCode(int errnoNum, int& httpStatusCode);
 };

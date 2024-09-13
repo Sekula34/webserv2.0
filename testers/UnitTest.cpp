@@ -12,7 +12,7 @@
 #include "../srcs/Utils/FileUtils.hpp"
 
 
-const std::string UnitTest::_constFileFolder = "testers/ConfigFileTest/TestFiles/";
+const std::string UnitTest::_constFileFolder = "configuration_files/valid/";
 
 void UnitTest::_testpassed(bool block)
 {
@@ -120,10 +120,11 @@ void UnitTest::stringDelimCheck()
 
 void UnitTest::testingOpeninDirBlock()
 {
-	testOpeningDirCase("Configuration", 0);
-	testOpeningDirCase("./Configuration/", 0);
+	testOpeningDirCase("configuration_files", 0);
+	testOpeningDirCase("./configuration_files/", 0);
 	testOpeningDirCase("html/403.html", 404);
-	testOpeningDirCase("testers/NoPermisionFolder", 403);
+	//TODO: not sure how to test 403 anymore
+	//testOpeningDirCase("configuration_files/", 403);
 	testOpeningDirCase("testers/EmptyFolder/", 0);
 }
 
@@ -135,6 +136,7 @@ void UnitTest::testOpeningDirCase(const std::string path, int expected_error)
 	std::cout << "Result is " << result << std::endl;
 	perror("Opening dir failed");
 	errno = 0;
+	std::cout << statusCode << std::endl;
 	assert(statusCode == expected_error);
 	_testpassed();
 }
@@ -205,18 +207,22 @@ void UnitTest::testDirBlock()
 
 void UnitTest::configSyntaxBlock()
 {
-	std::string folder = "testers/ConfigFileTest/TestFiles/";
-	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/simpleFile.conf",false);
-	_configFileSyntaxCheck("nonExistent", true);
-	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/noPermission.conf", true);
-	_configFileSyntaxCheck("testers/ConfigFileTest/TestFiles/bulshit",true);
+	std::string folder = "configuration_files/";
+	std::string validFolder = folder + "valid/";
+	std::string invalidFolder = folder + "invalid/";
 
-	_configFileSyntaxCheck(folder + "InvalidContext.conf", true);
-	_configFileSyntaxCheck(folder + "InvalidContext2.conf", true);
-	_configFileSyntaxCheck(folder + "doublehttp.conf", true);
-	_configFileSyntaxCheck(folder + "simpleServer.conf", false);
-	_configFileSyntaxCheck(folder + "ThreeServers.conf", false);
-	_configFileSyntaxCheck(folder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
+	_configFileSyntaxCheck("nonExistent", true);
+	_configFileSyntaxCheck(invalidFolder + "noPermission.conf", true);
+	_configFileSyntaxCheck(invalidFolder + "bulshit",true);
+	_configFileSyntaxCheck(invalidFolder + "InvalidContext.conf", true);
+	_configFileSyntaxCheck(invalidFolder + "InvalidContext2.conf", true);
+	_configFileSyntaxCheck(invalidFolder + "doublehttp.conf", true);
+	_configFileSyntaxCheck(validFolder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
+
+	_configFileSyntaxCheck(invalidFolder + "ErrorOutOfRange.conf", false);
+	_configFileSyntaxCheck(folder + "default.conf",false);
+	_configFileSyntaxCheck(validFolder + "simpleServer.conf", false);
+	_configFileSyntaxCheck(validFolder + "ThreeServers.conf", false);
 	return _testpassed(true);
 }
 

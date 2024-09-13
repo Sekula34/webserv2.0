@@ -13,6 +13,18 @@
 #include <dirent.h>
 
 
+std::string FileUtils::_configFilePath;
+
+void FileUtils::setConfigFilePath(const std::string &configFilePath)
+{
+	FileUtils::_configFilePath = configFilePath;
+}
+
+const std::string& FileUtils::getConfigFilePath(void)
+{
+	return _configFilePath;
+}
+
 bool FileUtils::isPathValid(const std::string relativeFilePath)
 {
 	if(relativeFilePath.empty() == true)

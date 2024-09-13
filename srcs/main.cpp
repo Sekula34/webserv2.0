@@ -2,6 +2,7 @@
 #include "Server/ConnectionDispatcher.hpp"
 #include "Server/SocketManager.hpp"
 #include "Utils/Data.hpp"
+#include "Utils/FileUtils.hpp"
 #include "Utils/Logger.hpp"
 #include <exception>
 #include <iostream>
@@ -37,8 +38,9 @@ int main(int argc, char** argv, char** envp)
 {
 	try
 	{
-		const std::string filePath = getConfigFilePath(argc, argv);
-		ConnectionDispatcherTest(envp, filePath);
+		FileUtils::setConfigFilePath(getConfigFilePath(argc, argv));
+		//const std::string filePath = getConfigFilePath(argc, argv);
+		ConnectionDispatcherTest(envp, FileUtils::getConfigFilePath());
 	}
 	catch(std::exception &e)
 	{
