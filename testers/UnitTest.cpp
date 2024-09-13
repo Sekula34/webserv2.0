@@ -217,7 +217,7 @@ void UnitTest::configSyntaxBlock()
 	_configFileSyntaxCheck(invalidFolder + "InvalidContext.conf", true);
 	_configFileSyntaxCheck(invalidFolder + "InvalidContext2.conf", true);
 	_configFileSyntaxCheck(invalidFolder + "doublehttp.conf", true);
-	_configFileSyntaxCheck(validFolder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
+	_configFileSyntaxCheck(invalidFolder + "zeroServer.conf", false); // not sure about this one, should it be exceptions or not
 
 	_configFileSyntaxCheck(invalidFolder + "ErrorOutOfRange.conf", false);
 	_configFileSyntaxCheck(folder + "default.conf",false);
@@ -232,7 +232,6 @@ void UnitTest::configNumberOfServersBlock()
 	_configNumberOfServers("simpleFile.conf", 1);
 	_configNumberOfServers("simpleServer.conf",1);
 	_configNumberOfServers("ThreeServers.conf",3);
-	_configNumberOfServers("zeroServer.conf", 0);
 	return _testpassed(true);
 }
 void UnitTest::allTests()
