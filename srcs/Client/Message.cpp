@@ -100,6 +100,8 @@ const std::string	Message::getBodyString()
 		_chunked = false;
 	}
 	_findBody(it);
+	if (it == _chain.begin())
+		return ("");
 	return (it->getStringUnchunked());
 }
 
@@ -140,12 +142,13 @@ void	Message::_findBody(std::list<Node>::iterator& it)
 		if(it->getType() == BODY) 
 			return;
 	}
+	it = _chain.begin();
 }
 
 size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
 {
 	_findBody(it);
-	if (it == _chain.end() || MAX_CHUNKSIZE <= 0)
+	if (it == _chain.begin() || MAX_CHUNKSIZE <= 0)
 	{
 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
 		return (0);
@@ -226,7 +229,7 @@ void	Message::_createHeader()
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
 	// Logger::info("Client header created with : "); std::cout << _message;
-	if(_header->getHttpStatusCode() != 0)
+	if(_header && _header->getHttpStatusCode() != 0)
 	{
 		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
 		// need to pass this to Client!!
@@ -236,6 +239,8 @@ void	Message::_createHeader()
 
 void	Message::_headerInfoToNode()
 {
+	if (!_header)
+		return ;
 	// set BODY SIZE from header
 	std::map<std::string, std::string>::const_iterator found = _header->getHeaderFieldMap().find("Content-Length");
 	if (found != _header->getHeaderFieldMap().end())
@@ -259,7 +264,8 @@ void	Message::_addNewNode()
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked && _header)
 	{
-			_chain.push_back(Node("", BODY, _it->getBodySize()));
+			std::cout << "body size of saved in header: " << _it->getBodySize()<<std::endl;
+			_chain.push_back(Node("", BODY, _it->getBodySize(), _request));
 	}
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete

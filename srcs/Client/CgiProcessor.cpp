@@ -140,6 +140,8 @@ std::string operatingSystem()
 
 std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 {
+	if (suffix == "")
+		return suffix;
 	std::string tmp;
 	std::vector<std::string> dirs = ParsingUtils::splitString(Data::findStringInEnvp("PATH="), ':');
 	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); it++)
@@ -195,11 +197,10 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 void	CgiProcessor::_initScriptVars()
 {
 	// the suffix should come from url parser
-	std::string suffix = ".py";
+	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
 
 	// this should happen when parsing the config file
-	Data::setCgiLang(suffix, "python3");
-
+	// Data::setCgiLang(suffix, "python3");
 
 	std::string location = "/cgi-bin/";
 
@@ -207,9 +208,13 @@ void	CgiProcessor::_initScriptVars()
 	// if not installed stops Cgi sets 500 error
 	_interpreterAbsPath = getInterpreterPath(suffix);
 	if (_interpreterAbsPath.empty())
+	{
+		_stopCgiSetErrorCode();
 		return ;
+	}
 
-	_scriptName = getScriptName(suffix);
+	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
+	// _scriptName = getScriptName(suffix);
 	if (_scriptName.empty())
 		return ;
 
@@ -325,6 +330,11 @@ void	CgiProcessor::_createEnvVector()
 	line = "SERVER_SOFTWARE=webserv2.0 ("; 
 	line += operatingSystem();
 	line += ")"; 
+	_envVec.push_back(line);
+
+	// root of document
+	line = "DOCUMENT_ROOT="; 
+	line += _scriptLocation;
 	_envVec.push_back(line);
 }
 
@@ -449,9 +459,12 @@ void	CgiProcessor::_readFromChild()
 		// EOF reached, child has gracefully shutdown connection
 		if (n == 0)
 		{
-			// _client->getServerMsg()->printChain();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
+			// copy the error code in the CgiResponseHeader into client
+			// so that errors from CGI can be processed
+			if (_client->getServerMsg() && _client->getServerMsg()->getHeader())
+				_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
 		}
 	}
 }
@@ -585,6 +598,8 @@ void	CgiProcessor::_stopCgiSetErrorCode()
 	std::cout << ",id: " << _client->getId() << std::endl;
 	_client->setErrorCode(500);
 	_client->cgiRunning = false;
+	delete _client->getServerMsg();
+	_client->setServerMsg(NULL);
 }
 
 void	CgiProcessor::_prepareSockets()

@@ -1,30 +1,35 @@
-POST /test HTTP/1.1
-Host: foo.example
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 27
-Transfer-Encoding: chunked
-Trailer: Expires
+#!/usr/bin/env python3
+
+import sys
+import time
+
+# Print headers, including Transfer-Encoding: chunked
+print("Transfer-Encoding: chunked")
+print("Content-Type: text/html\n")
+
+# The HTML content to be sent
+html_content = """
+<html>
+<head><title>Hello World CGI</title></head>
+<body><h2>this is used to be chunky but now it's not!</h2></body>
+</html>
+"""
+
+# Function to write content in proper HTTP chunked encoding
+def write_chunked(content, chunk_size=10):
+    for i in range(0, len(content), chunk_size):
+        chunk = content[i:i + chunk_size]
+        chunk_len = hex(len(chunk))[2:]  # Convert chunk size to hexadecimal
+        sys.stdout.write(f"{chunk_len}\r\n")  # Write chunk size in hex
+        sys.stdout.write(f"{chunk}\r\n")      # Write the actual chunk
+        sys.stdout.flush()                    # Flush to send immediately
+        #time.sleep(0.5)  # Simulate delay for each chunk
+
+    # Send the final 0 chunk to indicate the end
+    sys.stdout.write("0\r\n\r\n")
+    sys.stdout.flush()
+
+# Send the content in chunks
+write_chunked(html_content)
 
 
-1
-1
-2
-22
-3
-333
-4
-4444
-5
-55555
-2A
-Lorem ipsum dolor sit amet, consetetur sad
-1A5
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna ali
-0
-
-Forgotten-Encoding: forgt to tell you about this in the first header
-Expires: Wed, 21 Oct 2015 07:28:00 GMT
-
-
-
-Don't print this!!!!

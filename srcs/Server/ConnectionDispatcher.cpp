@@ -135,25 +135,15 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
-		delete &client;
 		if (n < 0 || peek < 0)
 			Logger::error("receiving from Client", true);
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
+		delete &client;
 		return (false);
 	}
 	return (true);
 }
-
-// void	ConnectionDispatcher::_checkEndHeader(Client& client, int n)
-// {
-// 	if (n < MAXLINE - 1 || client.getMessage().find("\r\n\r\n") != std::string::npos)
-// 	{
-// 		//std::cout << std::endl << client->getMessage() << std::endl;
-// 		client.setReadHeader(false);
-// 		client.setWriteClient(true);
-// 	}
-// }
 
 void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
 {
@@ -365,6 +355,8 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
+	// if (client.getServerMsg())
+	// 	client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 
@@ -375,7 +367,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 
 void ConnectionDispatcher::_processAnswer(Client& client)
 {
-	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
+	Logger::info("Process answer for client: ");std::cout << client.getId() << std::endl;  
 	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)

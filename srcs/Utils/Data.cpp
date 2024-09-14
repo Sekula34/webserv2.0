@@ -196,6 +196,9 @@ void	Data::setCgiLang(std::string suffix, std::string interpreter)
 void	Data::setAllCgiLang()
 {
 	Data::setCgiLang(".py", "python3");
+	Data::setCgiLang(".sh", "bash");
+	Data::setCgiLang(".php", "php");
+	Data::setCgiLang(".pl", "perl");
 }
 
 void	Data::setEpollFd(int fd)

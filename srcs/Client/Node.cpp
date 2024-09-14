@@ -223,12 +223,6 @@ size_t	ft_strstr(char *buffer, std::string remainDel, size_t & bufferPos, size_t
 	size_t	i = 0;
 	size_t	j = 0;
 
-
-	// std::cout << "buffer: " << buffer << std::endl;
-	// std::cout << "remainDel: " << remainDel << std::endl;
-	// std::cout << "bufferPos: " << bufferPos << std::endl;
-	// std::cout << "num: " << num << std::endl;
-
 	if (!buffer || remainDel.empty())
 		return (0);
 	if (remainDel.c_str()[j] == '\0')
@@ -291,14 +285,16 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	}
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
-		if (_request)
-			del = {'\r','\n'};
+		del = {'\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)
 	{
-		if (_request)
+		if (_request || _bodySize)
+		{
+			std::cout << "body size in Node of Body: "<< _bodySize << std::endl;
 			_btr = _bodySize - _str.size();
+		}
 		else
 			_btr = num - bufferPos;
 	}
