@@ -214,6 +214,15 @@ void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
 }
 
 
+const std::string& Directive::getDirectiveName(void) const 
+{
+	return _directiveName;
+}
+
+const size_t& Directive::getDirectiveLineNum(void) const 
+{
+	return _dirLineNumber;
+}
 void Directive::apply(DefaultSettings& settings)
 {
 	if(_directiveName == "listen")

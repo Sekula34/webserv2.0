@@ -1,6 +1,6 @@
 #ifndef DIRECTIVE_HPP
 #define DIRECTIVE_HPP
-#include "DefaultSettings.hpp"
+
 #include "Token.hpp"
 #include <cstddef>
 #include <exception>
@@ -8,6 +8,7 @@
 #include <vector>
 
 class DirectiveTester;
+class DefaultSettings;
 
 class Directive 
 {
@@ -66,6 +67,9 @@ class Directive
 		Directive& operator=(const Directive& source);
 		~Directive();
 
+
+		const std::string& getDirectiveName(void) const;
+		const size_t& getDirectiveLineNum(void) const;
 		size_t getDirectivePathSize(void) const;
 		void apply(DefaultSettings& settings);
 		void printDirectiveInfor(void) const;
