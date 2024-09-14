@@ -6,6 +6,10 @@
 #include <vector>
 #include "NginxReturn.hpp"
 #include "ParsingUtils.hpp"
+#include "../Utils/FileUtils.hpp"
+#include "../Utils/Logger.hpp"
+#include "Configuration.hpp"
+
 DefaultSettings::DefaultSettings()
 {
 	_serverName = "[Default Server Name]";
@@ -86,6 +90,22 @@ void DefaultSettings::setAcceptedMethodToTrue(std::string methodName)
 	if(it != _acceptedMethods.end())
 		it->second = true;
 	return;
+}
+
+void DefaultSettings::p_checkDuplicateDirectives(const std::vector<Directive>& dirVec)
+{
+	const Directive* duplicate = NULL;
+	if(Directive::isDuplicateDirectivePresent(dirVec, duplicate) == true)
+	{
+		if(duplicate != NULL)
+		{
+			std::ostringstream oss;
+			oss << "[" << duplicate->getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
+			oss << duplicate->getDirectiveLineNum();
+			Logger::error(oss.str(), true);
+		}
+		throw Configuration::InvalidConfigFileException();
+	}
 }
 
 void DefaultSettings::_setDefaultHttpMethods(void)

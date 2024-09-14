@@ -5,6 +5,7 @@
 #include <string>
 #include "NginxReturn.hpp"
 #include <vector>
+#include "Directive.hpp"
 
 class DefaultSettings 
 {
@@ -28,6 +29,8 @@ class DefaultSettings
 		std::vector<std::string> _index;
 		std::string _root;
 		std::vector<std::string> m_cgiExtensions;
+
+		static void p_checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 
 	public :
 		DefaultSettings(void);
