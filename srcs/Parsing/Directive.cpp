@@ -10,6 +10,7 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
+#include "../Utils/FileUtils.hpp"
 
 const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root"};
 
@@ -311,17 +312,16 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 	std::string codeString = _directiveValue.substr(0, posOfSpace);
 	std::string erorrPagePath = _directiveValue.substr(posOfSpace + 1);
 	int codeNumber = _stringToInt(codeString);
-	if(codeNumber < 100 || codeNumber > 599)
+	if(codeNumber < 300 || codeNumber > 599)
 	{
+		std::ostringstream oss;
+		oss << "Value [" << codeNumber <<"] must be beetween 300 and 599 in " << FileUtils::getConfigFilePath() << ":";
+		oss << _dirLineNumber << "' for direcetive error_page";
+		Logger::error(oss.str(), true);
 		std::cerr << yellow << "Code number : "<<codeNumber <<" of error page directive is out of range. Line " << _dirLineNumber << resetText << std::endl;
 		throw InvalidDirectiveException();
 	}
 	settings.setErrorPage(codeNumber, erorrPagePath);
-	//settings.printAllSettings();
-	// std::cout << "Code is string is:" << codeString << "." << std::endl;
-	// std::cout <<"Int code is " << codeNumber << std::endl;
-	// std::cout << "Error page path is :" << erorrPagePath <<"." << std::endl;
-	// (void) settings;
 }
 
 //set settings listen port
