@@ -9,6 +9,7 @@
 #include <ostream>
 #include <vector>
 
+
 ServerSettings::ServerSettings()
 {
 	_serverId = -1;
@@ -19,6 +20,7 @@ ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vect
 {
 	_serverTokens = Token::getAllServerTokens(serverId, allTokens);
 	_serverDirectives = Directive::getAllServerDirectives(_serverTokens);
+	checkDuplicateDirectives(_getServerLevelDirectives());
 	_applyAllServerLevelDirectives();
 	_serverLocations = _setServerLocations();
 }
@@ -40,6 +42,18 @@ ServerSettings& ServerSettings::operator=(const ServerSettings& source)
 ServerSettings::~ServerSettings()
 {
 
+}
+
+const std::vector<Directive> ServerSettings::_getServerLevelDirectives() const
+{
+	std::vector<Directive> serverLevelDirectives;
+	for(size_t i = 0; i < _serverDirectives.size(); i++)
+	{
+		//if path is 2 that means directive have http server
+		if(_serverDirectives[i].getDirectivePathSize() == 2)
+			serverLevelDirectives.push_back(_serverDirectives[i]);
+	}
+	return serverLevelDirectives;
 }
 
 //set and apply all location directives and the same time

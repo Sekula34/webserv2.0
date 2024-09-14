@@ -17,6 +17,8 @@ class ServerSettings : public DefaultSettings
 		void 							_applyAllServerLevelDirectives();
 		void 							_generateDefaultLocation(std::vector<LocationSettings>& serverLocation);
 		bool							_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const;
+		const std::vector<Directive>    _getServerLevelDirectives() const;
+
 	protected: 
 		int _serverId;
 		std::vector<Directive>			_serverDirectives;
