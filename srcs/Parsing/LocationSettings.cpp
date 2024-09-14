@@ -23,6 +23,7 @@ std::vector<Token>& serverTokens)
 	_locationDirectives = _setLocationDirectives();
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
+
 LocationSettings::LocationSettings(const DefaultSettings& settings,
 std::vector<Token>& serverTokens)
 :DefaultSettings(settings)
@@ -112,15 +113,26 @@ void LocationSettings::printLocationSettings(void) const
 	std::cout << "___________________________________________________"<<std::endl;
 }
 
+const std::string& LocationSettings::getLocationUri() const 
+{
+	return(_uri);
+}
+
+bool LocationSettings::isCgiLocation(void) const
+{
+	if(getCgiExtensions().size() == 0)
+		return false;
+	return true;
+}
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
 // MR_NOTE: This function is not being used.
 std::vector<Directive> LocationSettings::getLocationDirectives(void) const
 {
 	return(_locationDirectives);
-}
-
-const std::string& LocationSettings::getLocationUri() const 
-{
-	return(_uri);
 }
 
 // MR_NOTE: This function is not being used.
@@ -132,7 +144,7 @@ void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &a
 	}
 }
 
-// TODO: This function is not being used. It seems that is deprecated and replaced by ResponseBody/_constructIndex
+// MR_NOTE: This function is not being used. It seems that is deprecated and replaced by ResponseBody/_constructIndex
 bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 {
 	pathToIndex.erase();
@@ -154,10 +166,4 @@ bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 	}
 	return false;
 }
-
-bool LocationSettings::isCgiLocation(void) const
-{
-	if(getCgiExtensions().size() == 0)
-		return false;
-	return true;
-}
+ */

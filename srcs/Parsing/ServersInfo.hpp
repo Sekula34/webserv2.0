@@ -30,8 +30,8 @@ class ServersInfo
 		~ServersInfo();
 		//MR_TODO: Need Default constructor to be OCF.
 
-		void printAllServersInfo(void) const;
-		const std::vector<ServerSettings>& getAllServers(void) const;
+		// void printAllServersInfo(void) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
+		// const std::vector<ServerSettings>& getAllServers(void) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		/**
 		 * @brief Get the Server By Id object
 		 * 

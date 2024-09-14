@@ -42,15 +42,15 @@ class ServerSettings : public DefaultSettings
 		 */
 		std::string										getLocationURIfromPath(const std::string& fullPath) const;
 		bool											amIServerLocation(const std::string& path) const;
-		std::vector<Token>								getServerTokens(void) const;
-		std::vector<Directive>							getServerDirectives(void) const;
+		// std::vector<Token>								getServerTokens(void) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
+		// std::vector<Directive>							getServerDirectives(void) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		const std::vector<LocationSettings>&			getServerLocations() const;
 		std::vector<LocationSettings>::const_iterator	fetchLocationWithUri(const std::string uri, bool& found) const;
 		//LocationSettings& fetchLocationFromServer(std::string requestedLocation);
 		const int&										getServerId() const;
 		void											printServerSettings(void) const;
 		void											printServerTokens(void) const;
-		void											addDirectiveToServer(Directive directive);
+		// void											addDirectiveToServer(Directive directive); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);

@@ -10,11 +10,7 @@
 #include <unistd.h>
 #include "../Utils/Logger.hpp"
 
-
-
 #include <iostream>
-
-
 
 Socket::Socket() : _port(8080)
 {
@@ -95,7 +91,18 @@ const int& Socket::getSocketFd(void) const
 	return(_socketFD);
 }
 
-// MR_DOUBT: This function is not being used.
+std::ostream& operator<<(std::ostream& os, const Socket& socket)
+{
+	os<< "Socket with port: " << socket._port << std::endl;
+	os<< "Socket fd is :" << socket._socketFD << std::endl;
+	return os;
+}
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+// MR_NOTE: This function is not being used.
 int Socket::getCommunicationSocket(void)
 {
 	int communicationSocket;
@@ -107,11 +114,4 @@ int Socket::getCommunicationSocket(void)
 	}
 	return communicationSocket;
 }
-
-
-std::ostream& operator<<(std::ostream& os, const Socket& socket)
-{
-	os<< "Socket with port: " << socket._port << std::endl;
-	os<< "Socket fd is :" << socket._socketFD << std::endl;
-	return os;
-}
+ */

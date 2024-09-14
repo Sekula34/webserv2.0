@@ -219,7 +219,7 @@ void Directive::apply(DefaultSettings& settings)
 	else if(_directiveName == "client_max_body_size")
 		_applyClientMaxBodySize(settings);
 	else if(_directiveName == "autoindex")
-		_apllyAutoIndex(settings);
+		_applyAutoIndex(settings);
 	else if(_directiveName == "return")
 		_applyReturn(settings);
 	else if(_directiveName == "index")
@@ -284,8 +284,7 @@ void Directive::_applyReturn(DefaultSettings& settings)
 	settings.setNginxReturn(status, url);
 }
 
-//MR_NOTE: Typo. applyAutoIndex
-void Directive::_apllyAutoIndex(DefaultSettings& settings)
+void Directive::_applyAutoIndex(DefaultSettings& settings)
 {
 	bool state = false;
 	if(_directiveValue == "on")
@@ -425,3 +424,8 @@ size_t Directive::getDirectivePathSize(void) const
 {
 	return (_dirPath.size());
 }
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+

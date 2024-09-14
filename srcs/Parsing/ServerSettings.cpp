@@ -22,6 +22,7 @@ ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vect
 	_applyAllServerLevelDirectives();
 	_serverLocations = _setServerLocations();
 }
+
 ServerSettings::ServerSettings(const ServerSettings& source)
 : DefaultSettings(source), _serverId(source._serverId)
 {
@@ -105,24 +106,6 @@ std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) 
 	}
 }
 
-//MR_NOTE: This function is not being used.
-void ServerSettings::addDirectiveToServer(Directive directive)
-{
-	_serverDirectives.push_back(directive);
-}
-
-//MR_NOTE: This function is not being used.
-std::vector<Directive> ServerSettings::getServerDirectives(void) const
-{
-	return(_serverDirectives);
-}
-
-//MR_NOTE: This function is not being used.
-std::vector<Token> ServerSettings::getServerTokens(void) const 
-{
-	return (_serverTokens);
-}
-
 const std::vector<LocationSettings>& ServerSettings::getServerLocations() const 
 {
 	return (_serverLocations);
@@ -149,6 +132,7 @@ void ServerSettings::printServerTokens(void) const
 	std::cout << "Server id: " << _serverId << " tokens are: "<< std::endl;
 	Token::printAllTokensInfo(_serverTokens);
 }
+
 void ServerSettings::printServerSettings(void) const
 {
 	std::cout << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
@@ -169,7 +153,6 @@ void ServerSettings::printServerSettings(void) const
 	}
 	std::cout << "___________________________________________________"<<std::endl;
 }
-
 
 std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 {
@@ -192,3 +175,26 @@ std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 	os << "___________________________________________________"<<std::endl;
 	return os;
 }
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+//MR_NOTE: This function is not being used.
+void ServerSettings::addDirectiveToServer(Directive directive)
+{
+	_serverDirectives.push_back(directive);
+}
+
+//MR_NOTE: This function is not being used.
+std::vector<Directive> ServerSettings::getServerDirectives(void) const
+{
+	return(_serverDirectives);
+}
+
+//MR_NOTE: This function is not being used.
+std::vector<Token> ServerSettings::getServerTokens(void) const 
+{
+	return (_serverTokens);
+}
+ */

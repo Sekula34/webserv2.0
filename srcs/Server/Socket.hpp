@@ -36,7 +36,7 @@ class Socket
 		* @return int new filedescriptor that is used to communicate with client
 		* @note you must close this
 		*/ 
-		int getCommunicationSocket(void);
+		// int getCommunicationSocket(void); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 		void printSocketInfo(void);
 

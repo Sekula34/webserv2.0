@@ -17,7 +17,7 @@ class Data {
 
 		static int								getEpollFd();
 		static std::map<int, Client*> &			getClients();
-		static const Client *					getClientByFd(int fd);
+		// static const Client *					getClientByFd(int fd); //FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		static const std::vector<Socket> &		getServerSockets();
 		static const std::vector<int> 			getServerSocketFds();
 		static int &							getNfds();
@@ -29,7 +29,7 @@ class Data {
 		static void								closeAllFds();
 		static void								epollAddFd(int fd);
 		static void								epollRemoveFd(int fd);
-		static void								setEpollFd(int fd);
+		// static void								setEpollFd(int fd); //FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		static void								setServerSockets(std::vector<Socket> * sockets);
 		static void								setEnvp(char** envp);
 		static std::string						findStringInEnvp(std::string str);

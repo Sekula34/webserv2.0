@@ -56,7 +56,6 @@ struct epoll_event	Data::_events[MAX_EVENTS];
 std::map<std::string, std::string> emptyLanguages;
 std::map<std::string, std::string> Data::_cgiLang = emptyLanguages;
 
-
 int	Data::getEpollFd()
 {
 	return (_epollfd);
@@ -65,19 +64,6 @@ int	Data::getEpollFd()
 std::map<int, Client*> &	Data::getClients()
 {
 	return (_clients);
-}
-
-// MR_DOUBT: What is "int" in _clients? (a fd? or just an id?). Cuz we could do "_clients[fd]"
-// MR_DOUBT: This function is not being used.
-const Client*	Data::getClientByFd(int fd)
-{
-	std::map<int, Client*>::iterator it = _clients.begin();
-	for(; it != _clients.end(); it++)
-	{
-		if (it->second->getFd() == fd) // MR_DOUBT: Can Client be NULL? If yes, possible segfault.
-			return (it->second);
-	}
-	return (NULL);
 }
 
 const std::vector<Socket> &		Data::getServerSockets()
@@ -198,20 +184,38 @@ void	Data::setCgiLang(std::string suffix, std::string interpreter)
 	_cgiLang[suffix] = interpreter;	
 }
 
-
 void	Data::setAllCgiLang()
 {
 	Data::setCgiLang(".py", "python3");
 }
 
-// MR_DOUBT: This function is not being used.
+void	Data::setServerSockets(std::vector<Socket> * sockets)
+{
+	_serverSockets = sockets;
+}
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+// MR_DOUBT: What is "int" in _clients? (a fd? or just an id?). Cuz we could do "_clients[fd]"
+// MR_NOTE: This function is not being used.
+const Client*	Data::getClientByFd(int fd)
+{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for(; it != _clients.end(); it++)
+	{
+		if (it->second->getFd() == fd) // MR_DOUBT: Can Client be NULL? If yes, possible segfault.
+			return (it->second);
+	}
+	return (NULL);
+}
+
+// MR_NOTE: This function is not being used.
 void	Data::setEpollFd(int fd)
 {
 	_epollfd = fd;
 	if (Data::_epollfd == -1)					
 		throw std::runtime_error("epoll create failed");
 }
-void	Data::setServerSockets(std::vector<Socket> * sockets)
-{
-	_serverSockets = sockets;
-}
+ */

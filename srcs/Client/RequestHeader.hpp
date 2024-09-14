@@ -4,8 +4,7 @@
 #include <string>
 #include "../Utils/UrlSuffix.hpp"
 
-
-class CHTest;
+class CHTest; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 /**
  * @brief struct that contains all info about requstLine

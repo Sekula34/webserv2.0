@@ -27,10 +27,10 @@ class LocationSettings : public DefaultSettings
 		~LocationSettings();
 
 
-		std::vector<Directive> getLocationDirectives(void) const;
+		// std::vector<Directive> getLocationDirectives(void) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		const std::string& getLocationUri(void) const;
 		void printLocationSettings(void) const;
-		static void printAllLocationSettings(std::vector<LocationSettings>& allLocations);
+		// static void printAllLocationSettings(std::vector<LocationSettings>& allLocations); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 		/**
 		 * @brief Set the Index Page Path object
@@ -39,7 +39,7 @@ class LocationSettings : public DefaultSettings
 		 * @return true if file exist and put path to index in param
 		 * @return false if file dont exist, path to index will be ""
 		 */
-		bool setIndexPagePath(std::string& pathToIndex) const;
+		// bool setIndexPagePath(std::string& pathToIndex) const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		bool isCgiLocation(void) const;
 };
 

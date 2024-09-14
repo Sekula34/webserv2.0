@@ -38,7 +38,7 @@ class Configuration
 		bool _isCharDelimiter(char c) const;
 		void _fillAllTokensPaths(void);
 		void _fillTokensVector(void);
-		std::string _generateServerIdString(int serverId);
+		// std::string _generateServerIdString(int serverId); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		std::string _getCleanConfLine(const std::string& dirtyLine) ;
 		void _removeSpacesAndTabs(std::string& dirtyLine);
 
@@ -49,9 +49,9 @@ class Configuration
 		Configuration& operator=(const Configuration& source);
 		~Configuration();
 
-		const std::string& getFilePath() const;
+		// const std::string& getFilePath() const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		
-		void printFileMember(void);
+		// void printFileMember(void); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 		std::vector<Token> getAllTokens() const;
 

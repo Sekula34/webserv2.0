@@ -25,7 +25,7 @@ class SocketManager
 		SocketManager& operator=(const SocketManager& source);
 		~SocketManager();
 
-		std::vector<Socket>& getAllSockets(void);
+		// std::vector<Socket>& getAllSockets(void); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 		std::vector<int> getAllListenFd(void) const;
 		
 		/**
@@ -34,14 +34,14 @@ class SocketManager
 		 * @param socketFd file descriptor number that should find Socket that have that fd
 		 * @return Socket& 
 		 */
-		Socket& getSocketByFd(int socketFd);
+		// Socket& getSocketByFd(int socketFd); // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 
 		/**
 		 * @brief Get the Max Socket Fd for select, 3, 4 ex will return 4
 		 * 
 		 * @return const int 
 		 */
-		 int getMaxSocketFd() const;
+		//  int getMaxSocketFd() const; // FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 };
 
 #endif

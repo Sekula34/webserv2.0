@@ -258,27 +258,6 @@ void Configuration::_fillTokensVector(void)
 	}
 }
 
-
-
-
-
-//takes server id as integer ServerId ad return string that is always
-//"server{ServerId} ex 1, will return server1"
-//MR_NOTE: This function is not being used.
-std::string Configuration::_generateServerIdString(int serverId)
-{
-	std::string indexedServer;
-	std::stringstream ss;
-	ss << serverId;
-	std::string idAsString = ss.str();
-	if(ss.fail())
-	{
-		throw std::runtime_error("in _generateServerIdString stringstream ss failed");
-	}
-	indexedServer = "server_" + idAsString;
-	return (indexedServer);
-}
-
 //take potential dirtyLine and return clean one
 // line like this   #will ignore everthing after # and remove leading and trailing spaces and tabs
 std::string Configuration::_getCleanConfLine(const std::string& dirtyLine) 
@@ -294,8 +273,6 @@ std::string Configuration::_getCleanConfLine(const std::string& dirtyLine)
 	_removeSpacesAndTabs(cleanLine);
 	return cleanLine;
 }
-
-
 
 //will remove newlineaswell;
 void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
@@ -326,6 +303,42 @@ void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
 	dirtyLine = dirtyLine.substr(beginPos, endPos - beginPos);
 }
 
+std::vector<Token> Configuration::getAllTokens() const 
+{
+	return (_tokensVector);
+}
+
+int Configuration::getNumberOfServers(void) const
+{
+	return (_serverId);
+}
+
+const char* Configuration::InvalidConfigFileException::what() const throw()
+{
+	return("Invalid Configuration File");
+}
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+//takes server id as integer ServerId ad return string that is always
+//"server{ServerId} ex 1, will return server1"
+//MR_NOTE: This function is not being used.
+std::string Configuration::_generateServerIdString(int serverId)
+{
+	std::string indexedServer;
+	std::stringstream ss;
+	ss << serverId;
+	std::string idAsString = ss.str();
+	if(ss.fail())
+	{
+		throw std::runtime_error("in _generateServerIdString stringstream ss failed");
+	}
+	indexedServer = "server_" + idAsString;
+	return (indexedServer);
+}
+
 //return string to relative path of ConfFile inside project
 //MR_NOTE: This function is not being used.
 const std::string& Configuration::getFilePath() const
@@ -341,18 +354,4 @@ void Configuration::printFileMember(void)
 		std::cout << "Line " << _fileLine[i].second << " " << _fileLine[i].first << std::endl;
 	} 
 }
-
-std::vector<Token> Configuration::getAllTokens() const 
-{
-	return (_tokensVector);
-}
-
-int Configuration::getNumberOfServers(void) const
-{
-	return (_serverId);
-}
-
-const char* Configuration::InvalidConfigFileException::what() const throw()
-{
-	return("Invalid Configuration File");
-}
+ */

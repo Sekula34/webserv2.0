@@ -13,7 +13,6 @@
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Client/Message.hpp"
 
-
 ServersInfo::ServersInfo(std::string configPath)
 {
 	Configuration serversConf(configPath);
@@ -93,23 +92,6 @@ void ServersInfo::_setHttpDirectives(void)
 	}
 }
 
-//MR_NOTE: This function is not being used.
-void ServersInfo::printAllServersInfo(void) const 
-{
-	for(size_t i = 0; i < _servers.size(); i++)
-	{
-		std::cout << "-------------------INFO FOR SERVER " << i << "----------------------------" << std::endl;
-		_servers[i].printServerSettings();
-		std::cout << std::endl;
-	}
-}
-
-// MR_NOTE: This function is not being used.
-const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
-{
-	return(_servers);
-}
-
 const ServerSettings& ServersInfo::getServerById(int serverId) const 
 {
 	int serverIndex = serverId - 1;
@@ -119,8 +101,6 @@ const ServerSettings& ServersInfo::getServerById(int serverId) const
 	}
 	return(_servers[serverIndex]);
 }
-
-
 
 const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string serverName) const
 {
@@ -194,3 +174,25 @@ const std::vector<int> ServersInfo::getUniquePorts() const
 	}
 	return uniquePorts;
 }
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+//MR_NOTE: This function is not being used.
+void ServersInfo::printAllServersInfo(void) const 
+{
+	for(size_t i = 0; i < _servers.size(); i++)
+	{
+		std::cout << "-------------------INFO FOR SERVER " << i << "----------------------------" << std::endl;
+		_servers[i].printServerSettings();
+		std::cout << std::endl;
+	}
+}
+
+// MR_NOTE: This function is not being used.
+const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
+{
+	return(_servers);
+}
+ */

@@ -32,7 +32,7 @@ class Directive
 		void _applyListen(DefaultSettings& settings);
 		void _applyLimitExcept(DefaultSettings& settings);
 		void _applyClientMaxBodySize(DefaultSettings& settings);
-		void _apllyAutoIndex(DefaultSettings& settings);
+		void _applyAutoIndex(DefaultSettings& settings);
 		void _applyReturn(DefaultSettings& settings);
 		void _applyIndex(DefaultSettings& settings);
 		void _apllyRoot(DefaultSettings& settings);

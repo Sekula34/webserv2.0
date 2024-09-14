@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <iostream>
 
-
 void ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
 	Data::setAllCgiLang();

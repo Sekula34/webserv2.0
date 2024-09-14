@@ -84,6 +84,7 @@ bool ParsingUtils::isStringValid(std::string toCheck, const std::string ValidVal
 	}
 	return false;
 }
+
 //return sizeT value of string
 //throw InvalidConverion() exception if string is not number
 //std::runtime exception if iss to sizeT failed
@@ -117,7 +118,6 @@ std::string ParsingUtils::getDirName(std::string fullPath)
 	return fullPath.substr(0, posOfSlash + 1);
 }
 
-
 bool ParsingUtils::isStringEnd(const std::string toCheck,const std::string expectedEnd)
 {
 	if(toCheck.size() < expectedEnd.size())
@@ -149,7 +149,6 @@ std::string ParsingUtils::extractAfterDelim(const std::string fullString, const 
 	pos += delimiter.length();
 	return fullString.substr(pos);
 }
-
 
 std::string ParsingUtils::getHttpPlainValue(std::string fieldValue)
 {
@@ -196,6 +195,35 @@ const char * ParsingUtils::InvalidConversion::what() const throw()
 	return("Exception: Invalid Converion");
 }
 
+std::string	ParsingUtils::uriDecode(bool decodePlusAsSpace, const std::string& input)
+{
+	std::ostringstream decoded;
+	for (size_t i = 0; i < input.length(); ++i)
+	{
+
+		// 1st check mode and + for faster performance.
+		if (decodePlusAsSpace && input[i] == '+')
+			decoded << ' ';
+		else if (input[i] == '%' && i + 2 < input.length())
+		{
+			// Convert hex to char
+			std::istringstream hexStream(input.substr(i + 1, 2));
+			int hexValue;
+			hexStream >> std::hex >> hexValue;
+			decoded << static_cast<char>(hexValue);
+			i += 2; // Skip over the hex digits
+		}
+		else
+			decoded << input[i];
+	}
+	return (decoded.str());
+}
+
+//============================================================================
+//FIXME:================FUNTIONS FOR TESTING OR NOT BEING USED================
+//============================================================================
+/* 
+
 static bool	ft_isValidURIChar(unsigned char& c)
 {
 	static std::string validURIChars(VALID_URI_CHARS);
@@ -223,27 +251,4 @@ std::string	ParsingUtils::uriEncode(bool encodeSpaceAsPlus, const std::string& i
 	}
 	return (encoded.str());
 }
-
-std::string	ParsingUtils::uriDecode(bool decodePlusAsSpace, const std::string& input)
-{
-	std::ostringstream decoded;
-	for (size_t i = 0; i < input.length(); ++i)
-	{
-
-		// 1st check mode and + for faster performance.
-		if (decodePlusAsSpace && input[i] == '+')
-			decoded << ' ';
-		else if (input[i] == '%' && i + 2 < input.length())
-		{
-			// Convert hex to char
-			std::istringstream hexStream(input.substr(i + 1, 2));
-			int hexValue;
-			hexStream >> std::hex >> hexValue;
-			decoded << static_cast<char>(hexValue);
-			i += 2; // Skip over the hex digits
-		}
-		else
-			decoded << input[i];
-	}
-	return (decoded.str());
-}
+ */
