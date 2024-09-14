@@ -258,7 +258,6 @@ void Client::_initVars(void)
 	_recvLine = NULL;
 	_recvLine = new char[MAXLINE];
 
-	std::cout << " this is size of MAXLINE Buffer: " << sizeof(_recvLine) << "this is MAXLINE: " << MAXLINE << std::endl;
 	memset(_recvLine, 0, MAXLINE);
 	// header = NULL;
 	_response = NULL;

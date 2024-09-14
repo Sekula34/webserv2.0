@@ -285,8 +285,7 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	}
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
-		if (_request)
-			del = {'\r','\n'};
+		del = {'\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)

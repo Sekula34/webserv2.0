@@ -135,11 +135,11 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
-		delete &client;
 		if (n < 0 || peek < 0)
 			Logger::error("receiving from Client", true);
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
+		delete &client;
 		return (false);
 	}
 	return (true);

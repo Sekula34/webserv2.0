@@ -1,18 +1,35 @@
-print("Content-Type: text")
-print("Transfer-Encoding: chunked\n")
+#!/usr/bin/env python3
 
-print("1\r")
-print("1\r")
-print("2\r")
-print("22\r")
-print("3\r")
-print("333\r")
-print("4\r")
-print("4444\r")
-print("5\r")
-print("55555\r")
-print("2A\r")
-print("Lorem ipsum dolor sit amet, consetetur sad\r")
-print("1A5\r")
-print("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna ali\r")
-print("0\r")
+import sys
+import time
+
+# Print headers, including Transfer-Encoding: chunked
+print("Transfer-Encoding: chunked")
+print("Content-Type: text/html\n")
+
+# The HTML content to be sent
+html_content = """
+<html>
+<head><title>Hello World CGI</title></head>
+<body><h2>this is used to be chunky but now it's not!</h2></body>
+</html>
+"""
+
+# Function to write content in proper HTTP chunked encoding
+def write_chunked(content, chunk_size=10):
+    for i in range(0, len(content), chunk_size):
+        chunk = content[i:i + chunk_size]
+        chunk_len = hex(len(chunk))[2:]  # Convert chunk size to hexadecimal
+        sys.stdout.write(f"{chunk_len}\r\n")  # Write chunk size in hex
+        sys.stdout.write(f"{chunk}\r\n")      # Write the actual chunk
+        sys.stdout.flush()                    # Flush to send immediately
+        #time.sleep(0.5)  # Simulate delay for each chunk
+
+    # Send the final 0 chunk to indicate the end
+    sys.stdout.write("0\r\n\r\n")
+    sys.stdout.flush()
+
+# Send the content in chunks
+write_chunked(html_content)
+
+

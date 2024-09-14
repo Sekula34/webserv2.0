@@ -100,6 +100,8 @@ const std::string	Message::getBodyString()
 		_chunked = false;
 	}
 	_findBody(it);
+	if (it == _chain.begin())
+		return ("");
 	return (it->getStringUnchunked());
 }
 
@@ -140,12 +142,13 @@ void	Message::_findBody(std::list<Node>::iterator& it)
 		if(it->getType() == BODY) 
 			return;
 	}
+	it = _chain.begin();
 }
 
 size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
 {
 	_findBody(it);
-	if (it == _chain.end() || MAX_CHUNKSIZE <= 0)
+	if (it == _chain.begin() || MAX_CHUNKSIZE <= 0)
 	{
 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
 		return (0);
