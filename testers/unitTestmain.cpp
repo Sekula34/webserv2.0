@@ -1,3 +1,4 @@
+#include "DirectiveTester.hpp"
 #include "ServerTest.hpp"
 #include "UnitTest.hpp"
 #include "RequestHeaderTester.hpp"
@@ -11,6 +12,7 @@ void all()
 	ServerTest::runAllTests();
 	RequestHeaderTester::runAllTests();
 	AutoindexTest::runAll();
+	DirectiveTester::runAll();
 	Logger::info("\nPassed all unit Testes", true);
 }
 
@@ -21,6 +23,7 @@ int main()
 	//UnitTest::testingOpeninDirBlock();
 	//RequestHeaderTester::cgiResponseHeader();
 	//UnitTest::configSyntaxBlock();
+	DirectiveTester::testDuplicate();
 	all();
 	//CHTest::fullUrlTest();
 	//UnitTest::stringDelimCheck();
