@@ -30,7 +30,6 @@ class DefaultSettings
 		std::string _root;
 		std::vector<std::string> m_cgiExtensions;
 
-		static void p_checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 
 	public :
 		DefaultSettings(void);
@@ -38,6 +37,7 @@ class DefaultSettings
 		DefaultSettings& operator=(const DefaultSettings& source);
 		~DefaultSettings();
 
+		static void checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 
 		bool isMethodAllowed(std::string method) const;
 

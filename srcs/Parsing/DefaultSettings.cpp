@@ -92,7 +92,7 @@ void DefaultSettings::setAcceptedMethodToTrue(std::string methodName)
 	return;
 }
 
-void DefaultSettings::p_checkDuplicateDirectives(const std::vector<Directive>& dirVec)
+void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dirVec)
 {
 	const Directive* duplicate = NULL;
 	if(Directive::isDuplicateDirectivePresent(dirVec, duplicate) == true)
