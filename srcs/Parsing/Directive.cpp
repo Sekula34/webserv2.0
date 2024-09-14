@@ -2,8 +2,11 @@
 #include "DefaultSettings.hpp"
 #include "ParsingUtils.hpp"
 #include "Token.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <iterator>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -19,6 +22,9 @@ const std::string Directive::_validServerDirectives[] ={"listen", "host", "serve
 
 const std::string Directive:: _validLocationDirectives[] = {"error_page", "client_max_body_size", "return",
 "autoindex", "index", "limit_except", "root", "extension"};
+
+//directive that can be present only once
+const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except"};
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
@@ -208,6 +214,15 @@ void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
 }
 
 
+const std::string& Directive::getDirectiveName(void) const 
+{
+	return _directiveName;
+}
+
+const size_t& Directive::getDirectiveLineNum(void) const 
+{
+	return _dirLineNumber;
+}
 void Directive::apply(DefaultSettings& settings)
 {
 	if(_directiveName == "listen")
@@ -415,12 +430,42 @@ void Directive::applyAllDirectives(std::vector<Directive>& allDirectives, Defaul
 	}
 }
 
-const char* Directive::InvalidDirectiveException::what() const throw()
+
+bool Directive::isDuplicateDirectivePresent(const std::vector<Directive> &directives, const Directive* &duplicateDir)
 {
-	return ("Exception: Invalid directive");
+	size_t uniqueSize = sizeof(_uniqueDirectives) / sizeof(std::string);
+	duplicateDir = NULL;
+	for(size_t i = 0; i < uniqueSize; i++)
+	{
+		if(isDuplicateDirectiveNamePresent(directives, duplicateDir, _uniqueDirectives[i]) == true)
+			return true;
+	}
+	return false;
+}
+
+bool Directive::isDuplicateDirectiveNamePresent(const std::vector<Directive> &directives, const Directive *&duplicateDir, const std::string &nameToCheck)
+{
+	std::vector<Directive>::const_iterator firstIt;
+	std::vector<Directive>::const_iterator secondIt;
+	FindbyDirectiveName functor(nameToCheck);
+	duplicateDir = NULL;
+
+	firstIt = std::find_if(directives.cbegin(), directives.cend(), functor);
+	if(firstIt == directives.cend())
+		return false;
+	secondIt = std::find_if(std::next(firstIt), directives.cend(), functor);
+	if(secondIt == directives.cend())
+		return false;
+	duplicateDir = &(*secondIt);
+	return true;
 }
 
 size_t Directive::getDirectivePathSize(void) const 
 {
 	return (_dirPath.size());
+}
+
+const char* Directive::InvalidDirectiveException::what() const throw()
+{
+	return ("Exception: Invalid directive");
 }

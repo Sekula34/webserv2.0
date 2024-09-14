@@ -55,6 +55,7 @@ SRCS =		srcs/Client/AHeader.cpp\
 			srcs/Utils/Logger.cpp\
 			srcs/Utils/UrlSuffix.cpp\
 			testers/AutoIndexTest.cpp\
+			testers/DirectiveTester.cpp\
 			testers/ServerTest.cpp\
 			testers/UnitTest.cpp \
 			testers/RequestHeaderTester.cpp\
@@ -89,6 +90,7 @@ HEADERS =	srcs/Client/AHeader.hpp\
 			srcs/Utils/Logger.hpp\
 			srcs/Utils/UrlSuffix.hpp\
 			testers/AutoIndexTest.hpp\
+			testers/DirectiveTester.hpp\
 			testers/ServerTest.hpp\
 			testers/UnitTest.hpp\
 			testers/RequestHeaderTester.hpp\

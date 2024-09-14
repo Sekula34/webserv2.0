@@ -5,6 +5,7 @@
 #include <string>
 #include "NginxReturn.hpp"
 #include <vector>
+#include "Directive.hpp"
 
 class DefaultSettings 
 {
@@ -29,12 +30,14 @@ class DefaultSettings
 		std::string _root;
 		std::vector<std::string> m_cgiExtensions;
 
+
 	public :
 		DefaultSettings(void);
 		DefaultSettings(const DefaultSettings& source);
 		DefaultSettings& operator=(const DefaultSettings& source);
 		~DefaultSettings();
 
+		static void checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 
 		bool isMethodAllowed(std::string method) const;
 
