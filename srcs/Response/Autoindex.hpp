@@ -29,6 +29,8 @@ class Autoindex
 		void _createDirectoryLinks(DIR* directory);
 		void _createAndStoreOneFileLink(const std::string fileEntry);
 		void _generateHtmlPage(const std::string pageTitle);
+
+	//MR_NOTE: Be careful with this one! I think we cannot use friend.
 	friend AutoindexTest;
 };
 

@@ -36,6 +36,7 @@ class ResponseHeader : public AHeader
 		bool _cgiStatusLine() const;
 		static bool _setStatusLine(StatusLineElements& elem, std::string line);
 
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
 };
 

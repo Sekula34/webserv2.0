@@ -202,6 +202,7 @@ static bool	ft_isValidURIChar(unsigned char& c)
 	return (isalnum(c) || validURIChars.find(c) != std::string::npos);
 }
 
+//MR_NOTE: This function is not being used.
 std::string	ParsingUtils::uriEncode(bool encodeSpaceAsPlus, const std::string& input)
 {
 	std::ostringstream encoded;

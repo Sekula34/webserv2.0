@@ -13,6 +13,7 @@ SocketManager::SocketManager()
 
 }
 
+//MR_DOUBT: Check this SocketMaganer/Data interaction.
 SocketManager::SocketManager(const std::vector<int>& uniquePorts)
 {
 	for(size_t i = 0; i < uniquePorts.size(); i++)
@@ -41,10 +42,12 @@ SocketManager::~SocketManager()
 		close(_allSockets[i].getSocketFd());
 }
 
+//MR_DOUBT: This function is not being used.
 std::vector<Socket>& SocketManager::getAllSockets(void)
 {
 	return (_allSockets);
 }
+
 
 std::vector<int> SocketManager::getAllListenFd(void) const
 {
@@ -57,6 +60,7 @@ std::vector<int> SocketManager::getAllListenFd(void) const
 	return listenFds;
 }
 
+//MR_DOUBT: This function is not being used.
 Socket& SocketManager::getSocketByFd(int socketFD)
 {
 	for(size_t i = 0; i < _allSockets.size(); i++)
@@ -70,6 +74,7 @@ Socket& SocketManager::getSocketByFd(int socketFD)
 	throw std::runtime_error("NO SUCH SOCKET");
 }
 
+//MR_DOUBT: This function is not being used.
 int SocketManager::getMaxSocketFd() const
 {
 	int maxFD(-1);

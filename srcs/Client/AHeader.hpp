@@ -41,7 +41,7 @@ class AHeader
 		bool _checkHeaderFields(void);
 		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;
 		
-		
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator <<(std::ostream& os, const AHeader& header);
 };
 

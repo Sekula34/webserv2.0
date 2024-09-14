@@ -176,7 +176,7 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 		if(*i == ' ' || *i == '\t')
 		{
 			value.erase(i);
-			i--;
+			i--; // MR_DOUBT: this decrements i, but loop increments it. Also, erase modify iterators.
 		}
 		else
 			break;
@@ -283,6 +283,7 @@ void Directive::_applyReturn(DefaultSettings& settings)
 	settings.setNginxReturn(status, url);
 }
 
+//MR_NOTE: Typo. applyAutoIndex
 void Directive::_apllyAutoIndex(DefaultSettings& settings)
 {
 	bool state = false;

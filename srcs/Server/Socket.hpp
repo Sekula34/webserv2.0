@@ -40,6 +40,7 @@ class Socket
 
 		void printSocketInfo(void);
 
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const Socket& socket);
 };
 

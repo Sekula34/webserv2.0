@@ -65,7 +65,7 @@ std::string LocationSettings::_getUriFromToken(const Token& token)
 		if(*i == ' ' || *i == '\t')
 		{
 			uri.erase(i);
-			i--;
+			i--; // MR_DOUBT: this decrements i, but loop increments it. Also, erase modify iterators.
 		}
 		else
 			break;
@@ -112,6 +112,7 @@ void LocationSettings::printLocationSettings(void) const
 	std::cout << "___________________________________________________"<<std::endl;
 }
 
+// MR_NOTE: This function is not being used.
 std::vector<Directive> LocationSettings::getLocationDirectives(void) const
 {
 	return(_locationDirectives);
@@ -122,6 +123,7 @@ const std::string& LocationSettings::getLocationUri() const
 	return(_uri);
 }
 
+// MR_NOTE: This function is not being used.
 void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &allLocations)
 {
 	for(size_t i = 0; i < allLocations.size(); i++)
@@ -130,6 +132,7 @@ void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &a
 	}
 }
 
+// TODO: This function is not being used. It seems that is deprecated and replaced by ResponseBody/_constructIndex
 bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 {
 	pathToIndex.erase();

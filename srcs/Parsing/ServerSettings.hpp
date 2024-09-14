@@ -52,6 +52,7 @@ class ServerSettings : public DefaultSettings
 		void											printServerTokens(void) const;
 		void											addDirectiveToServer(Directive directive);
 
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);
 };
 

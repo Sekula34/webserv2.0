@@ -93,6 +93,7 @@ void ServersInfo::_setHttpDirectives(void)
 	}
 }
 
+//MR_NOTE: This function is not being used.
 void ServersInfo::printAllServersInfo(void) const 
 {
 	for(size_t i = 0; i < _servers.size(); i++)
@@ -103,6 +104,7 @@ void ServersInfo::printAllServersInfo(void) const
 	}
 }
 
+// MR_NOTE: This function is not being used.
 const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
 {
 	return(_servers);
@@ -127,7 +129,7 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 	std::vector<ServerSettings> ServersId = _getAllServersIdWithPort(portNumber);
 	if(ServersId.size() == 0)
 		return NULL;
-	if(ServersId.size() == 1 || serverName == "")
+	if(ServersId.size() == 1 || serverName == "") // MR_DOUBT: Why if its empty?
 	{
 		serverId = ServersId[0].getServerId();
 		toReturn = &getServerById(serverId);
@@ -142,11 +144,11 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 			return &getServerById(serverId);
 		}
 	}
-	serverId = ServersId[0].getServerId();
+	serverId = ServersId[0].getServerId(); // MR_DOUBT: Why if it doesnt found name, we return the 1st?
 	return &getServerById(serverId);
 }
 
-
+// MR_DOUBT: What is the meaning of "header" here? And why this function is on ServersInfo?
 bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
 {
 	if(header == NULL)
@@ -164,6 +166,7 @@ bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
 	return true;
 }
 
+// MR_DOUBT: What is the meaning of "header" here? And why this function is on ServersInfo?
 const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 {
 	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)

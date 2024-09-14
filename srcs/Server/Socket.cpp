@@ -44,7 +44,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 
 	int opt(1);
 
-	int retVal;
+	int retVal; // MR_DOUBT: SO_REUSEADDR if for reusing address. we want that, correct? so localhost is available.
 	retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
 	if(retVal == -1)
 	{
@@ -95,6 +95,7 @@ const int& Socket::getSocketFd(void) const
 	return(_socketFD);
 }
 
+// MR_DOUBT: This function is not being used.
 int Socket::getCommunicationSocket(void)
 {
 	int communicationSocket;

@@ -21,10 +21,10 @@ Configuration::Configuration()
 Configuration::Configuration(const std::string& filePath)
 :_serverId(0),_filePath(filePath)
 {
-	_checkFileAccessType();
-	_copyFileInVector();
-	_fillTokensVector();
-	_fillAllTokensPaths();
+	_checkFileAccessType(); // MR_NOTE: This are file checks (open, etc).
+	_copyFileInVector(); // MR_NOTE: This is file parsing/saving.
+	_fillTokensVector(); // MR_NOTE: This is tokinizing (extract context, rirectives, etc).
+	_fillAllTokensPaths(); // MR_NOTE: This are token checks ({}).
 }
 
 Configuration::Configuration(const Configuration& source)
@@ -155,8 +155,8 @@ void Configuration::_fillAllTokensPaths(void)
 	for(size_t i = 0; i < _tokensVector.size() - 1; i++)
 	{
 		Token &currentToken = _tokensVector[i];
-		Token nextToken = _tokensVector[i + 1];
-		currentToken.setTokenPath(tokenPath);
+		Token nextToken = _tokensVector[i + 1]; // MR_DOUBT: This doesnt trigger "invalid read"?
+		currentToken.setTokenPath(tokenPath); // MR_DOUBT: What is tokenPath? It seems its the {}
 		if(nextToken.getTokenType() == OPENING_BRACE)
 		{
 			if(currentToken.getTokenType() != CONTEXT)
@@ -264,6 +264,7 @@ void Configuration::_fillTokensVector(void)
 
 //takes server id as integer ServerId ad return string that is always
 //"server{ServerId} ex 1, will return server1"
+//MR_NOTE: This function is not being used.
 std::string Configuration::_generateServerIdString(int serverId)
 {
 	std::string indexedServer;
@@ -326,12 +327,13 @@ void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
 }
 
 //return string to relative path of ConfFile inside project
+//MR_NOTE: This function is not being used.
 const std::string& Configuration::getFilePath() const
 {
 	return (_filePath);
 }
 
-
+//MR_NOTE: This function is not being used.
 void Configuration::printFileMember(void)
 {
 	for(size_t i = 0; i < _fileLine.size(); i++)

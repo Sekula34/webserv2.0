@@ -91,6 +91,8 @@ class RequestHeader : public AHeader
 		  * @return false if not and set _error
 		  */
 		bool _checkRequestStruct(void);
+
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const RequestHeader& obj);
 
 };

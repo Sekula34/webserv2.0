@@ -105,16 +105,19 @@ std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) 
 	}
 }
 
+//MR_NOTE: This function is not being used.
 void ServerSettings::addDirectiveToServer(Directive directive)
 {
 	_serverDirectives.push_back(directive);
 }
 
+//MR_NOTE: This function is not being used.
 std::vector<Directive> ServerSettings::getServerDirectives(void) const
 {
 	return(_serverDirectives);
 }
 
+//MR_NOTE: This function is not being used.
 std::vector<Token> ServerSettings::getServerTokens(void) const 
 {
 	return (_serverTokens);

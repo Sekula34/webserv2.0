@@ -48,10 +48,10 @@ Data &	Data::operator=(Data const & rhs)
 
 int Data::_nfds = 0;
 char** Data::_envp = NULL;
-int Data::_epollfd = epoll_create(1);
+int Data::_epollfd = epoll_create(1); // MR_DOUBT: Here we should check if it returned -1.
 std::map<int, Client*> emptyClients;
 std::map<int, Client*>&	Data::_clients = emptyClients;
-std::vector<Socket> *	Data::_serverSockets = NULL;
+std::vector<Socket> *	Data::_serverSockets = NULL; // MR_DOUBT: A pointer to a vector? Or a vector of pointers?
 struct epoll_event	Data::_events[MAX_EVENTS];
 std::map<std::string, std::string> emptyLanguages;
 std::map<std::string, std::string> Data::_cgiLang = emptyLanguages;
@@ -67,12 +67,14 @@ std::map<int, Client*> &	Data::getClients()
 	return (_clients);
 }
 
+// MR_DOUBT: What is "int" in _clients? (a fd? or just an id?). Cuz we could do "_clients[fd]"
+// MR_DOUBT: This function is not being used.
 const Client*	Data::getClientByFd(int fd)
 {
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for(; it != _clients.end(); it++)
 	{
-		if (it->second->getFd() == fd)
+		if (it->second->getFd() == fd) // MR_DOUBT: Can Client be NULL? If yes, possible segfault.
 			return (it->second);
 	}
 	return (NULL);
@@ -80,9 +82,10 @@ const Client*	Data::getClientByFd(int fd)
 
 const std::vector<Socket> &		Data::getServerSockets()
 {
-	return (*_serverSockets);
+	return (*_serverSockets);// MR_DOUBT: Can _serverSockets be NULL? If yes, possible segfault.
 }
 
+// MR_DOUBT: Can _serverSockets be NULL? If yes, possible segfault.
 const std::vector<int> 		Data::getServerSocketFds()
 {
 	std::vector<int> listenFds;
@@ -110,9 +113,10 @@ bool Data::isCgiExtensionValid(std::string extension)
 
 void	Data::setEnvp(char** envvar)
 {
-	_envp = envvar;
+	_envp = envvar; //MR_TODO: Here we could check if env is NULL, and throw an exception.
 }
 
+// MR_NOTE: If env is NULL (e.g: env -i), we could segfault
 std::string	Data::findStringInEnvp(std::string str)
 {
 	std::string tmp;
@@ -133,11 +137,13 @@ std::string	Data::findStringInEnvp(std::string str)
 	return (substr);
 }
 
+//MR_DOUBT: This is a setter or a getter?
 struct epoll_event*		Data::setEvents() 
 {
 	return (_events);
 }
 
+// MR_DOUBT: Can Client be NULL? If yes, possible segfault.
 void	Data::closeAllFds()
 {
 	// closing EpollFD
@@ -175,7 +181,7 @@ void	Data::epollAddFd(int fd)
 		throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
 }
 
-void	Data::epollRemoveFd(int fd)
+void	Data::epollRemoveFd(int fd)	
 {
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
@@ -198,6 +204,7 @@ void	Data::setAllCgiLang()
 	Data::setCgiLang(".py", "python3");
 }
 
+// MR_DOUBT: This function is not being used.
 void	Data::setEpollFd(int fd)
 {
 	_epollfd = fd;

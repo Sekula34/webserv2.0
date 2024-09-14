@@ -30,6 +30,7 @@ class Response
 		void sendSimpleResponse() const;
 		bool sendResponse();
 
+		//MR_NOTE: Be careful with this one! I think we cannot use friend.
 		friend std::ostream& operator<<(std::ostream& os, const Response& obj);
 };
 
