@@ -263,10 +263,7 @@ void	Message::_addNewNode()
 {
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked && _header)
-	{
-			std::cout << "body size of saved in header: " << _it->getBodySize()<<std::endl;
 			_chain.push_back(Node("", BODY, _it->getBodySize(), _request));
-	}
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete
 	if (_it->getType() != LCHUNK && _chunked)

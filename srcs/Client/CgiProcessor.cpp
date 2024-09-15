@@ -38,6 +38,7 @@ _nfds(Data::getNfds())
 	_terminate = false;
 	_shutdownStart = 0;
 	_sentSigkill = false;
+	_bytesSent = 0;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -416,13 +417,39 @@ bool	CgiProcessor::_isSocketReady(int socket, int macro)
 
 void	CgiProcessor::_writeToChild()
 {
+	int		writeValue;
+
+	// return if epoll does not allow us to write to socket
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
 
-	// FIXME: here wrtie will have to be called until written bites equal message size
-	// TODO: implement writing the body of unchunked Client Message into socket with SEND
-	write(_client->socketToChild, "check this out\n", 15);
+	// SEND
+	const std::string& bodystr = _client->getClientMsg()->getBodyString();
+	writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT);
+	_bytesSent += writeValue;
+
+	// not sure we need this, but protects server from getting stuck in writing to CGI
+	if (!_client->checkTimeout())
+	{
+		Logger::error("writing to CGI timed out", true);
+		writeValue = -1;
+	}
+
+	// return if full message could not be sent
+	if (_bytesSent < bodystr.size() && writeValue > 0)
+		return ;
+
+	// if unable to send full message, log error and set error Code
+	if (writeValue < 0 || (writeValue == 0 && _bytesSent < bodystr.size()))
+	{
+		Logger::error("failed to send Request Body to CGI", true);
+		_client->setErrorCode(500);
+	}
+
+	// finished writing
 	_client->hasWrittenToCgi = true;
+
+	// closing Socket and and removing it from epoll
 	Logger::warning("removing FD from epoll: ");
 	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollRemoveFd(_client->socketToChild);
@@ -433,7 +460,6 @@ void	CgiProcessor::_writeToChild()
 void	CgiProcessor::_readFromChild()
 {
 	int n = 0;
-
 
 	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
@@ -463,7 +489,7 @@ void	CgiProcessor::_readFromChild()
 			_client->hasReadFromCgi = true;
 			// copy the error code in the CgiResponseHeader into client
 			// so that errors from CGI can be processed
-			if (_client->getServerMsg() && _client->getServerMsg()->getHeader())
+			if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())
 				_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
 		}
 	}

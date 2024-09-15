@@ -49,6 +49,7 @@ class CgiProcessor {
 		bool						_terminate;
 		bool						_sentSigkill;
 		std::clock_t				_shutdownStart;
+		size_t						_bytesSent;
 
 		void						_ioChild();
 		void						_initScriptVars();

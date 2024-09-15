@@ -291,10 +291,7 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	if (_type == BODY)
 	{
 		if (_request || _bodySize)
-		{
-			std::cout << "body size in Node of Body: "<< _bodySize << std::endl;
 			_btr = _bodySize - _str.size();
-		}
 		else
 			_btr = num - bufferPos;
 	}
