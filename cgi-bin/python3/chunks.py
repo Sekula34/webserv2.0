@@ -11,7 +11,7 @@ print("Content-Type: text/html\n")
 html_content = """
 <html>
 <head><title>Hello World CGI</title></head>
-<body><h2>this is used to be chunky but now it's not!</h2></body>
+<body><h2>this used to be chunky but now it's not!</h2></body>
 </html>
 """
 
