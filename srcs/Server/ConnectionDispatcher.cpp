@@ -57,7 +57,7 @@ ConnectionDispatcher::~ConnectionDispatcher()
 	close(Data::getEpollFd());
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for(; it != _clients.end(); it++)
-		delete it->second;
+		delete it->second; // MR_NOTE: Maybe we can also erase the iterator after deleting Client*.
 }
 
 /* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
@@ -74,7 +74,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
 		throw std::runtime_error("accept error");
 
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
-	Client * newClient = new Client(clientfd, client_addr, addrlen);
+	Client * newClient = new Client(clientfd, client_addr, addrlen); // MR_NOTE: Since it's an allocation, we shoud have a try-catch block.
 
 	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
 	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.
@@ -82,7 +82,7 @@ void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
 	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
 	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
 	if (_clients.find(clientfd) != _clients.end())
-		_clients[clientfd]->setWriteClient(false);
+		_clients[clientfd]->setWriteClient(false); // MR_DOUBT: Please explain this.
 	_clients[clientfd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
@@ -116,7 +116,7 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 	client->setWriteClient(false);
 	
 	// REMOVE THIS CLIENT INSTANCE FROM CLIENTS MAP
-	_clients.erase(client->getFd());
+	_clients.erase(client->getFd()); // MR_NOTE: Client delete is done in _checkReceiveError, readFd.
 }
 
 bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
@@ -138,7 +138,7 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		delete &client;
 		if (n < 0 || peek < 0)
 			Logger::error("receiving from Client", true);
-		if (client.getClientMsg()->getState() == ERROR)
+		if (client.getClientMsg()->getState() == ERROR) // MR_DOUBT: Possible segfault if client was deleted?
 			Logger::error("Invalid Request", true);
 		return (false);
 	}
@@ -170,7 +170,7 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
 		client.clearRecvLine();
-		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT);
+		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT); // MR_NOTE: recv fail is checked in _checkReceiveError
 		// std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
@@ -220,7 +220,7 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 	if (!client.cgiChecked && client.getErrorCode() == 0)
 	{
 		client.cgiChecked= true;
-		client.cgiChecked = true;
+		client.cgiChecked = true; // MR_DOUBT: Must it be called twice?
 		bool found = true;
 		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
 		if (!clientServer)
@@ -234,11 +234,11 @@ void	ConnectionDispatcher::_checkCgi(Client& client)
 			_parseCgiURLInfo(*location, client);
 			RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
 			std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
-			std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
+			std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found); // MR_NOTE: Be careful with this function, since it modifies found too.
 			if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
 			{ 
 				Logger::warning("Cgi checked and it exist on this location", true);
-				client.setCgi(new CgiProcessor(client));
+				client.setCgi(new CgiProcessor(client)); // MR_DOUBT: Since it allocates memory, put it in a try/catch block?
 			}
 		}
 	}
@@ -251,7 +251,7 @@ void ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/");
 	if(scriptName == "")
 		scriptName = fileName;
-	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false)
+	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false) // MR_DOUBT: How does this work?
 	{
 		Logger::warning("Implemted  some error code that is not correct");
 		client.setErrorCode(400);
@@ -284,7 +284,7 @@ void ConnectionDispatcher::_setCgiPathInfo(const std::string& urlpath, const std
 
 bool ConnectionDispatcher::_isCgiPathInfoValid(std::string pathInfo)
 {
-	if(pathInfo.find("/..") != std::string::npos || pathInfo.find("~") != std::string::npos)
+	if(pathInfo.find("/..") != std::string::npos || pathInfo.find("~") != std::string::npos) // MR_DOUBT: Why "/.." and not only ".."?
 	{
 		return false;
 	}
@@ -303,7 +303,7 @@ std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocat
 	}
 	std::string ServerLocation = cgiServer.getLocationURIfromPath(clientHeader->urlSuffix->getPath());
 	bool found = true;
-	std::vector<LocationSettings>::const_iterator it = cgiServer.fetchLocationWithUri(ServerLocation, found);
+	std::vector<LocationSettings>::const_iterator it = cgiServer.fetchLocationWithUri(ServerLocation, found); // MR_NOTE: Be careful with this function, since it modifies found too.
 	if(found == false || it->isCgiLocation() == false)
 	{
 		foundLoc = false;
@@ -328,7 +328,7 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 
 	// allocate new Message instance if necessary
 	if (!client.getClientMsg())
-		client.setClientMsg(new Message(true));
+		client.setClientMsg(new Message(true)); // MR_NOTE: Since it allocates memory, maybe put a try/catch block?
 
 	if (client.getClientMsg()->getState() == COMPLETE)
 		return (true);
@@ -376,7 +376,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 void ConnectionDispatcher::_processAnswer(Client& client)
 {
 	Logger::info("Process answer for client: ");std::cout <<client.getId() << std::endl;  
-	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
+	const ServerSettings* const responseServer = _serversInfo.getClientServer(client); // MR_DOUBT: Double const?
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)
 	{
@@ -384,7 +384,7 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 	}
 	else
 		Logger::warning("NO Server found");
-	_createAndDelegateResponse(client, responseServer);
+	_createAndDelegateResponse(client, responseServer); // MR_DOUBT: if responseServer is NULL? (check _createAndDelegateResponse())
 }
 
 void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const ServerSettings* responseServer)
@@ -395,7 +395,7 @@ void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const Ser
 		Logger::error("Trying to create response for client that already has one", true);
 		return;
 	}
-	Response* response = new Response(client, responseServer);
+	Response* response = new Response(client, responseServer); // MR_NOTE: since it's an allocation, put try/catch block?
 	client.setResponse(response);
 	Logger::info("Response created ", true);
 }
@@ -414,7 +414,7 @@ void ConnectionDispatcher::_notStuckMessage(void) const
 		if(counter < 10000)
 	   		std::cout << "Waiting for new request." << std::flush;
 		else if(counter < 20000)
-			std::cout << "Waiting for new request.." << std::flush;
+			std::cout << "Waiting for new request.." << std::flush; // MR_DOUBT: Thiss will be printed 1999 times?
 		else  
 			std::cout << "Waiting for new request..." << std::flush;
 
@@ -425,7 +425,7 @@ void ConnectionDispatcher::_notStuckMessage(void) const
         std::cout << "\r";
 
         // Clear the line (by overwriting with spaces)
-        std::cout << std::string(27, ' ') << std::flush;
+        std::cout << std::string(27, ' ') << std::flush; // MR_DOUBT: why 27?
 
         // Move the cursor back to the beginning of the line again
         std::cout << "\r";
@@ -452,7 +452,7 @@ void	ConnectionDispatcher::_shutdownCgiChildren()
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); it++)
 	{
-		if (it->second->getCgi() && !it->second->getCgi()->sentSigterm)
+		if (it->second->getCgi() && !it->second->getCgi()->sentSigterm) // MR_DOUBT: segfault if Client/CGI is NULL? (check _epoll_accept_client, _checkCgi)
 			it->second->getCgi()->terminateChild();
 	}
 }
@@ -464,14 +464,14 @@ bool	ConnectionDispatcher::_catchEpollErrorAndSignal()
 		if(flag == 1)
 		{
 			signal(SIGINT, SIG_IGN);
-			flag++;
+			flag++; // MR_DOUBT: Why increment?
 			Logger::info("Turn off procedure triggered", true);
 			_shutdownCgiChildren();
 		}
 		if (flag && _clients.size() != 0)
 			return (true);
 		if (!flag)
-			Logger::error("Epoll wait failed", true);
+			Logger::error("Epoll wait failed", true); // MR_DOUBT: How this be triggered (flag resetted to 0)?
 		return (false);
 	}
 	return (true);

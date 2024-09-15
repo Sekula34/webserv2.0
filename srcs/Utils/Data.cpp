@@ -167,6 +167,7 @@ void	Data::epollAddFd(int fd)
 		throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
 }
 
+// MR_DOUBT: Should we also erase the client from the map _clients?
 void	Data::epollRemoveFd(int fd)	
 {
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
