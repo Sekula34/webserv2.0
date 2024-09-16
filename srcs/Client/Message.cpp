@@ -166,6 +166,7 @@ Node	Message::_newChunkNode(size_t size)
 	return (node);
 }
 
+// MR_DOUBT: After using this function, we modify the header to write "Transfer-Encoding: chunked"?
 void	Message::_bodyToChunks()
 {
 	std::list<Node>::iterator it;
@@ -178,7 +179,7 @@ void	Message::_bodyToChunks()
 	
 	currentNode = _chain.begin();
 
-	_chain.pop_back();
+	_chain.pop_back(); // MR_DOUBT: Why pop the last node? Because it's the whole body and now I have it in str?
 	while (remainSize)
 	{
 		if (remainSize > optimalSize)
@@ -219,9 +220,9 @@ void	Message::_createHeader()
 	if(_header != NULL)
 		return;
 	if (_request)
-		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
+		_header = new RequestHeader(_chain.begin()->getStringUnchunked()); // MR_DOUBT: Since it's an allocation, put a try/catch block?
 	else
-		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n");
+		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n"); // MR_DOUBT: Why only cgiResponseHeader? If it's a GET request?
 
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
@@ -302,7 +303,7 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 	}
 
 	// is CHUNK HEADER complete?
-	if (_it->getType() == CHUNK && !_it->getChunkHeader())
+	if (_it->getType() == CHUNK && !_it->getChunkHeader()) // MR_DOUBT: Should we also check for LCHUNK?
 	{
 		if (_it->getStringChunked().find("\r\n") != std::string::npos)
 			_it->setChunkHeader(true);
@@ -379,7 +380,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		// if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
 		// 	_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
-			_addNewNode();
+			_addNewNode(); // MR_NOTE: This function increment _it to point to next node. Should we check if it == end()?
 	}
 	// printChain();
 }

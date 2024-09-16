@@ -25,6 +25,8 @@
 # define MAX_TIMEOUT		10000
 # define DELETED			-1 
 
+// MR_NOTE: MAXLINE is the buffer size for recvLine of Client
+
 class CgiProcessor;
 class Message;
 

@@ -264,7 +264,7 @@ void Client::_initVars(void)
 	_response = NULL;
 	_cgiOutput = "";
 	Cgi = NULL;
-	cgiRunning = true;
+	cgiRunning = true; // MR_DOUBT: Why true?
 	_clockstop = 1000;
 	_clientMsg = NULL;
 	_serverMsg = NULL;
