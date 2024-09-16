@@ -426,6 +426,7 @@ void	CgiProcessor::_writeToChild()
 	// SEND
 	const std::string& bodystr = _client->getClientMsg()->getBodyString();
 	writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT);
+	std::cout << "bytes written to CGI child process: " << writeValue << std::endl;
 	_bytesSent += writeValue;
 
 	// not sure we need this, but protects server from getting stuck in writing to CGI
@@ -459,7 +460,7 @@ void	CgiProcessor::_writeToChild()
 
 void	CgiProcessor::_readFromChild()
 {
-	int n = 0;
+	int readValue = 0;
 
 	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
@@ -468,22 +469,22 @@ void	CgiProcessor::_readFromChild()
 			_client->setServerMsg(new Message(false));
 
 		_client->clearRecvLine();
-		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
-		// std::cout << "bytes read from child socket: " << n << std::endl;
+		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
+		// std::cout << "bytes read from child socket: " << readValue << std::endl;
 
 		// successful read -> concat message
-		if (n > 0)
-			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), n);
+		if (readValue > 0)
+			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), readValue);
 
 		// failed read -> stop CGI and set errorcode = 500
-		if (n < 0)
+		if (readValue < 0)
 		{
 			Logger::warning("failed tor read from Child Process", true);
 			_stopCgiSetErrorCode();
 		}
 
 		// EOF reached, child has gracefully shutdown connection
-		if (n == 0)
+		if (readValue == 0)
 		{
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;

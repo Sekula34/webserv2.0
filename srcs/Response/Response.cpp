@@ -13,7 +13,8 @@ Response::Response(const Client& client, const ServerSettings* server)
 :_client(client),
 _server(server),
 _responseHeader(NULL),
-_responseBody(client, _server)
+_responseBody(client, _server),
+_bytesSent(0)
 {
 	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
 }
@@ -21,7 +22,8 @@ _responseBody(client, _server)
 //maybe broken
 Response::Response(const Response& source)
 :_client(source._client),
-_responseBody(source._responseBody)
+_responseBody(source._responseBody),
+_bytesSent(source._bytesSent)
 {
 	if(source._responseHeader == NULL)
 		_responseHeader = NULL;
@@ -87,13 +89,25 @@ void Response::sendSimpleResponse()const
 
 bool Response::sendResponse()
 {
+ 	int writeValue;
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
- 	int writeValue;
-	writeValue = write(_client.getFd(), response.c_str(), response.size());
-	if(writeValue == -1)
-		return false;
-	return true;
+
+	writeValue = send(_client.getFd(), response.c_str() + _bytesSent, response.size() - _bytesSent, MSG_DONTWAIT);
+	_bytesSent += writeValue;
+
+	// return out of function it foull Message was not sent because
+	// message bigger than socket buffer
+	if (_bytesSent < response.size() && writeValue > 0)
+		return (false);
+
+	// if unable to send full message, log error and set error Code
+	if (writeValue < 0 || (writeValue == 0 && _bytesSent < response.size()))
+	{
+		Logger::error("failed to send Request Body to CGI", true);
+		return (true);
+	}
+	return (true);
 }
 
 std::ostream& operator<<(std::ostream& os, const Response& obj)

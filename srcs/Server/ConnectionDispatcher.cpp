@@ -194,14 +194,13 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
 	if (Data::setEvents()[idx].events & EPOLLOUT)
 	{
-		bool result = client.getResponse()->sendResponse();
-		if(result == true)
-			Logger::info("The response  was sent successfully", true);
-		else
-			Logger::warning("Sending response had some error");
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		delete &client;
+		if(client.getResponse()->sendResponse())
+		{
+			Logger::info("Finished sending message", true);
+			clientsRemoveFd(&client);
+			Data::epollRemoveFd(client.getFd());
+			delete &client;
+		}
 	}
 }
 

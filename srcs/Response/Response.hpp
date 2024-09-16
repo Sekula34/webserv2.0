@@ -15,6 +15,7 @@ class Response
 		ResponseHeader* _responseHeader; //owning
 		//CLASS HEADER;
 		ResponseBody _responseBody;
+		size_t		_bytesSent;
 		
 		//std::string _body; 
 		//Response();
