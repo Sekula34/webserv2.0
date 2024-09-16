@@ -40,4 +40,4 @@ def delete_file(filename):
 
 if __name__ == "__main__":
 	create_python_test_files()
-	#delete_python_test_files()
+	delete_python_test_files()
