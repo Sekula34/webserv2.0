@@ -72,6 +72,9 @@ class DefaultSettings
 		const std::string getErrorPagePath(const int errorCode) const;
 
 		const std::vector<std::string>& getCgiExtensions(void) const;
+
+		friend std::ostream& operator<<(std::ostream& os, const DefaultSettings& server);
 };
+
 
 #endif
