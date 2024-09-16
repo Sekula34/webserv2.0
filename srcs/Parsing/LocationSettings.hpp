@@ -41,6 +41,7 @@ class LocationSettings : public DefaultSettings
 		 */
 		bool setIndexPagePath(std::string& pathToIndex) const;
 		bool isCgiLocation(void) const;
+		bool isCgiExtensionSet(const std::string& scriptExtension) const;
 };
 
 class FindByUri

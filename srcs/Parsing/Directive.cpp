@@ -24,7 +24,7 @@ const std::string Directive:: _validLocationDirectives[] = {"error_page", "clien
 "autoindex", "index", "limit_except", "root", "extension"};
 
 //directive that can be present only once
-const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except"};
+const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension"};
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
