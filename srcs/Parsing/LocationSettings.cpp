@@ -159,3 +159,13 @@ bool LocationSettings::isCgiLocation(void) const
 		return false;
 	return true;
 }
+
+bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) const
+{
+	for(size_t i = 0; i < m_cgiExtensions.size(); i++)
+	{
+		if(m_cgiExtensions[i] == scriptExtension)
+			return true;
+	}
+	return false;
+}
