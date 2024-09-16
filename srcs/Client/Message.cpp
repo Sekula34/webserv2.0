@@ -324,7 +324,7 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 	if (_it->getType() == BODY)
 	{
 		if (_it->getBodySize() == _it->getStringUnchunked().size())	
-			_it->setState(COMPLETE);
+			_it->setState(COMPLETE); // MR_DOUBT: Can we have an incomplete body?
 	}
 }
 
@@ -350,7 +350,7 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 
 	if ((_it->getType() == LCHUNK && !_trailer)
 		|| _it->getType() == BODY || _it->getType() == TRAILER)
-		_state = COMPLETE;
+		_state = COMPLETE; // MR_DOUBT: So if a type is seted (e.g BODY), then that means is COMPLETE?
 
 	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
@@ -359,7 +359,7 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 		_headerInfoToNode();
 
 		// if body size is 0 and message not chunked and message is a request then Message is complete
-		if (!_chunked && _it->getBodySize() == 0 && _request)
+		if (!_chunked && _it->getBodySize() == 0 && _request) // MR_DOUBT: Is this a GET request?
 			_state = COMPLETE;
 		if (num < MAXLINE && bufferPos == num)
 			_state = COMPLETE;
@@ -377,7 +377,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_isNodeComplete(bufferPos, num);
 		_parseNode(bufferPos, num);
 		// _checkNode();
-		// if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
+		// if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE) // MR_DOUBT: Why this is commented out?
 		// 	_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode(); // MR_NOTE: This function increment _it to point to next node. Should we check if it == end()?

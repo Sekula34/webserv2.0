@@ -208,7 +208,7 @@ std::string	Node::_getRemainDel(const std::string & del)
 		if (found == std::string::npos)
 			continue;
 		if (found == _str.size() - (tmp.size()))
-			return (del.substr(tmp.size(), del.size()));
+			return (del.substr(tmp.size(), del.size())); // MR_DOUBT: How does this work?
 	}
 	return (del);
 }
