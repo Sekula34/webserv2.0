@@ -30,6 +30,7 @@ Message::Message (bool request)
 	_header = NULL;
 }
 
+//MR_NOTE: This is only for fullfilling Orthodox CF parts. It's not used in the code.
 Message::Message (void)
 {
 	// std::cout << "Message default constructor called" << std::endl;
@@ -373,7 +374,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
-		_it->concatString(buffer, bufferPos, num);
+		_it->concatString(buffer, bufferPos, num); // MR_NOTE: This function increments bufferPos
 		_isNodeComplete(bufferPos, num);
 		_parseNode(bufferPos, num);
 		// _checkNode();
