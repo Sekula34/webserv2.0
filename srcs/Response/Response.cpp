@@ -98,20 +98,19 @@ bool Response::sendResponse()
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
 
-	writeValue = send(_client.getFd(), response.c_str() + _bytesSent, response.size() - _bytesSent, MSG_DONTWAIT);
+	// SEND
+	writeValue = send(_client.getFd(),
+		response.c_str() + _bytesSent, response.size() - _bytesSent, MSG_DONTWAIT | MSG_NOSIGNAL);
 	_bytesSent += writeValue;
 
-	// return out of function it foull Message was not sent because
+	// return out of function if full Message was not sent because
 	// message bigger than socket buffer
 	if (_bytesSent < response.size() && writeValue > 0)
 		return (false);
 
 	// if unable to send full message, log error and set error Code
 	if (writeValue < 0 || (writeValue == 0 && _bytesSent < response.size()))
-	{
-		Logger::error("failed to send Request Body to CGI", true);
-		return (true);
-	}
+		Logger::error("failed to send Response to Client", true);
 	return (true);
 }
 

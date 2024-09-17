@@ -78,7 +78,7 @@ void Logger::chars(std::string message, bool newline)
     }
 	std::cout << BLUE;
 	_printCurrentTime();
-	std::cout <<"INFO: " << message << RESET;
+	std::cout <<"INFO: " << RESET;
 	printEscapeCharacters(message);
     if(newline == true)
         std::cout << std::endl;

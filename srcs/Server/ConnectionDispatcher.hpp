@@ -39,7 +39,7 @@ class ConnectionDispatcher
 		Client* 					_isClient(int fd);
 		bool						_handleServerSocket(size_t idx);
 		void						_handleClient(Client& client, int idx);
-		bool						_checkReceiveError(Client& client, int n, int peek);
+		bool						_checkReceiveError(Client& client, int n);
 		void						_checkEndHeader(Client& client, int n);
 		void						_peek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
@@ -53,6 +53,7 @@ class ConnectionDispatcher
 		void						_processAnswer(Client& client);
 		bool						_catchEpollErrorAndSignal();
 		void						_shutdownCgiChildren();
+		void						_deleteClient(Client& client);
 
 		/**
 		 * @brief creates Response instace that is forwarded to client. Client is resposible for deleting

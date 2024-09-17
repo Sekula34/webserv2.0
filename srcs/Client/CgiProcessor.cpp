@@ -382,7 +382,6 @@ int	CgiProcessor::_execute()
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
-	std::cout << "starting child script" << std::endl;
 	if (chdir(_scriptLocation.c_str()) == -1)
 	{
 		close(_socketsFromChild[1]);
@@ -448,8 +447,8 @@ void	CgiProcessor::_writeToChild()
 	_client->hasWrittenToCgi = true;
 
 	// closing Socket and and removing it from epoll
-	Logger::warning("removing FD from epoll: ");
-	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
+	// Logger::warning("removing FD from epoll: ");
+	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollRemoveFd(_client->socketToChild);
 	close(_client->socketToChild);
 	_client->socketToChild = DELETED;
@@ -467,9 +466,6 @@ void	CgiProcessor::_readFromChild()
 
 		_client->clearRecvLine();
 		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
-		std::cout << "bytes read from child socket: " << readValue << std::endl;
-		std::cout << "buffer: ";
-		Logger::chars(_client->getRecvLine(), true);
 
 		// successful read -> concat message
 		if (readValue > 0)
@@ -485,7 +481,6 @@ void	CgiProcessor::_readFromChild()
 		// EOF reached, child has gracefully shutdown connection
 		if (readValue == 0 && _client->waitReturn != 0)
 		{
-			_client->getServerMsg()->printChain();
 			if (!_client->getServerMsg()->getHeader())
 				_client->getServerMsg()->_createHeader();
 			_client->getServerMsg()->setState(COMPLETE);
@@ -502,8 +497,8 @@ void	CgiProcessor::_closeCgi()
 {
 	if (_client->hasReadFromCgi && _client->waitReturn > 0)
 	{
-		Logger::warning("removing FD from epoll: ");
-		std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
+		// Logger::warning("removing FD from epoll: ");
+		// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
 		_client->socketFromChild = DELETED;
@@ -635,11 +630,11 @@ void	CgiProcessor::_prepareSockets()
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
-	Logger::warning("adding FD to epoll: ");
-	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
+	// Logger::warning("adding FD to epoll: ");
+	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsToChild[0]);
-	Logger::warning("adding FD to epoll: ");
-	std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
+	// Logger::warning("adding FD to epoll: ");
+	// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsFromChild[0]);
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }

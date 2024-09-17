@@ -119,7 +119,7 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 	_clients.erase(client->getFd());
 }
 
-bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
+bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n)
 {
 	// this checks every time we go through loop. Maybe not necessary
 	if (client.getClientMsg() && client.getClientMsg()->getHeader()
@@ -128,14 +128,14 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		client.setErrorCode(client.getClientMsg()->getHeader()->getHttpStatusCode()); 
 	}
 
-	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
+	if (n <= 0 || client.getClientMsg()->getState() == ERROR)
 	{
 		if (n == 0)
 			Logger::warning("reading 0 bytes from client, deleting client", true);
 		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
 		clientsRemoveFd(&client);
 		Data::epollRemoveFd(client.getFd());
-		if (n < 0 || peek < 0)
+		if (n < 0)
 			Logger::error("receiving from Client", true);
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
@@ -182,32 +182,38 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 
 	// if no activity from Client then delete Client
 	if (!client.checkTimeout())
-	{
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		delete &client;
-	}
+		_deleteClient(client);
 	return (false);
+}
+
+void	ConnectionDispatcher::_deleteClient(Client& client)
+{
+	clientsRemoveFd(&client);
+	Data::epollRemoveFd(client.getFd());
+	delete &client;
 }
 
 void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
-	if (Data::setEvents()[idx].events & EPOLLOUT)
+	bool allowedToSend = Data::setEvents()[idx].events & EPOLLOUT;
+	bool finishedSending = false;
+
+	// if FD is available to be written to write Response to Client
+	if (allowedToSend)
+		finishedSending = client.getResponse()->sendResponse();
+
+	// save how many bytes we have sent so far to Client
+	size_t bytesSent = client.getResponse()->getBytesSent();
+
+	// delete Client if full message has been sent
+	// or something went wrong during sending
+	if (finishedSending || (!allowedToSend && bytesSent != 0))
 	{
-		if(client.getResponse()->sendResponse())
-		{
-			Logger::info("Finished sending message", true);
-			clientsRemoveFd(&client);
-			Data::epollRemoveFd(client.getFd());
-			delete &client;
-		}
-	}
-	else if (client.getResponse()->getBytesSent() != 0)
-	{
-		Logger::error("failed to send full Response to client", true);
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		delete &client;
+		if (finishedSending)
+			Logger::info("finished sending Response to Client", true);
+		else
+			Logger::error("unable to send full Response to Client", true);
+		_deleteClient(client);
 	}
 }
 
@@ -320,7 +326,6 @@ void	ConnectionDispatcher::_runCgi(Client& client)
 bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 {
 	int			n = 0;
-	int			peek = 0;
 
 	// allocate new Message instance if necessary
 	if (!client.getClientMsg())
@@ -340,7 +345,7 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 
 	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
-	if (!_checkReceiveError(client, n, peek))
+	if (!_checkReceiveError(client, n))
 		return (false);
 
 	return (true);
