@@ -47,6 +47,11 @@ std::string Response::getResponseString(void)
 	std::string res = _createResponseString();
 	return res;
 }
+size_t	Response::getBytesSent()
+{
+	return (_bytesSent);
+}
+
 
 std::string Response::_createResponseString(void) 
 {
@@ -89,7 +94,7 @@ void Response::sendSimpleResponse()const
 
 bool Response::sendResponse()
 {
- 	int writeValue;
+ 	int writeValue = 0;
 	std::string response = _createResponseString();
 	Logger::info("String Response created: ", true);
 

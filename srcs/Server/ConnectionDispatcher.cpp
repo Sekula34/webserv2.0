@@ -160,7 +160,7 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 	if (Data::setEvents()[idx].events & EPOLLIN)
 	{
 		client.clearRecvLine();
-		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT);
+		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 		// std::cout << "trying to read n: " << n << std::endl;
 		return (true);
 	}
@@ -201,6 +201,13 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 			Data::epollRemoveFd(client.getFd());
 			delete &client;
 		}
+	}
+	else if (client.getResponse()->getBytesSent() != 0)
+	{
+		Logger::error("failed to send full Response to client", true);
+		clientsRemoveFd(&client);
+		Data::epollRemoveFd(client.getFd());
+		delete &client;
 	}
 }
 
@@ -331,9 +338,6 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (n > 0)
 		client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
 
-	// PEEK IN ORDER TO RULE OUT THE POSSIBILITY OF BLOCKING ON NEXT READ
-	// _peek(&client, n, peek);
-
 	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
 	if (!_checkReceiveError(client, n, peek))
@@ -354,8 +358,6 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
-	// if (client.getServerMsg())
-	// 	client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 

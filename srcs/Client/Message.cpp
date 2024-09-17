@@ -300,8 +300,10 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 			del = "\n\n";
 		if (_it->getStringUnchunked().find(del) != std::string::npos)	
 			_it->setState(COMPLETE);
-		if (num < MAXLINE && bufferPos == num)
-			_it->setState(COMPLETE);
+		(void)bufferPos;
+		(void)num;
+		// if (num < MAXLINE && bufferPos == num)
+		// 	_it->setState(COMPLETE);
 	}
 
 	// is CHUNK HEADER complete?
@@ -363,8 +365,10 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 		// if body size is 0 and message not chunked and message is a request then Message is complete
 		if (!_chunked && _it->getBodySize() == 0 && _request)
 			_state = COMPLETE;
-		if (num < MAXLINE && bufferPos == num)
-			_state = COMPLETE;
+		(void)bufferPos;
+		(void)num;
+		// if (num < MAXLINE && bufferPos == num)
+		// 	_state = COMPLETE;
 	}
 	
 	// if Trailer, complete the header with info from trailer
@@ -375,6 +379,8 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 	size_t	bufferPos = 0;
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
+		if (_it->getState() == COMPLETE)
+			_addNewNode();
 		_it->concatString(buffer, bufferPos, num);
 		_isNodeComplete(bufferPos, num);
 		_parseNode(bufferPos, num);

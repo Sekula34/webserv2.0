@@ -12,7 +12,7 @@ headers = {
 body = "sending a body to cgi finally works!"
 
 # Sending the POST request
-conn.request("POST", "/cgi-bin/close_stdin.py", body, headers)  # Adjust the path as needed
+conn.request("POST", "/cgi-bin/io_test.py", body, headers)  # Adjust the path as needed
 
 # Getting the response
 response = conn.getresponse()

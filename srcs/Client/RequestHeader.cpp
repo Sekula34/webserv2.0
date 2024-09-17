@@ -32,7 +32,6 @@ RequestHeader::RequestHeader(const std::string message)
 :AHeader(getHeaderSectionString(message)),
 _fullRequest(getFullRequest(message))
 {
-	std::cout << "Request Header:" << std::endl << _fullRequest << std::endl;
 	_constructFunction();
 }
 

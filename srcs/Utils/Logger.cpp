@@ -54,6 +54,36 @@ void Logger::info(std::string message, bool newline)
         std::cout << std::endl;
 }
 
+void printEscapeCharacters(const std::string& str) {
+    for (std::string::size_type i = 0; i < str.size(); ++i) {
+        char c = str[i];
+        switch (c) {
+            case '\n': std::cout << "\\n"; break;
+            case '\r': std::cout << "\\r"; break;
+            case '\t': std::cout << "\\t"; break;
+            case '\\': std::cout << "\\\\"; break;
+            case '\"': std::cout << "\\\""; break;
+            default:
+                std::cout << c;
+                break;
+        }
+    }
+}
+
+void Logger::chars(std::string message, bool newline)
+{
+    if(_isPrintingAllowed() == false)
+    {
+        return;
+    }
+	std::cout << BLUE;
+	_printCurrentTime();
+	std::cout <<"INFO: " << message << RESET;
+	printEscapeCharacters(message);
+    if(newline == true)
+        std::cout << std::endl;
+}
+
 void Logger::warning(std::string message, bool newline)
 {
     if(_isPrintingAllowed() == false)

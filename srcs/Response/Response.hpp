@@ -30,6 +30,7 @@ class Response
 		std::string getResponseString(void);
 		void sendSimpleResponse() const;
 		bool sendResponse();
+		size_t	getBytesSent();
 
 		friend std::ostream& operator<<(std::ostream& os, const Response& obj);
 };

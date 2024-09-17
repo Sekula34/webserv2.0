@@ -382,6 +382,7 @@ int	CgiProcessor::_execute()
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
 	Data::closeAllFds();
+	std::cout << "starting child script" << std::endl;
 	if (chdir(_scriptLocation.c_str()) == -1)
 	{
 		close(_socketsFromChild[1]);
@@ -401,6 +402,7 @@ int	CgiProcessor::_execute()
 		throw std::runtime_error("dup2 failed in CGI child process");
 	}
 	close(_socketsFromChild[1]);
+
  	execve(_args[0], _args, _env);
 	throw std::runtime_error("execve failed in CGI child process");
 }
@@ -417,7 +419,7 @@ bool	CgiProcessor::_isSocketReady(int socket, int macro)
 
 void	CgiProcessor::_writeToChild()
 {
-	int		writeValue;
+	int		writeValue = 0;
 
 	// return if epoll does not allow us to write to socket
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
@@ -425,16 +427,11 @@ void	CgiProcessor::_writeToChild()
 
 	// SEND
 	const std::string& bodystr = _client->getClientMsg()->getBodyString();
-	writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT);
-	std::cout << "bytes written to CGI child process: " << writeValue << std::endl;
-	_bytesSent += writeValue;
 
-	// not sure we need this, but protects server from getting stuck in writing to CGI
-	if (!_client->checkTimeout())
-	{
-		Logger::error("writing to CGI timed out", true);
-		writeValue = -1;
-	}
+	if (bodystr.size() > 0)
+		writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT | MSG_NOSIGNAL);
+	// std::cout << "bytes written to CGI child process: " << writeValue << std::endl;
+	_bytesSent += writeValue;
 
 	// return if full message could not be sent
 	if (_bytesSent < bodystr.size() && writeValue > 0)
@@ -469,8 +466,10 @@ void	CgiProcessor::_readFromChild()
 			_client->setServerMsg(new Message(false));
 
 		_client->clearRecvLine();
-		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
-		// std::cout << "bytes read from child socket: " << readValue << std::endl;
+		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+		std::cout << "bytes read from child socket: " << readValue << std::endl;
+		std::cout << "buffer: ";
+		Logger::chars(_client->getRecvLine(), true);
 
 		// successful read -> concat message
 		if (readValue > 0)
@@ -484,8 +483,11 @@ void	CgiProcessor::_readFromChild()
 		}
 
 		// EOF reached, child has gracefully shutdown connection
-		if (readValue == 0)
+		if (readValue == 0 && _client->waitReturn != 0)
 		{
+			_client->getServerMsg()->printChain();
+			if (!_client->getServerMsg()->getHeader())
+				_client->getServerMsg()->_createHeader();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
 			// copy the error code in the CgiResponseHeader into client
