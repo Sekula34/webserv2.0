@@ -41,7 +41,6 @@ class ConnectionDispatcher
 		void						_handleClient(Client& client, int idx);
 		bool						_checkReceiveError(Client& client, int n);
 		void						_checkEndHeader(Client& client, int n);
-		void						_peek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
 		void						_checkCgi(Client& client);
 		void 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);
@@ -54,6 +53,7 @@ class ConnectionDispatcher
 		bool						_catchEpollErrorAndSignal();
 		void						_shutdownCgiChildren();
 		void						_deleteClient(Client& client);
+		void						_incompleteMessage(Client & client, int idx);
 
 		/**
 		 * @brief creates Response instace that is forwarded to client. Client is resposible for deleting

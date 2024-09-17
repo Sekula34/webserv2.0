@@ -133,25 +133,29 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n)
 		if (n == 0)
 			Logger::warning("reading 0 bytes from client, deleting client", true);
 		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
 		if (n < 0)
 			Logger::error("receiving from Client", true);
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
-		delete &client;
+		_deleteClient(client);
 		return (false);
 	}
 	return (true);
 }
-
-void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
+void	ConnectionDispatcher::_incompleteMessage(Client & client, int idx)
 {
-	if (n > 0)
+	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
+		&& client.getClientMsg()->getState() == INCOMPLETE
+		&& client.getClientMsg()->getIterator()->getStringUnchunked().size() != 0)
 	{
-		// if (n == MAXLINE && client->getClientMsg()->getChain().begin()->getState() == INCOMPLETE)
-		if (n == MAXLINE && client->getClientMsg()->getState() == INCOMPLETE)
-			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
+		// if we are at header, parse the header 
+		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
+		{
+			client.getClientMsg()->_createHeader();
+			client.getClientMsg()->_headerInfoToNode();
+		}
+		client.getClientMsg()->getIterator()->setState(COMPLETE);
+		client.getClientMsg()->setState(COMPLETE);
 	}
 }
 
@@ -165,20 +169,8 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		return (true);
 	}
 
-	// handeling the case where we receive a Request from Client that has no proper delimiter
-	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
-		&& client.getClientMsg()->getState() == INCOMPLETE
-		&& client.getClientMsg()->getIterator()->getStringUnchunked().size() != 0)
-	{
-		// if we are at header, set header to complete and parse the header 
-		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
-		{
-			client.getClientMsg()->_createHeader();
-			client.getClientMsg()->_headerInfoToNode();
-		}
-		client.getClientMsg()->getIterator()->setState(COMPLETE);
-		client.getClientMsg()->setState(COMPLETE);
-	}
+	// we have started to recieve message but reading has stopped and Message is incomplete
+	_incompleteMessage(client, idx);
 
 	// if no activity from Client then delete Client
 	if (!client.checkTimeout())
@@ -343,7 +335,7 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (n > 0)
 		client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
 
-	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
+	// UNSUCCESSFUL RECEIVE OR ERR IN MESSAGE 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
 	if (!_checkReceiveError(client, n))
 		return (false);
