@@ -98,6 +98,7 @@ const std::string	Message::getBodyString()
 	{
 		_chunksToBody();
 		_chunked = false;
+		_trailer = false;
 	}
 	_findBody(it);
 	if (it == _chain.begin())
@@ -288,7 +289,7 @@ size_t	Message::_calcChunkSize(std::string s)
 }
 
 
-void	Message::_isNodeComplete(size_t bufferPos, size_t num)
+void	Message::_isNodeComplete()
 {
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
@@ -300,10 +301,6 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 			del = "\n\n";
 		if (_it->getStringUnchunked().find(del) != std::string::npos)	
 			_it->setState(COMPLETE);
-		(void)bufferPos;
-		(void)num;
-		// if (num < MAXLINE && bufferPos == num)
-		// 	_it->setState(COMPLETE);
 	}
 
 	// is CHUNK HEADER complete?
@@ -332,7 +329,7 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 	}
 }
 
-void	Message::_parseNode(size_t bufferPos, size_t num)
+void	Message::_parseNode()
 {
 	// if message is chunked -> read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
@@ -365,10 +362,6 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 		// if body size is 0 and message not chunked and message is a request then Message is complete
 		if (!_chunked && _it->getBodySize() == 0 && _request)
 			_state = COMPLETE;
-		(void)bufferPos;
-		(void)num;
-		// if (num < MAXLINE && bufferPos == num)
-		// 	_state = COMPLETE;
 	}
 	
 	// if Trailer, complete the header with info from trailer
@@ -377,18 +370,14 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 void	Message::bufferToNodes(char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
+	// std::cout << "buffer: ";
+	// Logger::chars(buffer, true);
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
-		if (_it->getState() == COMPLETE)
-			_addNewNode();
-		_it->concatString(buffer, bufferPos, num);
-		_isNodeComplete(bufferPos, num);
-		_parseNode(bufferPos, num);
-		// _checkNode();
-		// if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
-		// 	_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
+		_it->concatString(buffer, bufferPos, num);
+		_isNodeComplete();
+		_parseNode();
 	}
-	// printChain();
 }

@@ -42,8 +42,8 @@ class Message {
 		std::stringstream 			_ss;
 		AHeader*					_header;
 
-		void						_isNodeComplete(size_t bufferPos, size_t num);
-		void						_parseNode(size_t bufferPos, size_t num);
+		void						_isNodeComplete();
+		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
