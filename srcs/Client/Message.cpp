@@ -237,6 +237,7 @@ std::string	Message::_createCgiHeaderDel()
 
 void	Message::_createHeader()
 {
+	std::cout << "the string in Header: " << _it->getStringUnchunked() <<  std::endl;
 	if(_header != NULL)
 		return;
 	if (_request)
@@ -308,7 +309,7 @@ size_t	Message::_calcChunkSize(std::string s)
 }
 
 
-void	Message::_isNodeComplete()
+void	Message::_setNodeComplete()
 {
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
@@ -329,8 +330,8 @@ void	Message::_isNodeComplete()
 			_it->setChunkHeader(true);
 	}
 
-	// is CHUNK or LCHUNK complete?
-	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
+	// is CHUNK or LCHUNK complete when no trailer expected?
+	if ((_it->getType() == CHUNK || (_it->getType() == LCHUNK && !_trailer)) && _it->getChunkHeader() )
 	{
 		if(_it->getChunkHeaderSize() + _it->getChunkSize() + 2 == _it->getStringChunked().length())
 			_it->setState(COMPLETE);
@@ -362,7 +363,11 @@ void	Message::_parseNode()
 		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
 
 		if (_it->getChunkSize() == 0)
+		{
 			_it->setType(LCHUNK);
+			if (_trailer)
+				_it->setState(COMPLETE);
+		}
 	}
 	
 	if (_it->getState() != COMPLETE)
@@ -382,6 +387,11 @@ void	Message::_parseNode()
 		if (!_chunked && _it->getBodySize() == 0 && _request)
 			_state = COMPLETE;
 	}
+
+	// if (_it->getType() == TRAILER)
+	// {
+	// 	_header->_fillHeaderFieldMap();
+	// }
 	
 	// TODO: if Trailer, complete the header with info from trailer
 }
@@ -396,7 +406,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 		_it->concatString(buffer, bufferPos, num);
-		_isNodeComplete();
+		_setNodeComplete();
 		_parseNode();
 	}
 }

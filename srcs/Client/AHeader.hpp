@@ -42,6 +42,7 @@ class AHeader
 		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;
 		
 		
+		friend class Message;
 		friend std::ostream& operator <<(std::ostream& os, const AHeader& header);
 };
 
