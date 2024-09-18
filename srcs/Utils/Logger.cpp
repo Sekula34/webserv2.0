@@ -9,6 +9,7 @@ const std::string Logger::YELLOW = "\033[33m";
 const std::string Logger::RED = "\033[31m";
 const std::string Logger::RESET = "\033[0m";
 const std::string Logger::BLUE = "\033[34m";
+const std::string Logger::PURPLE = "\033[35m";
 
 
 
@@ -50,6 +51,36 @@ void Logger::info(std::string message, bool newline)
 	std::cout << GREEN;
 	_printCurrentTime();
 	std::cout <<"INFO: " << message << RESET;
+    if(newline == true)
+        std::cout << std::endl;
+}
+
+void printEscapeCharacters(const std::string& str) {
+    for (std::string::size_type i = 0; i < str.size(); ++i) {
+        char c = str[i];
+        switch (c) {
+            case '\n': std::cout << "\\n"; break;
+            case '\r': std::cout << "\\r"; break;
+            case '\t': std::cout << "\\t"; break;
+            case '\\': std::cout << "\\\\"; break;
+            case '\"': std::cout << "\\\""; break;
+            default:
+                std::cout << c;
+                break;
+        }
+    }
+}
+
+void Logger::chars(std::string message, bool newline)
+{
+    if(_isPrintingAllowed() == false)
+    {
+        return;
+    }
+	std::cout << PURPLE;
+	_printCurrentTime();
+	std::cout <<"CHARS: " << RESET;
+	printEscapeCharacters(message);
     if(newline == true)
         std::cout << std::endl;
 }

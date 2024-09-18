@@ -15,6 +15,7 @@ class Response
 		ResponseHeader* _responseHeader; //owning
 		//CLASS HEADER;
 		ResponseBody _responseBody;
+		size_t		_bytesSent;
 		
 		//std::string _body; 
 		//Response();
@@ -29,6 +30,7 @@ class Response
 		std::string getResponseString(void);
 		void sendSimpleResponse() const;
 		bool sendResponse();
+		size_t	getBytesSent();
 
 		friend std::ostream& operator<<(std::ostream& os, const Response& obj);
 };

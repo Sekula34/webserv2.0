@@ -22,7 +22,7 @@
 
 # define MAXLINE			4096
 // # define MAXLINE			1
-# define MAX_TIMEOUT		10000
+# define MAX_TIMEOUT		3000
 # define DELETED			-1 
 
 class CgiProcessor;

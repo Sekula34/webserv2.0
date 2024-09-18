@@ -1,4 +1,3 @@
-
 #include "../Server/SocketManager.hpp"
 #include "../Server/Socket.hpp"
 #include "../Utils/Data.hpp"
@@ -38,6 +37,7 @@ _nfds(Data::getNfds())
 	_terminate = false;
 	_shutdownStart = 0;
 	_sentSigkill = false;
+	_bytesSent = 0;
 	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
 }
 
@@ -110,13 +110,7 @@ int	CgiProcessor::getPid()
 */
 
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
-// Just remember that, for chunked request, your server needs to unchunk it
-// parse header
 // if no header or incomplete header, create header
-// If no content_length is returned from CGI, EOF will mark the end of the returned data.
-// check return of write to child,
-// use send instead of write to child?
-// call write to child multiple times untill whole message has been written
 // finish alls meta-variables
 
 std::string operatingSystem()
@@ -196,12 +190,10 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 
 void	CgiProcessor::_initScriptVars()
 {
-	// the suffix should come from url parser
+	// the suffix is .py or .php
 	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
 
-	// this should happen when parsing the config file
-	// Data::setCgiLang(suffix, "python3");
-
+	// this is the location on the server and is hardcoded
 	std::string location = "/cgi-bin/";
 
 	// go through PATH variable and check whether interpreter is installed
@@ -214,7 +206,6 @@ void	CgiProcessor::_initScriptVars()
 	}
 
 	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
-	// _scriptName = getScriptName(suffix);
 	if (_scriptName.empty())
 		return ;
 
@@ -224,7 +215,7 @@ void	CgiProcessor::_initScriptVars()
 	_scriptLocation = Data::findStringInEnvp("PWD=") + location
 		+ Data::getCgiLang().at(suffix);
 
-	std::cout << _scriptAbsPath << std::endl;
+	// Logger::info(_scriptAbsPath, true);
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
 	{
 		Logger::warning("CGI script not executable: ");
@@ -239,6 +230,7 @@ void	CgiProcessor::_initScriptVars()
 void	CgiProcessor::_createEnvVector()
 {
 	std::string	line;
+	std::string pathInfo = (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getCgiPathInfo();
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
@@ -272,15 +264,24 @@ void	CgiProcessor::_createEnvVector()
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
 	// actual PATH_INFO part is missing!!
 	line = "PATH_INFO="; 
-	line += _scriptAbsPath;
+	line += _scriptLocation;
+	line += pathInfo;
+	_envVec.push_back(line);
+
+	line = "RFC_PATH_INFO="; 
+	line += pathInfo;
 	_envVec.push_back(line);
 
 	// PATH_TRANSLATED 
 	// this should include PATH_INFO (the way RFC defines PATH_INFO)
 	// actual PATH_INFO part is missing!!
-	line = "PATH_TRANSLATED="; 
-	line += _scriptAbsPath;
-	_envVec.push_back(line);
+	if (!pathInfo.empty())
+	{
+		line = "PATH_TRANSLATED="; 
+		line += _scriptLocation;
+		line += pathInfo;
+		_envVec.push_back(line);
+	}
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
@@ -400,7 +401,9 @@ int	CgiProcessor::_execute()
 		throw std::runtime_error("dup2 failed in CGI child process");
 	}
 	close(_socketsFromChild[1]);
+
  	execve(_args[0], _args, _env);
+	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
@@ -416,15 +419,37 @@ bool	CgiProcessor::_isSocketReady(int socket, int macro)
 
 void	CgiProcessor::_writeToChild()
 {
+	int		writeValue = 0;
+
+	// return if epoll does not allow us to write to socket
 	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
 		return ;
 
-	// FIXME: here wrtie will have to be called until written bites equal message size
-	// TODO: implement writing the body of unchunked Client Message into socket with SEND
-	write(_client->socketToChild, "check this out\n", 15);
+	// SEND
+	const std::string& bodystr = _client->getClientMsg()->getBodyString();
+
+	if (bodystr.size() > 0)
+		writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT | MSG_NOSIGNAL);
+	// std::cout << "bytes written to CGI child process: " << writeValue << std::endl;
+	_bytesSent += writeValue;
+
+	// return if full message could not be sent
+	if (_bytesSent < bodystr.size() && writeValue > 0)
+		return ;
+
+	// if unable to send full message, log error and set error Code
+	if (writeValue < 0 || (writeValue == 0 && _bytesSent < bodystr.size()))
+	{
+		Logger::error("failed to send Request Body to CGI", true);
+		_client->setErrorCode(500);
+	}
+
+	// finished writing
 	_client->hasWrittenToCgi = true;
-	Logger::warning("removing FD from epoll: ");
-	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
+
+	// closing Socket and and removing it from epoll
+	// Logger::warning("removing FD from epoll: ");
+	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollRemoveFd(_client->socketToChild);
 	close(_client->socketToChild);
 	_client->socketToChild = DELETED;
@@ -432,8 +457,7 @@ void	CgiProcessor::_writeToChild()
 
 void	CgiProcessor::_readFromChild()
 {
-	int n = 0;
-
+	int readValue = 0;
 
 	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
 	{
@@ -442,28 +466,30 @@ void	CgiProcessor::_readFromChild()
 			_client->setServerMsg(new Message(false));
 
 		_client->clearRecvLine();
-		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
-		// std::cout << "bytes read from child socket: " << n << std::endl;
+		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 		// successful read -> concat message
-		if (n > 0)
-			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), n);
+		if (readValue > 0)
+			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), readValue);
 
 		// failed read -> stop CGI and set errorcode = 500
-		if (n < 0)
+		if (readValue < 0)
 		{
 			Logger::warning("failed tor read from Child Process", true);
 			_stopCgiSetErrorCode();
 		}
 
 		// EOF reached, child has gracefully shutdown connection
-		if (n == 0)
+		if (readValue == 0 && _client->waitReturn != 0)
 		{
+			if (!_client->getServerMsg()->getHeader())
+				_client->getServerMsg()->_createHeader();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
+			// _client->getServerMsg()->printChain();
 			// copy the error code in the CgiResponseHeader into client
 			// so that errors from CGI can be processed
-			if (_client->getServerMsg() && _client->getServerMsg()->getHeader())
+			if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())
 				_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
 		}
 	}
@@ -473,8 +499,8 @@ void	CgiProcessor::_closeCgi()
 {
 	if (_client->hasReadFromCgi && _client->waitReturn > 0)
 	{
-		Logger::warning("removing FD from epoll: ");
-		std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
+		// Logger::warning("removing FD from epoll: ");
+		// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 		Data::epollRemoveFd(_client->socketFromChild);
 		close(_client->socketFromChild);
 		_client->socketFromChild = DELETED;
@@ -606,11 +632,11 @@ void	CgiProcessor::_prepareSockets()
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
-	Logger::warning("adding FD to epoll: ");
-	std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
+	// Logger::warning("adding FD to epoll: ");
+	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsToChild[0]);
-	Logger::warning("adding FD to epoll: ");
-	std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
+	// Logger::warning("adding FD to epoll: ");
+	// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
 	Data::epollAddFd(_socketsFromChild[0]);
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }

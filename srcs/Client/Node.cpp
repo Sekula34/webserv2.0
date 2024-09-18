@@ -15,7 +15,9 @@ _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(0),
 _chunkHeader(false),
-_request(true)
+_request(true),
+_hasNewline(false),
+_hasCgiDel(false)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -29,7 +31,9 @@ _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(0),
 _chunkHeader(false),
-_request(request)
+_request(request),
+_hasNewline(false),
+_hasCgiDel(false)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -43,7 +47,9 @@ _chunkSize(0),
 _chunkHeaderSize(0),
 _bodySize(size),
 _chunkHeader(false),
-_request(request)
+_request(request),
+_hasNewline(false),
+_hasCgiDel(false)
 {
 	// std::cout << "Node default constructor called" << std::endl;
 }
@@ -70,7 +76,9 @@ _chunkSize(src._chunkSize),
 _chunkHeaderSize(src._chunkHeaderSize),
 _bodySize(src._bodySize),
 _chunkHeader(src._chunkHeader),
-_request(src._request)
+_request(src._request),
+_hasNewline(src._hasNewline),
+_hasCgiDel(src._hasCgiDel)
 {
 	//std::cout << "Node copy constructor called" << std::endl;
 	*this = src;
@@ -88,6 +96,12 @@ Node &	Node::operator=(Node const & rhs)
 	}
 	return (*this);
 }
+
+bool	Node::getHasCgiDel()
+{
+	return (_hasCgiDel);
+}
+
 void	Node::setString(const std::string & s)
 {
 	_str = s;
@@ -172,9 +186,7 @@ std::string	Node::_chunk()
 {	
 	std::stringstream ss;
 	std::string result;
-	//std::string del = {'\r','\n'};
-	std::string del("\r\n");
-
+	std::string del = ("\r\n");
 	ss << std::hex << _str.size();
 	result = ss.str() + del + _str + del;
 	return (result);
@@ -185,8 +197,7 @@ std::string	Node::_unChunk()
 	if (_str.size() == 0)
 		return (std::cout << "can't unchunk empty string", "");
 	std::string uc_str;
-	// std::string del = {'\r', '\n'};
-	std::string del("\r\n");
+	std::string del = ("\r\n");
 	std::size_t found = 0;
 
 	found = _str.find(del);
@@ -256,22 +267,52 @@ bool	Node::_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t
 	return (true);
 }
 
-void	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
+size_t	Node::_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num)
 {
 	std::string remainDel = _getRemainDel(del);
-	// if (remainDel.size() < del.size() && _bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer))
 	if (bufferPos == 0 && _checkRemainDelIsBufStart(remainDel, buffer, bufferPos))
-		_btr = remainDel.size();
+		return (remainDel.size());
 	else
 	{
 		size_t	tmp = ft_strstr(buffer, remainDel, bufferPos, num);
 		if (tmp == 0)
-		{
-			_btr = num;
-			return ;
-		}
-		_btr = tmp + remainDel.size();
+			return (num);
+		return (tmp + remainDel.size());
 	}
+}
+
+size_t	Node::_calcBtrCgi(char* buffer, size_t & bufferPos, size_t num)
+{
+	size_t i = bufferPos;
+
+	for (;i < num; i++)
+	{
+		if (buffer[i] == '\r' && _hasNewline)
+		{
+			_hasCgiDel = true;
+			continue ;
+		}
+		if (buffer[i] == '\n')
+		{
+			if (_hasNewline)
+			{
+				_state = COMPLETE;
+				return (++i);
+			}
+	  		else
+	  			_hasNewline = true;
+		}
+		if (buffer[i] != '\r' && buffer[i] != '\n')
+		{
+			if (_hasCgiDel)
+			{
+				_state = COMPLETE;
+				return (i);
+			}
+			_hasNewline = false;
+		}
+	}
+	return (i);
 }
 
 void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
@@ -280,23 +321,21 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	if (_type == HEADER || _type == TRAILER)
 	{
 		if (_request)
-			del = "\r\n\r\n";// del = {'\r','\n','\r','\n'};
+			_btr = _calcBtr(buffer, "\r\n\r\n", bufferPos, num);
 		else
-			del = "\n\n";// del = {'\n','\n'};
-		_calcBtr(buffer, del, bufferPos, num);
+			_btr = _calcBtrCgi(buffer, bufferPos, num);
 	}
+
+
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
-		del = "\r\n";// del = {'\r','\n'};
-		_calcBtr(buffer, del, bufferPos, num);
+		del = "\r\n";
+		_btr = _calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)
 	{
 		if (_request || _bodySize)
-		{
-			std::cout << "body size in Node of Body: "<< _bodySize << std::endl;
 			_btr = _bodySize - _str.size();
-		}
 		else
 			_btr = num - bufferPos;
 	}
@@ -311,7 +350,7 @@ void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
 	
 	// sets variable _btr, which is the bytes to read from buffer
 	// _btr is based on finding the delimiter of Header and Chunk in buffer
-	// or on bodysize and chunksize if applicable
+	// or it is based on bodysize and chunksize if applicable
 	_setBtr(buffer, bufferPos, num);
 
 	// increase the size of string so it can hold the new bytes (_btr)

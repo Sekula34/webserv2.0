@@ -98,6 +98,7 @@ const std::string	Message::getBodyString()
 	{
 		_chunksToBody();
 		_chunked = false;
+		_trailer = false;
 	}
 	_findBody(it);
 	if (it == _chain.begin())
@@ -129,7 +130,7 @@ void	Message::printChain()
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
 		if (it->getType() == TRAILER)
 			std::cout << "Node Type: TRAILER, string: " << std::endl;
- 		std::cout << it->getStringUnchunked() << std::endl << std::endl;
+		Logger::chars(it->getStringUnchunked(), true);
 	}
 }
 
@@ -217,6 +218,23 @@ void	Message::_chunksToBody()
 	_chain.back().setState(COMPLETE);
 }
 
+std::string	Message::_createCgiHeaderDel()
+{
+	const std::string& str = _chain.begin()->getStringUnchunked();
+	if (!_chain.begin()->getHasCgiDel())
+		return ("\n\n");
+	size_t found = str.rfind("\n");
+	if (found == str.size() - 1)
+	found = str.rfind("\n", str.size() - 2);
+	if (found != std::string::npos)
+	{
+		std::cout << "created this CGI Header Delimiter: " << std::endl;
+		Logger::chars(str.substr(found, str.size()), true);
+		return (str.substr(found, str.size()));
+	}
+	return ("\n\n");
+}
+
 void	Message::_createHeader()
 {
 	if(_header != NULL)
@@ -224,7 +242,7 @@ void	Message::_createHeader()
 	if (_request)
 		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
 	else
-		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n");
+		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n", _createCgiHeaderDel());
 
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
@@ -252,8 +270,10 @@ void	Message::_headerInfoToNode()
 		_ss >> num;
 		_it->setBodySize(num);
 	}
+	// set whether we are expecting a TRAILER or not
 	if (_header->getHeaderFieldMap().find("Trailer") != _header->getHeaderFieldMap().end())
 		_trailer = true;
+	// set whether we are expecting CHUNKS or not
 	found = _header->getHeaderFieldMap().find("Transfer-Encoding");
 	if (found != _header->getHeaderFieldMap().end() && found->second.find("chunked") != std::string::npos)
 		_chunked = true;
@@ -263,10 +283,7 @@ void	Message::_addNewNode()
 {
 	// create REGULAR BODY NODE if message unchunked and header is complete
 	if (_it->getType() == HEADER && !_chunked && _header)
-	{
-			std::cout << "body size of saved in header: " << _it->getBodySize()<<std::endl;
 			_chain.push_back(Node("", BODY, _it->getBodySize(), _request));
-	}
 
 	// create CHUNKED BODY NODE if message is chunked and body is complete
 	if (_it->getType() != LCHUNK && _chunked)
@@ -291,20 +308,18 @@ size_t	Message::_calcChunkSize(std::string s)
 }
 
 
-void	Message::_isNodeComplete(size_t bufferPos, size_t num)
+void	Message::_isNodeComplete()
 {
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
 	{
-		std::string del;
-		if (_request)
-			del = "\r\n\r\n";
-		else
-			del = "\n\n";
-		if (_it->getStringUnchunked().find(del) != std::string::npos)	
-			_it->setState(COMPLETE);
-		if (num < MAXLINE && bufferPos == num)
-			_it->setState(COMPLETE);
+		if (_request || _it->getType() == TRAILER)
+		{
+			if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
+				_it->setState(COMPLETE);
+		}
+		// else if (_it->getHasCgiDel())
+		// 	_it->setState(COMPLETE);
 	}
 
 	// is CHUNK HEADER complete?
@@ -333,7 +348,7 @@ void	Message::_isNodeComplete(size_t bufferPos, size_t num)
 	}
 }
 
-void	Message::_parseNode(size_t bufferPos, size_t num)
+void	Message::_parseNode()
 {
 	// if message is chunked -> read chunk header and set _btr
 	// if chunk header is size 0 set Type to LCHUNK
@@ -366,26 +381,22 @@ void	Message::_parseNode(size_t bufferPos, size_t num)
 		// if body size is 0 and message not chunked and message is a request then Message is complete
 		if (!_chunked && _it->getBodySize() == 0 && _request)
 			_state = COMPLETE;
-		if (num < MAXLINE && bufferPos == num)
-			_state = COMPLETE;
 	}
 	
-	// if Trailer, complete the header with info from trailer
+	// TODO: if Trailer, complete the header with info from trailer
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)
 {
 	size_t	bufferPos = 0;
+	// std::cout << "buffer: ";
+	// Logger::chars(buffer, true);
 	while (bufferPos < num && _state == INCOMPLETE)
 	{
-		_it->concatString(buffer, bufferPos, num);
-		_isNodeComplete(bufferPos, num);
-		_parseNode(bufferPos, num);
-		// _checkNode();
-		// if (num < MAXLINE && bufferPos == num && _it->getType() == HEADER && _it->getState() == COMPLETE)
-		// 	_state = COMPLETE;
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
+		_it->concatString(buffer, bufferPos, num);
+		_isNodeComplete();
+		_parseNode();
 	}
-	// printChain();
 }

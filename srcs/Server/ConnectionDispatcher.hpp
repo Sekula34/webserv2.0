@@ -39,9 +39,8 @@ class ConnectionDispatcher
 		Client* 					_isClient(int fd);
 		bool						_handleServerSocket(size_t idx);
 		void						_handleClient(Client& client, int idx);
-		bool						_checkReceiveError(Client& client, int n, int peek);
+		bool						_checkReceiveError(Client& client, int n);
 		void						_checkEndHeader(Client& client, int n);
-		void						_peek(Client* client, int n, int & peek);
 		void						_addServerSocketsToEpoll(void);
 		void						_checkCgi(Client& client);
 		bool 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);
@@ -53,6 +52,8 @@ class ConnectionDispatcher
 		void						_processAnswer(Client& client);
 		bool						_catchEpollErrorAndSignal();
 		void						_shutdownCgiChildren();
+		void						_deleteClient(Client& client);
+		void						_incompleteMessage(Client & client, int idx);
 		static void					_checkIfScriptExtensionIsSupported(const LocationSettings& location, Client& client);
 
 		/**

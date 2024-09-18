@@ -121,7 +121,7 @@ void	ConnectionDispatcher::clientsRemoveFd(Client* client)
 	_clients.erase(client->getFd());
 }
 
-bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
+bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n)
 {
 	// this checks every time we go through loop. Maybe not necessary
 	if (client.getClientMsg() && client.getClientMsg()->getHeader()
@@ -130,49 +130,27 @@ bool	ConnectionDispatcher::_checkReceiveError(Client& client, int n, int peek)
 		client.setErrorCode(client.getClientMsg()->getHeader()->getHttpStatusCode()); 
 	}
 
-	if (n <= 0 || peek < 0 || client.getClientMsg()->getState() == ERROR)
+	if (n <= 0 || client.getClientMsg()->getState() == ERROR)
 	{
 		if (n == 0)
 			Logger::warning("reading 0 bytes from client, deleting client", true);
 		// we are closing right now on n == 0 but we should not if keep-alive is on!!!!!!
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		if (n < 0 || peek < 0)
+		if (n < 0)
 			Logger::error("receiving from Client", true);
 		if (client.getClientMsg()->getState() == ERROR)
 			Logger::error("Invalid Request", true);
-		delete &client;
+		_deleteClient(client);
 		return (false);
 	}
 	return (true);
 }
-
-void	ConnectionDispatcher::_peek(Client* client, int n, int & peek)
+void	ConnectionDispatcher::_incompleteMessage(Client & client, int idx)
 {
-	if (n > 0)
-	{
-		// if (n == MAXLINE && client->getClientMsg()->getChain().begin()->getState() == INCOMPLETE)
-		if (n == MAXLINE && client->getClientMsg()->getState() == INCOMPLETE)
-			peek = recv(client->getFd(), client->getRecvLine(), MAXLINE, MSG_PEEK | MSG_DONTWAIT);
-	}
-}
-
-bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
-{
-	if (Data::setEvents()[idx].events & EPOLLIN)
-	{
-		client.clearRecvLine();
-		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT);
-		// std::cout << "trying to read n: " << n << std::endl;
-		return (true);
-	}
-
-	// handeling the case where we receive a Request from Client that has no proper delimiter
 	if (!(Data::setEvents()[idx].events & EPOLLIN) && client.getClientMsg()
 		&& client.getClientMsg()->getState() == INCOMPLETE
 		&& client.getClientMsg()->getIterator()->getStringUnchunked().size() != 0)
 	{
-		// if we are at header, set header to complete and parse the header 
+		// if we are at header, parse the header 
 		if (client.getClientMsg()->getIterator()->getType() == HEADER && !client.getClientMsg()->getHeader())
 		{
 			client.getClientMsg()->_createHeader();
@@ -181,29 +159,55 @@ bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
 		client.getClientMsg()->getIterator()->setState(COMPLETE);
 		client.getClientMsg()->setState(COMPLETE);
 	}
+}
+
+bool	ConnectionDispatcher::readFd(int fd, Client & client, int & n, int idx)
+{
+	if (Data::setEvents()[idx].events & EPOLLIN)
+	{
+		client.clearRecvLine();
+		n = recv(fd, client.getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+		// std::cout << "trying to read n: " << n << std::endl;
+		return (true);
+	}
+
+	// we have started to recieve message but reading has stopped and Message is incomplete
+	_incompleteMessage(client, idx);
 
 	// if no activity from Client then delete Client
 	if (!client.checkTimeout())
-	{
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		delete &client;
-	}
+		_deleteClient(client);
 	return (false);
+}
+
+void	ConnectionDispatcher::_deleteClient(Client& client)
+{
+	clientsRemoveFd(&client);
+	Data::epollRemoveFd(client.getFd());
+	delete &client;
 }
 
 void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 {
-	if (Data::setEvents()[idx].events & EPOLLOUT)
+	bool allowedToSend = Data::setEvents()[idx].events & EPOLLOUT;
+	bool finishedSending = false;
+
+	// if FD is available to be written to write Response to Client
+	if (allowedToSend)
+		finishedSending = client.getResponse()->sendResponse();
+
+	// save how many bytes we have sent so far to Client
+	size_t bytesSent = client.getResponse()->getBytesSent();
+
+	// delete Client if full message has been sent
+	// or something went wrong during sending
+	if (finishedSending || (!allowedToSend && bytesSent != 0))
 	{
-		bool result = client.getResponse()->sendResponse();
-		if(result == true)
-			Logger::info("The response  was sent successfully", true);
+		if (finishedSending)
+			Logger::info("finished sending Response to Client", true);
 		else
-			Logger::warning("Sending response had some error");
-		clientsRemoveFd(&client);
-		Data::epollRemoveFd(client.getFd());
-		delete &client;
+			Logger::error("unable to send full Response to Client", true);
+		_deleteClient(client);
 	}
 }
 
@@ -229,7 +233,7 @@ bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 {
 	Logger::info("Called cgi parse url", true);
 	std::string fileName = ParsingUtils::getFileNameFromUrl( static_cast<RequestHeader *>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), cgiLocation.getLocationUri());
-	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/");
+	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/", false);
 	if(scriptName == "")
 		scriptName = fileName;
 	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false)
@@ -239,8 +243,9 @@ bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 		return false;
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
-	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
-	Logger::info("Script name and file extension are setted and path info are setted ", false);
+	// _setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
+	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptName, client);
+	Logger::info("ScriptName, fileExtension and pathInfo are set", false);
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptName() << " " << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension() << " ";
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiPathInfo() << std::endl;
 	return true;
@@ -329,7 +334,6 @@ void	ConnectionDispatcher::_runCgi(Client& client)
 bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 {
 	int			n = 0;
-	int			peek = 0;
 
 	// allocate new Message instance if necessary
 	if (!client.getClientMsg())
@@ -347,12 +351,9 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (n > 0)
 		client.getClientMsg()->bufferToNodes(client.getRecvLine(), n);
 
-	// PEEK IN ORDER TO RULE OUT THE POSSIBILITY OF BLOCKING ON NEXT READ
-	// _peek(&client, n, peek);
-
-	// UNSUCCESSFUL RECIEVE OR ERR IN MESSAGE 
+	// UNSUCCESSFUL RECEIVE OR ERR IN MESSAGE 
 	// REMOVE CLIENT FROM CLIENTS AND EPOLL. DELETE CLIENT. LOG ERR MSG
-	if (!_checkReceiveError(client, n, peek))
+	if (!_checkReceiveError(client, n))
 		return (false);
 
 	return (true);
@@ -370,8 +371,6 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 	if (client.getCgi() && client.cgiRunning)
 		return ;
 
-	// if (client.getServerMsg())
-	// 	client.getServerMsg()->printChain();
 	// PROCESS ANSWER
 	_processAnswer(client);
 
