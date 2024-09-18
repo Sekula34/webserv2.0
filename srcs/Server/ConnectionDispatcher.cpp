@@ -233,7 +233,7 @@ bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 {
 	Logger::info("Called cgi parse url", true);
 	std::string fileName = ParsingUtils::getFileNameFromUrl( static_cast<RequestHeader *>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), cgiLocation.getLocationUri());
-	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/");
+	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/", false);
 	if(scriptName == "")
 		scriptName = fileName;
 	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false)
@@ -243,8 +243,9 @@ bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 		return false;
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
-	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
-	Logger::info("Script name and file extension are setted and path info are setted ", false);
+	// _setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
+	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptName, client);
+	Logger::info("ScriptName, fileExtension and pathInfo are set", false);
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptName() << " " << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension() << " ";
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiPathInfo() << std::endl;
 	return true;

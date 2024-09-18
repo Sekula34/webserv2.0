@@ -230,6 +230,7 @@ void	CgiProcessor::_initScriptVars()
 void	CgiProcessor::_createEnvVector()
 {
 	std::string	line;
+	std::string pathInfo = (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getCgiPathInfo();
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
@@ -263,15 +264,24 @@ void	CgiProcessor::_createEnvVector()
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
 	// actual PATH_INFO part is missing!!
 	line = "PATH_INFO="; 
-	line += _scriptAbsPath;
+	line += _scriptLocation;
+	line += pathInfo;
+	_envVec.push_back(line);
+
+	line = "RFC_PATH_INFO="; 
+	line += pathInfo;
 	_envVec.push_back(line);
 
 	// PATH_TRANSLATED 
 	// this should include PATH_INFO (the way RFC defines PATH_INFO)
 	// actual PATH_INFO part is missing!!
-	line = "PATH_TRANSLATED="; 
-	line += _scriptAbsPath;
-	_envVec.push_back(line);
+	if (!pathInfo.empty())
+	{
+		line = "PATH_TRANSLATED="; 
+		line += _scriptLocation;
+		line += pathInfo;
+		_envVec.push_back(line);
+	}
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
