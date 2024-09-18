@@ -9,6 +9,7 @@ const std::string Logger::YELLOW = "\033[33m";
 const std::string Logger::RED = "\033[31m";
 const std::string Logger::RESET = "\033[0m";
 const std::string Logger::BLUE = "\033[34m";
+const std::string Logger::PURPLE = "\033[35m";
 
 
 
@@ -76,9 +77,9 @@ void Logger::chars(std::string message, bool newline)
     {
         return;
     }
-	std::cout << BLUE;
+	std::cout << PURPLE;
 	_printCurrentTime();
-	std::cout <<"INFO: " << RESET;
+	std::cout <<"CHARS: " << RESET;
 	printEscapeCharacters(message);
     if(newline == true)
         std::cout << std::endl;

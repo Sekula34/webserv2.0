@@ -22,6 +22,7 @@ class Logger
 		static const std::string RED;
 		static const std::string RESET;
 		static const std::string BLUE;
+		static const std::string PURPLE;
 		static void _printCurrentTime();
 		static bool _isPrintingAllowed();
 

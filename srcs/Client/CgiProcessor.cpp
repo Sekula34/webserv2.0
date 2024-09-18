@@ -1,4 +1,3 @@
-
 #include "../Server/SocketManager.hpp"
 #include "../Server/Socket.hpp"
 #include "../Utils/Data.hpp"
@@ -111,13 +110,7 @@ int	CgiProcessor::getPid()
 */
 
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
-// Just remember that, for chunked request, your server needs to unchunk it
-// parse header
 // if no header or incomplete header, create header
-// If no content_length is returned from CGI, EOF will mark the end of the returned data.
-// check return of write to child,
-// use send instead of write to child?
-// call write to child multiple times untill whole message has been written
 // finish alls meta-variables
 
 std::string operatingSystem()
@@ -197,12 +190,10 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 
 void	CgiProcessor::_initScriptVars()
 {
-	// the suffix should come from url parser
+	// the suffix is .py or .php
 	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
 
-	// this should happen when parsing the config file
-	// Data::setCgiLang(suffix, "python3");
-
+	// this is the location on the server and is hardcoded
 	std::string location = "/cgi-bin/";
 
 	// go through PATH variable and check whether interpreter is installed
@@ -215,7 +206,6 @@ void	CgiProcessor::_initScriptVars()
 	}
 
 	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
-	// _scriptName = getScriptName(suffix);
 	if (_scriptName.empty())
 		return ;
 
@@ -225,7 +215,7 @@ void	CgiProcessor::_initScriptVars()
 	_scriptLocation = Data::findStringInEnvp("PWD=") + location
 		+ Data::getCgiLang().at(suffix);
 
-	std::cout << _scriptAbsPath << std::endl;
+	// Logger::info(_scriptAbsPath, true);
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
 	{
 		Logger::warning("CGI script not executable: ");
@@ -403,6 +393,7 @@ int	CgiProcessor::_execute()
 	close(_socketsFromChild[1]);
 
  	execve(_args[0], _args, _env);
+	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
@@ -485,7 +476,7 @@ void	CgiProcessor::_readFromChild()
 				_client->getServerMsg()->_createHeader();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
-			_client->getServerMsg()->printChain();
+			// _client->getServerMsg()->printChain();
 			// copy the error code in the CgiResponseHeader into client
 			// so that errors from CGI can be processed
 			if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())

@@ -1,7 +1,7 @@
 <?php
 // Output the necessary HTTP header for CGI scripts
-echo "Content-Type: text\n\r";
-//echo "Something: hi\r\r\n";
+echo "Something: hi\r\r\n";
+echo "Content-Type: text\r\n\r\n";
 
 // Start outputting HTML content
 echo "<!DOCTYPE html>";
