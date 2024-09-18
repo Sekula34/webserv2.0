@@ -485,6 +485,7 @@ void	CgiProcessor::_readFromChild()
 				_client->getServerMsg()->_createHeader();
 			_client->getServerMsg()->setState(COMPLETE);
 			_client->hasReadFromCgi = true;
+			_client->getServerMsg()->printChain();
 			// copy the error code in the CgiResponseHeader into client
 			// so that errors from CGI can be processed
 			if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())

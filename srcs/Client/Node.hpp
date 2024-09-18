@@ -40,6 +40,7 @@ class Node {
 		size_t				getChunkSize() const;
 		size_t				getBodySize() const;
 		size_t				getChunkHeaderSize();
+		bool				getHasCgiDel();
 		void				setType(int type);
 		void				setChunkHeader(bool b);
 		void				setBodySize(const size_t size);
@@ -57,6 +58,8 @@ class Node {
 		size_t				_bodySize; // if this node is a BODY this will be it's size
 		bool				_chunkHeader; // flag to indicate that we have set chunkSize
 		bool				_request;
+		bool				_hasNewline;
+		bool				_hasCgiDel;
 		// std::stringstream 	_ss;
 
 							//Node specific functions
@@ -64,7 +67,8 @@ class Node {
 		std::string			_chunk();
 		std::string			_unChunk();
 		bool				_checkRemainDelIsBufStart(std::string remainDel, char* buffer, size_t bufferPos);
-		void				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
+		size_t				_calcBtr(char* buffer, std::string del, size_t & bufferPos, size_t num);
+		size_t				_calcBtrCgi(char* buffer, size_t & bufferPos, size_t num);
 		void				_setBtr(char* buffer, size_t & bufferPos, size_t num);
 
 		Node &				operator=(Node const & rhs);

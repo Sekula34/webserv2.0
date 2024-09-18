@@ -130,7 +130,7 @@ void	Message::printChain()
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
 		if (it->getType() == TRAILER)
 			std::cout << "Node Type: TRAILER, string: " << std::endl;
- 		std::cout << it->getStringUnchunked() << std::endl << std::endl;
+		Logger::chars(it->getStringUnchunked(), true);
 	}
 }
 
@@ -218,6 +218,23 @@ void	Message::_chunksToBody()
 	_chain.back().setState(COMPLETE);
 }
 
+std::string	Message::_createCgiHeaderDel()
+{
+	const std::string& str = _chain.begin()->getStringUnchunked();
+	if (!_chain.begin()->getHasCgiDel())
+		return ("\n\n");
+	size_t found = str.rfind("\n");
+	if (found == str.size() - 1)
+	found = str.rfind("\n", str.size() - 2);
+	if (found != std::string::npos)
+	{
+		std::cout << "created this CGI Header Delimiter: " << std::endl;
+		Logger::chars(str.substr(found, str.size()), true);
+		return (str.substr(found, str.size()));
+	}
+	return ("\n\n");
+}
+
 void	Message::_createHeader()
 {
 	if(_header != NULL)
@@ -225,7 +242,7 @@ void	Message::_createHeader()
 	if (_request)
 		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
 	else
-		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n");
+		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n", _createCgiHeaderDel());
 
 	 
 		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
@@ -294,13 +311,13 @@ void	Message::_isNodeComplete()
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
 	{
-		std::string del;
-		if (_request)
-			del = "\r\n\r\n";
-		else
-			del = "\n\n";
-		if (_it->getStringUnchunked().find(del) != std::string::npos)	
-			_it->setState(COMPLETE);
+		if (_request || _it->getType() == TRAILER)
+		{
+			if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
+				_it->setState(COMPLETE);
+		}
+		// else if (_it->getHasCgiDel())
+		// 	_it->setState(COMPLETE);
 	}
 
 	// is CHUNK HEADER complete?
@@ -364,7 +381,7 @@ void	Message::_parseNode()
 			_state = COMPLETE;
 	}
 	
-	// if Trailer, complete the header with info from trailer
+	// TODO: if Trailer, complete the header with info from trailer
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)

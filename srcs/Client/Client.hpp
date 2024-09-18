@@ -21,7 +21,7 @@
 //# include "CgiProcessor.hpp"
 
 # define MAXLINE			4096
-// # define MAXLINE			2
+// # define MAXLINE			1
 # define MAX_TIMEOUT		3000
 # define DELETED			-1 
 

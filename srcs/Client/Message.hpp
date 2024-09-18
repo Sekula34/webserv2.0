@@ -49,6 +49,7 @@ class Message {
 		void						_findBody(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
 		Node						_newChunkNode(size_t size);
+		std::string					_createCgiHeaderDel();
 		// void						_createHeader();
 		// void						_headerInfoToNode();
 
