@@ -172,7 +172,8 @@ std::string	Node::_chunk()
 {	
 	std::stringstream ss;
 	std::string result;
-	std::string del = {'\r','\n'};
+	//std::string del = {'\r','\n'};
+	std::string del("\r\n");
 
 	ss << std::hex << _str.size();
 	result = ss.str() + del + _str + del;
@@ -184,7 +185,8 @@ std::string	Node::_unChunk()
 	if (_str.size() == 0)
 		return (std::cout << "can't unchunk empty string", "");
 	std::string uc_str;
-	std::string del = {'\r', '\n'};
+	// std::string del = {'\r', '\n'};
+	std::string del("\r\n");
 	std::size_t found = 0;
 
 	found = _str.find(del);
@@ -278,14 +280,14 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	if (_type == HEADER || _type == TRAILER)
 	{
 		if (_request)
-			del = {'\r','\n','\r','\n'};
+			del = "\r\n\r\n";// del = {'\r','\n','\r','\n'};
 		else
-			del = {'\n','\n'};
+			del = "\n\n";// del = {'\n','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
-		del = {'\r','\n'};
+		del = "\r\n";// del = {'\r','\n'};
 		_calcBtr(buffer, del, bufferPos, num);
 	}
 	if (_type == BODY)

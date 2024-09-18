@@ -31,9 +31,19 @@ m_httpErrorCode(0)
 }
 
 AHeader::AHeader(const AHeader& source)
-:AHeader(source.m_headerSection)
+:m_headerSection(source.m_headerSection)
 {
-
+	if(_fillHeaderFieldMap() == false)
+	{
+		Logger::error("Error while filling header field map", true);
+		return;
+	}
+	if(_checkHeaderFields() == false)
+	{
+		Logger::error("checking header fields failed", true);
+		return;
+	}
+	Logger::info("Header fileds map is successfully filled", true);
 }
 
 AHeader& AHeader::operator=(const AHeader& source)
