@@ -21,7 +21,7 @@ std::vector<Token>& serverTokens)
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
 	_locationDirectives = _setLocationDirectives();
-	checkDuplicateDirectives(_locationDirectives);
+	//checkDuplicateDirectives(_locationDirectives);
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 LocationSettings::LocationSettings(const DefaultSettings& settings,
@@ -158,4 +158,14 @@ bool LocationSettings::isCgiLocation(void) const
 	if(getCgiExtensions().size() == 0)
 		return false;
 	return true;
+}
+
+bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) const
+{
+	for(size_t i = 0; i < m_cgiExtensions.size(); i++)
+	{
+		if(m_cgiExtensions[i] == scriptExtension)
+			return true;
+	}
+	return false;
 }

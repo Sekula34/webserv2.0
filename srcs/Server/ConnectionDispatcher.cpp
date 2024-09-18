@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <sys/select.h>
 #include <unistd.h>
@@ -211,34 +213,23 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 
 void	ConnectionDispatcher::_checkCgi(Client& client)
 {
-	if (!client.cgiChecked && client.getErrorCode() == 0)
+	client.cgiChecked = true;
+	const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
+	if (!clientServer)
+		return ;
+	bool locFound = false;
+	std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, *clientServer, locFound);
+	if(locFound)
 	{
-		client.cgiChecked= true;
-		client.cgiChecked = true;
-		bool found = true;
-		const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
-		if (!clientServer)
-			return ;
-
-		bool locFound = false;
-		std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, *clientServer, locFound);
-		if(locFound)
-		{
-			Logger::info("Cgi checked and it exist on this location :", false); std::cout << location->getLocationUri() << std::endl;
-			_parseCgiURLInfo(*location, client);
-			RequestHeader* clientHeader = static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
-			std::string ServerLocation = clientServer->getLocationURIfromPath(clientHeader->urlSuffix->getPath());
-			std::vector<LocationSettings>::const_iterator it = clientServer->fetchLocationWithUri(ServerLocation, found);
-			if (found == true && it->getLocationUri() == "/cgi-bin/")  //this can be changed in cofig maybe
-			{ 
-				Logger::warning("Cgi checked and it exist on this location", true);
-				client.setCgi(new CgiProcessor(client));
-			}
-		}
+		Logger::info("Cgi checked and it exist on this location :", false); std::cout << location->getLocationUri() << std::endl;
+		if(_parseCgiURLInfo(*location, client) == true)
+			ConnectionDispatcher::_checkIfScriptExtensionIsSupported(*location, client);
 	}
+	else
+		Logger::info("This is not cgi", true);
 }
 
-void ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
+bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
 {
 	Logger::info("Called cgi parse url", true);
 	std::string fileName = ParsingUtils::getFileNameFromUrl( static_cast<RequestHeader *>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), cgiLocation.getLocationUri());
@@ -249,13 +240,36 @@ void ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 	{
 		Logger::warning("Implemted  some error code that is not correct");
 		client.setErrorCode(400);
-		return;
+		return false;
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
 	_setCgiPathInfo(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getPath(), scriptPath, client);
 	Logger::info("Script name and file extension are setted and path info are setted ", false);
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptName() << " " << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension() << " ";
 	std::cout << static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->getCgiPathInfo() << std::endl;
+	return true;
+}
+
+void ConnectionDispatcher::_checkIfScriptExtensionIsSupported(const LocationSettings& location, Client& client)
+{
+	RequestHeader* header = static_cast<RequestHeader *>(client.getClientMsg()->getHeader());
+	if(header == NULL)
+	{
+		std::ostringstream oss;
+		oss << "header is null i am setting 500. This should not happen";
+		Logger::error(oss.str(), true);
+		return;
+	}
+	std::string requestedScriptExtension = header->urlSuffix->getCgiScriptExtension();
+	if(location.isCgiExtensionSet(requestedScriptExtension) == true)
+		client.setCgi(new CgiProcessor(client));
+	else
+	{
+		std::ostringstream oss; 
+		oss << "403 is set because requested script extension " << requestedScriptExtension << " is not supported on location " << location.getLocationUri();
+		Logger::error(oss.str(), true);
+		client.setErrorCode(403);
+	}
 }
 
 void ConnectionDispatcher::_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client)
@@ -309,7 +323,8 @@ std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocat
 
 void	ConnectionDispatcher::_runCgi(Client& client)
 {
-	_checkCgi(client);
+	if (!client.cgiChecked && client.getErrorCode() == 0)
+		_checkCgi(client);
 	if (!client.getCgi() || !client.cgiRunning)
 		return ;
 	client.getCgi()->process();

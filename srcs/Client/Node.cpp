@@ -187,7 +187,6 @@ std::string	Node::_chunk()
 	std::stringstream ss;
 	std::string result;
 	std::string del = ("\r\n");
-
 	ss << std::hex << _str.size();
 	result = ss.str() + del + _str + del;
 	return (result);
@@ -326,6 +325,8 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 		else
 			_btr = _calcBtrCgi(buffer, bufferPos, num);
 	}
+
+
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
 		del = "\r\n";

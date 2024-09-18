@@ -43,7 +43,7 @@ class ConnectionDispatcher
 		void						_checkEndHeader(Client& client, int n);
 		void						_addServerSocketsToEpoll(void);
 		void						_checkCgi(Client& client);
-		void 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);
+		bool 						_parseCgiURLInfo(const LocationSettings& cgiLocation, Client& client);
 		void						_setCgiPathInfo(const std::string& fullUrl, const std::string fileName, Client& client);
 		bool						_isCgiPathInfoValid(std::string pathInfo);
 		std::vector<LocationSettings>::const_iterator	_setCgiLocation(Client& client, const ServerSettings& cgiServer, bool& foundLoc);
@@ -54,6 +54,7 @@ class ConnectionDispatcher
 		void						_shutdownCgiChildren();
 		void						_deleteClient(Client& client);
 		void						_incompleteMessage(Client & client, int idx);
+		static void					_checkIfScriptExtensionIsSupported(const LocationSettings& location, Client& client);
 
 		/**
 		 * @brief creates Response instace that is forwarded to client. Client is resposible for deleting

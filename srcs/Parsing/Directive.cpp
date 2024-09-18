@@ -24,7 +24,7 @@ const std::string Directive:: _validLocationDirectives[] = {"error_page", "clien
 "autoindex", "index", "limit_except", "root", "extension"};
 
 //directive that can be present only once
-const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except"};
+const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension"};
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
@@ -450,11 +450,11 @@ bool Directive::isDuplicateDirectiveNamePresent(const std::vector<Directive> &di
 	FindbyDirectiveName functor(nameToCheck);
 	duplicateDir = NULL;
 
-	firstIt = std::find_if(directives.cbegin(), directives.cend(), functor);
-	if(firstIt == directives.cend())
+	firstIt = std::find_if(directives.begin(), directives.end(), functor);
+	if(firstIt == directives.end())
 		return false;
-	secondIt = std::find_if(std::next(firstIt), directives.cend(), functor);
-	if(secondIt == directives.cend())
+	secondIt = std::find_if(firstIt++, directives.end(), functor);
+	if(secondIt == directives.end())
 		return false;
 	duplicateDir = &(*secondIt);
 	return true;

@@ -28,7 +28,7 @@ ServersInfo::ServersInfo(std::string configPath)
 
 	DefaultSettings defSettings;
 	_setHttpDirectives();
-	DefaultSettings::checkDuplicateDirectives(_httpDirectives);
+	//DefaultSettings::checkDuplicateDirectives(_httpDirectives);
 	Directive::applyAllDirectives(_httpDirectives, defSettings);
 	for(int i = 1; i <= _numberOfServers; i++)
 	{

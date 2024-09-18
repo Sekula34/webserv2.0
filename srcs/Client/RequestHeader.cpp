@@ -36,7 +36,8 @@ _fullRequest(getFullRequest(message))
 }
 
 RequestHeader::RequestHeader(const RequestHeader& source)
-:RequestHeader(source._fullRequest)
+:AHeader(getHeaderSectionString(source.m_headerSection)),
+_fullRequest(getFullRequest(source.getFullMessage()))
 {
 
 }

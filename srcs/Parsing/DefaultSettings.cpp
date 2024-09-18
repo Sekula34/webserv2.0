@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <iostream>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
 #include "NginxReturn.hpp"
@@ -219,4 +220,12 @@ const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
 const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
 {
 	return m_cgiExtensions;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const DefaultSettings& settings)
+{
+	os << "Default Settings print " << std::endl;
+	ParsingUtils::printVector(settings.m_cgiExtensions, "Cgi extensions"); 
+	return os;
 }
