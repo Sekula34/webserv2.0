@@ -270,8 +270,10 @@ void	Message::_headerInfoToNode()
 		_ss >> num;
 		_it->setBodySize(num);
 	}
+	// set whether we are expecting a TRAILER or not
 	if (_header->getHeaderFieldMap().find("Trailer") != _header->getHeaderFieldMap().end())
 		_trailer = true;
+	// set whether we are expecting CHUNKS or not
 	found = _header->getHeaderFieldMap().find("Transfer-Encoding");
 	if (found != _header->getHeaderFieldMap().end() && found->second.find("chunked") != std::string::npos)
 		_chunked = true;
