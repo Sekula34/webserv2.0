@@ -17,7 +17,7 @@ AHeader::AHeader(const std::string& headerSection)
 : m_headerSection(headerSection),
 m_httpErrorCode(0)
 {
-	if(_fillHeaderFieldMap() == false)
+	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
 		Logger::error("Error while filling header field map", true);
 		return;
@@ -33,7 +33,7 @@ m_httpErrorCode(0)
 AHeader::AHeader(const AHeader& source)
 :m_headerSection(source.m_headerSection)
 {
-	if(_fillHeaderFieldMap() == false)
+	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
 		Logger::error("Error while filling header field map", true);
 		return;
@@ -104,9 +104,8 @@ bool AHeader::isBodyExpected() const
 }
 
 
-bool AHeader::_fillHeaderFieldMap()
+bool AHeader::_fillHeaderFieldMap(std::vector<std::string> plainHeaders)
 {
-	std::vector<std::string> plainHeaders = _getHeaderFields();
 	for(size_t i = 0; i < plainHeaders.size(); i++)
 	{
 		std::cout << "header field: " << plainHeaders[i] << std::endl;
@@ -117,9 +116,9 @@ bool AHeader::_fillHeaderFieldMap()
 	
 }
 
-std::vector<std::string> AHeader::_getHeaderFields() const
+std::vector<std::string> AHeader::_getHeaderFields(const std::string& header_str) const
 {
-	std::vector<std::string> headerFields =  ParsingUtils::splitString(m_headerSection, "\r\n");
+	std::vector<std::string> headerFields =  ParsingUtils::splitString(header_str, "\r\n");
 	headerFields.erase(headerFields.end() - 1);
 	return headerFields;
 }

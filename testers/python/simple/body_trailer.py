@@ -34,7 +34,8 @@ send_chunk(conn, " How are you?")
 conn.send(b"0\r\n")  # 0 followed by CRLF indicates the end of the chunks
 
 # sending trailer
-conn.send(b"Expires: now\r\n\r\n")
+conn.send(b"Expires: now\r\n")
+conn.send(b"Something: thisIsImportant\r\n\r\n")
 
 # Get the response
 response = conn.getresponse()

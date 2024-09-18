@@ -356,8 +356,8 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (!_checkReceiveError(client, n))
 		return (false);
 
-	if (client.getClientMsg())
-		client.getClientMsg()->printChain();
+	// if (client.getClientMsg())
+	// 	client.getClientMsg()->printChain();
 	return (true);
 }
 

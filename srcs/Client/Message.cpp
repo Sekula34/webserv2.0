@@ -130,7 +130,10 @@ void	Message::printChain()
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
 		if (it->getType() == TRAILER)
 			std::cout << "Node Type: TRAILER, string: " << std::endl;
-		Logger::chars(it->getStringUnchunked(), true);
+		if (it->getType() == CHUNK || it->getType() == LCHUNK)
+			Logger::chars(it->getStringChunked(), true);
+	 	else
+			Logger::chars(it->getStringUnchunked(), true);
 	}
 }
 
@@ -237,7 +240,6 @@ std::string	Message::_createCgiHeaderDel()
 
 void	Message::_createHeader()
 {
-	std::cout << "the string in Header: " << _it->getStringUnchunked() <<  std::endl;
 	if(_header != NULL)
 		return;
 	if (_request)
@@ -388,12 +390,15 @@ void	Message::_parseNode()
 			_state = COMPLETE;
 	}
 
-	// if (_it->getType() == TRAILER)
-	// {
-	// 	_header->_fillHeaderFieldMap();
-	// }
-	
-	// TODO: if Trailer, complete the header with info from trailer
+	if (_it->getType() == TRAILER)
+	{
+		std::string withoutDel = _it->getStringUnchunked().substr(0, _it->getStringUnchunked().size() - 2);
+		_header->_fillHeaderFieldMap(_header->_getHeaderFields(withoutDel));
+		_chain.pop_back();
+		_trailer = false;
+		Logger::warning("Request Header:", true);
+		std::cout << *_header << std::endl;
+	}
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)
