@@ -32,12 +32,15 @@ class DefaultSettings
 		std::vector<std::string> m_cgiExtensions;
 
 
+
 	public :
 		DefaultSettings(void);
 		DefaultSettings(const DefaultSettings& source);
 		DefaultSettings& operator=(const DefaultSettings& source);
 		~DefaultSettings();
 
+		static void  duplicateErrorMessage(const Directive& duplicate);
+		bool isPortInListen(const int portToCheck) const;
 		static void checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 
 		bool isMethodAllowed(std::string method) const;
@@ -53,6 +56,7 @@ class DefaultSettings
 		void setRoot(std::string root);
 		void setServerName(std::string serverName);
 		void setCgiExtensions(std::vector<std::string> extensionsVector);
+		void removeDefaultListenPort();
 		//applydirective maybe
 
 		void printAllSettings(void) const;

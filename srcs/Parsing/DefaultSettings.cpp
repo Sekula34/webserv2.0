@@ -5,11 +5,13 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include "Directive.hpp"
 #include "NginxReturn.hpp"
 #include "ParsingUtils.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "Configuration.hpp"
+#include "algorithm"
 
 DefaultSettings::DefaultSettings()
 {
@@ -93,18 +95,26 @@ void DefaultSettings::setAcceptedMethodToTrue(std::string methodName)
 	return;
 }
 
+void DefaultSettings::duplicateErrorMessage(const Directive& duplicate)
+{
+	std::ostringstream oss;
+	oss << "[" << duplicate.getDirectiveName() << "]" << " is duplicated in " << FileUtils::getConfigFilePath() << ":";
+	oss << duplicate.getDirectiveLineNum();
+	Logger::error(oss.str(), true);
+}
+
+void DefaultSettings::removeDefaultListenPort(void)
+{
+	_listenPorts.erase(_listenPorts.begin());
+}
+
 void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dirVec)
 {
 	const Directive* duplicate = NULL;
 	if(Directive::isDuplicateDirectivePresent(dirVec, duplicate) == true)
 	{
 		if(duplicate != NULL)
-		{
-			std::ostringstream oss;
-			oss << "[" << duplicate->getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
-			oss << duplicate->getDirectiveLineNum();
-			Logger::error(oss.str(), true);
-		}
+			duplicateErrorMessage(*duplicate);
 		throw Configuration::InvalidConfigFileException();
 	}
 }
