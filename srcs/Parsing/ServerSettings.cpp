@@ -20,7 +20,7 @@ ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vect
 {
 	_serverTokens = Token::getAllServerTokens(serverId, allTokens);
 	_serverDirectives = Directive::getAllServerDirectives(_serverTokens);
-	//checkDuplicateDirectives(_getServerLevelDirectives());
+	checkDuplicateDirectives(_getServerLevelDirectives());
 	_applyAllServerLevelDirectives();
 	_serverLocations = _setServerLocations();
 }

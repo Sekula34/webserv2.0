@@ -21,7 +21,7 @@ std::vector<Token>& serverTokens)
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
 	_locationDirectives = _setLocationDirectives();
-	//checkDuplicateDirectives(_locationDirectives);
+	checkDuplicateDirectives(_locationDirectives);
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 LocationSettings::LocationSettings(const DefaultSettings& settings,
