@@ -56,7 +56,7 @@ class CgiProcessor {
 		bool						_checkInterpreterScript();
 		void						_readFromChild();
 		void						_writeToChild();
-		void						_stopCgiSetErrorCode();
+		void						_stopCgiSetErrorCode(int code = 500);
 		bool						_createSockets();
 		void						_prepareSockets();
 		bool						_isSocketReady(int socket, int macro);

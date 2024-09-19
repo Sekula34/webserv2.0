@@ -29,7 +29,7 @@ ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
     }else if(client.getCgi())
     {
         _httpStatusCode = 200;
-        _response = client.getServerMsg()->getBodyString();
+        _response = client.getServerMsg()->getUnchunkedBodyString();
     }else   
 	{
         Logger::warning("GENERATING SERVER RESPONSE NOT fully IMPLEMENTED YET", true);

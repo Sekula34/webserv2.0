@@ -90,7 +90,7 @@ const std::list<Node>&	Message::getChain() const
 	return (_chain);
 }
 
-const std::string	Message::getBodyString() 
+const std::string	Message::getUnchunkedBodyString() 
 {
 	std::list<Node>::iterator it;
 

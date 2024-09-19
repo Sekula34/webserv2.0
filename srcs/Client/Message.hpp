@@ -26,7 +26,7 @@ class Message {
 		void						setState(int s);
 		AHeader*					getHeader() const;
 		const std::list<Node>&		getChain() const;
-		const std::string			getBodyString();
+		const std::string			getUnchunkedBodyString();
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
 		void						_createHeader();
 		void						_headerInfoToNode();

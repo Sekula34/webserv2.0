@@ -238,8 +238,11 @@ bool ConnectionDispatcher::_parseCgiURLInfo(const LocationSettings& cgiLocation,
 		scriptName = fileName;
 	if(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->urlSuffix->setCgiScriptName(scriptName) == false)
 	{
-		Logger::warning("Implemted  some error code that is not correct");
-		client.setErrorCode(400);
+		Logger::warning("Invalid CGI sript suffix", true);
+		// TODO: nginx returns 403, but 404 would be more appropriate
+		// the argument for 403 would be that we only allow specific extensions
+		// therefore everything else is forbidden
+		client.setErrorCode(403);
 		return false;
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;

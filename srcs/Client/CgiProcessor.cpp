@@ -201,7 +201,7 @@ void	CgiProcessor::_initScriptVars()
 	_interpreterAbsPath = getInterpreterPath(suffix);
 	if (_interpreterAbsPath.empty())
 	{
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(502);
 		return ;
 	}
 
@@ -220,11 +220,11 @@ void	CgiProcessor::_initScriptVars()
 	{
 		Logger::warning("CGI script not executable: ");
 		std::cout << _scriptAbsPath << std::endl;
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(403);
 		return ;
 	}
 	if (!_isRegularFile(_scriptAbsPath))
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(403);
 }
 
 void	CgiProcessor::_createEnvVector()
@@ -403,7 +403,6 @@ int	CgiProcessor::_execute()
 	close(_socketsFromChild[1]);
 
  	execve(_args[0], _args, _env);
-	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
@@ -426,7 +425,7 @@ void	CgiProcessor::_writeToChild()
 		return ;
 
 	// SEND
-	const std::string& bodystr = _client->getClientMsg()->getBodyString();
+	const std::string& bodystr = _client->getClientMsg()->getUnchunkedBodyString();
 
 	if (bodystr.size() > 0)
 		writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT | MSG_NOSIGNAL);
@@ -618,11 +617,11 @@ bool	CgiProcessor::_createSockets()
 	return (true);
 }
 
-void	CgiProcessor::_stopCgiSetErrorCode()
+void	CgiProcessor::_stopCgiSetErrorCode(int code)
 {
-	Logger::error("stopping CGI, errorcode 500 ");
-	std::cout << ",id: " << _client->getId() << std::endl;
-	_client->setErrorCode(500);
+	Logger::error("stopping CGI, errorcode ");
+	std::cout << code << ",id: " << _client->getId() << std::endl;
+	_client->setErrorCode(code);
 	_client->cgiRunning = false;
 	delete _client->getServerMsg();
 	_client->setServerMsg(NULL);
