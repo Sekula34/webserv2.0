@@ -13,7 +13,7 @@ void ServerTest::_portTester(int expectedPort, const ServerSettings& server)
 {
 	std::string expectedResult = ParsingUtils::toString(expectedPort);
 	Logger::testCase("Port Tester",expectedResult);
-	assert(server.getPort() == expectedPort);
+	assert(server.getPort()[0] == expectedPort);
 	_testpassed();
 }
 

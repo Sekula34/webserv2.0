@@ -1,0 +1,111 @@
+/* Base reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b, #6a82fb, #fc5c7d, #4b6cb7);
+    color: #fff;
+    overflow: hidden;
+}
+
+/* Faster and more distinct animated background gradient */
+@keyframes gradientBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+    20% {
+        background-position: 25% 75%;
+    }
+    40% {
+        background-position: 50% 25%;
+    }
+    60% {
+        background-position: 75% 50%;
+    }
+    80% {
+        background-position: 100% 75%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body {
+    background-size: 300% 300%;
+    animation: gradientBackground 5s ease-in-out infinite;
+}
+
+.container {
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 2s ease-out forwards;
+    transform: translateY(-50px);
+    opacity: 0;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+p {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    color: #fff;
+}
+
+/* Glow effect for text */
+@keyframes textGlow {
+    0% {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+                     0 0 20px rgba(255, 255, 255, 0.4),
+                     0 0 30px rgba(255, 255, 255, 0.3),
+                     0 0 40px rgba(255, 255, 255, 0.2);
+    }
+    100% {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.7),
+                     0 0 40px rgba(255, 255, 255, 0.6),
+                     0 0 60px rgba(255, 255, 255, 0.5),
+                     0 0 80px rgba(255, 255, 255, 0.4);
+    }
+}
+
+p strong {
+    color: #fddb3a;
+    text-shadow: 0 0 10px #fddb3a, 0 0 20px #fddb3a;
+    animation: pulse 1.5s infinite;
+}
+
+/* Pulse animation for port numbers */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

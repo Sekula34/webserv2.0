@@ -107,6 +107,16 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("space in file name", response.text)
 		Colors.test_passed()
 
+	def test_double_valid_listen(self):
+		TestMyWebServer.print_test_title("Testing double listen")
+		response = TestMyWebServer.send_get("http://localhost:2020/")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("I listen to both", response.text)
+		response = TestMyWebServer.send_get("http://localhost:2222/")
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("I listen to both", response.text)
+		Colors.test_passed()
+
 	def test_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()
