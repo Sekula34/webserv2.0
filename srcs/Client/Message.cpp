@@ -211,8 +211,9 @@ void	Message::_chunksToBody()
 	it++;
 	while (it != _chain.end())
 	{
-		str += it->getStringUnchunked();
 		tmp = it;	
+		if (it->getType() != TRAILER)
+			str += it->getStringUnchunked();
 		it++;
 		_chain.erase(tmp);
 	}
@@ -231,8 +232,8 @@ std::string	Message::_createCgiHeaderDel()
 	found = str.rfind("\n", str.size() - 2);
 	if (found != std::string::npos)
 	{
-		std::cout << "created this CGI Header Delimiter: " << std::endl;
-		Logger::chars(str.substr(found, str.size()), true);
+		// std::cout << "created this CGI Header Delimiter: " << std::endl;
+		// Logger::chars(str.substr(found, str.size()), true);
 		return (str.substr(found, str.size()));
 	}
 	return ("\n\n");
@@ -247,14 +248,9 @@ void	Message::_createHeader()
 	else
 		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n", _createCgiHeaderDel());
 
-	 
-		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
-	// Logger::info("Client header created with : "); std::cout << _message;
 	if(_header && _header->getHttpStatusCode() != 0)
 	{
 		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
-		// need to pass this to Client!!
-		// setErrorCode(_header->getHttpStatusCode());
 	}
 }
 
@@ -392,10 +388,14 @@ void	Message::_parseNode()
 
 	if (_it->getType() == TRAILER)
 	{
-		std::string withoutDel = _it->getStringUnchunked().substr(0, _it->getStringUnchunked().size() - 2);
-		_header->_fillHeaderFieldMap(_header->_getHeaderFields(withoutDel));
+		// THIS IS WHERE WE WOULD ADD THE TRAILER FIELDS TO THE HEADER
+		// std::string withoutDel = _it->getStringUnchunked().substr(0, _it->getStringUnchunked().size() - 2);
+		// _header->_fillHeaderFieldMap(_header->_getHeaderFields(withoutDel));
+		
+		// DELETING TRAILER NODE
 		_chain.pop_back();
 		_trailer = false;
+
 		Logger::warning("Request Header:", true);
 		std::cout << *_header << std::endl;
 	}

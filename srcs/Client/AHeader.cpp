@@ -108,7 +108,7 @@ bool AHeader::_fillHeaderFieldMap(std::vector<std::string> plainHeaders)
 {
 	for(size_t i = 0; i < plainHeaders.size(); i++)
 	{
-		std::cout << "header field: " << plainHeaders[i] << std::endl;
+		// std::cout << "header field: " << plainHeaders[i] << std::endl;
 		if(_setOneHeaderField(plainHeaders[i]) == false)
 			return false;
 	}
