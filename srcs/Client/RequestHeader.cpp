@@ -102,7 +102,7 @@ void RequestHeader::_constructFunction()
 		Logger::warning("Tried to create ClientRequest header with string that does not contain CRLFCRLF",true);
 	_initRequestVars();
 	if(_setReqVariables() == true)
-		urlSuffix = new UrlSuffix(getURLSuffix());
+		urlSuffix = new UrlSuffix(getURLSuffix()); // MR_NOTE: Put try/catch block?
 	else
 	{
 		p_setHttpStatusCode(400);
@@ -148,7 +148,7 @@ bool RequestHeader::_setRequestLine(void)
 bool RequestHeader::_fillRequestStruct(void)
 {
 	std::vector<std::string> firstLineStrings = ParsingUtils::splitString(_requestLine, ' ');
-	if(firstLineStrings.size() != 3)
+	if(firstLineStrings.size() != 3) // MR_NOTE: Because it's Method, Uri, Protocol.
 	{
 		Logger::warning("there is no 3 elements in _requestLine", true);
 		return false;

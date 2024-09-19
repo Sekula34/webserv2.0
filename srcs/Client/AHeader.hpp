@@ -22,7 +22,7 @@ class AHeader
 		const std::map<std::string, std::string>& getHeaderFieldMap() const;
 		const int& getHttpStatusCode(void) const;
 		bool isBodyExpected() const;
-		void setOneHeaderField(std::string key, std::string value);
+		void setOneHeaderField(std::string key, std::string value); // MR_DOUBT: Why there's two functions with the same name?
 
 	protected:
 		std::map<std::string, std::string> m_headerFields;
@@ -36,7 +36,7 @@ class AHeader
 
 	private:
 		bool _fillHeaderFieldMap();
-		bool _setOneHeaderField(std::string keyAndValue);
+		bool _setOneHeaderField(std::string keyAndValue); // MR_DOUBT: Why there's two functions with the same name?
 		std::vector<std::string> _getHeaderFields() const;
 		bool _checkHeaderFields(void);
 		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;

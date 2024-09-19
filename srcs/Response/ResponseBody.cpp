@@ -224,6 +224,7 @@ bool ResponseBody::_fileHtml(const std::string& serverFilePath)
     return false;
 }
 
+// MR_DOUBT: How this work?
 void ResponseBody::_dirHtml(const std::string& serverFilePath, const LocationSettings& location)
 {
     (void)serverFilePath;
@@ -236,6 +237,7 @@ void ResponseBody::_dirHtml(const std::string& serverFilePath, const LocationSet
     _autoindexHtml(serverFilePath,location);
 }
 
+// MR_DOUBT: How this work?
 void ResponseBody::_autoindexHtml(const std::string& serverFilePath, const LocationSettings& location)
 {
     if(location.getAutoindexFlag() == true)
@@ -274,7 +276,7 @@ std::string ResponseBody::_convertToServerPath(const LocationSettings& location)
     size_t startingPos = 0;
     size_t replaceLen = location.getLocationUri().size();
     const std::string& replaceString(location.getRoot() + "/");
-    serverPath.replace(startingPos, replaceLen, replaceString);
+    serverPath.replace(startingPos, replaceLen, replaceString); // MR_DOUBT: Why not just write 0 here for startingPos?
     return serverPath;
 }
 

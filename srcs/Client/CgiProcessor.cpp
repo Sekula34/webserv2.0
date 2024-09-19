@@ -171,7 +171,7 @@ std::string	CgiProcessor::getScriptName(std::string suffix)
 
 bool	CgiProcessor::_isRegularFile(std::string file)
 {
-	struct stat sb;
+	struct stat sb; // MR_SEARCH: is it ok to check like this? (check Configuration.cpp)
 
 	if (stat(file.c_str(), &sb) == -1)
 	{
@@ -192,6 +192,7 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 	return (true);
 }
 
+// MR_NOTE: I guess later we'll implement other types of extensions. Correct?
 void	CgiProcessor::_initScriptVars()
 {
 	// the suffix should come from url parser
@@ -217,7 +218,7 @@ void	CgiProcessor::_initScriptVars()
 		+ Data::getCgiLang().at(suffix) + "/" + _scriptName;
 
 	_scriptLocation = Data::findStringInEnvp("PWD=") + location
-		+ Data::getCgiLang().at(suffix);
+		+ Data::getCgiLang().at(suffix); // MR_NOTE: This block is duplicated.
 
 	std::cout << _scriptAbsPath << std::endl;
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
@@ -338,11 +339,11 @@ char**	CgiProcessor::_vecToChararr(std::vector<std::string> list)
 {
 	int i = 0;
 	std::vector<std::string>::iterator it = list.begin();
-	char**	_tmp = new char*[list.size() + 1];
+	char**	_tmp = new char*[list.size() + 1]; // MR_NOTE: Since its an allocation, put try/catch block?
 
 	for (; it != list.end(); it++)
 	{
-		char* line = new char[it->size() + 1];
+		char* line = new char[it->size() + 1]; // MR_NOTE: Since its an allocation, put try/catch block?
 		for (size_t j = 0; j < it->size(); j++)
 			line[j] = it->c_str()[j];
 		_tmp[i] = line;
@@ -429,7 +430,7 @@ void	CgiProcessor::_readFromChild()
 	{
 
 		if (!_client->getServerMsg())
-			_client->setServerMsg(new Message(false));
+			_client->setServerMsg(new Message(false)); // MR_NOTE: try/catch block?
 
 		_client->clearRecvLine();
 		n = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT);
@@ -497,7 +498,7 @@ void	CgiProcessor::_timeoutKillChild()
 	if (_sentSigkill)
 		return ;
 	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
-	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
+	if (_shutdownStart && diff > MAX_TIMEOUT / 2) // MR_DOUBT: Why divided by two?
 	{	
 		Logger::error("killing child process with PID: ");
 		std::cout << _pid << std::endl;
@@ -519,7 +520,7 @@ void	CgiProcessor::_handleChildTimeout()
 		kill(_pid, SIGTERM);
 	}
 	// if SIGTERM not successful send SIGKILL after MAX_TIMEOUT / 2
-	_timeoutKillChild();
+	_timeoutKillChild(); // MR_DOUBT_ How this is checked? (sigterm sending)
 }
 
 void	CgiProcessor::_handleReturnStatus(int status)
@@ -617,7 +618,7 @@ int CgiProcessor::process()
 			signal(SIGINT, SIG_IGN);
 			// runs execve on cgi-script
 			_execute();
-			return (_stopCgiSetErrorCode(), 1);
+			return (_stopCgiSetErrorCode(), 1); // MR_NOTE: If CHILD reaches this, that means that excecv failed.
 		}
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets();

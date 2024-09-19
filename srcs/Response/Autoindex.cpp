@@ -91,6 +91,7 @@ void Autoindex::_createDirectoryLinks(DIR* directory)
 	}
 }
 
+// MR_DOUBT: How does this work?
 void Autoindex::_createAndStoreOneFileLink(const std::string fileName)
 {
 	std::ostringstream oss;

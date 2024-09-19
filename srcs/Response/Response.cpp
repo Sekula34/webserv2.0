@@ -15,7 +15,7 @@ _server(server),
 _responseHeader(NULL),
 _responseBody(client, _server)
 {
-	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size());
+	_responseHeader = new ResponseHeader(_responseBody.getHttpStatusCode(), _responseBody.getResponse().size()); // MR_NOTE: Try/catch block?
 }
 
 //maybe broken
@@ -26,7 +26,7 @@ _responseBody(source._responseBody)
 	if(source._responseHeader == NULL)
 		_responseHeader = NULL;
 	else  
-		_responseHeader = new ResponseHeader(*source._responseHeader);
+		_responseHeader = new ResponseHeader(*source._responseHeader); // MR_NOTE: Try/catch block?
 }
 
 Response&  Response::operator=(const Response& source)
@@ -57,7 +57,7 @@ std::string Response::_createResponseString(void)
 	//created header
 	if(_responseHeader == NULL)
 	{
-		_responseHeader = new ResponseHeader(httpCode, _responseBody.getResponse().size());
+		_responseHeader = new ResponseHeader(httpCode, _responseBody.getResponse().size()); // MR_NOTE: Try/catch block?
 	}
 	oss << _responseHeader->turnResponseHeaderToString();
 	oss << "\r\n";
@@ -85,6 +85,7 @@ void Response::sendSimpleResponse()const
 	// Logger::info("Response is sent to client: "); std::cout <<_clientHeader.getClientFd() << std::endl;
 }
 
+// MR_NOTE: This is not on a loop. So if we can only write partial msg, then how it's handled?
 bool Response::sendResponse()
 {
 	std::string response = _createResponseString();

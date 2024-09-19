@@ -39,7 +39,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 		Logger::error("Opening file failed. Check if file exist (maybe typo) and if you have reading permmision.", true);
 		return false;
 	}
-	struct stat fileStat;
+	struct stat fileStat; // MR_DOUBT: Is it ok to check like this?
 	if(stat(relativeFilePath.c_str(), &fileStat) != 0)
 	{
 		throw std::runtime_error("Stat function failed");
@@ -56,7 +56,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 bool FileUtils::putFileInString(const std::string filePath, std::string &stringFile)
 {
 	const std::string relativePath = "./" + filePath;
-	stringFile.erase();
+	stringFile.erase(); // MR_DOUBT: Why is this erased?
 	if(isPathValid(relativePath) == false)
 	{
 		return false;
@@ -79,6 +79,7 @@ bool FileUtils::putFileInString(const std::string filePath, std::string &stringF
 	return true;
 }
 
+// MR_NOTE: errno should be set to zero at the start of this function.
 bool FileUtils::isDirectoryValid(const std::string relativeDirPath, int& httpStatusCode)
 {
 	DIR* directory = opendir(relativeDirPath.c_str());
@@ -110,7 +111,7 @@ void FileUtils::_setDirFailStatusCode(int errnoNum, int& httpStatusCode)
 
 int FileUtils::isPathFileOrFolder(const std::string &serverFilePath, int& httpStatusCode)
 {
-	struct stat statBuf;
+	struct stat statBuf; // MR_DOUBT: Is it ok to check like this?
 	errno = 0;
 	int value = stat(serverFilePath.c_str(), &statBuf);
 	if(value != 0)

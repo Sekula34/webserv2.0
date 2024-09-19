@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 
-
+// MR_DOUBT: Why two constructors?
 ResponseHeader::ResponseHeader(std::string headerSection, const int httpCode)
 :AHeader(headerSection),
 _httpCode(httpCode)
@@ -44,6 +44,7 @@ ResponseHeader::~ResponseHeader()
 {
 }
 
+// MR_NOTE: This function s is not being used.
 std::string ResponseHeader::getStartLine() const 
 {
 	std::ostringstream oss;
@@ -66,7 +67,7 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 	std::string toReplace = cgiHeaderFieldDelimiter;
 	std::string httpDelimiter = "\r\n";
 	std::string aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
-	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200);
+	ResponseHeader* toReturn = new ResponseHeader(aHeaderString, 200); // MR_NOTE: Try/catch block?
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
 		return NULL;
 	if(toReturn->_cgiStatusLine() == true)

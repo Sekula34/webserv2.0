@@ -82,7 +82,7 @@ const int& AHeader::getHttpStatusCode(void) const
 
 bool AHeader::isBodyExpected() const
 {
-	std::string s = "chunked";
+	std::string s = "chunked"; // MR_NOTE: This variable is not being used.
 	if(m_headerFields.find("Content-Length") != m_headerFields.end()
 	|| (m_headerFields.find("Transfer-Encoding") != m_headerFields.end()
 		&& m_headerFields.at("Transfer-Encoding") == "chunked"))
@@ -127,11 +127,11 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 {
 	std::string key = ParsingUtils::extractUntilDelim(keyAndValue, ":");
 	if(key != "")
-		key.erase(key.end() - 1);
+		key.erase(key.end() - 1); // MR_DOUBT: This is for deleting ":"?
 	std::string plainKey = ParsingUtils::getHttpPlainValue(key);
 	std::string value = ParsingUtils::extractAfterDelim(keyAndValue, ":");
 	value = ParsingUtils::getHttpPlainValue(value);
-	if(key == "" || value == "")
+	if(key == "" || value == "") // MR_NOTE: Host field could be empty in some specific circumstances. And error could be 400
 	{
 		p_setHttpStatusCode(500);
 		Logger::warning("Something is off");
