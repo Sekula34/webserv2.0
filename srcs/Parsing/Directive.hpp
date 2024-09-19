@@ -33,6 +33,7 @@ class Directive
 		int _stringToInt(std::string stringValue) const;
 		
 
+		void _firstListenSetup(DefaultSettings& settings);
 		void _applyErrorPage(DefaultSettings& settings);
 		void _applyListen(DefaultSettings& settings);
 		void _applyLimitExcept(DefaultSettings& settings);

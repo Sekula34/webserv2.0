@@ -1,4 +1,5 @@
 #include "Directive.hpp"
+#include "Configuration.hpp"
 #include "DefaultSettings.hpp"
 #include "ParsingUtils.hpp"
 #include "Token.hpp"
@@ -340,13 +341,27 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 //set settings listen port
 void Directive::_applyListen(DefaultSettings& settings)
 {
+	_firstListenSetup(settings);
 	int portNumber = _stringToInt(_directiveValue);
 	if(portNumber < 0 || portNumber > 65535)
 	{
 		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
 		throw InvalidDirectiveException();
 	}
-	settings.setListenPort(portNumber);
+	if(settings.addListenPort(portNumber) == false)
+	{
+		DefaultSettings::duplicateErrorMessage(*this);
+		throw Configuration::InvalidConfigFileException();
+	}
+}
+
+void Directive::_firstListenSetup(DefaultSettings& settings)
+{
+	static bool flag = false;
+	if(flag == true)
+		return;
+	flag = true;
+	settings.removeDefaultListenPort();
 }
 
 //set all accepted http methods to false 
