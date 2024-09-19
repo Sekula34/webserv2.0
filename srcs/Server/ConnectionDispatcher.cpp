@@ -156,6 +156,11 @@ void	ConnectionDispatcher::_incompleteMessage(Client & client, int idx)
 			client.getClientMsg()->_createHeader();
 			client.getClientMsg()->_headerInfoToNode();
 		}
+		if (client.getClientMsg()->getIterator()->getType() == TRAILER)
+		{
+			if (client.getClientMsg()->getIterator()->getStringUnchunked().find("\r\n\r\n") == std::string::npos)
+				client.setErrorCode(500);
+		}
 		client.getClientMsg()->getIterator()->setState(COMPLETE);
 		client.getClientMsg()->setState(COMPLETE);
 	}
@@ -356,6 +361,8 @@ bool	ConnectionDispatcher::readClient(Client& client,  int idx)
 	if (!_checkReceiveError(client, n))
 		return (false);
 
+	// if (client.getClientMsg())
+	// 	client.getClientMsg()->printChain();
 	return (true);
 }
 

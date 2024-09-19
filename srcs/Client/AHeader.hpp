@@ -35,13 +35,18 @@ class AHeader
 		std::string p_getAllHeaderFieldsAsString() const;
 
 	private:
-		bool _fillHeaderFieldMap();
+		// overload
+		bool _fillHeaderFieldMap(std::vector<std::string> plainHeaders);
+		std::vector<std::string> _getHeaderFields(const std::string& header_str) const;
+
 		bool _setOneHeaderField(std::string keyAndValue);
-		std::vector<std::string> _getHeaderFields() const;
+
+
 		bool _checkHeaderFields(void);
 		std::string _getOneHeaderFieldAsString(std::string key, std::string value) const;
 		
 		
+		friend class Message;
 		friend std::ostream& operator <<(std::ostream& os, const AHeader& header);
 };
 

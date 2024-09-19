@@ -326,7 +326,6 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 			_btr = _calcBtrCgi(buffer, bufferPos, num);
 	}
 
-
 	if ((_type == CHUNK || _type == LCHUNK) && !_chunkHeader)
 	{
 		del = "\r\n";
@@ -341,6 +340,7 @@ void	Node::_setBtr(char* buffer, size_t & bufferPos, size_t num)
 	}
 	if ((_type == CHUNK || LCHUNK) && _chunkHeader)
 		_btr =  _chunkHeaderSize + _chunkSize + 2 - _str.size() ;
+	
 }
 
 void	Node::concatString(char* buffer, size_t & bufferPos, size_t num)
