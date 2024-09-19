@@ -74,7 +74,8 @@ std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port) cons
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
 		const ServerSettings& oneServer(_servers[i]);
-		if(oneServer.getPort() == port)
+		//if(oneServer.getPort() == port)
+		if(oneServer.isPortInListen(port) == true)
 			serversPort.push_back(oneServer);
 	}
 	return serversPort;
@@ -172,6 +173,14 @@ const ServerSettings* ServersInfo::getClientServer(const Client& client) const
 	return toReturn;
 }
 
+void ServersInfo::_addUniquePort(const int port, std::vector<int>& uniquePorts) const
+{		
+	std::vector<int>::iterator it;
+	it = std::find(uniquePorts.begin(), uniquePorts.end(), port);
+	if(it == uniquePorts.end())
+		uniquePorts.push_back(port);
+}
+
 //goes through vector of servers
 //get server Port, check if port is in unique vector if not add it
 //return unique ports;
@@ -180,12 +189,11 @@ const std::vector<int> ServersInfo::getUniquePorts() const
 	std::vector<int> uniquePorts;
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
-		const int serverPort = _servers[i].getPort();
-		std::vector<int>::iterator it;
-		it = std::find(uniquePorts.begin(), uniquePorts.end(), serverPort);
-		if(it == uniquePorts.end())
+		std::vector<int> allServerPorts = _servers[i].getPort();
+		for(size_t i = 0; i < allServerPorts.size(); i++)
 		{
-			uniquePorts.push_back(serverPort);
+			const int serverPort = allServerPorts[i];
+			_addUniquePort(serverPort, uniquePorts);
 		}
 	}
 	return uniquePorts;

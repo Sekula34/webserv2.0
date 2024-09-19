@@ -21,6 +21,7 @@ class ServersInfo
 		void _setHttpDirectives(void);
 		bool _isTokenHttpDirective(const Token& toCheck) const;
 		bool _validateRequestHeader(const RequestHeader* header) const;
+		void _addUniquePort(const int port, std::vector<int>& uniquePorts) const;
 		std::vector<ServerSettings> _getAllServersIdWithPort(int port) const;
 
 	public :
