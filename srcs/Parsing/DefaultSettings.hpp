@@ -16,7 +16,8 @@ class DefaultSettings
 	protected :
 		//server stuff 
 		std::string _serverName;
-		int _listenPort;
+		std::vector<int> _listenPorts;
+		//int _listenPort;
 		std::string _host;
 		
 		
@@ -41,7 +42,7 @@ class DefaultSettings
 
 		bool isMethodAllowed(std::string method) const;
 
-		void setListenPort(int listenPort);
+		bool addListenPort(int listenPort);
 		void setErrorPage(int errorCode, std::string path);
 		void setAllAcceptedMethodsToFalse(void);
 		void setAcceptedMethodToTrue(std::string methodName);
@@ -56,7 +57,7 @@ class DefaultSettings
 
 		void printAllSettings(void) const;
 
-		const int& getPort(void) const;
+		const std::vector<int>& getPort(void) const;
 		const std::string& getRoot(void) const;
 		const std::string& getServerName(void) const;
 		const NginnxReturn& getNginxReturn(void) const;

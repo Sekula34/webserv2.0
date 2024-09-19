@@ -14,7 +14,7 @@
 DefaultSettings::DefaultSettings()
 {
 	_serverName = "[Default Server Name]";
-	_listenPort = 8080;
+	_listenPorts.push_back(8080);
 	_host = "[Default HOST]";
 	//_errorPages[404] = "/html/404.html";
 	_setDefaultHttpMethods();
@@ -32,7 +32,7 @@ DefaultSettings::DefaultSettings(const DefaultSettings& source)
 DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 {
 	_serverName = source._serverName;
-	_listenPort = source._listenPort;
+	_listenPorts = source._listenPorts;
 	_host = source._host;
 	_errorPages = source._errorPages;
 	_acceptedMethods = source._acceptedMethods;
@@ -62,7 +62,7 @@ void DefaultSettings::printAllSettings(void) const
 {
 	std::cout << "---------------DEFAULT ALL SETTINGS PRINT ---------------" <<  std::endl;
 	std::cout << "Default server name :" << _serverName << std::endl;
-	std::cout << "Default listen port:" << _listenPort << std::endl;
+	ParsingUtils::printVector(_listenPorts, "Listen Ports");
 	std::cout << "Defautl host: " << _host << std::endl;
 	std::cout << "Default root: " <<_root << std::endl;
 	ParsingUtils::printMap(_errorPages, "ErrorPages");
@@ -122,9 +122,20 @@ void DefaultSettings::_setDefaultIndexes(void)
 	_index.push_back("index.html");
 }
 
-void DefaultSettings::setListenPort(int listenPort)
+bool DefaultSettings::addListenPort(const int listenPort)
 {
-	_listenPort = listenPort;
+	if(isPortInListen(listenPort) == true)
+		return false;
+	_listenPorts.push_back(listenPort);
+	return true;
+}
+
+bool DefaultSettings::isPortInListen(const int portToCheck) const
+{
+	std::vector<int>::const_iterator it = std::find(_listenPorts.begin(), _listenPorts.end(), portToCheck);
+	if(it != _listenPorts.end())
+		return true;
+	return false;
 }
 
 void DefaultSettings::setErrorPage(int errorCode ,std::string path)
@@ -175,9 +186,9 @@ void DefaultSettings::setCgiExtensions(std::vector<std::string> extensionVector)
 	m_cgiExtensions = extensionVector;
 }
 
-const int& DefaultSettings::getPort(void) const
+const std::vector<int>& DefaultSettings::getPort(void) const
 {
-	return(_listenPort);
+	return(_listenPorts);
 }
 
 const std::string& DefaultSettings::getRoot(void) const 
