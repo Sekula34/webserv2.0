@@ -165,7 +165,7 @@ void ServerSettings::printServerSettings(void) const
 	std::cout << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
 	std::cout << "Server id: " << _serverId << std::endl;
 	std::cout << "Default server name :" << _serverName << std::endl;
-	std::cout << "Default listen port:" << _listenPort << std::endl;
+	ParsingUtils::printVector(_listenPorts, "Listen Ports");
 	std::cout << "Defautl host: " << _host << std::endl;
 	//std::cout << "Server directives: "<< std::endl;
 	// for(size_t i = 0; i < _serverDirectives.size(); i++)
@@ -182,12 +182,14 @@ void ServerSettings::printServerSettings(void) const
 }
 
 
+
 std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 {
 	os << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
 	os << "Server id: " << server._serverId << std::endl;
 	os << "Server name :" << server._serverName << std::endl;
-	os << "Server listen port:" << server._listenPort << std::endl;
+	ParsingUtils::printVector(server._listenPorts, "listen ports");
+	//os << "Server listen port:" << server._listenPort << std::endl;
 	os << "Defautl host: " << server._host << std::endl;
 	//os << "Server directives: "<< std::endl;
 	// for(size_t i = 0; i < _serverDirectives.size(); i++)
