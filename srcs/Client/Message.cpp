@@ -229,7 +229,7 @@ std::string	Message::_createCgiHeaderDel()
 		return ("\n\n");
 	size_t found = str.rfind("\n");
 	if (found == str.size() - 1)
-	found = str.rfind("\n", str.size() - 2);
+		found = str.rfind("\n", str.size() - 2);
 	if (found != std::string::npos)
 	{
 		// std::cout << "created this CGI Header Delimiter: " << std::endl;

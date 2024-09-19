@@ -74,7 +74,14 @@ is supported and if not send text instead.
     
 
 - the script MUST return a Content-Type header field.
-- a status header field is optionoal
+- a status header field is optional
 - status 200 'OK' is assumed if the status header field is omitted
-- The server MUST make any modifications to the scripts outpus to make sure that 
+- The server MUST make any modifications to the scripts output to make sure that 
 the response to the Client complies with HTTP protocol
+
+
+
+### TODO
+
+- if body check if content-type header field was given, if not -> 502
+
