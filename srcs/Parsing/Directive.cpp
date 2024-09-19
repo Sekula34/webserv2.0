@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
-#include <iterator>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
