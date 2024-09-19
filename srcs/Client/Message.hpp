@@ -42,7 +42,7 @@ class Message {
 		std::stringstream 			_ss;
 		AHeader*					_header;
 
-		void						_isNodeComplete();
+		void						_setNodeComplete();
 		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);

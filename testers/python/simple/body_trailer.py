@@ -7,10 +7,12 @@ conn = http.client.HTTPConnection("localhost", 9090)  # Replace 'example.com' wi
 headers = {
     'Content-type': 'text/plain',
     'Transfer-Encoding': 'chunked',
+    'Trailer': 'expires',
+
 }
 
 # Start the request without sending the body yet
-conn.putrequest("POST", "/cgi-bin/hello.py")
+conn.putrequest("POST", "/cgi-bin/io_test.py")
 for header, value in headers.items():
     conn.putheader(header, value)
 conn.endheaders()
@@ -29,7 +31,11 @@ send_chunk(conn, "there!")
 send_chunk(conn, " How are you?")
 
 # Signal the end of the chunked transfer
-conn.send(b"0\r\n\r\n")  # 0 followed by CRLF indicates the end of the chunks
+conn.send(b"0\r\n")  # 0 followed by CRLF indicates the end of the chunks
+
+# sending trailer
+conn.send(b"Expires: now\r\n")
+conn.send(b"Something: thisIsImportant\r\n\r\n")
 
 # Get the response
 response = conn.getresponse()

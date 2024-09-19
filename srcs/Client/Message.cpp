@@ -130,7 +130,10 @@ void	Message::printChain()
 			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
 		if (it->getType() == TRAILER)
 			std::cout << "Node Type: TRAILER, string: " << std::endl;
-		Logger::chars(it->getStringUnchunked(), true);
+		if (it->getType() == CHUNK || it->getType() == LCHUNK)
+			Logger::chars(it->getStringChunked(), true);
+	 	else
+			Logger::chars(it->getStringUnchunked(), true);
 	}
 }
 
@@ -208,8 +211,9 @@ void	Message::_chunksToBody()
 	it++;
 	while (it != _chain.end())
 	{
-		str += it->getStringUnchunked();
 		tmp = it;	
+		if (it->getType() != TRAILER)
+			str += it->getStringUnchunked();
 		it++;
 		_chain.erase(tmp);
 	}
@@ -228,8 +232,8 @@ std::string	Message::_createCgiHeaderDel()
 	found = str.rfind("\n", str.size() - 2);
 	if (found != std::string::npos)
 	{
-		std::cout << "created this CGI Header Delimiter: " << std::endl;
-		Logger::chars(str.substr(found, str.size()), true);
+		// std::cout << "created this CGI Header Delimiter: " << std::endl;
+		// Logger::chars(str.substr(found, str.size()), true);
 		return (str.substr(found, str.size()));
 	}
 	return ("\n\n");
@@ -244,14 +248,9 @@ void	Message::_createHeader()
 	else
 		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n", _createCgiHeaderDel());
 
-	 
-		// _header = new ResponseHeader(_chain.begin()->getStringUnchunked());
-	// Logger::info("Client header created with : "); std::cout << _message;
 	if(_header && _header->getHttpStatusCode() != 0)
 	{
 		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
-		// need to pass this to Client!!
-		// setErrorCode(_header->getHttpStatusCode());
 	}
 }
 
@@ -308,7 +307,7 @@ size_t	Message::_calcChunkSize(std::string s)
 }
 
 
-void	Message::_isNodeComplete()
+void	Message::_setNodeComplete()
 {
 	// is HEADER of TRAILER complete?
 	if (_it->getType() == HEADER || _it->getType() == TRAILER)
@@ -329,8 +328,8 @@ void	Message::_isNodeComplete()
 			_it->setChunkHeader(true);
 	}
 
-	// is CHUNK or LCHUNK complete?
-	if ((_it->getType() == CHUNK || _it->getType() == LCHUNK) && _it->getChunkHeader())
+	// is CHUNK or LCHUNK complete when no trailer expected?
+	if ((_it->getType() == CHUNK || (_it->getType() == LCHUNK && !_trailer)) && _it->getChunkHeader() )
 	{
 		if(_it->getChunkHeaderSize() + _it->getChunkSize() + 2 == _it->getStringChunked().length())
 			_it->setState(COMPLETE);
@@ -362,7 +361,11 @@ void	Message::_parseNode()
 		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
 
 		if (_it->getChunkSize() == 0)
+		{
 			_it->setType(LCHUNK);
+			if (_trailer)
+				_it->setState(COMPLETE);
+		}
 	}
 	
 	if (_it->getState() != COMPLETE)
@@ -382,8 +385,20 @@ void	Message::_parseNode()
 		if (!_chunked && _it->getBodySize() == 0 && _request)
 			_state = COMPLETE;
 	}
-	
-	// TODO: if Trailer, complete the header with info from trailer
+
+	if (_it->getType() == TRAILER)
+	{
+		// THIS IS WHERE WE WOULD ADD THE TRAILER FIELDS TO THE HEADER
+		// std::string withoutDel = _it->getStringUnchunked().substr(0, _it->getStringUnchunked().size() - 2);
+		// _header->_fillHeaderFieldMap(_header->_getHeaderFields(withoutDel));
+		
+		// DELETING TRAILER NODE
+		_chain.pop_back();
+		_trailer = false;
+
+		Logger::warning("Request Header:", true);
+		std::cout << *_header << std::endl;
+	}
 }
 
 void	Message::bufferToNodes(char* buffer, size_t num)
@@ -396,7 +411,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		if (_it->getState() == COMPLETE && bufferPos < num && _state == INCOMPLETE)
 			_addNewNode();
 		_it->concatString(buffer, bufferPos, num);
-		_isNodeComplete();
+		_setNodeComplete();
 		_parseNode();
 	}
 }
