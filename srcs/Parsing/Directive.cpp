@@ -453,7 +453,7 @@ bool Directive::isDuplicateDirectiveNamePresent(const std::vector<Directive> &di
 	firstIt = std::find_if(directives.begin(), directives.end(), functor);
 	if(firstIt == directives.end())
 		return false;
-	secondIt = std::find_if(firstIt++, directives.end(), functor);
+	secondIt = std::find_if(++firstIt, directives.end(), functor);
 	if(secondIt == directives.end())
 		return false;
 	duplicateDir = &(*secondIt);
