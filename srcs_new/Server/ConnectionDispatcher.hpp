@@ -15,15 +15,15 @@ class ConnectionDispatcher
 
 	private:
 		// Methods
-		void		_mainLoopEpoll(void);
+		void		_epollLoop(void);
 		Client*		_findClientInClients(int client_fd);
 		bool		_handleServerSocket(size_t idx);
 		void		_addServerSocketsToEpoll(void);
-		void 		_epoll_accept_client(int listen_socket);
+		void 		_epollAcceptClient(int listen_socket);
 		// Attributes
 
 	public:
-		ConnectionDispatcher(SocketManager& sockets, ServersInfo& serverInfo);
+		ConnectionDispatcher();
 		~ConnectionDispatcher();
 
 	private:
