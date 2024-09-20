@@ -1,16 +1,15 @@
 #include "Socket.hpp"
 #include <cstdio>
 #include <cstring>
-#include <iostream>
-#include <ostream>
-#include <sstream>
 #include <stdexcept>
 #include "../Utils/Logger.hpp"
 
-
-//STATIC ATTRIBUTES/METHODS==================================================//
+// STATIC ATTRIBUTES/METHODS=================================================//
+// Initializing static attributes
 std::vector<Socket>	Socket::_allSockets;
 
+// Static method to get all sockets FDs so ConnectionDispatcher can add them
+// to epoll and listen to incomming connections (new Clients).
 const std::vector<int>	Socket::getSocketFDs(void)
 {
 	std::vector<int> fds;
@@ -20,8 +19,8 @@ const std::vector<int>	Socket::getSocketFDs(void)
 	return (fds);
 }
 
-//Constructor, Desructor and other stuff====================================//
-// Custom constructor
+// Constructor, Destructor and OCF Parts ===================================//
+// Custom Constructor
 Socket::Socket(int portNumber) : _port(portNumber)
 {
 	_addrlen = sizeof(sockaddr_in);
@@ -58,16 +57,14 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		perror("listen systemcall failed");
 		throw std::runtime_error("System call listen failed");
 	}
-	// std::ostringstream oss; 
-	// oss << "Socket is listening on port: " << _port << std::endl;
-	Logger::info("Socket is listening on port:");
-	std::cout << _port << std::endl;
+	_allSockets.push_back(*this); // Adding socket to _allsockets vector.
+	Logger::info("Socket is listening on port:", _port);
 }
 
-// Default constructor
+// Default Constructor
 Socket::Socket() : _port(8080) {}
 
-// Copy constructor
+// Copy Constructor
 Socket::Socket(const Socket& source) : 
 _port(source._port), _socketFD(source._socketFD),
 _adress(source._adress), _addrlen(source._addrlen)
