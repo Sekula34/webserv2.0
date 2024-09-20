@@ -29,6 +29,7 @@ class ResponseBody
 
 
 		void _handlerGetMethod();
+		void _handlerPostMethod();
 		void _handleRedirect(const NginnxReturn& redirect);
 
 		void _processRequestedLocation(const LocationSettings& location);

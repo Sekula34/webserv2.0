@@ -11,6 +11,9 @@
 #include "../Client/Message.hpp"
 #include "Autoindex.hpp"
 
+// For POST method:
+#include <fstream> // For ofstream
+
 class Client;
 
 ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
@@ -278,6 +281,20 @@ std::string ResponseBody::_convertToServerPath(const LocationSettings& location)
     return serverPath;
 }
 
+// Function to handle POST requests.
+// For the moment:
+// * It bypass all valiations. It's just for starting/testing.
+// * It assumes that cgi is not enable.
+// * It assumes that POST is allowed.
+void ResponseBody::_handlerPostMethod()
+{
+	std::ofstream request("requestMessage");
+	if (!request.is_open())
+		Logger::error("Could not create file for storing POST request msg");
+	request << static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getFullMessage();
+	request.close();
+}
+
 void ResponseBody::_generateServerResponse()
 {
     if(static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getRequestLine().protocolVersion != "HTTP/1.1")
@@ -291,8 +308,9 @@ void ResponseBody::_generateServerResponse()
     }
     else if(requstedMethod == "POST")
     {
-        Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
-        _renderServerErrorPage(501);
+        // Logger::error("Not implemeted method yet :"); std::cout << requstedMethod << std::endl;
+        // _renderServerErrorPage(501);
+		_handlerPostMethod();
     }
     else if(requstedMethod == "DELETE")
     {
