@@ -1,12 +1,8 @@
 #include "Socket.hpp"
 #include <cstdio>
 #include <cstring>
-#include <iostream>
-#include <ostream>
-#include <sstream>
 #include <stdexcept>
 #include "../Utils/Logger.hpp"
-
 
 //STATIC ATTRIBUTES/METHODS==================================================//
 std::vector<Socket>	Socket::_allSockets;
@@ -58,10 +54,9 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		perror("listen systemcall failed");
 		throw std::runtime_error("System call listen failed");
 	}
-	// std::ostringstream oss; 
-	// oss << "Socket is listening on port: " << _port << std::endl;
-	Logger::info("Socket is listening on port:");
-	std::cout << _port << std::endl;
+
+	_allSockets.push_back(*this); // Adding soket to _allsocket vector.
+	Logger::info("Socket is listening on port:", _port);
 }
 
 // Default constructor

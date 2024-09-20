@@ -4,7 +4,7 @@
 # include <sys/epoll.h>
 
 class Client;
-class SocketManager;
+// class SocketManager;
 
 class ConnectionDispatcher 
 {
