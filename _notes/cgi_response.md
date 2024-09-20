@@ -79,9 +79,45 @@ is supported and if not send text instead.
 - The server MUST make any modifications to the scripts output to make sure that 
 the response to the Client complies with HTTP protocol
 
+### LOCAL REDIRECT RESPONSE
+
+the CGI scripts returns local URI opionally with a query string. The U
+
+the URI is in a ***Location*** header field. Example:
+```Location: html/aboutme.html?name=gabriel```
+
+The script MUST NOT return an.y other header fields or body
+The Server MUST return the answer that the Location URI would have produced, had the client sent it intially.
+
+### CLIENT REDIRECT RESPONSE
+
+Here the client is redirected so the answer of the server is a 302 FOUND, plus the URI
+The URI can be on the server but can also be anywhere on the net.
+The body is empty.
+There is only one header field -> Location
+
+### CLIENT REDIRECT RESPONSE WITH DOCUMENT
+
+must contain all three CGI header Fields:
+- status (must contain 302 or other header status code that means redirection)
+- Location
+- content type
+
+Could also contain other header fields
+
+Basically the same as  Client Redirect Response but with a body.
+The body could include a website with the link, to the location.
+This is useful if the browser does not support redirection.
+
+
 
 
 ### TODO
 
 - if body check if content-type header field was given, if not -> 502
-
+- if status: 200 ignore otherwise copy number into client
+- if local redirect response: check whether Location header field is only one and there is no body!
+- implement local redirect
+- At least one CGI field MUST be supplied;
+- each CGI field MUST NOT appear more than once in the response 
+- a NULL field value is equivalent to a field not being sent
