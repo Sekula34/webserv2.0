@@ -2,8 +2,10 @@
 # define CONNECTIONDISPATCHER_HPP
 
 # include <sys/epoll.h>
+# include <map>
 
 class Client;
+class CgiProcessor;
 // class SocketManager;
 
 class ConnectionDispatcher 
@@ -19,8 +21,10 @@ class ConnectionDispatcher
 		Client*		_findClientInClients(int client_fd);
 		bool		_handleServerSocket(size_t idx);
 		void		_addServerSocketsToEpoll(void);
-		void 		_epollAcceptClient(int listen_socket);
+		// void 		_epollAcceptClient(int listen_socket);
 		// Attributes
+		std::map<int, Client* >		_clients;
+		std::map<int, CgiProcessor >	_cgis;
 
 	public:
 		ConnectionDispatcher();
@@ -29,7 +33,6 @@ class ConnectionDispatcher
 	private:
 		ConnectionDispatcher(ConnectionDispatcher& source);
 		ConnectionDispatcher& operator=(ConnectionDispatcher& source);
-
 };
 
 #endif
