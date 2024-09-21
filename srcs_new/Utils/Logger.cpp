@@ -14,9 +14,7 @@ const std::string Logger::PURPLE = "\033[35m";
 bool Logger::_isPrintingAllowed()
 {
 	if (PRINT == 1)
-	{
 		return true;
-	}
 	return false;
 }
 
@@ -44,10 +42,13 @@ void	Logger::log(std::string title, std::string type, std::string color)
 	Logger::log(title, "", type, color);
 }
 
-void printEscapeCharacters(const std::string& str) {
-	for (std::string::size_type i = 0; i < str.size(); ++i) {
+void printEscapeCharacters(const std::string& str)
+{
+	for (std::string::size_type i = 0; i < str.size(); ++i)
+	{
 		char c = str[i];
-		switch (c) {
+		switch (c)
+		{
 			case '\n': std::cout << "\\n"; break;
 			case '\r': std::cout << "\\r"; break;
 			case '\t': std::cout << "\\t"; break;

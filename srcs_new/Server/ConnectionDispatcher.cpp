@@ -3,13 +3,54 @@
 #include "../Client/Client.hpp"
 #include "Data.hpp"
 #include <stdexcept>
+#include <csignal>
+#include <unistd.h> // DELETE. This is for Logger. getpid()
+
+#define MAX_WAIT	-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
+#define MAX_EVENTS	40 // what happens if we exceed this?
+
+volatile sig_atomic_t flag = 0 ;
+
+void handle_sigint(int)
+{
+	flag = 1;
+	Logger::warning("CTRL + C caught, Server is turning off", "");
+}
+
+static bool	_stopByEpollError(int& _nfds)
+{
+	if (_nfds == -1)
+	{
+		Logger::error("Epoll wait failed", true);
+		return (true);
+	}
+	return (false);
+}
+
+bool	ConnectionDispatcher::_stopBySigInt()
+{
+	if (flag)
+	{
+		if (flag == 1)
+		{
+			signal(SIGINT, SIG_IGN);
+			flag++;
+			Logger::info("Turn off procedure triggered", true);
+			_shutdownCgiChildren();
+		}
+		if (flag && _clients.size() != 0)
+			return (false);
+		return (true);
+	}
+	return (false);
+}
 
 //REGULAR METHODS===========================================================//
 
 /* CREATE CLIENT FD BY CALLING ACCEPT ON LISTEN SOCKET, CREATE CLIENT INSTANCE
 ADD INSTANCE TO CLIENTS MAP. MAP KEY: CLIENT FD, MAP VALUE: CLIENT INSTANCE POINTER */
 // void	ConnectionDispatcher::_epoll_accept_client(int listen_socket)
-static void	_epollAcceptClient(int listen_socket, std::map<int, Client* >& clients)
+static void	_epollAcceptClient(const int listen_socket, std::map<int, Client* >& clients)
 {
 	struct sockaddr client_addr;
 	socklen_t addrlen = sizeof(client_addr);
@@ -48,4 +89,26 @@ bool ConnectionDispatcher::_handleServerSocket(size_t idx)
 		}
 	}
 	return false;
+}
+
+void ConnectionDispatcher::_epollLoop()
+{
+	Client* client;
+
+	Logger::info("my pid is: ", getpid());
+	signal(SIGINT, handle_sigint);
+	_addServerSocketsToEpoll();
+	while(true)
+	{
+		if (_stopByEpollError(_nfds) || _stopBySigInt())
+			break;
+		_nfds = epoll_wait(_epollfd, Data::setEvents(), MAX_EVENTS, MAX_WAIT);
+		for (int idx = 0; idx < _nfds && _nfds != -1; ++idx)
+		{
+			if (_handleServerSocket(idx) == true)
+				continue;
+			if ((client = _isClient(Data::setEvents()[idx].data.fd)) != NULL)
+				_handleClient(*client, idx);
+		}
+	}
 }

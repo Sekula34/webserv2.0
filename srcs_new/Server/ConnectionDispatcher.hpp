@@ -23,8 +23,10 @@ class ConnectionDispatcher
 		void		_addServerSocketsToEpoll(void);
 		// void 		_epollAcceptClient(int listen_socket);
 		// Attributes
-		std::map<int, Client* >		_clients;
-		std::map<int, CgiProcessor >	_cgis;
+		const int						_epollfd;
+		int								_nfds; // fds which have activity returned by epoll_wait
+		std::map<int, Client*>			_clients;
+		std::map<int, CgiProcessor>		_cgis;
 
 	public:
 		ConnectionDispatcher();

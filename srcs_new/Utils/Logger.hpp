@@ -17,7 +17,6 @@
 
 class Logger 
 {
-
 	private:
 		static void _printCurrentTime();
 		static bool _isPrintingAllowed();
@@ -37,9 +36,7 @@ class Logger
 		static void log(std::string title, T value = "", std::string type = "INFO", std::string color = GREEN)
 		{
 			if(_isPrintingAllowed() == false)
-			{
 				return;
-			}
 			std::cout << color;
 			_printCurrentTime();
 			std::cout << type << " " << title << " " << RESET;
