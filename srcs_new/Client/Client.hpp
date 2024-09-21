@@ -8,7 +8,7 @@
 // # include <cstddef>
 // # include <cstring>
 // # include <iostream>
-#include <new>
+#include <cstddef>
 # include <string>
 # include <ctime>
 # include <unistd.h>
@@ -26,19 +26,18 @@
 # define MAX_TIMEOUT		3000
 # define DELETED			-1 
 
-
 class Message;
 
 class Client
 {
 	enum	e_fdState
 	{
-		UNSET,
-		R_READ,
-		R_WRITE,
-		R_READWRITE,
-		CLOSE,
-		CLOSED
+		UNSET, // Initial state of fd
+		R_READ, // fd ready to be read
+		R_WRITE, // fd ready to be writted to
+		R_READWRITE, // fd ready to be written to and read from
+		CLOSE, // close fd
+		CLOSED // fd is closed
 	};
 
 	enum	e_clientState
@@ -52,42 +51,47 @@ class Client
 		DELETE	// Client wants to be deleted
 	};
 
+	typedef std::pair<int, e_fdState> fdStatePair;
+	typedef std::vector<std::pair<int, e_fdState> > fdPairsVec;
+
 	public:
 		// Methods
 		unsigned long		getId() const;
-		int					getFd() const;
+		int					getClientFd() const;
+		unsigned short		getClientPort();
+		std::string			getClientIp() const;
 		std::clock_t		getStartTime() const;
 		int					getErrorCode() const;
-		std::string			getClientIp() const;
-		unsigned short		getClientPort();
 		Message*			getRequestMsg()const;
 		Message*			getResponseMsg()const;
 		Message*			getCgiResponseMsg()const;
+		bool				checkTimeout();
 		void				setRequestMsg(Message* m);
 		void				setResponseMsg(Message* m);
 		void				setCgiResponseMsg(Message* m);
 		void				setErrorCode(int e);
 		void				setAddrlen(socklen_t addrlen);
 		void				setChildSocket(int in, int out);
-		void				unsetsocket_tochild();
-		void				unsetsocket_fromchild();
-		bool				checkTimeout();
+		void				closeSocketToChild();
+		void				closeSocketFromChild();
+		void				closeClientFds();
 		// Attributes
 		static int			client_cntr;
 
 	private:
 		// Methods
-		void				_init_user_info();
+		void				_initClientIp();
 		void				_initVars(void);
 		// Attributes
-		const unsigned long	_id;
-		const int			_fd;
+		const size_t		_id;
+		fdPairsVec			_clientFds;
+		// const int			_fd;
 		e_clientState		_stateClient;
-		e_fdState			_stateFd;
-		int					_socketToChild;
-		e_fdState			_stateSocketToChild;
-		int					_socketFromChild;
-		e_fdState			_stateSocketFromChild;
+		// e_fdState			_stateFd;
+		// int					_socketToChild;
+		// e_fdState			_stateSocketToChild;
+		// int					_socketFromChild;
+		// e_fdState			_stateSocketFromChild;
 		const std::clock_t	_start;
 		double				_clockstop;
 		int					_errorCode;
@@ -109,6 +113,3 @@ class Client
 };
 
 #endif
-
-//============================================================================
-// 

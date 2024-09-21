@@ -9,7 +9,9 @@
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
 #define MAX_EVENTS		40 // what happens if we exceed this?
 
-
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 void	ConnectionManager::_acceptNewClient(int listen_socket)
 {

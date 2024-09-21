@@ -9,24 +9,36 @@
 #include <sstream>
 
 
+//==========================================================================//
+// STATIC ATTRIBUTES/METHODS================================================//
+//==========================================================================//
+
+// Initializing static attributes
 int	Client::client_cntr = 0;
 
 
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 std::clock_t	Client::getStartTime() const
 {
 	return (_start);
 }
 
-
 unsigned long	Client::getId() const
 {
 	return (_id);
 }
 
-int	Client::getFd() const
+int	Client::getClientFd() const
 {
-	return (_fd);
+	int ret = 0;
+	if (_clientFds.size() > 0)
+		ret = _clientFds.begin()->first;
+	else
+	 	Logger::error("F@ck no fd in client with id ", _id);
+	return (ret);
 }
 
 Message*	Client::getRequestMsg()const
@@ -58,7 +70,6 @@ void	Client::setErrorCode(int c)
 {
 	_errorCode = c;
 }
-
 
 void	Client::setAddrlen(socklen_t addrLen)
 {
@@ -96,12 +107,11 @@ bool	Client::checkTimeout()
 	return (true);
 }
 
-
 void Client::_initVars(void)
 {
 
-	_socketFromChild = DELETED;
-	_socketToChild = DELETED;
+	// _socketFromChild = DELETED;
+	// _socketToChild = DELETED;
 	_errorCode = 0;
 	_clockstop = 1000;
 	_requestMsg = NULL;
@@ -110,25 +120,36 @@ void Client::_initVars(void)
 
 void	Client::setChildSocket(int to, int from)
 {
-	_socketToChild = to;
-	_socketFromChild = from;
+	// _socketToChild = to;
+	// _socketFromChild = from;
+	_clientFds.push_back(std::pair<int, e_fdState>(to, UNSET));
+	_clientFds.push_back(std::pair<int, e_fdState>(from, UNSET));
 }
 
-void	Client::unsetsocket_tochild()
+void	Client::closeSocketToChild()
 {
-	_socketToChild = DELETED;
+	// _socketToChild = DELETED;
+	if (_clientFds.size() < 2)
+		Logger::error("F@ck no socketToChild in client with id ", _id);
+	else
+		_clientFds[1].second = CLOSE;
 }
 
-void	Client::unsetsocket_fromchild()
+void	Client::closeSocketFromChild()
 {
-	_socketFromChild = DELETED;
+	// _socketFromChild = DELETED;
+	if (_clientFds.size() < 3)
+		Logger::error("F@ck no socketFromChild in client with id ", _id);
+	else
+		_clientFds[2].second = CLOSE;
 }
 
+// TODO: Long discussion with Filip about this function.
 unsigned short	Client::getClientPort()
 {
 	struct sockaddr_in local_addr;
-    socklen_t local_addr_len = sizeof(local_addr);
-    if (getsockname(_fd, (struct sockaddr *)&local_addr, &local_addr_len) == -1)
+	socklen_t local_addr_len = sizeof(local_addr);
+	if (getsockname(getClientFd(), (struct sockaddr *)&local_addr, &local_addr_len) == -1)
 	{
 		setErrorCode(500);
 		return (0);
@@ -136,7 +157,7 @@ unsigned short	Client::getClientPort()
 	return (ntohs(local_addr.sin_port));
 }
 
-void	Client::_init_user_info()
+void	Client::_initClientIp()
 {
 	std::string address;
 	std::stringstream ss;
@@ -155,37 +176,46 @@ void	Client::_init_user_info()
 	_clientIp = ss.str();
 }
 
+void	Client::closeClientFds()
+{
+	fdPairsVec::iterator it = _clientFds.begin();
+	for (; it != _clientFds.end(); ++it)
+	{
+		if (it->second != CLOSED)
+		{
+			close(it->first);
+			it->second = CLOSED;
+		}
+	}
+}
+
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
-// Custom Constrcutor
+// Custom Constructor
 Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	_id(++client_cntr),
-	_fd(fd),
+	// _fd(fd),
 	_start(std::clock()),
 	_clientAddr(clientAddr),
 	_addrLen(addrLen)
 {
+	_clientFds.push_back(fdStatePair(fd, UNSET));
 	_initVars();
-	_init_user_info();
+	_initClientIp();
 	Logger::info("Client constructed, unique ID: ", _id);
-	Logger::info("Client FD: ", _fd);
+	Logger::info("Client Fd: ", getClientFd());
 }
 
 // Default Constructor
 Client::Client (void): 
 _id(0),
-_fd(0),
 _start(std::clock()) {}
 
 // Destructor
 Client::~Client (void)
 {
-	if (_socketToChild != DELETED)
-		close(_socketToChild);
-	if (_socketFromChild != DELETED)
-		close(_socketFromChild);
 	delete _requestMsg;
 	delete _responseMsg;
 	delete _cgiResponseMsg;
@@ -193,14 +223,20 @@ Client::~Client (void)
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
 	Logger::info("Client destructed, unique ID: ", _id);
-	Logger::info("Closing FD: ", _fd);
-	close (_fd);
+	Logger::info("Closing Fd: ", getClientFd());
+	// if (_socketToChild != DELETED)
+	// 	close(_socketToChild);
+	// if (_socketFromChild != DELETED)
+	// 	close(_socketFromChild);
+	// close (_fd);
+	closeClientFds();
 }
 
 // Copy Constructor
 Client::Client(Client const & src):
 _id(++client_cntr),
-_fd(src._fd),
+// _fd(src._fd),
+_clientFds(src._clientFds),
 _start(std::clock())
 {
 	*this = src;
