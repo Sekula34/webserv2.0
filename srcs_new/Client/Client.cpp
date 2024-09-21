@@ -8,7 +8,6 @@
 #include "../Utils/Data.hpp"
 #include <sstream>
 
-
 //==========================================================================//
 // STATIC ATTRIBUTES/METHODS================================================//
 //==========================================================================//
@@ -16,10 +15,14 @@
 // Initializing static attributes
 int	Client::client_cntr = 0;
 
-
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
+
+const Client::e_clientState&		Client::getClientState() const
+{
+	return (_clientState);
+}
 
 std::clock_t	Client::getStartTime() const
 {
@@ -107,11 +110,18 @@ bool	Client::checkTimeout()
 	return (true);
 }
 
-void Client::_initVars(void)
+void Client::setClientState(e_clientState state)
+{
+	_clientState = state;
+}
+
+void Client::_initVars(int fd)
 {
 
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
+	_clientFds.push_back(fdStatePair(fd, UNSET));
+	_initClientIp();
 	_errorCode = 0;
 	_clockstop = 1000;
 	_requestMsg = NULL;
@@ -201,9 +211,9 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	_clientAddr(clientAddr),
 	_addrLen(addrLen)
 {
-	_clientFds.push_back(fdStatePair(fd, UNSET));
-	_initVars();
-	_initClientIp();
+	// _clientFds.push_back(fdStatePair(fd, UNSET));
+	_initVars(fd);
+	// _initClientIp();
 	Logger::info("Client constructed, unique ID: ", _id);
 	Logger::info("Client Fd: ", getClientFd());
 }
