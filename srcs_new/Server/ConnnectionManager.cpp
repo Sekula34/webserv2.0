@@ -14,7 +14,7 @@
 // REGULAR METHODS==========================================================//
 //==========================================================================//
 
-// Helper function for _epollLoop() to add server sockets to epoll
+// Helper function for to add fd to epoll
 static int		epollAddFd(int& epollFd, int& fd)
 {
 	int ret;
@@ -30,6 +30,7 @@ static int		epollAddFd(int& epollFd, int& fd)
 	return (ret);
 }
 
+// Function for _epollLoop() to accept new client and add it to epoll
 void	ConnectionManager::_acceptNewClient(int listen_socket)
 {
 	struct sockaddr client_addr;
@@ -44,48 +45,20 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 	// CREATE NEW CLIENT INSTANCE WITH CLIENT FD CONSTRUCTOR
 	Client * newClient = new Client(clientFd, client_addr, addrlen);
 
-	// IF CLIENT FD ALREADY EXISTS IN MAP, THEN SET NOWRITE IN THE CLIENT INSTANCE.
-	// WE DON'T IMMEADIATELY DELETE CLIENT BECAUSE IT MIGHT BE PROCESSING.
-	// IN THAT CASE THE  CLIENT INSTANCE NEEDS TO FINISH ITS JOB
-	// AND HAS TO BE DELETED -> THIS CASE IS NOT YET TAKEN CARE OF
-	// RIGHT NOW MEMORY LEAK!!! ADD TO GRAVEYARD VECTOR??
 	if (_clients.find(clientFd) != _clients.end())
 	{
-		// _clients[clientFd]->setWriteClient(false);
-		// _clients[clientFd]->setClientState(Client::DELETE);
 		Logger::error("F@ck Found duplicate fd in clients map", _clients[clientFd]->getId());
 		delete _clients[clientFd];
 	}
 	_clients[clientFd] = newClient;
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
-	// Data::epollAddFd(clientfd);
 	epollAddFd(_epollFd, clientFd);
 }
 
-// bool ConnectionManager::_handleServerSocket(struct epoll_event* events, int idx)
-// {
-// 	if (!events)
-// 		return (false);
-// 	std::vector<Socket> serverSockets = Socket::getSockets();
-// 	std::vector<Socket>::const_iterator it = serverSockets.begin();
-// 	for(; it != serverSockets.end(); ++it)
-// 	{
-// 		if (events[idx].data.fd == it->getSocketFD())
-// 		{
-// 			_acceptNewClient(it->getSocketFD());
-// 			return (true);
-// 		}
-// 	}
-// 	return (false);
-// }
-
-// Helper function for _epollLoop() to add server sockets to epoll
+// Function for _epollLoop() to add server sockets to epoll
 void		ConnectionManager::_addServerSocketsToEpoll()
 {
-	// std::vector<int> socketFds = Data::getServerSocketFds();
-	// struct epoll_event	ev;
-	// ev.events = EPOLLIN | EPOLLOUT;
 	int ret = 0;
 	std::vector<Socket> sockets = Socket::getSockets();
 	std::vector<Socket>::const_iterator it = sockets.begin();
@@ -93,14 +66,13 @@ void		ConnectionManager::_addServerSocketsToEpoll()
 	{
 		int fd = it->getSocketFD();
 		Logger::info("Adding to epoll this server socket: ", fd);
-		// ev.data.fd = fd;
-		// if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev) == -1)
 		ret = epollAddFd(_epollFd, fd);
 		if (ret == -1)
 			throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
 	}
 }
 
+// Helper function to check if fd belongs to a server socket
 static bool		isServerSocket(int fd)
 {
 	std::vector<Socket> serverSockets = Socket::getSockets();
@@ -113,13 +85,27 @@ static bool		isServerSocket(int fd)
 	return (false);
 }
 
+// Helper function to check if fd belongs to a client;if yes then returns Client
 static Client*		isClient(int fd, std::map<int, Client*>& clients)
 {
-	// std::map<int, Client*>::iterator it = _clients.find(fd);
 	std::map<int, Client*>::const_iterator it = clients.find(fd);
 	if (it == clients.end())
 		return (NULL);
 	return (it->second);
+}
+
+void	ConnectionManager::_updateClientFd(Client& client, const int& idx, const struct epoll_event* events)
+{
+	if (client.getClientState() == Client::DELETEME)
+		return ;
+	bool allowedToSend = events[idx].events & EPOLLOUT;
+	bool allowedToReceive = events[idx].events & EPOLLIN;
+	if (allowedToSend && !allowedToReceive)
+		client.setClientFdState(0, Client::R_SEND);
+	if (!allowedToSend && allowedToReceive)
+		client.setClientFdState(0, Client::R_RECEIVE);
+	if (allowedToSend && allowedToReceive)
+		client.setClientFdState(0, Client::R_SENDREC);
 }
 
 void	ConnectionManager::_epollLoop()
@@ -129,7 +115,7 @@ void	ConnectionManager::_epollLoop()
 
 	Logger::info("my pid is: ", getpid());
 	// signal(SIGINT, handle_sigint);
-	_addServerSocketsToEpoll();
+	// _addServerSocketsToEpoll();
 	while(true)
 	{
 		// if (!_catchEpollErrorAndSignal())
@@ -143,7 +129,15 @@ void	ConnectionManager::_epollLoop()
 				continue;
 			}
 			if ((client = isClient(events[idx].data.fd, _clients)) != NULL)
-				_handleClient(*client, idx);
+				_updateClientFd(*client, idx, events);
+
+			// handle CGI Sockets
+				// add/remove CGI Sockets from/to epoll
+				// update CGI Sockets
+
+
+			// delete Clients 
+				// remove Client Fds
 		}
 	}
 }
@@ -160,7 +154,10 @@ void	ConnectionManager::ConnectionManagerLoop()
 // Custom Constructor
 // ConnectionManager::ConnectionManager(int epollFd, std::list<Client*>& clients) :
 ConnectionManager::ConnectionManager(int epollFd, std::map<int, Client*>& clients) :
-_epollFd(epollFd), _clients(clients) {}
+_epollFd(epollFd), _clients(clients)
+{
+	_addServerSocketsToEpoll();
+}
 
 // Destructor
 ConnectionManager::~ConnectionManager()

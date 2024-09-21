@@ -33,10 +33,10 @@ class Client
 	public: 
 		enum	e_fdState
 		{
-			UNSET, // Initial state of fd
-			R_READ, // fd ready to be read
-			R_WRITE, // fd ready to be writted to
-			R_READWRITE, // fd ready to be written to and read from
+			NONE, // Initial state of fd
+			R_RECEIVE, // fd ready to be read
+			R_SEND, // fd ready to be writted to
+			R_SENDREC, // fd ready to be written to and read from
 			CLOSE, // close fd
 			CLOSED // fd is closed
 		};
@@ -49,7 +49,7 @@ class Client
 			F_CGIREAD,	// Client finished reading to CGI 
 			F_RESPONSE,	// Client has finished writing Response
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
-			DELETE	// Client wants to be deleted
+			DELETEME	// Client wants to be deleted
 		};
 
 		typedef std::pair<int, e_fdState> fdStatePair;
@@ -69,6 +69,7 @@ class Client
 		Message*				getCgiResponseMsg()const;
 		bool					checkTimeout();
 		void					setClientState(e_clientState state);
+		void					setClientFdState(int idx, e_fdState fdState);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
 		void					setCgiResponseMsg(Message* m);

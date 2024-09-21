@@ -18,18 +18,16 @@ class ConnectionManager
 	private:
 		// Methods
 		void		_epollLoop(void);
-		// Client*		_findClientInClients(int client_fd);
-		bool		_handleServerSocket(struct epoll_event* events, int idx);
-		// void		_addServerSocketsToEpoll(void);
-		void		_addServerSocketsToEpoll();
-		void 		_acceptNewClient(int listen_socket);
+		// bool		_handleServerSocket(struct epoll_event* events, int idx);
+		void		_updateClientFd(Client& client, const int& idx, const struct epoll_event* events);
+		void		_addServerSocketsToEpoll(void); // Make arguments const
+		void 		_acceptNewClient(int listen_socket); // Make arguments const
+
 		// Attributes
 		int							_epollFd;
-		// std::list<Client*>& 		_clients;
 		std::map<int, Client*>& 	_clients;
 
 	public:
-		// ConnectionManager(int epollFd, std::list<Client*>& clients);
 		ConnectionManager(int epollFd, std::map<int, Client*>& clients);
 		~ConnectionManager();
 

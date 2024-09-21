@@ -110,9 +110,19 @@ bool	Client::checkTimeout()
 	return (true);
 }
 
-void Client::setClientState(e_clientState state)
+void	Client::setClientState(e_clientState state)
 {
 	_clientState = state;
+}
+
+void	Client::setClientFdState(int idx, e_fdState fdState)
+{
+	if (idx > _clientFds.size())
+	{
+		Logger::error("Trying to change the state of a non-existing fd; your idx is: ", idx);
+		return ;
+	}
+	_clientFds[idx].second = fdState;
 }
 
 void Client::_initVars(int fd)
@@ -120,7 +130,7 @@ void Client::_initVars(int fd)
 
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
-	_clientFds.push_back(fdStatePair(fd, UNSET));
+	_clientFds.push_back(fdStatePair(fd, NONE));
 	_initClientIp();
 	_errorCode = 0;
 	_clockstop = 1000;
@@ -132,8 +142,8 @@ void	Client::setChildSocket(int to, int from)
 {
 	// _socketToChild = to;
 	// _socketFromChild = from;
-	_clientFds.push_back(std::pair<int, e_fdState>(to, UNSET));
-	_clientFds.push_back(std::pair<int, e_fdState>(from, UNSET));
+	_clientFds.push_back(std::pair<int, e_fdState>(to, NONE));
+	_clientFds.push_back(std::pair<int, e_fdState>(from, NONE));
 }
 
 void	Client::closeSocketToChild()
