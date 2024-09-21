@@ -8,19 +8,9 @@
 //==========================================================================//
 // STATIC ATTRIBUTES/METHODS================================================//
 //==========================================================================//
+
 // Initializing static attributes
 std::vector<Socket>	Socket::_allSockets;
-
-// Static method to get all sockets FDs so ConnectionDispatcher can add them
-// to epoll and listen to incomming connections (new Clients).
-// std::vector<int>	Socket::getSocketFDs()
-// {
-// 	std::vector<int> fds;
-// 	std::vector<Socket>::const_iterator it = _allSockets.begin();
-// 	for (; it != _allSockets.end(); ++it)
-// 		fds.push_back(it->_socketFD);
-// 	return (fds);
-// }
 
 std::vector<Socket>&	Socket::getSockets()
 {
@@ -34,16 +24,20 @@ void	Socket::closeSockets()
 	for (; it != sockets.end(); ++it)
 		close(it->_socketFD);
 }
+
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
+
 const int&	Socket::getSocketFD() const
 {
 	return (_socketFD);
 }
+
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
+
 // Custom Constructor
 Socket::Socket(int portNumber) : _port(portNumber)
 {
@@ -62,7 +56,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 
 	int opt(1);
 	int retVal;
-	// TODO: check if this is ok with subjcet. Reuseaddr is to make bind not fail if restart is quick.
+	// TODO: check if this is ok with subject. Reuseaddr is to make bind not fail if restart is quick.
 	retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
 	if(retVal == -1)
 	{
@@ -98,5 +92,8 @@ _adress(source._adress), _addrlen(source._addrlen)
 
 // Destructor
 Socket::~Socket() {}
-// We don't close the socket fd because we need it, it will be closed
+
+//==========================================================================//
+// NOTES:
+// 1) We don't close the socket fd because we need it, it will be closed
 // by ConnectionManager Destructor (when program ends).

@@ -17,10 +17,10 @@ class ConnectionManager
 	private:
 		// Methods
 		void		_epollLoop(void);
-		Client*		_findClientInClients(int client_fd);
+		// Client*		_findClientInClients(int client_fd);
 		bool		_handleServerSocket(struct epoll_event* events, int idx);
-		void		_addServerSocketsToEpoll(void);
-		void 		_epollAcceptClient(int listen_socket);
+		// void		_addServerSocketsToEpoll(void);
+		void 		_acceptNewClient(int listen_socket);
 		// Attributes
 		int						_epollFd;
 		std::list<Client*>& 	_clients;

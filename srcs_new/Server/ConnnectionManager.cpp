@@ -1,6 +1,7 @@
 #include "ConnectionManager.hpp"
 #include "../Utils/Logger.hpp"
 #include "Socket.hpp"
+#include "../Client/Client.hpp"
 #include <csignal>
 #include <sys/epoll.h>
 #include <unistd.h> // FIXME. Used by Logger for getpid()
@@ -41,12 +42,13 @@ bool ConnectionManager::_handleServerSocket(struct epoll_event* events, int idx)
 {
 	if (!events)
 		return (false);
-	std::vector<int> serverSockets = Socket::getSocketFDs();
-	for(std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	std::vector<Socket> serverSockets = Socket::getSockets();
+	std::vector<Socket>::const_iterator it = serverSockets.begin();
+	for(; it != serverSockets.end(); ++it)
 	{
-		if (events[idx].data.fd == *it)
+		if (events[idx].data.fd == it->getSocketFD())
 		{
-			_acceptNewClient(*it);
+			_acceptNewClient(it->getSocketFD());
 			return (true);
 		}
 	}
@@ -69,7 +71,7 @@ void	ConnectionManager::_epollLoop()
 		for (int idx = 0; idx < nfds && nfds != -1; ++idx)
 		{
 			if (_handleServerSocket(events, idx) == true)
-				continue;_handleServerSocket();
+				continue;
 			if ((client = _isClient(Data::setEvents()[idx].data.fd)) != NULL)
 				_handleClient(*client, idx);
 		}
