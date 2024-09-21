@@ -1,25 +1,49 @@
 #include "Socket.hpp"
+#include "../Utils/Logger.hpp"
 #include <cstdio>
 #include <cstring>
 #include <stdexcept>
-#include "../Utils/Logger.hpp"
+#include <unistd.h>
 
-// STATIC ATTRIBUTES/METHODS=================================================//
+//==========================================================================//
+// STATIC ATTRIBUTES/METHODS================================================//
+//==========================================================================//
 // Initializing static attributes
 std::vector<Socket>	Socket::_allSockets;
 
 // Static method to get all sockets FDs so ConnectionDispatcher can add them
 // to epoll and listen to incomming connections (new Clients).
-const std::vector<int>	Socket::getSocketFDs(void)
+// std::vector<int>	Socket::getSocketFDs()
+// {
+// 	std::vector<int> fds;
+// 	std::vector<Socket>::const_iterator it = _allSockets.begin();
+// 	for (; it != _allSockets.end(); ++it)
+// 		fds.push_back(it->_socketFD);
+// 	return (fds);
+// }
+
+std::vector<Socket>&	Socket::getSockets()
 {
-	std::vector<int> fds;
-	std::vector<Socket>::const_iterator it = _allSockets.begin();
-	for (; it != _allSockets.end(); ++it)
-		fds.push_back(it->_socketFD);
-	return (fds);
+	return (_allSockets);
 }
 
+void	Socket::closeSockets()
+{
+	std::vector<Socket> sockets = Socket::getSockets();
+	std::vector<Socket>::const_iterator it = sockets.begin();
+	for (; it != sockets.end(); ++it)
+		close(it->_socketFD);
+}
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
+const int&	Socket::getSocketFD() const
+{
+	return (_socketFD);
+}
+//==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
+//==========================================================================//
 // Custom Constructor
 Socket::Socket(int portNumber) : _port(portNumber)
 {
@@ -70,5 +94,9 @@ _port(source._port), _socketFD(source._socketFD),
 _adress(source._adress), _addrlen(source._addrlen)
 {}
 
+// TODO: Copy Assigment Operator
+
 // Destructor
 Socket::~Socket() {}
+// We don't close the socket fd because we need it, it will be closed
+// by ConnectionManager Destructor (when program ends).

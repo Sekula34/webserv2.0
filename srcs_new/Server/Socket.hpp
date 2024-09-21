@@ -12,7 +12,10 @@ class Socket
 {
 	public:
 		// Methods
-		static const std::vector<int>	getSocketFDs(void);
+		const int&	getSocketFD() const;
+		// static std::vector<int>&	getSocketFDs();
+		static std::vector<Socket>&	getSockets();
+		static void					closeSockets();
 		// int getCommunicationSocket(void);
 		// friend std::ostream& operator<<(std::ostream& os, const Socket& socket);
 
