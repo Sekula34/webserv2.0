@@ -63,7 +63,7 @@ std::string HttpStatusCode::getReasonPhrase(int code)
 	it = _statusCode.find(code);
 	if(it == _statusCode.end())
 	{
-		Logger::error("Cannot find ReasonPhrase with code: "); std::cerr << code << std::endl;
+		Logger::error("Cannot find ReasonPhrase with code: ", code);
 		throw UnkownCodeException();
 	}
 	return it->second;

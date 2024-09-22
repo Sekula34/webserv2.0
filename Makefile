@@ -28,6 +28,8 @@ NC := \033[0m # No color
 
 SRCS =		srcs_new/Message/AHeader.cpp\
 			srcs_new/Client/Client.cpp \
+			srcs_new/Client/FdData.cpp \
+			srcs_new/Io/Io.cpp \
 			srcs_new/Message/Message.cpp \
 			srcs_new/Message/Node.cpp \
 			srcs_new/Message/RequestHeader.cpp \
@@ -51,6 +53,8 @@ SRCS =		srcs_new/Message/AHeader.cpp\
 
 HEADERS =	srcs_new/Message/AHeader.hpp\
 			srcs_new/Client/Client.hpp \
+			srcs_new/Client/FdData.hpp \
+			srcs_new/Io/Io.hpp \
 			srcs_new/Message/Message.hpp \
 			srcs_new/Message/Node.hpp \
 			srcs_new/Message/RequestHeader.hpp \

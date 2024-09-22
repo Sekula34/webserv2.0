@@ -44,13 +44,14 @@ void	Io::_ioClient(Client& client)
 			_receiveMsg(client, fdData, message);
 		return ;
 	}
-	_sendMsg(client);
+	// _sendMsg(client);
 }	
 
-void	Io::_sendMsg(Client& client)
-{
-
-}
+// TODO:
+// void	Io::_sendMsg(Client& client)
+// {
+// 	(void)client;
+// }
 
 void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 {
@@ -89,6 +90,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		if (!client.getMsg(msgType)->getHeader())
 			client.getMsg(msgType)->_createHeader(); // TODO: Check _headwer because it uses new.
 		client.getMsg(msgType)->setState(COMPLETE);
+		client.getMsg(msgType)->printChain();
 
 		// TODO: implement this when CGI is refactored
 		//_client->hasReadFromCgi = true;

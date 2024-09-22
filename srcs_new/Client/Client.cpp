@@ -20,7 +20,7 @@
 // Initializing static attributes
 size_t	Client::client_cntr = 0;
 
-std::map<int, Client*>	clients;
+std::map<int, Client*>	Client::clients;
 
 //==========================================================================//
 // REGULAR METHODS==========================================================//

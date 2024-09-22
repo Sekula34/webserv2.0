@@ -18,7 +18,7 @@ class Io
 	private:
 		// Methods
 		void	_ioClient(Client& client);	
-		 void	_sendMsg(Client& client);
+		//  void	_sendMsg(Client& client);
 		void	_receiveMsg(Client& client, FdData& fdData, Message* message);
 
 		// Attributes

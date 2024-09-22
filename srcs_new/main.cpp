@@ -12,11 +12,34 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
-#include <map>
+// #include <map>
 // #include <list>
 
-void	initVars(char** envp, const std::string& configFilePath)
+// void	initVars(char** envp, const std::string& configFilePath)
+// {
+// 	Data::setAllCgiLang();
+// 	ServersInfo serverInfo(configFilePath);
+// 	Logger::info("SERVER IS TURNED ON", "");
+// 	Data::setEnvp(envp);
+// 	// SocketManager sockets(serverInfo.getUniquePorts());
+
+// 	// Save all sockets Fds
+// 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
+// 	for (std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+// 		Socket currSocket(*it);
+
+// 	// Initialize epoll
+// 	int epollFd = epoll_create(1);
+// 	if (epollFd == -1)
+// 		throw (std::runtime_error("epoll_create failed"));
+
+// 	// Create manager instance
+// 	ConnectionManager manager(epollFd);
+// }
+
+void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
+	// ConnectionManager* manager = NULL;
 	Data::setAllCgiLang();
 	ServersInfo serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
@@ -35,19 +58,13 @@ void	initVars(char** envp, const std::string& configFilePath)
 
 	// Create manager instance
 	ConnectionManager manager(epollFd);
-}
-
-void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
-{
-	ConnectionManager* manager;
-
 	Io io;
-
-	initVars(envp, configFilePath);
+	Logger::info("my pid is: ", getpid());
+	// initVars(envp, configFilePath);
 	// Main Loop
 	while (true)
 	{
-		manager->epollLoop();
+		manager.epollLoop();
 		io.ioLoop();
 		// io.ioLoop();
 		// virtualServer.virtualServerLoop();

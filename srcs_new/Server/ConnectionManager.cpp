@@ -68,11 +68,11 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 		return ;
 	}
 
-	if (_clients.find(clientFd) != _clients.end()) // This should never happen
-	{
-		Logger::error("F@ck Found duplicate fd in clients map", _clients[clientFd]->getId());
-		delete _clients[clientFd];
-	}
+	// if (_clients.find(clientFd) != _clients.end()) // This should never happen
+	// {
+	// 	Logger::error("F@ck Found duplicate fd in clients map", _clients[clientFd]->getId());
+	// 	delete _clients[clientFd];
+	// }
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
 	int ret = epollAddFd(_epollFd, clientFd);
@@ -289,29 +289,28 @@ void	ConnectionManager::epollLoop()
 	Logger::info("my pid is: ", getpid());
 	// signal(SIGINT, handle_sigint);
 	// _addServerSocketsToEpoll();
-	while(true)
-	{
+
 		// if (!_catchEpollErrorAndSignal())
 			// break;
-		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, MAX_WAIT);
-		for (int idx = 0; idx < nfds && nfds != -1; ++idx)
-		{
-			if (isServerSocket(events[idx].data.fd))
-				_acceptNewClient(events[idx].data.fd);
-			else if ((client = isClient(events[idx].data.fd, _clients)) != NULL)
-				_handleClient(*client, idx, events); // BF:_updateClientFd
-			else
-			 	_handleCgiFds(idx, events);
-			// handle CGI Sockets
-				// add/remove CGI Sockets from/to epoll
-				// update CGI Sockets
+	int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, MAX_WAIT);
+	for (int idx = 0; idx < nfds && nfds != -1; ++idx)
+	{
+		if (isServerSocket(events[idx].data.fd))
+			_acceptNewClient(events[idx].data.fd);
+		else if ((client = isClient(events[idx].data.fd, _clients)) != NULL)
+			_handleClient(*client, idx, events); // BF:_updateClientFd
+		else
+			_handleCgiFds(idx, events);
+		// handle CGI Sockets
+			// add/remove CGI Sockets from/to epoll
+			// update CGI Sockets
 
-			// handle Client
-				// delete Clients
-					// remove Client Fd from Epoll
-				// update Client Fds
-		}
+		// handle Client
+			// delete Clients
+				// remove Client Fd from Epoll
+			// update Client Fds
 	}
+
 }
 
 // void	ConnectionManager::ConnectionManagerLoop()

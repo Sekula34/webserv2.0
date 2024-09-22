@@ -33,7 +33,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 		return false;
 	}
 	std::ifstream file(relativeFilePath.c_str());
-	Logger::info("Trying to open "); std::cout << relativeFilePath.c_str() << std::endl;
+	Logger::info("Trying to open ", relativeFilePath);
 	if(file.good() == false)
 	{
 		Logger::error("Opening file failed. Check if file exist (maybe typo) and if you have reading permmision.", true);
@@ -46,7 +46,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 	}
 	if(S_ISREG(fileStat.st_mode) == 0)
 	{
-		Logger::error("File is not regular at location: "); std::cout << relativeFilePath;
+		Logger::error("File is not regular at location: ", relativeFilePath);
 		return false;
 	}
 	Logger::info("File is regular file that can be opened", true);
