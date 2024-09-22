@@ -19,9 +19,10 @@ class ConnectionManager
 		// Methods
 		void		_epollLoop(void);
 		// bool		_handleServerSocket(struct epoll_event* events, int idx);
-		void		_updateClientFd(Client& client, const int& idx, const struct epoll_event* events);
+		void		_handleClient(Client& client, const int& idx, struct epoll_event* events);
 		void		_addServerSocketsToEpoll(void); // Make arguments const
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
+		void		_handleCgiFds(Client& client, const int& idx, struct epoll_event* events);
 
 		// Attributes
 		int							_epollFd;
@@ -35,7 +36,13 @@ class ConnectionManager
 		ConnectionManager();
 		ConnectionManager(ConnectionManager& source);
 		ConnectionManager& operator=(ConnectionManager& source);
-
 };
 
 #endif
+
+//============================================================================
+// NOTES/IDEAS:
+// 1) If we pass too much epol struct, then maybe make it an attribute
+// 2) Make epoll operations one function
+// 3) Instead of having a _client vector of pairs of fd and e_state; we could have
+// a map wgich keey is fd and value is pair of fd_type and fd_state.

@@ -5,18 +5,17 @@
 # include <netinet/in.h>
 # include <vector>
 
-
 const int backlog(10); //max of 10 connection on listen queue
 
 class Socket 
 {
 	public:
 		// Methods
-		const int&	getSocketFD() const;
-		// static std::vector<int>&	getSocketFDs();
 		static std::vector<Socket>&	getSockets();
+		// static std::vector<int>&	getSocketFDs();
 		static void					closeSockets();
 		// int getCommunicationSocket(void);
+		const int&					getSocketFD() const;
 		// friend std::ostream& operator<<(std::ostream& os, const Socket& socket);
 
 	private:

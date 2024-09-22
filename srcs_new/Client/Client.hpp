@@ -30,7 +30,7 @@ class Message;
 
 class Client
 {
-	public: 
+	public:
 		enum	e_fdState
 		{
 			NONE, // Initial state of fd
@@ -52,6 +52,13 @@ class Client
 			DELETEME	// Client wants to be deleted
 		};
 
+		enum	e_clientFdType
+		{
+			CLIENT_FD = 0,
+			TOCHILD_FD = 1,
+			FROMCHILD_FD = 2
+		};
+
 		typedef std::pair<int, e_fdState> fdStatePair;
 		typedef std::vector<std::pair<int, e_fdState> > fdPairsVec;
 
@@ -59,6 +66,9 @@ class Client
 		// Methods
 		unsigned long			getId() const;
 		int						getClientFd() const;
+
+		fdPairsVec&				getClientFds(); // Maybe we could come up with a better name.
+
 		const e_clientState&	getClientState() const;
 		unsigned short			getClientPort();
 		std::string				getClientIp() const;
@@ -79,23 +89,25 @@ class Client
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
+
 		// Attributes
-		static int			client_cntr;
+		static size_t			client_cntr;
 
 	private:
 		// Methods
 		void				_initClientIp();
 		void				_initVars(int fd);
+
 		// Attributes
 		const size_t		_id;
-		fdPairsVec			_clientFds;
-		// const int			_fd;
+		fdPairsVec			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		// const int		_fd;
 		e_clientState		_clientState;
-		// e_fdState			_stateFd;
-		// int					_socketToChild;
-		// e_fdState			_stateSocketToChild;
-		// int					_socketFromChild;
-		// e_fdState			_stateSocketFromChild;
+		// e_fdState		_stateFd;
+		// int				_socketToChild;
+		// e_fdState		_stateSocketToChild;
+		// int				_socketFromChild;
+		// e_fdState		_stateSocketFromChild;
 		const std::clock_t	_start;
 		double				_clockstop;
 		int					_errorCode;
@@ -107,13 +119,13 @@ class Client
 		socklen_t			_addrLen;
 
 	public:
-							Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);
-							~Client(void);
+						Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);
+						~Client(void);
 
 	private:
-							Client(void);
-							Client(Client const & src);
-		Client &			operator=(Client const & rhs);
+						Client(void);
+						Client(Client const & src);
+		Client &		operator=(Client const & rhs);
 };
 
 #endif

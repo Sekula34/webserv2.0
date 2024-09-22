@@ -13,7 +13,7 @@
 //==========================================================================//
 
 // Initializing static attributes
-int	Client::client_cntr = 0;
+size_t	Client::client_cntr = 0;
 
 //==========================================================================//
 // REGULAR METHODS==========================================================//
@@ -42,6 +42,11 @@ int	Client::getClientFd() const
 	else
 	 	Logger::error("F@ck no fd in client with id ", _id);
 	return (ret);
+}
+
+Client::fdPairsVec&		Client::getClientFds()
+{
+	return (_clientFds);
 }
 
 Message*	Client::getRequestMsg()const
@@ -130,6 +135,7 @@ void Client::_initVars(int fd)
 
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
+	_clientState = NEW;
 	_clientFds.push_back(fdStatePair(fd, NONE));
 	_initClientIp();
 	_errorCode = 0;
