@@ -80,6 +80,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// EOF reached, child has gracefully shutdown connection
 	// TODO: implement this when CGI is refactored
 	// if (readValue == 0 && _client->waitReturn != 0)
+	client.getMsg(Client::REQ_MSG)->printChain();
 	if (readValue == 0)
 	{
 		Client::e_clientMsgType msgType;
@@ -90,7 +91,6 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		if (!client.getMsg(msgType)->getHeader())
 			client.getMsg(msgType)->_createHeader(); // TODO: Check _headwer because it uses new.
 		client.getMsg(msgType)->setState(COMPLETE);
-		client.getMsg(msgType)->printChain();
 
 		// TODO: implement this when CGI is refactored
 		//_client->hasReadFromCgi = true;

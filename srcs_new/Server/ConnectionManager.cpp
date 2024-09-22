@@ -286,7 +286,7 @@ void	ConnectionManager::epollLoop()
 	struct epoll_event	events[MAX_EVENTS];
 	Client* client = NULL;
 
-	Logger::info("my pid is: ", getpid());
+
 	// signal(SIGINT, handle_sigint);
 	// _addServerSocketsToEpoll();
 
