@@ -66,16 +66,17 @@ class Client
 			CGIRESP_MSG
 		};
 
-		typedef std::pair<int, e_fdState> fdStatePair;
-		typedef std::vector<std::pair<int, e_fdState> > fdPairsVec;
+		typedef std::pair<e_clientFdType, e_fdState> fdTypeStatePair;
+		typedef std::map<int, fdTypeStatePair > fdPairsMap;
 
 	public:
 		// Methods
 		Message*				getMsg(e_clientMsgType type);
 		unsigned long			getId() const;
-		int						getClientFd() const;
+	//	int						getClientFd() const;
+		int						getFdByType(e_clientFdType type);
 
-		fdPairsVec&				getClientFds(); // Maybe we could come up with a better name.
+		fdPairsMap&				getClientFds(); // Maybe we could come up with a better name.
 
 		const e_clientState&	getClientState() const;
 		unsigned short			getClientPort();
@@ -109,7 +110,7 @@ class Client
 
 		// Attributes
 		const size_t		_id;
-		fdPairsVec			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		fdPairsMap			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
 		// const int		_fd;
 		e_clientState		_clientState;
 		// e_fdState		_stateFd;

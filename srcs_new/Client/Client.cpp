@@ -67,17 +67,29 @@ unsigned long	Client::getId() const
 	return (_id);
 }
 
-int	Client::getClientFd() const
+// int	Client::getClientFd() const
+// {
+// 	int ret = 0;
+// 	if (_clientFds.size() > 0)
+// 		ret = _clientFds.begin()->first;
+// 	else
+// 	 	Logger::error("F@ck no fd in client with id ", _id);
+// 	return (ret);
+// }
+
+int	Client::getFdByType(e_clientFdType type)
 {
-	int ret = 0;
-	if (_clientFds.size() > 0)
-		ret = _clientFds.begin()->first;
-	else
-	 	Logger::error("F@ck no fd in client with id ", _id);
-	return (ret);
+	fdPairsMap::iterator it = _clientFds.begin();
+	for(; it != _clientFds.end(); ++it)
+	{
+		if(it->second.first == type)
+			return it->first;
+	}
+	Logger::warning("We are returning minus 1. cuz there is no such type Boze pomozi", type);
+	return -1;
 }
 
-Client::fdPairsVec&		Client::getClientFds()
+Client::fdPairsMap&		Client::getClientFds()
 {
 	return (_clientFds);
 }
@@ -153,14 +165,14 @@ void	Client::setClientState(e_clientState state)
 	_clientState = state;
 }
 
-void	Client::setClientFdState(int idx, e_fdState fdState)
+void	Client::setClientFdState(int fd, e_fdState fdState)
 {
-	if (idx > _clientFds.size())
-	{
-		Logger::error("Trying to change the state of a non-existing fd; your idx is: ", idx);
-		return ;
-	}
-	_clientFds[idx].second = fdState;
+	fdPairsMap::iterator it = _clientFds.find(fd);
+	if (it == _clientFds.end())
+		Logger::error("Trying to change the state of a non-existing fd ", fd);
+	else
+		_clientFds[fd].second = fdState;
+
 }
 
 void Client::_initVars(int fd)
@@ -168,7 +180,8 @@ void Client::_initVars(int fd)
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
 	_clientState = NEW;
-	_clientFds.push_back(fdStatePair(fd, NONE));
+	_clientFds[fd] = fdTypeStatePair(CLIENT_FD, NONE);
+	// _clientFds.push_back(fdStatePair(fd, NONE));
 	_initClientIp();
 	_errorCode = 0;
 	_clockstop = 1000;
@@ -180,10 +193,8 @@ void Client::_initVars(int fd)
 
 void	Client::setChildSocket(int to, int from)
 {
-	// _socketToChild = to;
-	// _socketFromChild = from;
-	_clientFds.push_back(std::pair<int, e_fdState>(to, NONE));
-	_clientFds.push_back(std::pair<int, e_fdState>(from, NONE));
+	_clientFds[to] = fdTypeStatePair(TOCHILD_FD, NONE);
+	_clientFds[from] = fdTypeStatePair(FROMCHILD_FD, NONE);
 }
 
 void	Client::closeSocketToChild()
@@ -209,7 +220,7 @@ unsigned short	Client::getClientPort()
 {
 	struct sockaddr_in local_addr;
 	socklen_t local_addr_len = sizeof(local_addr);
-	if (getsockname(getClientFd(), (struct sockaddr *)&local_addr, &local_addr_len) == -1)
+	if (getsockname(getFdByType(CLIENT_FD), (struct sockaddr *)&local_addr, &local_addr_len) == -1)
 	{
 		setErrorCode(500);
 		return (0);
@@ -238,13 +249,13 @@ void	Client::_initClientIp()
 
 void	Client::closeClientFds()
 {
-	fdPairsVec::iterator it = _clientFds.begin();
+	fdPairsMap::iterator it = _clientFds.begin();
 	for (; it != _clientFds.end(); ++it)
 	{
-		if (it->second != CLOSED)
+		if (it->second.second != CLOSED)
 		{
 			close(it->first);
-			it->second = CLOSED;
+			it->second.second = CLOSED;
 		}
 	}
 }
@@ -265,7 +276,7 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	_initVars(fd);
 	// _initClientIp();
 	Logger::info("Client constructed, unique ID: ", _id);
-	Logger::info("Client Fd: ", getClientFd());
+	Logger::info("Client Fd: ", getFdByType);
 }
 
 // Default Constructor
@@ -283,14 +294,14 @@ Client::~Client()
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
 	Logger::info("Client destructed, unique ID: ", _id);
-	Logger::info("Closing Fd: ", getClientFd());
+	Logger::info("Closing Fd: ", getFdByType);
 	// if (_socketToChild != DELETED)
 	// 	close(_socketToChild);
 	// if (_socketFromChild != DELETED)
 	// 	close(_socketFromChild);
 	// close (_fd);
 	closeClientFds();
-	clients.erase(getClientFd());
+	clients.erase(getFdByType);
 }
 
 // Copy Constructor

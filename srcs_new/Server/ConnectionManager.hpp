@@ -22,7 +22,7 @@ class ConnectionManager
 		void		_handleClient(Client& client, const int& idx, struct epoll_event* events);
 		void		_addServerSocketsToEpoll(void); // Make arguments const
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
-		void		_handleCgiFds(Client& client, const int& idx, struct epoll_event* events);
+		void		_handleCgiFds(const int& idx, struct epoll_event* events);
 
 		// Attributes
 		int							_epollFd;

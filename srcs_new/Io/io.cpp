@@ -36,13 +36,13 @@ void	Io::_ioClient(Client& client)
 			fdType = Client::FROMCHILD_FD;
 			message = client.getMsg(Client::CGIRESP_MSG);
 		}
-		Client::fdStatePair& fdPair = client.getClientFds()[fdType];
-
+		int fd = client.getFdByType(fdType);
+		Client::fdPairsMap::iterator itFdMap = client.getClientFds().find(fd); 
 		if (!message)
 			return ; // TODO: Stop Loop / delete client, panic?
 		// If the state of the file descripter allows us to receive -> we receive
-		if (fdPair.second  == Client::R_RECEIVE || fdPair.second  == Client::R_SENDREC)
-			_receiveMsg(client, fdPair, message);
+		if (itFdMap->second.second  == Client::R_RECEIVE || itFdMap->second.second  == Client::R_SENDREC)
+			_receiveMsg(client, itFdMap, message);
 		return ;
 	}
 	_sendMsg(client);
@@ -53,7 +53,7 @@ void	Io::_sendMsg(Client& client)
 
 }
 
-void	Io::_receiveMsg(Client& client, Client::fdStatePair& fdPair, Message* message)
+void	Io::_receiveMsg(Client& client, Client::fdPairsMap::iterator& itFdMap, Message* message)
 {
 	int 	readValue = 0;
 	// char*	buffer = new char[MAXLINE];

@@ -134,16 +134,17 @@ static Client*		isClient(int fd, std::map<int, Client*>& clients)
 // }
 
 // TODO: Decalre an enum to be more verbose for idx of clientFds
-static void	updateClientFds(Client& client, const int fdType, const int& epollIdx, const struct epoll_event* events)
+static void	updateClientFds(Client& client, const int& epollIdx, const struct epoll_event* events)
 {
+	const int fd = events[epollIdx].data.fd;
 	bool allowedToSend = events[epollIdx].events & EPOLLOUT;
 	bool allowedToReceive = events[epollIdx].events & EPOLLIN;
 	if (allowedToSend && !allowedToReceive)
-		client.setClientFdState(fdType, Client::R_SEND);
+		client.setClientFdState(fd, Client::R_SEND);
 	if (!allowedToSend && allowedToReceive)
-		client.setClientFdState(fdType, Client::R_RECEIVE);
+		client.setClientFdState(fd, Client::R_RECEIVE);
 	if (allowedToSend && allowedToReceive)
-		client.setClientFdState(fdType, Client::R_SENDREC);
+		client.setClientFdState(fd, Client::R_SENDREC);
 }
 
 // Method for _epollLoop() to update Client Fd state (e_fdState)
@@ -158,7 +159,7 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx, struct epo
 		return ;
 	}
 
-	updateClientFds(client, Client::CLIENT_FD, idx, events);
+	updateClientFds(client, idx, events);
 	// bool allowedToSend = events[idx].events & EPOLLOUT;
 	// bool allowedToReceive = events[idx].events & EPOLLIN;
 	// if (allowedToSend && !allowedToReceive)
@@ -169,7 +170,42 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx, struct epo
 	// 	client.setClientFdState(0, Client::R_SENDREC);
 }
 
-void		ConnectionManager::_handleCgiFds(Client& client, const int& idx, struct epoll_event* events)
+// void		ConnectionManager::_handleCgiFds(Client& client, const int& idx, struct epoll_event* events)
+// {
+// 	int targetFd = events[idx].data.fd;
+// 	// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
+// 	std::map<int, Client*>::iterator it = _clients.begin();
+// 	for (; it != _clients.end(); ++it)
+// 	{
+// 		Client& currentClient = *(it->second);
+// 		Client::fdPairsVec::iterator itFds = currentClient.getClientFds().begin();
+// 		for (int i = 0; itFds != currentClient.getClientFds().end(); ++itFds, ++i)
+// 		{
+// 			if (targetFd == itFds->first)
+// 			{
+// 				if (i == 0)
+// 					Logger::error("We are trying to change client fd. this should not happen in client with id: ", currentClient.getId());
+// 				if (itFds->second == Client::CLOSE)
+// 				{
+// 					epollRemoveFd(_epollFd, targetFd, events);
+// 					close(targetFd);
+// 					itFds->second = Client::CLOSED;
+// 					return ;
+// 				}
+// 				if (itFds->second == Client::NONE)
+// 				{
+// 					epollAddFd(_epollFd, targetFd);
+// 					return;
+// 				}
+// 				updateClientFds(currentClient, i, idx, events);
+// 				return ;
+// 			}
+// 		}
+// 	}
+// 	Logger::error("Could not find targetFd in any client (while trying to set cgi socket state): ", targetFd);
+// }
+
+void		ConnectionManager::_handleCgiFds(const int& idx, struct epoll_event* events)
 {
 	int targetFd = events[idx].data.fd;
 	// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
@@ -177,29 +213,33 @@ void		ConnectionManager::_handleCgiFds(Client& client, const int& idx, struct ep
 	for (; it != _clients.end(); ++it)
 	{
 		Client& currentClient = *(it->second);
-		Client::fdPairsVec::iterator itFds = currentClient.getClientFds().begin();
-		for (int i = 0; itFds != currentClient.getClientFds().end(); ++itFds, ++i)
+		//Client::fdPairsMap::iterator itFds = currentClient.getClientFds().begin();
+		Client::fdPairsMap::iterator fdIt = currentClient.getClientFds().find(targetFd);
+		if(fdIt == currentClient.getClientFds().end())
+			continue ;
+		const int& fd = fdIt->first;
+		Client::fdTypeStatePair& tyteState = fdIt->second;
+		Client::e_clientFdType& fdType = tyteState.first;
+		Client::e_fdState& fdState = tyteState.second;
+
+		if (fdType == Client::CLIENT_FD)
+			Logger::error("We are trying to change client fd. this should not happen in client with id: ", currentClient.getId());
+		if (fdState == Client::CLOSE)
 		{
-			if (targetFd == itFds->first)
-			{
-				if (i == 0)
-					Logger::error("We are trying to change client fd. this should not happen in client with id: ", currentClient.getId());
-				if (itFds->second == Client::CLOSE)
-				{
-					epollRemoveFd(_epollFd, targetFd, events);
-					close(targetFd);
-					itFds->second = Client::CLOSED;
-					return ;
-				}
-				if (itFds->second == Client::NONE)
-				{
-					epollAddFd(_epollFd, targetFd);
-					return;
-				}
-				updateClientFds(currentClient, i, idx, events);
-				return ;
-			}
+			epollRemoveFd(_epollFd, targetFd, events);
+			close(targetFd);
+			fdState = Client::CLOSED;
+			return ;
 		}
+		if (fdState == Client::NONE)
+		{
+			epollAddFd(_epollFd, targetFd);
+			return;
+		}
+		updateClientFds(currentClient, idx, events);
+		return ;
+
+		
 	}
 	Logger::error("Could not find targetFd in any client (while trying to set cgi socket state): ", targetFd);
 }
@@ -224,7 +264,7 @@ void	ConnectionManager::epollLoop()
 			else if ((client = isClient(events[idx].data.fd, _clients)) != NULL)
 				_handleClient(*client, idx, events); // BF:_updateClientFd
 			else
-			 	_handleCgiFds(*client, idx, events);
+			 	_handleCgiFds(idx, events);
 			// handle CGI Sockets
 				// add/remove CGI Sockets from/to epoll
 				// update CGI Sockets
