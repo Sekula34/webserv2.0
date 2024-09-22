@@ -17,9 +17,10 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-Message::Message (bool request)
+Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
 {
-
+	if (_errorCode)
+		Logger::error("F@ck message constructor WITH error code", _errorCode);
 	// std::cout << "Message default constructor called" << std::endl;
 	_request = request;
 	_chain.push_back(Node("", HEADER, _request));
@@ -30,17 +31,17 @@ Message::Message (bool request)
 	_header = NULL;
 }
 
-Message::Message (void)
-{
-	// std::cout << "Message default constructor called" << std::endl;
-	_request = true;
-	_chain.push_back(Node("", HEADER, _request));
-	_it = _chain.begin();
-	_chunked = false;
-	_trailer = false;
-	_state = INCOMPLETE;
-	_header = NULL;
-}
+// Message::Message (void)
+// {
+// 	// std::cout << "Message default constructor called" << std::endl;
+// 	_request = true;
+// 	_chain.push_back(Node("", HEADER, _request));
+// 	_it = _chain.begin();
+// 	_chunked = false;
+// 	_trailer = false;
+// 	_state = INCOMPLETE;
+// 	_header = NULL;
+// }
 
 /******************************************************************************/
 /*                                Destructor                                  */

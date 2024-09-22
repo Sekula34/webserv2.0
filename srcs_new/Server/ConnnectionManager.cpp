@@ -80,7 +80,7 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 		delete newClient;
 
 	// ADDING NEWLY CREATED CLIENT TO _CLIENTS MAP
-	_clients[clientFd] = newClient;
+	// _clients[clientFd] = newClient;
 }
 
 // Method for _epollLoop() to add server sockets to epoll
@@ -151,10 +151,10 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx, struct epo
 {
 	if (client.getClientState() == Client::DELETEME)
 	{
-		std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
-		_clients.erase(it);
+		// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
+		// _clients.erase(it);
 		epollRemoveFd(_epollFd, client.getClientFd(), events);
-		delete &client;
+		delete &client; // delete needs an address
 		return ;
 	}
 
@@ -204,7 +204,7 @@ void		ConnectionManager::_handleCgiFds(Client& client, const int& idx, struct ep
 	Logger::error("Could not find targetFd in any client (while trying to set cgi socket state): ", targetFd);
 }
 
-void	ConnectionManager::_epollLoop()
+void	ConnectionManager::epollLoop()
 {
 	struct epoll_event	events[MAX_EVENTS];
 	Client* client = NULL;
@@ -237,18 +237,18 @@ void	ConnectionManager::_epollLoop()
 	}
 }
 
-void	ConnectionManager::ConnectionManagerLoop()
-{
+// void	ConnectionManager::ConnectionManagerLoop()
+// {
 
-}
+// }
 
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
 // Custom Constructor
-ConnectionManager::ConnectionManager(int epollFd, std::map<int, Client*>& clients) :
-_epollFd(epollFd), _clients(clients)
+ConnectionManager::ConnectionManager(int epollFd) :
+_epollFd(epollFd), _clients(Client::clients)
 {
 	_addServerSocketsToEpoll();
 }

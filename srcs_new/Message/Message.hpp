@@ -14,7 +14,7 @@ class Message {
 
 	public:
 									// canonical
-									Message(bool r);
+									Message(bool request, int& errorCode);
 		virtual						~Message(void);
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
@@ -41,6 +41,7 @@ class Message {
 		bool						_request;
 		std::stringstream 			_ss;
 		AHeader*					_header;
+		int&						_errorCode;
 
 		void						_setNodeComplete();
 		void						_parseNode();
@@ -53,7 +54,7 @@ class Message {
 		// void						_createHeader();
 		// void						_headerInfoToNode();
 
-									Message(void);
+									//Message(void);
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);
 };

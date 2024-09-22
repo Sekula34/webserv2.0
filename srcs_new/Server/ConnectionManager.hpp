@@ -12,12 +12,12 @@ class ConnectionManager
 {
 	public:
 		// Methods
-		void	ConnectionManagerLoop();
+		void		epollLoop(void);
+		// void	ConnectionManagerLoop();
 		// Attributes
 
 	private:
 		// Methods
-		void		_epollLoop(void);
 		// bool		_handleServerSocket(struct epoll_event* events, int idx);
 		void		_handleClient(Client& client, const int& idx, struct epoll_event* events);
 		void		_addServerSocketsToEpoll(void); // Make arguments const
@@ -29,7 +29,7 @@ class ConnectionManager
 		std::map<int, Client*>& 	_clients;
 
 	public:
-		ConnectionManager(int epollFd, std::map<int, Client*>& clients);
+		ConnectionManager(int epollFd);
 		~ConnectionManager();
 
 	private:

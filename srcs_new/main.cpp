@@ -1,5 +1,6 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Server/ConnectionManager.hpp"
+#include "Io/Io.hpp"
 #include "Server/Socket.hpp"
 #include "Utils/Data.hpp"
 #include "Utils/FileUtils.hpp"
@@ -11,7 +12,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
-#include <list>
+#include <map>
+// #include <list>
 
 void	initVars(char** envp, const std::string& configFilePath)
 {
@@ -31,19 +33,22 @@ void	initVars(char** envp, const std::string& configFilePath)
 	if (epollFd == -1)
 		throw (std::runtime_error("epoll_create failed"));
 
-	// Create empty clients list and create manager instance
-	std::list<Client*> clients;
-	ConnectionManager manager(epollFd, clients);
+	// Create manager instance
+	ConnectionManager manager(epollFd);
 }
 
 void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
 	ConnectionManager* manager;
+
+	Io io;
+
 	initVars(envp, configFilePath);
 	// Main Loop
 	while (true)
 	{
-		manager.ConnectionManagerLoop();
+		manager->epollLoop();
+		io.ioLoop();
 		// io.ioLoop();
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();

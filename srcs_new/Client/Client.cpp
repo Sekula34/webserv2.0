@@ -2,6 +2,7 @@
 #include "Client.hpp"
 #include <cstddef>
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include "../Message/Message.hpp"
 #include "../Utils/Logger.hpp"
@@ -15,9 +16,41 @@
 // Initializing static attributes
 size_t	Client::client_cntr = 0;
 
+std::map<int, Client*>	clients;
+
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
+
+Message*	Client::getMsg(e_clientMsgType type)
+{
+	try
+	{
+		if (type == REQ_MSG)
+		{	
+			if (!_requestMsg)
+				_requestMsg = new Message(true, _errorCode);
+			return (_requestMsg);
+		}
+		if (type == RESP_MSG)
+		{	
+			if (!_responseMsg)
+				_responseMsg = new Message(false, _errorCode);
+			return (_responseMsg);
+		}
+		if (type == CGIRESP_MSG)
+		{	
+			if (!_cgiResponseMsg)
+				_cgiResponseMsg = new Message(false, _errorCode);
+			return (_cgiResponseMsg);
+		}
+	}
+	catch (std::exception& e)
+	{
+		Logger::error("F@ck could not create new Message in client: ", _id);
+		return (NULL);
+	}
+}
 
 const Client::e_clientState&		Client::getClientState() const
 {
@@ -49,22 +82,22 @@ Client::fdPairsVec&		Client::getClientFds()
 	return (_clientFds);
 }
 
-Message*	Client::getRequestMsg()const
-{
-	return (_requestMsg);
-}
+// Message*	Client::getRequestMsg()const
+// {public
+// 	return (_requestMsg);
+// }
 
-Message*	Client::getResponseMsg()const
-{
-	return (_responseMsg);
-}
+// Message*	Client::getResponseMsg()const
+// {
+// 	return (_responseMsg);
+// }
 
-Message*	Client::getCgiResponseMsg()const
-{
-	return (_cgiResponseMsg);
-}
+// Message*	Client::getCgiResponseMsg()const
+// {
+// 	return (_cgiResponseMsg);
+// }
 
-int	Client::getErrorCode() const
+int&	Client::getErrorCode()
 {
 	return (_errorCode);
 }
@@ -132,7 +165,6 @@ void	Client::setClientFdState(int idx, e_fdState fdState)
 
 void Client::_initVars(int fd)
 {
-
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
 	_clientState = NEW;
@@ -142,6 +174,8 @@ void Client::_initVars(int fd)
 	_clockstop = 1000;
 	_requestMsg = NULL;
 	_responseMsg = NULL;
+	_cgiResponseMsg = NULL;
+	clients[fd] = this;
 }
 
 void	Client::setChildSocket(int to, int from)
@@ -235,12 +269,12 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 }
 
 // Default Constructor
-Client::Client (void): 
+Client::Client(): 
 _id(0),
 _start(std::clock()) {}
 
 // Destructor
-Client::~Client (void)
+Client::~Client()
 {
 	delete _requestMsg;
 	delete _responseMsg;
@@ -256,6 +290,7 @@ Client::~Client (void)
 	// 	close(_socketFromChild);
 	// close (_fd);
 	closeClientFds();
+	clients.erase(getClientFd());
 }
 
 // Copy Constructor
@@ -266,10 +301,11 @@ _clientFds(src._clientFds),
 _start(std::clock())
 {
 	*this = src;
+	Logger::warning("Copy Constructor of Client called", src.getId());
 }
 
 // Copy Assignment Operator
-Client &	Client::operator=(const Client&)
+Client&	Client::operator=(const Client&)
 {
 	return (*this);
 }

@@ -59,11 +59,19 @@ class Client
 			FROMCHILD_FD = 2
 		};
 
+		enum	e_clientMsgType
+		{
+			REQ_MSG,
+			RESP_MSG,
+			CGIRESP_MSG
+		};
+
 		typedef std::pair<int, e_fdState> fdStatePair;
 		typedef std::vector<std::pair<int, e_fdState> > fdPairsVec;
 
 	public:
 		// Methods
+		Message*				getMsg(e_clientMsgType type);
 		unsigned long			getId() const;
 		int						getClientFd() const;
 
@@ -73,10 +81,10 @@ class Client
 		unsigned short			getClientPort();
 		std::string				getClientIp() const;
 		std::clock_t			getStartTime() const;
-		int						getErrorCode() const;
-		Message*				getRequestMsg()const;
-		Message*				getResponseMsg()const;
-		Message*				getCgiResponseMsg()const;
+		int&					getErrorCode();
+		// Message*				getRequestMsg()const;
+		// Message*				getResponseMsg()const;
+		// Message*				getCgiResponseMsg()const;
 		bool					checkTimeout();
 		void					setClientState(e_clientState state);
 		void					setClientFdState(int idx, e_fdState fdState);
@@ -92,6 +100,7 @@ class Client
 
 		// Attributes
 		static size_t			client_cntr;
+		static std::map<int, Client*>	clients;
 
 	private:
 		// Methods
