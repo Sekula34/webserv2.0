@@ -8,7 +8,8 @@
 
 class Message;
 
-class Io {
+class Io
+{
 	public:
 		// Methods
 		void	ioLoop();
@@ -18,10 +19,16 @@ class Io {
 		// Methods
 		void	_ioClient(Client& client);	
 		 void	_sendMsg(Client& client);
-		void	_receiveMsg(Client& client, Client::fdStatePair& fdPair, Message* message);
+		void	_receiveMsg(Client& client, FdData& fdData, Message* message);
 
 		// Attributes
 		char*	_buffer;
+	
+	public:
+		Io();
+		~Io();
+		Io(const Io& src);
+		Io&		operator=(const Io& src);
 };
 
 # endif

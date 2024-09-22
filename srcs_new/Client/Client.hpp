@@ -1,6 +1,6 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
-# include "../Message/RequestHeader.hpp"
+# include "FdData.hpp"
 // # include "CgiProcessor.hpp"
 // # include "../Response/Response.hpp"
 // # include "../Utils/Logger.hpp"
@@ -17,8 +17,9 @@
 # include <netdb.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
+# include <vector>
+# include <map>
 // # include <sstream>
-// # include <map>
 //# include "CgiProcessor.hpp"
 
 // # define MAXLINE			4096
@@ -28,18 +29,12 @@
 
 class Message;
 
+
+
 class Client
 {
 	public:
-		enum	e_fdState
-		{
-			NONE, // Initial state of fd
-			R_RECEIVE, // fd ready to be read
-			R_SEND, // fd ready to be writted to
-			R_SENDREC, // fd ready to be written to and read from
-			CLOSE, // close fd
-			CLOSED // fd is closed
-		};
+
 
 		enum	e_clientState
 		{
@@ -52,12 +47,6 @@ class Client
 			DELETEME	// Client wants to be deleted
 		};
 
-		enum	e_clientFdType
-		{
-			CLIENT_FD = 0,
-			TOCHILD_FD = 1,
-			FROMCHILD_FD = 2
-		};
 
 		enum	e_clientMsgType
 		{
@@ -66,17 +55,15 @@ class Client
 			CGIRESP_MSG
 		};
 
-		typedef std::pair<e_clientFdType, e_fdState> fdTypeStatePair;
-		typedef std::map<int, fdTypeStatePair > fdPairsMap;
-
 	public:
 		// Methods
 		Message*				getMsg(e_clientMsgType type);
 		unsigned long			getId() const;
 	//	int						getClientFd() const;
-		int						getFdByType(e_clientFdType type);
+		FdData&					getFdDataByType(FdData::e_fdType type);
+		FdData&					getFdDataByFd(int fd);
 
-		fdPairsMap&				getClientFds(); // Maybe we could come up with a better name.
+		std::vector<FdData>&	getClientFds(); // Maybe we could come up with a better name.
 
 		const e_clientState&	getClientState() const;
 		unsigned short			getClientPort();
@@ -88,7 +75,7 @@ class Client
 		// Message*				getCgiResponseMsg()const;
 		bool					checkTimeout();
 		void					setClientState(e_clientState state);
-		void					setClientFdState(int idx, e_fdState fdState);
+		// void					setClientFdState(int idx, e_fdState fdState);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
 		void					setCgiResponseMsg(Message* m);
@@ -110,7 +97,8 @@ class Client
 
 		// Attributes
 		const size_t		_id;
-		fdPairsMap			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		// fdPairsMap			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		std::vector<FdData>	_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
 		// const int		_fd;
 		e_clientState		_clientState;
 		// e_fdState		_stateFd;

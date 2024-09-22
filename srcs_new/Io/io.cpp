@@ -1,13 +1,13 @@
 # include "Io.hpp"
 # include "../Client/Client.hpp"
 # include "../Message/Message.hpp"
+# include "../Message/Node.hpp"
+# include "../Utils/Logger.hpp"
 
 
 //==========================================================================//
 // STATIC METHODS===========================================================//
 //==========================================================================//
-
-
 
 void	Io::ioLoop()
 {
@@ -23,26 +23,25 @@ void	Io::_ioClient(Client& client)
 	// IF client state is new or we have just finished writing to CGI -> we want to receive
 	if (client.getClientState() == Client::NEW || client.getClientState() == Client::F_CGIWRITE)
 	{
-		Client::e_clientFdType fdType;
+		FdData::e_fdType fdType;
 		// if Client state == NEW, then receive into requestMsg
 		if (client.getClientState() == Client::NEW)
 		{
-			fdType = Client::CLIENT_FD;
+			fdType = FdData::CLIENT_FD;
 			message = client.getMsg(Client::REQ_MSG);
 		}
 		// if Client state != NEW then we receive into cgiResponse Message 
 		else
 		{
-			fdType = Client::FROMCHILD_FD;
+			fdType = FdData::FROMCHILD_FD;
 			message = client.getMsg(Client::CGIRESP_MSG);
 		}
-		int fd = client.getFdByType(fdType);
-		Client::fdPairsMap::iterator itFdMap = client.getClientFds().find(fd); 
+		FdData& fdData = client.getFdDataByType(fdType);
 		if (!message)
 			return ; // TODO: Stop Loop / delete client, panic?
 		// If the state of the file descripter allows us to receive -> we receive
-		if (itFdMap->second.second  == Client::R_RECEIVE || itFdMap->second.second  == Client::R_SENDREC)
-			_receiveMsg(client, itFdMap, message);
+		if (fdData.state  == FdData::R_RECEIVE || fdData.state  == FdData::R_SENDREC)
+			_receiveMsg(client, fdData, message);
 		return ;
 	}
 	_sendMsg(client);
@@ -53,39 +52,51 @@ void	Io::_sendMsg(Client& client)
 
 }
 
-void	Io::_receiveMsg(Client& client, Client::fdPairsMap::iterator& itFdMap, Message* message)
+void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 {
 	int 	readValue = 0;
-	// char*	buffer = new char[MAXLINE];
-	// char	buffer[MAXLINE];
 
-	//_client->clearRecvLine();
-	readValue = recv(fdPair.first, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+	readValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// successful read -> concat message
 	if (readValue > 0)
 		message->bufferToNodes(_buffer, readValue);
 
-	// failed read -> stop CGI and set errorcode = 500
+	// failed read
 	if (readValue < 0)
 	{
-		Logger::warning("failed tor read from Child Process", true);
+		Logger::warning("failed to read with return Value: ", readValue);
 		client.setErrorCode(500);
-		client.setClientState(Client::F_REQUEST)
+		if (fdData.type == FdData::CLIENT_FD)
+			client.setClientState(Client::F_REQUEST);
+		else if (fdData.type == FdData::FROMCHILD_FD)
+		{
+			client.setClientState(Client::F_CGIREAD);
+			fdData.state = FdData::CLOSE;
+		}
 	}
 
 	// EOF reached, child has gracefully shutdown connection
-	if (readValue == 0 && _client->waitReturn != 0)
+	// TODO: implement this when CGI is refactored
+	// if (readValue == 0 && _client->waitReturn != 0)
+	if (readValue == 0)
 	{
-		if (!_client->getServerMsg()->getHeader())
-			_client->getServerMsg()->_createHeader();
-		_client->getServerMsg()->setState(COMPLETE);
-		_client->hasReadFromCgi = true;
-		// _client->getServerMsg()->printChain();
+		Client::e_clientMsgType msgType;
+		if (fdData.type == FdData::CLIENT_FD)
+			msgType = Client::REQ_MSG;
+		else
+		 	msgType = Client::CGIRESP_MSG;
+		if (!client.getMsg(msgType)->getHeader())
+			client.getMsg(msgType)->_createHeader(); // TODO: Check _headwer because it uses new.
+		client.getMsg(msgType)->setState(COMPLETE);
+
+		// TODO: implement this when CGI is refactored
+		//_client->hasReadFromCgi = true;
+
 		// copy the error code in the CgiResponseHeader into client
 		// so that errors from CGI can be processed
-		if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())
-			_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
+		// if (client.getMsg(msgType) && client.getMsg(msgType)->getHeader() && !client.getErrorCode())
+		// 	client.setErrorCode(client.getMsg(msgType)->getHeader().getHttpStatusCode());
 	}
 
 }
@@ -95,11 +106,22 @@ void	Io::_receiveMsg(Client& client, Client::fdPairsMap::iterator& itFdMap, Mess
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
-// Custom Constructor
+// Default Constructor
 Io::Io() : _buffer(new char[MAXLINE]) {}
 
 // Destructor
 Io::~Io()
 {
 	delete[] _buffer;
+}
+
+// Copy Contructor
+Io::Io(const Io& src) : _buffer(src._buffer) {}
+
+// Copy Assigment Operator
+Io&		Io::operator=(const Io& src)
+{
+	if (this != &src)
+		_buffer = src._buffer;
+	return (*this);
 }
