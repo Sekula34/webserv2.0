@@ -38,6 +38,8 @@ void	Io::_ioClient(Client& client)
 		}
 		Client::fdStatePair& fdPair = client.getClientFds()[fdType];
 
+		if (!message)
+			return ; // TODO: Stop Loop / delete client, panic?
 		// If the state of the file descripter allows us to receive -> we receive
 		if (fdPair.second  == Client::R_RECEIVE || fdPair.second  == Client::R_SENDREC)
 			_receiveMsg(client, fdPair, message);
@@ -68,7 +70,8 @@ void	Io::_receiveMsg(Client& client, Client::fdStatePair& fdPair, Message* messa
 	if (readValue < 0)
 	{
 		Logger::warning("failed tor read from Child Process", true);
-		_stopCgiSetErrorCode();
+		client.setErrorCode(500);
+		client.setClientState(Client::F_REQUEST)
 	}
 
 	// EOF reached, child has gracefully shutdown connection
