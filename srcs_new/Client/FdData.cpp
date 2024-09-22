@@ -4,7 +4,7 @@
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
-FdData::FdData(int fd, e_clientFdType type) : fd(fd), type(type), state(NONE)
+FdData::FdData(int fd, e_fdType type) : fd(fd), type(type), state(NONE)
 {}
 FdData::~FdData(void)
 {}

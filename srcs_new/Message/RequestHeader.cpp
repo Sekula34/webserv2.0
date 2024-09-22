@@ -46,7 +46,7 @@ _fullRequest(getFullRequest(source.getFullMessage()))
 RequestHeader& RequestHeader::operator=(const RequestHeader& source)
 {
 	(void) source;
-	Logger::warning("Give me good reason for this RequestHeader operator =");
+	Logger::warning("Give me good reason for this RequestHeader operator =", "");
 	return  *this;
 }
 

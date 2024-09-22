@@ -2,10 +2,10 @@
 #include "Message.hpp"
 #include "Node.hpp"
 #include "RequestHeader.hpp"
-#include "../Response/ResponseHeader.hpp"
-#include "Client.hpp"
+#include "ResponseHeader.hpp"
+#include "../Client/Client.hpp"
 #include "../Utils/Logger.hpp"
-#include "../Parsing/ParsingUtils.hpp"
+// #include "../Parsing/ParsingUtils.hpp"
 #include <sstream>
 #include <cmath>
 
@@ -57,7 +57,7 @@ Message::~Message (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-Message::Message(Message const & src)
+Message::Message(Message const & src) : _errorCode(src._errorCode)
 {
 	//std::cout << "Message copy constructor called" << std::endl;
 	*this = src;
@@ -133,7 +133,7 @@ void	Message::printChain()
 			std::cout << "Node Type: TRAILER, string: " << std::endl;
 		if (it->getType() == CHUNK || it->getType() == LCHUNK)
 			Logger::chars(it->getStringChunked(), true);
-	 	else
+		else
 			Logger::chars(it->getStringUnchunked(), true);
 	}
 }
@@ -230,7 +230,7 @@ std::string	Message::_createCgiHeaderDel()
 		return ("\n\n");
 	size_t found = str.rfind("\n");
 	if (found == str.size() - 1)
-	found = str.rfind("\n", str.size() - 2);
+		found = str.rfind("\n", str.size() - 2);
 	if (found != std::string::npos)
 	{
 		// std::cout << "created this CGI Header Delimiter: " << std::endl;

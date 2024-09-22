@@ -9,9 +9,9 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include "../Utils/Logger.hpp"
-#include "../Utils/HttpStatusCode.hpp"
-#include "../Client/Message.hpp"
+// #include "../Utils/Logger.hpp"
+// #include "../Utils/HttpStatusCode.hpp"
+// #include "../Message/Message.hpp"
 
 
 ServersInfo::ServersInfo(std::string configPath)
@@ -145,32 +145,33 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 	return &getServerById(serverId);
 }
 
+// TODO:
+// bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
+// {
+// 	if(header == NULL)
+// 	{
+// 		Logger::warning("Trying to get Client Server with client that have no header", "");
+// 		return false;
+// 	}
+// 	if(header->getHttpStatusCode() == 400) // or check if code is 400 
+// 	{
+// 		const std::string reason = HttpStatusCode::getReasonPhrase(header->getHttpStatusCode());
+// 		Logger::warning("Client send " + reason, true);
+// 		Logger::warning("There is no filled info in header for finding server", true);
+// 		return false;
+// 	}
+// 	return true;
+// }
 
-bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
-{
-	if(header == NULL)
-	{
-		Logger::warning("Trying to get Client Server with client that have no header");
-		return false;
-	}
-	if(header->getHttpStatusCode() == 400) // or check if code is 400 
-	{
-		const std::string reason = HttpStatusCode::getReasonPhrase(header->getHttpStatusCode());
-		Logger::warning("Client send " + reason, true);
-		Logger::warning("There is no filled info in header for finding server", true);
-		return false;
-	}
-	return true;
-}
-
-const ServerSettings* ServersInfo::getClientServer(const Client& client) const
-{
-	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
-		return NULL;
-	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
-	const ServerSettings* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
-	return toReturn;
-}
+// TODO: Important
+// const ServerSettings* ServersInfo::getClientServer(const Client& client) const
+// {
+// 	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
+// 		return NULL;
+// 	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
+// 	const ServerSettings* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
+// 	return toReturn;
+// }
 
 //goes through vector of servers
 //get server Port, check if port is in unique vector if not add it

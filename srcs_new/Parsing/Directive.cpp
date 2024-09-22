@@ -246,7 +246,8 @@ void Directive::apply(DefaultSettings& settings)
 		_applyCgiExtension(settings);
 	else 
 	{
-		Logger::warning("Applying directive: "); std::cout << _directiveName; Logger::warning("is not implemeted yet", true);
+		Logger::warning("Applying directive: ", _directiveName);;
+		Logger::warning("is not implemeted yet", "");
 	}
 }
 
@@ -392,8 +393,8 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 	{
 		if(Data::isCgiExtensionValid(extensions[i]) == false)
 		{
-			Logger::error("There is no interpreter for :"); std::cout << extensions[i] << " ";
-			std::cout << "In line " << _dirLineNumber << std::endl;
+			Logger::error("There is no interpreter for :", extensions[i]);
+			// TODO: std::cout << "In line " << _dirLineNumber << std::endl;
 			throw InvalidDirectiveException();
 		}
 	}

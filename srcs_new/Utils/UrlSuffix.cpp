@@ -21,7 +21,7 @@ UrlSuffix::UrlSuffix(const UrlSuffix& source)
 
 UrlSuffix& UrlSuffix::operator=(const UrlSuffix source)
 {
-	Logger::warning("Give me good reason why you called this on URL suffix");
+	Logger::warning("Give me good reason why you called this on URL suffix", "");
 	(void) source;
 	return (*this);
 }

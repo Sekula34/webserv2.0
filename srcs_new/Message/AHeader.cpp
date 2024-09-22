@@ -49,7 +49,7 @@ AHeader::AHeader(const AHeader& source)
 AHeader& AHeader::operator=(const AHeader& source)
 {
 	(void) source;
-	Logger::warning("Why is AHeader = operator called??");
+	Logger::warning("Why is AHeader = operator called??", "");
 	return *this;
 }
 
@@ -144,7 +144,7 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 	if(key == "" || value == "")
 	{
 		p_setHttpStatusCode(500);
-		Logger::warning("Something is off");
+		Logger::warning("Something is off", "");
 		return false;
 	}
 		//std::string key = connected[0];

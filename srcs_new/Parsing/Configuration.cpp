@@ -48,7 +48,7 @@ void Configuration::_checkDoubleHttp(const Token& oneToken)
 {
 	if(oneToken.getTokenInfo() == "http" && _tokensVector.size() != 0)
 	{
-		Logger::error("Second http context found ind line "); std::cout << oneToken.getTokenLineNumber() <<std::endl;
+		Logger::error("Second http context found ind line ", oneToken.getTokenLineNumber());
 		throw InvalidConfigFileException();
 	}
 }

@@ -58,10 +58,10 @@ class FdData
 	public:
 		FdData(int fd, e_fdType type);
 		~FdData(void);
+		FdData(FdData const & src);
 
 	private:
 						FdData(void);
-						FdData(FdData const & src);
 		FdData &		operator=(FdData const & rhs);
 };
 

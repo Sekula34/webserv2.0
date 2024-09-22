@@ -72,7 +72,8 @@ const Client*	Data::getClientByFd(int fd)
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for(; it != _clients.end(); it++)
 	{
-		if (it->second->getFd() == fd)
+		// if (it->second->getFd() == fd)
+		if (it->second->getFdDataByType(FdData::CLIENT_FD).fd == fd)
 			return (it->second);
 	}
 	return (NULL);
@@ -147,11 +148,13 @@ void	Data::closeAllFds()
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for(; it != _clients.end(); it++)
 	{
-		close(it->second->getFd());
-		if (it->second->socketToChild != DELETED)
-			close(it->second->socketToChild);
-		if (it->second->socketFromChild != DELETED)
-			close(it->second->socketFromChild);
+		close(it->second->getFdDataByType(FdData::CLIENT_FD).fd);
+		// if (it->second->socketToChild != DELETED)
+		if (it->second->getFdDataByType(FdData::TOCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::TOCHILD_FD).fd);
+		// if (it->second->socketFromChild != DELETED)
+		if (it->second->getFdDataByType(FdData::FROMCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::FROMCHILD_FD).fd);
 	}
 
 	// closing ServerSockets

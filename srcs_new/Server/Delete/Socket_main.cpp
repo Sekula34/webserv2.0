@@ -11,8 +11,8 @@ int	main()
 	}
 	std::vector<Socket> sockets = Socket::getSockets();
 	for (std::vector<Socket>::const_iterator it = sockets.begin(); it != sockets.end(); ++it)
-		std::cout << it->getSocketFD() << std::endl;
+		std::cout << it->getSocketFd() << std::endl;
 	// std::vector<int> closeSockets = Socket::getSockets();
 	for (std::vector<Socket>::const_iterator it = sockets.begin(); it != sockets.end(); ++it)
-		close(it->getSocketFD());
+		close(it->getSocketFd());
 }

@@ -29,7 +29,7 @@ void	Socket::closeSockets()
 // REGULAR METHODS==========================================================//
 //==========================================================================//
 
-const int&	Socket::getSocketFD() const
+const int&	Socket::getSocketFd() const
 {
 	return (_socketFD);
 }

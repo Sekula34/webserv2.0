@@ -1,6 +1,6 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
-#include "../Client/AHeader.hpp"
+#include "AHeader.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>

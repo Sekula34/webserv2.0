@@ -1,5 +1,6 @@
 #include "Node.hpp"
-#include "Client.hpp"
+// #include "../Client/Client.hpp"
+#include "../Io/Io.hpp"
 #include <sstream>
 
 /******************************************************************************/
@@ -299,8 +300,8 @@ size_t	Node::_calcBtrCgi(char* buffer, size_t & bufferPos, size_t num)
 				_state = COMPLETE;
 				return (++i);
 			}
-	  		else
-	  			_hasNewline = true;
+			else
+				_hasNewline = true;
 		}
 		if (buffer[i] != '\r' && buffer[i] != '\n')
 		{
