@@ -12,6 +12,7 @@ FdData::FdData(FdData const & src) : fd(src.fd), type(src.type), state(src.state
 {}
 FdData &		FdData::operator=(FdData const & rhs)
 {
-	*this = rhs;
+	if (this != &rhs)
+		state = rhs.state;
 	return (*this);
 }

@@ -204,7 +204,6 @@ void	Client::setWriteClient(bool b)
 /*                          Class Specific Functions                          */
 /******************************************************************************/
 
-
 bool	Client::checkTimeout()
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;

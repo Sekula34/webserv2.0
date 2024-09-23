@@ -15,12 +15,12 @@
 class Client;
 class Socket;
 
-class CgiProcessor {
+class Cgi {
 
 	public:
-									CgiProcessor(Client& client);
-									~CgiProcessor(void);
-		int							process(void);
+									Cgi(Client& client);
+									~Cgi(void);
+		int							loop(void);
 		std::string					getInterpreterPath(std::string suffix);
 		std::string					getScriptName(std::string suffix);
 		int							getPid();
@@ -73,9 +73,9 @@ class CgiProcessor {
 		void						_closeCgi();
 		void						_handleReturnStatus(int status);
 
-									CgiProcessor(void);
-									CgiProcessor(CgiProcessor const & src);
-		CgiProcessor &				operator=(CgiProcessor const & rhs);
+									Cgi(void);
+									Cgi(Cgi const & src);
+		Cgi &				operator=(Cgi const & rhs);
 };
 
 #endif

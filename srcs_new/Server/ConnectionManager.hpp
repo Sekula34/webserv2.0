@@ -5,6 +5,8 @@
 // # include <list>
 #include <map>
 
+#define MAX_EVENTS		40 // what happens if we exceed this?
+
 class Client;
 // class SocketManager;
 
@@ -13,20 +15,19 @@ class ConnectionManager
 	public:
 		// Methods
 		void		epollLoop(void);
-		// void	ConnectionManagerLoop();
 		// Attributes
 
 	private:
 		// Methods
-		// bool		_handleServerSocket(struct epoll_event* events, int idx);
-		void		_handleClient(Client& client, const int& idx, struct epoll_event* events);
+		void		_handleClient(Client& client, const int& idx);
 		void		_addServerSocketsToEpoll(void); // Make arguments const
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
-		void		_handleCgiFds(const int& idx, struct epoll_event* events);
+		void		_handleCgiFds(const int& idx);
 
 		// Attributes
 		int							_epollFd;
 		std::map<int, Client*>& 	_clients;
+		struct epoll_event			_events[MAX_EVENTS];
 
 	public:
 		ConnectionManager(int epollFd);

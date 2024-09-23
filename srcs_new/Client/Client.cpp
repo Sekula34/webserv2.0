@@ -199,12 +199,12 @@ void Client::_initVars(int fd)
 {
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
-	_clientState = NEW;
+	_clientState = DO_REQUEST;
 	_clientFds.push_back(FdData(fd, FdData::CLIENT_FD));
 	// _clientFds.push_back(fdStatePair(fd, NONE));
 	_initClientIp();
 	_errorCode = 0;
-	_clockstop = 1000;
+	// _clockstop = 1000;
 	_requestMsg = NULL;
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
