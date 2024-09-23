@@ -1,7 +1,9 @@
 #include "Token.hpp"
 #include <cstddef>
 #include <iostream>
+#include <sstream>
 #include <vector>
+#include "../Utils/Logger.hpp"
 
 
 //Create Token out of info and set default value of type to be UNKOWN, and lineNumber to 0
@@ -203,7 +205,9 @@ void Token::_contextChecker(void)
 			return;
 		}
 	}
-	std::cerr << yellow<< "Unkown context \"" << _info << "\" in line " << _lineNumber << resetText <<std::endl;
+	std::ostringstream oss("Unkown context [");
+	oss << _info << "] in line ";
+	Logger::error(oss.str(), _lineNumber);
 	throw InvalidTokenException();
 }
 

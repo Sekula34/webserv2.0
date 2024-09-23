@@ -6,12 +6,7 @@
 #include <string>
 #include <vector>
 
-const std::string yellow= "\033[1;33m";
-const std::string resetText = "\033[0m";
-
 const std::string validContexts[] = {"http", "server", "location"};
-
-
 
 class Token
 {
@@ -46,7 +41,7 @@ class Token
 		void						setTokenPath(std::vector<Token> path);
 		void						setTokenType(TokenType newType);
 		ContextType					getCurrentTokenContextType() const;
-		
+
 									Token();
 									Token(const std::string &info, size_t lineNumber = 0, int serverId = -1);
 									Token(const Token& source);
