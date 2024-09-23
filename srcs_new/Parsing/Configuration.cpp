@@ -1,6 +1,5 @@
 #include "Configuration.hpp"
 #include "Token.hpp"
-#include <cerrno>
 #include <cstddef>
 #include <iostream>
 #include <fstream>
