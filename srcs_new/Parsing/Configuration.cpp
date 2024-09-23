@@ -10,12 +10,30 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 
-//either will stay private or will call Configuration(std::string path) where 
-//path will be default config file
-Configuration::Configuration()
+//return string to relative path of ConfFile inside project
+const std::string& Configuration::getFilePath() const
 {
-	std::cout << "Configuration class created" << std::endl;
+	return (_filePath);
 }
+
+void Configuration::printFileMember(void)
+{
+	for(size_t i = 0; i < _fileLine.size(); i++)
+	{
+		std::cout << "Line " << _fileLine[i].second << " " << _fileLine[i].first << std::endl;
+	} 
+}
+
+std::vector<Token> Configuration::getAllTokens() const 
+{
+	return (_tokensVector);
+}
+
+int Configuration::getNumberOfServers(void) const
+{
+	return (_serverId);
+}
+
 
 //Set filePath to be const std::string variable
 Configuration::Configuration(const std::string& filePath)
@@ -325,30 +343,6 @@ void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
 	dirtyLine = dirtyLine.substr(beginPos, endPos - beginPos);
 }
 
-//return string to relative path of ConfFile inside project
-const std::string& Configuration::getFilePath() const
-{
-	return (_filePath);
-}
-
-
-void Configuration::printFileMember(void)
-{
-	for(size_t i = 0; i < _fileLine.size(); i++)
-	{
-		std::cout << "Line " << _fileLine[i].second << " " << _fileLine[i].first << std::endl;
-	} 
-}
-
-std::vector<Token> Configuration::getAllTokens() const 
-{
-	return (_tokensVector);
-}
-
-int Configuration::getNumberOfServers(void) const
-{
-	return (_serverId);
-}
 
 const char* Configuration::InvalidConfigFileException::what() const throw()
 {
