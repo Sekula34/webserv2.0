@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../Utils/Logger.hpp"
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
 // #include "../Message/Message.hpp"
@@ -22,7 +23,7 @@ ServersInfo::ServersInfo(std::string configPath)
 	_numberOfServers = serversConf.getNumberOfServers();
 	if(_numberOfServers < 1)
 	{
-		std::cerr << yellow << "There is not even one server in config file" << resetText << std::endl;
+		Logger::error("There is not eve one server in config file ", configPath);
 		throw Configuration::InvalidConfigFileException();
 	}
 

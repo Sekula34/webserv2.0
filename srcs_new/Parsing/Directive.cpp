@@ -126,8 +126,9 @@ std::string Directive::_getNameFromToken(const Token& token) const
 	size_t spacePos = name.find(' ');
 	if(name.empty() || spacePos == std::string::npos)
 	{
-		std::cerr<<yellow << "Invalid directive [" << token.getTokenInfo() <<"]" <<
-		"in line " << token.getTokenLineNumber() << resetText <<std::endl;
+		std::ostringstream oss ("Invalid directive [");
+		oss << token.getTokenInfo() << "] " << "in line " << token.getTokenLineNumber();
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	name = name.substr(0, spacePos);
@@ -159,13 +160,17 @@ std::string Directive::_getNameFromToken(const Token& token) const
 		}
 		default:
 		{
-			std::cerr<<yellow<<"Default case Directive " << name <<" in line " << token.getTokenLineNumber() << "is not inside any context" << resetText<< std::endl; 
+			std::ostringstream oss;
+			oss<<"Default case Directive " << name <<" in line " << token.getTokenLineNumber() << "is not inside any context";
+			Logger::error(oss.str(), ""); 
 			throw InvalidDirectiveException();
 		}
 	}
 	if(validName == false)
 	{
-		std::cerr<<yellow<<"Unknown directive \"" << name << "\" inside Context type : " << parent.getCurrentTokenContextType() << " in line " << token.getTokenLineNumber()<< resetText << std::endl;
+		std::ostringstream oss;
+		oss<<"Unknown directive \"" << name << "\" inside Context type : " << parent.getCurrentTokenContextType() << " in line " << token.getTokenLineNumber();
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	return name;
@@ -263,7 +268,9 @@ void Directive::_apllyRoot(DefaultSettings& settings)
 {
 	if(_directiveValue.empty() == true)
 	{
-		std::cerr<< yellow << "Root value is empty in line " << _dirLineNumber <<resetText <<std::endl;
+		std::ostringstream oss;
+		oss<< "Root value is empty in line " << _dirLineNumber;
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	settings.setRoot(_directiveValue);
@@ -275,7 +282,9 @@ void Directive::_applyIndex(DefaultSettings& settings)
 	std::vector<std::string> indexes = ParsingUtils::splitString(_directiveValue, ' ');
 	if(indexes.size() < 1 || indexes[0].empty() == true)
 	{
-		std::cerr<< yellow << "Index value is empty  in line " << _dirLineNumber <<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Index value is empty  in line " << _dirLineNumber;
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	settings.setIndexes(indexes);
@@ -286,13 +295,17 @@ void Directive::_applyReturn(DefaultSettings& settings)
 	std::vector<std::string> values = ParsingUtils::splitString(_directiveValue, ' ');
 	if(values.size() != 2)
 	{
-		std::cerr<< yellow << "Invalid return directive value " << _directiveValue << " in line " << _dirLineNumber << " for return value need to be status code and url seperated by space"<<resetText <<std::endl;
+		std::ostringstream oss;
+		oss<< "Invalid return directive value " << _directiveValue << " in line " << _dirLineNumber << " for return value need to be status code and url seperated by space";
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	int status = _stringToInt(values[0]);
 	if(status < 100 || status > 599)
 	{
-		std::cerr<< yellow << "Http return code " << _directiveValue << " in line " << _dirLineNumber << " is out of range"<<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Http return code " << _directiveValue << " in line " << _dirLineNumber << " is out of range";
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	std::string url = values[1];
@@ -308,7 +321,9 @@ void Directive::_apllyAutoIndex(DefaultSettings& settings)
 		state = false;
 	else 
 	{
-		std::cerr<< yellow << "Invalid auto index directive value " << _directiveValue << " in line " << _dirLineNumber << " value can be either on or off for autoindex"<<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Invalid auto index directive value " << _directiveValue << " in line " << _dirLineNumber << " value can be either on or off for autoindex";
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	settings.setAutoIndex(state);
@@ -320,7 +335,9 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 	size_t posOfSpace = _directiveValue.find(' ');
 	if(posOfSpace == std::string::npos)
 	{
-		std::cerr<< yellow << "Invalid error page directive value " << _directiveValue << " in line " << _dirLineNumber <<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Invalid error page directive value " << _directiveValue << " in line " << _dirLineNumber;
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	std::string codeString = _directiveValue.substr(0, posOfSpace);
@@ -331,8 +348,7 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 		std::ostringstream oss;
 		oss << "Value [" << codeNumber <<"] must be beetween 300 and 599 in " << FileUtils::getConfigFilePath() << ":";
 		oss << _dirLineNumber << "' for direcetive error_page";
-		Logger::error(oss.str(), true);
-		std::cerr << yellow << "Code number : "<<codeNumber <<" of error page directive is out of range. Line " << _dirLineNumber << resetText << std::endl;
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	settings.setErrorPage(codeNumber, erorrPagePath);
@@ -365,7 +381,9 @@ void Directive::_applyLimitExcept(DefaultSettings& settings)
 			settings.setAcceptedMethodToTrue(methodName);
 		else
 		{
-			std::cerr<<yellow << "Unknown http method [" << methodName << "] in line " << _dirLineNumber << resetText << std::endl;
+			std::ostringstream oss;
+			oss << "Unknown http method [" << methodName << "] in line " << _dirLineNumber;
+			Logger::error(oss.str(), "");
 			throw InvalidDirectiveException();
 		}
 	}
@@ -380,7 +398,9 @@ void Directive::_applyClientMaxBodySize(DefaultSettings& settings)
 	}
 	catch(ParsingUtils::InvalidConversion &e)
 	{
-		std::cerr<<yellow << "Failed conversion from string [" << _directiveValue << "] to size_t in line " << _dirLineNumber << resetText << std::endl;
+		std::ostringstream oss;
+		oss << "Failed conversion from string [" << _directiveValue << "] to size_t in line " << _dirLineNumber;
+		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
 	settings.setClientMaxBodySize(clientMaxBodySize);

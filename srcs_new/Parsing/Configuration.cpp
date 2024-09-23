@@ -1,5 +1,6 @@
 #include "Configuration.hpp"
 #include "Token.hpp"
+#include <cerrno>
 #include <cstddef>
 #include <iostream>
 #include <fstream>
@@ -167,7 +168,7 @@ void Configuration::_fillAllTokensPaths(void)
 	std::vector<Token> tokenPath;
 	if(_tokensVector.size() < 3)
 	{
-		std::cerr<<yellow<<"Configuration file should have at least 3 tokkens http and {}." << resetText << std::endl;
+		Logger::error("Configuration file should have at least 3 tokkens http and {}.", "");
 		throw InvalidConfigFileException();
 	}
 	for(size_t i = 0; i < _tokensVector.size() - 1; i++)
@@ -179,8 +180,10 @@ void Configuration::_fillAllTokensPaths(void)
 		{
 			if(currentToken.getTokenType() != Token::CONTEXT)
 			{
-				std::cerr << yellow << "In line " << currentToken.getTokenLineNumber() << " Token :\"";
-				std::cerr<< currentToken.getTokenInfo() <<"\" is not CONTEXT so '{' cannot come after it" << resetText <<std::endl;
+				std::ostringstream oss;
+				oss << "In line " << currentToken.getTokenLineNumber() << " Token :\"";
+				oss<< currentToken.getTokenInfo() <<"\" is not CONTEXT so '{' cannot come after it";
+				Logger::error(oss.str(), "");
 				throw InvalidConfigFileException();
 			}
 			tokenPath.push_back(currentToken);
@@ -190,8 +193,10 @@ void Configuration::_fillAllTokensPaths(void)
 		{
 			if(tokenPath.size() == 0)
 			{
-				std::cerr<<yellow<< "'}' in line " << nextToken.getTokenLineNumber();
-				std::cerr<< " does not have matching opening brace '{'" << resetText << std::endl;
+				std::ostringstream oss;
+				oss << "'}' in line " << nextToken.getTokenLineNumber();
+				oss<< " does not have matching opening brace '{'";
+				Logger::error(oss.str(), "");
 				throw InvalidConfigFileException();
 			}
 			tokenPath.pop_back();
@@ -199,7 +204,9 @@ void Configuration::_fillAllTokensPaths(void)
 	}
 	if(tokenPath.size() > 0)
 	{
-		std::cerr << yellow<< tokenPath.size() << " * '}' closing bracket is missing" <<resetText << std::endl;
+		std::ostringstream oss;
+		oss<< tokenPath.size() << " * '}' closing bracket is missing";
+		Logger::error(oss.str(), "");
 		throw InvalidConfigFileException();
 	}
 }
@@ -271,7 +278,9 @@ void Configuration::_fillTokensVector(void)
 	}
 	if(tokenInfo.empty() == false)
 	{
-		std::cerr <<yellow << "Token \""<< tokenInfo <<"\" is not delimited with anything." <<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Token \""<< tokenInfo <<"\" is not delimited with anything.";;
+		Logger::error(oss.str(), "");
 		throw InvalidConfigFileException();
 	}
 }
