@@ -49,37 +49,37 @@ std::vector<Token> Token::getAllServerTokens(int serverId, std::vector<Token>& a
 	return serverTokens;
 }
 
-Token::TokenType Token::getTokenType(void) const
+const Token::TokenType& Token::getTokenType(void) const
 {
 	return (_type);
 }
 
-Token::ContextType Token::getTokenContextType(void) const 
+const Token::ContextType& Token::getTokenContextType(void) const 
 {
 	return(_contextType);
 }
 
-int Token::getTokenServerId(void) const
+const int& Token::getTokenServerId(void) const
 {
 	return (_serverId);
 }
 
-size_t Token::getTokenLineNumber() const
+const size_t& Token::getTokenLineNumber() const
 {
 	return (_lineNumber);
 }
 
-std::string Token::getTokenInfo() const
+const std::string& Token::getTokenInfo() const
 {
 	return (_info);
 }
 
-Token::ContextType Token::getCurrentTokenContextType() const
+const Token::ContextType& Token::getCurrentTokenContextType() const
 {
 	return _contextType;
 }
 
-std::vector<Token> Token::getTokenPath(void) const
+const std::vector<Token>& Token::getTokenPath(void) const
 {
 	return (_path);
 }

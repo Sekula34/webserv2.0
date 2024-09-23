@@ -31,15 +31,15 @@ class Token
 		static void					checkAllTokensContext(std::vector<Token>& allTokens);
 		static void					printAllTokensInfo(const std::vector<Token>& allTokens);
 		static std::vector<Token>	getAllServerTokens(int serverId, std::vector<Token>& allTokens);
-		std::string					getTokenInfo() const;
-		size_t						getTokenLineNumber() const;
-		TokenType					getTokenType(void) const;
-		ContextType					getTokenContextType(void) const;
-		int							getTokenServerId(void) const;
-		std::vector<Token>			getTokenPath(void) const;
+		const std::string&			getTokenInfo() const;
+		const size_t&				getTokenLineNumber() const;
+		const TokenType&			getTokenType(void) const;
+		const ContextType&			getTokenContextType(void) const;
+		const int&					getTokenServerId(void) const;
+		const std::vector<Token>&	getTokenPath(void) const;
 		void						setTokenPath(std::vector<Token> path);
 		void						setTokenType(TokenType newType);
-		ContextType					getCurrentTokenContextType() const;
+		const ContextType&			getCurrentTokenContextType() const;
 
 									Token();
 									Token(const std::string &info, size_t lineNumber = 0, int serverId = -1);
@@ -55,8 +55,8 @@ class Token
 		std::vector<Token>			_path;
 		ContextType					_contextType;
 
-		void				_contextChecker(void);
-		void 				_checkOneToken(void);
+		void						_contextChecker(void);
+		void 						_checkOneToken(void);
 
 	public:
 		class InvalidTokenException : public std::exception
