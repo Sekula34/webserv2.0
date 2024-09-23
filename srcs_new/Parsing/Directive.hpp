@@ -28,7 +28,7 @@ class Directive
 		std::string _getNameFromToken(const Token& token) const;
 		std::string _getValueFromToken(const Token& token) const;
 		bool _isNameValid(const std::string& name, const std::string validList[],
-						ContextType context) const;
+						Token::ContextType context) const;
 
 		int _stringToInt(std::string stringValue) const;
 		

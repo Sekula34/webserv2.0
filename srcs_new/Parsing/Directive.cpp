@@ -68,22 +68,22 @@ Directive::~Directive()
 
 
 
-bool Directive::_isNameValid(const std::string& name, const std::string validList[], ContextType context) const
+bool Directive::_isNameValid(const std::string& name, const std::string validList[], Token::ContextType context) const
 {
 	size_t size = 0;
 	switch (context)
 	{
-		case HTTP :
+		case Token::HTTP :
 		{
 			size = sizeof(_validHttpDirectives)/sizeof(std::string);
 			break;
 		}
-		case SERVER :
+		case Token::SERVER :
 		{
 			size = sizeof(_validServerDirectives)/sizeof(std::string);
 			break;
 		}
-		case LOCATION:
+		case Token::LOCATION:
 		{
 			size = sizeof(_validLocationDirectives)/sizeof(std::string);
 			break;
@@ -142,19 +142,19 @@ std::string Directive::_getNameFromToken(const Token& token) const
 	bool validName = false;
 	switch (parent.getCurrentTokenContextType())
 	{
-		case HTTP :
+		case Token::HTTP :
 		{
-			validName = _isNameValid(name, _validHttpDirectives, HTTP);
+			validName = _isNameValid(name, _validHttpDirectives, Token::HTTP);
 			break;
 		};
-		case LOCATION:
+		case Token::LOCATION:
 		{
-			validName = _isNameValid(name, _validLocationDirectives, LOCATION);
+			validName = _isNameValid(name, _validLocationDirectives, Token::LOCATION);
 			break;
 		}
-		case SERVER:
+		case Token::SERVER:
 		{
-			validName = _isNameValid(name, _validServerDirectives, SERVER);
+			validName = _isNameValid(name, _validServerDirectives, Token::SERVER);
 			break;
 		}
 		default:
@@ -408,7 +408,7 @@ std::vector<Directive> Directive::getAllServerDirectives(const std::vector<Token
 	for(size_t i = 0; i < allServerTokens.size(); i++)
 	{
 		//allServerTokens[i].printTokenInfo();
-		if(allServerTokens[i].getTokenType() == DIRECTIVE)
+		if(allServerTokens[i].getTokenType() == Token::DIRECTIVE)
 		{
 			//allServerTokens[i].printTokenInfo();
 			Directive dire(allServerTokens[i]);

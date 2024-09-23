@@ -175,9 +175,9 @@ void Configuration::_fillAllTokensPaths(void)
 		Token &currentToken = _tokensVector[i];
 		Token nextToken = _tokensVector[i + 1];
 		currentToken.setTokenPath(tokenPath);
-		if(nextToken.getTokenType() == OPENING_BRACE)
+		if(nextToken.getTokenType() == Token::OPENING_BRACE)
 		{
-			if(currentToken.getTokenType() != CONTEXT)
+			if(currentToken.getTokenType() != Token::CONTEXT)
 			{
 				std::cerr << yellow << "In line " << currentToken.getTokenLineNumber() << " Token :\"";
 				std::cerr<< currentToken.getTokenInfo() <<"\" is not CONTEXT so '{' cannot come after it" << resetText <<std::endl;
@@ -186,7 +186,7 @@ void Configuration::_fillAllTokensPaths(void)
 			tokenPath.push_back(currentToken);
 			continue;
 		}
-		if(nextToken.getTokenType() == CLOSING_BRACE)
+		if(nextToken.getTokenType() == Token::CLOSING_BRACE)
 		{
 			if(tokenPath.size() == 0)
 			{

@@ -57,13 +57,13 @@ ServersInfo::~ServersInfo()
 //check if Token is directive that belongs to http only
 bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
 {
-	if(toCheck.getTokenType() != DIRECTIVE)
+	if(toCheck.getTokenType() != Token::DIRECTIVE)
 		return false;
 	std::vector<Token> path = toCheck.getTokenPath();
 	if(path.size() != 1)
 		return false;
-	ContextType parentType = path[0].getTokenContextType();
-	if(parentType != HTTP )
+	Token::ContextType parentType = path[0].getTokenContextType();
+	if(parentType != Token::HTTP )
 		return false;
 	return true;
 }

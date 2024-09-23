@@ -62,7 +62,7 @@ std::vector<LocationSettings> ServerSettings::_setServerLocations()
 	std::vector<LocationSettings> serverLocations;
 	for(size_t i = 0; i < _serverTokens.size(); i++)
 	{
-		if(_serverTokens[i].getCurrentTokenContextType() == LOCATION)
+		if(_serverTokens[i].getCurrentTokenContextType() == Token::LOCATION)
 		{
 			LocationSettings location(*this, _serverTokens[i], _serverTokens);
 			serverLocations.push_back(location);
