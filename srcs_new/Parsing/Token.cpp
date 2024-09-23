@@ -1,6 +1,7 @@
 #include "Token.hpp"
 #include <cstddef>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <vector>
 #include "../Utils/Logger.hpp"
@@ -24,7 +25,7 @@ void Token::printAllTokensInfo(const std::vector<Token>& allTokens)
 {
 	for(size_t i = 0; i < allTokens.size(); i++)
 	{
-		allTokens[i].printTokenInfo();
+		std::cout << allTokens[i];
 	}
 }
 
@@ -92,26 +93,6 @@ void Token::setTokenPath(std::vector<Token> path)
 void Token::setTokenType(TokenType newType)
 {
 	_type = newType;
-}
-
-void Token::printTokenInfo(void) const
-{
-	std::cout << "---------------TOKEN INFO---------------"<<std::endl;
-	std::cout << "Token content: " << _info << std::endl;
-	std::cout << "Server id :" << _serverId << std::endl;
-	std::cout << "Token type: "<<_type << std::endl;
-	std::cout << "Context type is " << _contextType << std::endl;
-	std::cout << "Token line number: " << _lineNumber << std::endl;
-	std::cout << "Token path is :";
-	for(size_t i = 0; i < _path.size(); i++)
-	{
-		std::cout << _path[i]._info;
-		if(i != _path.size() - 1)
-			std::cout <<" ";
-	}
-	std::cout <<std::endl;
-	std::cout << "Token context type is " << _contextType << std::endl;
-	std::cout << "________________________________________" << std::endl;
 }
 
 Token::Token()
@@ -216,4 +197,26 @@ void Token::_contextChecker(void)
 const char * Token::InvalidTokenException::what() const throw()
 {
 	return("Exception Invalid token");
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Token& token)
+{
+	os << "---------------TOKEN INFO---------------"<<std::endl;
+	os << "Token content: " << token._info << std::endl;
+	os << "Server id :" << token._serverId << std::endl;
+	os << "Token type: "<< token._type << std::endl;
+	os << "Context type is " << token._contextType << std::endl;
+	os << "Token line number: " << token._lineNumber << std::endl;
+	os << "Token path is :";
+	for(size_t i = 0; i < token._path.size(); i++)
+	{
+		os << token._path[i]._info;
+		if(i != token._path.size() - 1)
+			os <<" ";
+	}
+	os <<std::endl;
+	os << "Token context type is " << token._contextType << std::endl;
+	os << "________________________________________" << std::endl;
+	return os;
 }

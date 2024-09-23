@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <exception>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,6 @@ class Token
 		TokenType					getTokenType(void) const;
 		ContextType					getTokenContextType(void) const;
 		int							getTokenServerId(void) const;
-		void						printTokenInfo(void) const;
 		std::vector<Token>			getTokenPath(void) const;
 		void						setTokenPath(std::vector<Token> path);
 		void						setTokenType(TokenType newType);
@@ -63,6 +63,7 @@ class Token
 		{
 			const char * what() const throw();
 		};
+		friend std::ostream& operator<<(std::ostream& os, const Token& token);
 		
 };
 
