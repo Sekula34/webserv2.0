@@ -1,7 +1,10 @@
 #include "./Parsing/ServersInfo.hpp"
+#include "Client/Client.hpp"
+#include "Parsing/ServerSettings.hpp"
 #include "Server/ConnectionManager.hpp"
 #include "Io/Io.hpp"
 #include "Server/Socket.hpp"
+#include "Server/VirtualServer.hpp"
 #include "Utils/Data.hpp"
 #include "Utils/FileUtils.hpp"
 #include "Utils/Logger.hpp"
@@ -36,6 +39,14 @@
 // 	// Create manager instance
 // 	ConnectionManager manager(epollFd);
 // }
+
+
+void assingServer(Client& client, ServersInfo& servers)
+{
+	///client get port 
+	const ServerSettings* clientServer = servers.getServerByPort(8080);
+	client.setServer(clientServer);
+}
 
 void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {

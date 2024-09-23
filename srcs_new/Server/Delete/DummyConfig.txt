@@ -1,0 +1,8 @@
+server_name=server01
+host=www.example.com
+port:8080
+methods=GET, POST, DELETE
+location=/one
+location=/two
+cgi=YES
+upload_folder=uploads
