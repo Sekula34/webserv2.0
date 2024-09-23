@@ -29,19 +29,9 @@ Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
 	_trailer = false;
 	_state = INCOMPLETE;
 	_header = NULL;
+	_bytesSent = 0;
+	_bytesReceived = 0;
 }
-
-// Message::Message (void)
-// {
-// 	// std::cout << "Message default constructor called" << std::endl;
-// 	_request = true;
-// 	_chain.push_back(Node("", HEADER, _request));
-// 	_it = _chain.begin();
-// 	_chunked = false;
-// 	_trailer = false;
-// 	_state = INCOMPLETE;
-// 	_header = NULL;
-// }
 
 /******************************************************************************/
 /*                                Destructor                                  */
@@ -115,6 +105,22 @@ const std::list<Node>::iterator& 	Message::getIterator()
 void	Message::setState(int s)
 {
 	_state = s;
+}
+const size_t&				Message::getBytesSent() const
+{
+	return (_bytesSent);
+}
+const size_t&				Message::getBytesReceived() const
+{
+	return (_bytesReceived);
+}
+void						Message::setBytesReceived(size_t num)
+{
+	_bytesReceived = num;
+}
+void						Message::setBytesSent(size_t num)
+{
+	_bytesSent = num;
 }
 
 void	Message::printChain()

@@ -92,7 +92,7 @@ void		ConnectionManager::_addServerSocketsToEpoll()
 	for(; it != sockets.end(); ++it)
 	{
 		int fd = it->getSocketFd();
-		Logger::info("Adding to epoll this server socket: ", fd);
+		Logger::info("Adding to epoll the following server socket: ", fd);
 		ret = epollAddFd(_epollFd, fd);
 		if (ret == -1)
 			throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");

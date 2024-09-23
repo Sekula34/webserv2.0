@@ -19,6 +19,7 @@ class Io
 		// Methods
 		void	_ioClient(Client& client);	
 		//  void	_sendMsg(Client& client);
+		void	_sendMsg(Client& client, FdData& fdData, Message* message);
 		void	_receiveMsg(Client& client, FdData& fdData, Message* message);
 
 		// Attributes

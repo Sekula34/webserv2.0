@@ -30,6 +30,10 @@ class Message {
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
 		void						_createHeader();
 		void						_headerInfoToNode();
+		const size_t&				getBytesSent() const;
+		const size_t&				getBytesReceived() const;
+		void						setBytesReceived(size_t num);
+		void						setBytesSent(size_t num);
 
 									//Message specific functions
 	private:
@@ -42,6 +46,8 @@ class Message {
 		std::stringstream 			_ss;
 		AHeader*					_header;
 		int&						_errorCode;
+		size_t						_bytesSent;
+		size_t						_bytesReceived;
 
 		void						_setNodeComplete();
 		void						_parseNode();

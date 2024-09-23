@@ -93,7 +93,7 @@ all: $(NAME)
 $(NAME): $(OBJ) $(HEADERS) srcs_new/main.cpp
 	@printf "\r\033[K"
 	@printf "$(YELLOW)$(NAME)!\n"
-	@$(MAKE) --no-print-directory mainandtest
+	 @$(MAKE) --no-print-directory mainandtest
 	@$(CXX) $(OBJ) obj/srcs_new/main.o -o $(NAME) 
 	@printf "$(GREEN)$(NAME) created.$(NC)\n"
 	@printf "$(GREEN)$(NAME) done$(NC)\n"
@@ -105,7 +105,7 @@ $(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIRS)
 
 mainandtest: | $(OBJ_DIRS) 
 	@$(CXX) $(CXXFLAGS) -c srcs_new/main.cpp -o  obj/srcs_new/main.o
-	@$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
+	#@$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
 
 $(OBJ_DIRS):
 	@mkdir -p $@

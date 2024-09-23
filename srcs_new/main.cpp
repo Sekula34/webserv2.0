@@ -53,6 +53,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// Initialize epoll
 	int epollFd = epoll_create(1);
+	Logger::info("EPOLL Fd: ", epollFd);
 	if (epollFd == -1)
 		throw (std::runtime_error("epoll_create failed"));
 

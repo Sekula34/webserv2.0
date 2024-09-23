@@ -1,15 +1,14 @@
-
 #ifndef CGIPROCESSOR_HPP
 # define CGIPROCESSOR_HPP
-# include "Client.hpp"
 
+# include "../Client/Client.hpp"
 # include <iostream>
 # include <fcntl.h>
 # include <unistd.h>
 # include <sys/wait.h>
 # include <string.h>
 # include <vector>
-#include <stdio.h>
+# include <stdio.h>
 
 # define CHILD 0
 
