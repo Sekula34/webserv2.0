@@ -5,7 +5,7 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 
-
+const std::string Token::_validContexts[] = {"http", "server", "location"};
 //Create Token out of info and set default value of type to be UNKOWN, and lineNumber to 0
 //check everyContext in AllTokens
 //throw InvalidTokenException if there is Unkown context
@@ -188,13 +188,13 @@ void Token::_contextChecker(void)
 {
 	//std::cout << "Checking " << _info << std::endl;
 	const std::string location("location");
-	for(size_t i = 0; i < sizeof(validContexts) / sizeof(std::string); i++)
+	for(size_t i = 0; i < sizeof(_validContexts) / sizeof(std::string); i++)
 	{
-		if(_info == validContexts[i])
+		if(_info == _validContexts[i])
 		{
-			if(validContexts[i] == "http")
+			if(_validContexts[i] == "http")
 				_contextType = HTTP;
-			if(validContexts[i] == "server")
+			if(_validContexts[i] == "server")
 				_contextType = SERVER;
 			return;
 		}

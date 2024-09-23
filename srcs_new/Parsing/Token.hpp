@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-const std::string validContexts[] = {"http", "server", "location"};
 
 class Token
 {
@@ -48,12 +47,13 @@ class Token
 		Token&						operator=(const Token& source);
 									~Token();
 	private :
-		std::string			_info;
-		TokenType			_type;
-		std::size_t			_lineNumber;
-		int					_serverId;
-		std::vector<Token>	_path;
-		ContextType			_contextType;
+		static const std::string	_validContexts[];
+		std::string					_info;
+		TokenType					_type;
+		std::size_t					_lineNumber;
+		int							_serverId;
+		std::vector<Token>			_path;
+		ContextType					_contextType;
 
 		void				_contextChecker(void);
 		void 				_checkOneToken(void);
