@@ -27,6 +27,119 @@ const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "aut
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
+std::vector<Directive> Directive::getAllServerDirectives(const std::vector<Token>& allServerTokens)
+{
+	std::vector<Directive> serverDirectives;
+	for(size_t i = 0; i < allServerTokens.size(); i++)
+	{
+		if(allServerTokens[i].getTokenType() == Token::DIRECTIVE)
+		{
+			Directive dire(allServerTokens[i]);
+			serverDirectives.push_back(dire);
+		}
+	}
+	return serverDirectives;
+}
+//apply allDirectives on settings
+void Directive::applyAllDirectives(std::vector<Directive>& allDirectives, DefaultSettings& settings)
+{
+	for(size_t i = 0; i < allDirectives.size(); i ++)
+	{
+		allDirectives[i].apply(settings);
+	}
+}
+
+
+bool Directive::isDuplicateDirectivePresent(const std::vector<Directive> &directives, const Directive* &duplicateDir)
+{
+	size_t uniqueSize = sizeof(_uniqueDirectives) / sizeof(std::string);
+	duplicateDir = NULL;
+	for(size_t i = 0; i < uniqueSize; i++)
+	{
+		if(isDuplicateDirectiveNamePresent(directives, duplicateDir, _uniqueDirectives[i]) == true)
+			return true;
+	}
+	return false;
+}
+
+bool Directive::isDuplicateDirectiveNamePresent(const std::vector<Directive> &directives, const Directive *&duplicateDir, const std::string &nameToCheck)
+{
+	std::vector<Directive>::const_iterator firstIt;
+	std::vector<Directive>::const_iterator secondIt;
+	FindbyDirectiveName functor(nameToCheck);
+	duplicateDir = NULL;
+
+	firstIt = std::find_if(directives.begin(), directives.end(), functor);
+	if(firstIt == directives.end())
+		return false;
+	secondIt = std::find_if(++firstIt, directives.end(), functor);
+	if(secondIt == directives.end())
+		return false;
+	duplicateDir = &(*secondIt);
+	return true;
+}
+
+size_t Directive::getDirectivePathSize(void) const 
+{
+	return (_dirPath.size());
+}
+
+void Directive::printDirectiveInfor(void) const
+{
+	std::cout << "---------------Directive info--------------" << std::endl;
+	std::cout << "Directive name is [" << _directiveName <<"]" <<std::endl;
+	std::cout << "Directive value is :[" << _directiveValue <<"]" <<std::endl;
+	//std::cout <<"Directive path is : " << std::endl;
+	//Token::printAllTokensInfo(_dirPath);
+	std::cout <<"_____________________________________________" << std::endl;
+}
+
+void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
+{
+	for(size_t i = 0; i < allDirectives.size(); i++)
+	{
+		allDirectives[i].printDirectiveInfor();
+	}
+}
+
+
+const std::string& Directive::getDirectiveName(void) const 
+{
+	return _directiveName;
+}
+
+const size_t& Directive::getDirectiveLineNum(void) const 
+{
+	return _dirLineNumber;
+}
+void Directive::apply(DefaultSettings& settings)
+{
+	if(_directiveName == "listen")
+		_applyListen(settings);
+	else if(_directiveName =="error_page")
+		_applyErrorPage(settings);
+	else if(_directiveName == "limit_except")
+		_applyLimitExcept(settings);
+	else if(_directiveName == "client_max_body_size")
+		_applyClientMaxBodySize(settings);
+	else if(_directiveName == "autoindex")
+		_apllyAutoIndex(settings);
+	else if(_directiveName == "return")
+		_applyReturn(settings);
+	else if(_directiveName == "index")
+		_applyIndex(settings);
+	else if(_directiveName == "root")
+		_apllyRoot(settings);
+	else if (_directiveName == "server_name")
+		_applyServerName(settings);
+	else if(_directiveName == "extension")
+		_applyCgiExtension(settings);
+	else 
+	{
+		Logger::warning("Applying directive: ", _directiveName);;
+		Logger::warning("is not implemeted yet", "");
+	}
+}
 Directive::Directive()
 {
 
@@ -199,62 +312,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 }
 
 
-void Directive::printDirectiveInfor(void) const
-{
-	std::cout << "---------------Directive info--------------" << std::endl;
-	std::cout << "Directive name is [" << _directiveName <<"]" <<std::endl;
-	std::cout << "Directive value is :[" << _directiveValue <<"]" <<std::endl;
-	//std::cout <<"Directive path is : " << std::endl;
-	//Token::printAllTokensInfo(_dirPath);
-	std::cout <<"_____________________________________________" << std::endl;
-}
-
-void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
-{
-	for(size_t i = 0; i < allDirectives.size(); i++)
-	{
-		allDirectives[i].printDirectiveInfor();
-	}
-}
-
-
-const std::string& Directive::getDirectiveName(void) const 
-{
-	return _directiveName;
-}
-
-const size_t& Directive::getDirectiveLineNum(void) const 
-{
-	return _dirLineNumber;
-}
-void Directive::apply(DefaultSettings& settings)
-{
-	if(_directiveName == "listen")
-		_applyListen(settings);
-	else if(_directiveName =="error_page")
-		_applyErrorPage(settings);
-	else if(_directiveName == "limit_except")
-		_applyLimitExcept(settings);
-	else if(_directiveName == "client_max_body_size")
-		_applyClientMaxBodySize(settings);
-	else if(_directiveName == "autoindex")
-		_apllyAutoIndex(settings);
-	else if(_directiveName == "return")
-		_applyReturn(settings);
-	else if(_directiveName == "index")
-		_applyIndex(settings);
-	else if(_directiveName == "root")
-		_apllyRoot(settings);
-	else if (_directiveName == "server_name")
-		_applyServerName(settings);
-	else if(_directiveName == "extension")
-		_applyCgiExtension(settings);
-	else 
-	{
-		Logger::warning("Applying directive: ", _directiveName);;
-		Logger::warning("is not implemeted yet", "");
-	}
-}
 
 
 void Directive::_applyServerName(DefaultSettings& settings)
@@ -421,69 +478,6 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 	settings.setCgiExtensions(extensions);
 }
 
-std::vector<Directive> Directive::getAllServerDirectives(const std::vector<Token>& allServerTokens)
-{
-	std::vector<Directive> serverDirectives;	
-		//Token::printAllTokensInfo(serverToken);
-	for(size_t i = 0; i < allServerTokens.size(); i++)
-	{
-		//allServerTokens[i].printTokenInfo();
-		if(allServerTokens[i].getTokenType() == Token::DIRECTIVE)
-		{
-			//allServerTokens[i].printTokenInfo();
-			Directive dire(allServerTokens[i]);
-			serverDirectives.push_back(dire);
-			//dire.apply(server);
-			//server.printServerSettings();
-			////settings.printAllSettings();
-			//dire.printDirectiveInfor();
-		}
-	}
-	return serverDirectives;
-}
-//apply allDirectives on settings
-void Directive::applyAllDirectives(std::vector<Directive>& allDirectives, DefaultSettings& settings)
-{
-	for(size_t i = 0; i < allDirectives.size(); i ++)
-	{
-		allDirectives[i].apply(settings);
-	}
-}
-
-
-bool Directive::isDuplicateDirectivePresent(const std::vector<Directive> &directives, const Directive* &duplicateDir)
-{
-	size_t uniqueSize = sizeof(_uniqueDirectives) / sizeof(std::string);
-	duplicateDir = NULL;
-	for(size_t i = 0; i < uniqueSize; i++)
-	{
-		if(isDuplicateDirectiveNamePresent(directives, duplicateDir, _uniqueDirectives[i]) == true)
-			return true;
-	}
-	return false;
-}
-
-bool Directive::isDuplicateDirectiveNamePresent(const std::vector<Directive> &directives, const Directive *&duplicateDir, const std::string &nameToCheck)
-{
-	std::vector<Directive>::const_iterator firstIt;
-	std::vector<Directive>::const_iterator secondIt;
-	FindbyDirectiveName functor(nameToCheck);
-	duplicateDir = NULL;
-
-	firstIt = std::find_if(directives.begin(), directives.end(), functor);
-	if(firstIt == directives.end())
-		return false;
-	secondIt = std::find_if(++firstIt, directives.end(), functor);
-	if(secondIt == directives.end())
-		return false;
-	duplicateDir = &(*secondIt);
-	return true;
-}
-
-size_t Directive::getDirectivePathSize(void) const 
-{
-	return (_dirPath.size());
-}
 
 const char* Directive::InvalidDirectiveException::what() const throw()
 {
