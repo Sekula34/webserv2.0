@@ -3,6 +3,7 @@
 
 # include <string>
 # include <map>
+# include <iostream>
 
 // For testing
 # define MESSAGE_HEADER "DummyMessageHeader.txt"

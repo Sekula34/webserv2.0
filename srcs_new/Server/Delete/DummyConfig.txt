@@ -1,7 +1,7 @@
 server_name=server01
-host=www.example.com
-port:8080
-methods=GET, POST, DELETE
+host=www.tutorialspoint.com
+port=8080
+method=GET, POST, DELETE
 location=/one
 location=/two
 cgi=YES

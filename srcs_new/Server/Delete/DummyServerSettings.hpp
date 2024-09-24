@@ -3,6 +3,7 @@
 
 # include <string>
 # include <map>
+# include <iostream>
 
 // For testing
 # define CONFIGFILE "DummyConfig.txt"

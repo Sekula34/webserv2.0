@@ -1,7 +1,11 @@
 #ifndef DUMMYCLIENT_HPP
 # define DUMMYCLIENT_HPP
 
-# include "DummyMessage.hpp"
+// # include "DummyMessage.hpp"
+# include <string>
+# include <iostream>
+
+class DummyMessage;
 
 class DummyClient
 {
@@ -59,7 +63,7 @@ class DummyClient
 		DummyClient(const int fd, int _clientAddr, int _addrLen);
 		// ~DummyClient();
 
-	// Overloaded insertion operator.
+	// Overloaded insertion operator (for testing).
 	friend std::ostream&	operator<<(std::ostream& out, const DummyClient::e_clientState& clientState);
 	friend std::ostream&	operator<<(std::ostream& out, const DummyClient& client);
 };

@@ -1,6 +1,7 @@
 #include "DummyServerSettings.hpp"
 #include "DummyClient.hpp"
 #include "DummyMessage.hpp"
+#include "../VirtualServer.hpp"
 #include <iostream>
 
 int	main()
@@ -15,6 +16,9 @@ int	main()
 	client.setRequestMsg(message);
 	std::cout << *client.getMsg(DummyClient::REQ_MSG) << std::endl;
 	// std::cout << "-----------------DEBUGGING-----------------" << std::endl;
+	VirtualServer VS1(serverSettings);
+	std::cout << VS1 << std::endl;
+	VS1.generateResponse(client);
 	delete message;
 	return (0);
 }
