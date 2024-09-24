@@ -1,16 +1,26 @@
 #include "Logger.hpp"
+#include <cstddef>
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <string>
 #include <sys/time.h>
 #include <ctime>
 #include <iomanip>
 
-const std::string Logger::GREEN = "\033[32m";
-const std::string Logger::YELLOW = "\033[33m";
-const std::string Logger::RED = "\033[31m";
-const std::string Logger::RESET = "\033[0m";
-const std::string Logger::BLUE = "\033[34m";
-const std::string Logger::PURPLE = "\033[35m";
+std::map<Logger::e_color, std::string> autoSetColorMap()
+{
+	std::map<Logger::e_color, std::string> customMap;
+	customMap[Logger::GREEN] = "\033[32m";
+	customMap[Logger::YELLOW] = "\033[33m";
+	customMap[Logger::RED] = "\033[31m";
+	customMap[Logger::RESET] = "\033[0m";
+	customMap[Logger::BLUE] = "\033[34m";
+	customMap[Logger::PURPLE] = "\033[35m";
+	return customMap;
+}
+
+std::map<Logger::e_color, std::string> Logger::_colorMap = autoSetColorMap();
 
 bool Logger::_isPrintingAllowed()
 {
@@ -21,30 +31,7 @@ bool Logger::_isPrintingAllowed()
 	return false;
 }
 
-std::ostringstream&  Logger::_printCurrentTime() {
-	timeval curTime;
-	gettimeofday(&curTime, NULL);
-	static std::ostringstream oss;
-    oss.str(""); // Clear the stream
-    oss.clear(); // Clear any error flags
-
-	// Get the current time in seconds
-	time_t now = curTime.tv_sec;
-	tm* localTime = localtime(&now);
-
-	// Extract minutes, seconds, and milliseconds
-	int minutes = localTime->tm_min;
-	int seconds = localTime->tm_sec;
-	int milliseconds = curTime.tv_usec / 1000;
-
-	// Print the time in the desired format
-	oss << std::setw(2) << std::setfill('0') << minutes << ":"
-			<< std::setw(2) << std::setfill('0') << seconds << ":"
-			<< std::setw(3) << std::setfill('0') << milliseconds << " ";
-	return  oss;
-}
-
-std::ostringstream&	Logger::log(std::string title, std::string type, std::string color)
+std::ostringstream&	Logger::log(std::string title, std::string type, e_color color)
 {
 	return Logger::log(title, "", type, color);
 }
@@ -72,15 +59,49 @@ void Logger::chars(std::string message, bool newline)
 		return;
 	}
 	std::cout << PURPLE;
-	_printCurrentTime();
+	std::cout << _printCurrentTime().str();
 	std::cout <<"CHARS: " << RESET;
 	printEscapeCharacters(message);
 	if(newline == true)
 		std::cout << std::endl;
 }
+std::ostringstream&  Logger::_printCurrentTime() {
+	timeval curTime;
+	gettimeofday(&curTime, NULL);
+	static std::ostringstream oss;
+    oss.str(""); // Clear the stream
+    oss.clear(); // Clear any error flags
 
-// void Logger::testCase(std::string title ,std::string expectedResult)
-// {
-//     std::cout << BLUE;
-//     std::cout << "Test Case :" << title << ". " << RESET << expectedResult << std::endl;
-// }
+	// Get the current time in seconds
+	time_t now = curTime.tv_sec;
+	tm* localTime = localtime(&now);
+
+	// Extract minutes, seconds, and milliseconds
+	int minutes = localTime->tm_min;
+	int seconds = localTime->tm_sec;
+	int milliseconds = curTime.tv_usec / 1000;
+
+	// Print the time in the desired format
+	oss << std::setw(2) << std::setfill('0') << minutes << ":"
+			<< std::setw(2) << std::setfill('0') << seconds << ":"
+			<< std::setw(3) << std::setfill('0') << milliseconds << " ";
+	return  oss;
+}
+
+
+std::string Logger::_createFancyTitle(const std::string title, char c, size_t numberOfChars)
+{
+	std::ostringstream oss;
+	oss << _createCharSequence(numberOfChars, c);
+	oss << title; 
+	oss << _createCharSequence(numberOfChars, c);
+	return oss.str();
+}
+
+std::string  Logger::_createCharSequence(const size_t numberOfChars, char c)
+{
+	std::ostringstream oss;
+	for (size_t i = 0; i < numberOfChars; i++)
+		oss << c;
+	return  oss.str();
+}
