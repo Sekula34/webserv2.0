@@ -13,37 +13,7 @@ class DefaultSettings;
 class Directive 
 {
 	friend DirectiveTester;//FIXME: no one needs friends before eval so get rid of them
-	private :
-
-		static const std::string	_validHttpDirectives[];
-		static const std::string	_validServerDirectives[];
-		static const std::string	_validLocationDirectives[];
-		static const std::string	_validHttpMethods[];
-		static const std::string	_uniqueDirectives[];
-		std::string 				_directiveName;
-		std::string 				_directiveValue;
-		std::vector<Token> 			_dirPath;
-		std::size_t					_dirLineNumber;
-		
-		std::string	_getNameFromToken(const Token& token) const;
-		std::string	_getValueFromToken(const Token& token) const;
-		bool		_isNameValid(const std::string& name, const std::string validList[], Token::ContextType context) const;
-		int			_stringToInt(std::string stringValue) const;
-		void		_applyErrorPage(DefaultSettings& settings);
-		void 		_applyListen(DefaultSettings& settings);
-		void 		_applyLimitExcept(DefaultSettings& settings);
-		void 		_applyClientMaxBodySize(DefaultSettings& settings);
-		void 		_apllyAutoIndex(DefaultSettings& settings);
-		void 		_applyReturn(DefaultSettings& settings);
-		void 		_applyIndex(DefaultSettings& settings);
-		void 		_apllyRoot(DefaultSettings& settings);
-		void 		_applyServerName(DefaultSettings& settings);
-		void 		_applyCgiExtension(DefaultSettings& settings);
-		// Functor
-
-
-	public :
-		
+	public:
 		/**
 		 * @brief Function that goes through vector of directives and check if list contains duplicates that are not allowed.
 		 For example autoindex root .. can be defined only once in config file. 
@@ -71,11 +41,43 @@ class Directive
 										Directive(const Directive& source);
 		Directive& 						operator=(const Directive& source);
 										~Directive();
+	private:
+		static const std::string	_validHttpDirectives[];
+		static const std::string	_validServerDirectives[];
+		static const std::string	_validLocationDirectives[];
+		static const std::string	_validHttpMethods[];
+		static const std::string	_uniqueDirectives[];
+		std::string 				_directiveName;
+		std::string 				_directiveValue;
+		std::vector<Token> 			_dirPath;
+		std::size_t					_dirLineNumber;
+		
+		std::string	_getNameFromToken(const Token& token) const;
+		std::string	_getValueFromToken(const Token& token) const;
+		bool		_isNameValid(const std::string& name, const std::string validList[], Token::ContextType context) const;
+		int			_stringToInt(std::string stringValue) const;
+		void		_applyErrorPage(DefaultSettings& settings);
+		void 		_applyListen(DefaultSettings& settings);
+		void 		_applyLimitExcept(DefaultSettings& settings);
+		void 		_applyClientMaxBodySize(DefaultSettings& settings);
+		void 		_apllyAutoIndex(DefaultSettings& settings);
+		void 		_applyReturn(DefaultSettings& settings);
+		void 		_applyIndex(DefaultSettings& settings);
+		void 		_apllyRoot(DefaultSettings& settings);
+		void 		_applyServerName(DefaultSettings& settings);
+		void 		_applyCgiExtension(DefaultSettings& settings);
 
-	private : 
+	public:
+		class InvalidDirectiveException : public std::exception 
+		{
+			const char * what() const throw();
+		};
+
+	// Functor
+	private: 
 		class FindbyDirectiveName
 		{
-			private : 
+			private: 
 				std::string _directiveName;
 			public: 
 				FindbyDirectiveName(const std::string& directiveName)
@@ -85,12 +87,6 @@ class Directive
 				{
 					return (directive._directiveName == _directiveName);
 				}
-		};
-
-	public :
-		class InvalidDirectiveException : public std::exception 
-		{
-			const char * what() const throw();
 		};
 };
 
