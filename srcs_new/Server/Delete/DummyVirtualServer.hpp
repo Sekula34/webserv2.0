@@ -1,11 +1,10 @@
-#ifndef VIRTUALSERVER_HPP
-# define VIRTUALSERVER_HPP
+#ifndef DUMMYVIRTUALSERVER_HPP
+# define DUMMYVIRTUALSERVER_HPP
 
 # include <iostream>
 // TODO: Change dummy classes to the real ones one implemented.
 
-class ServerSettings;
-// class DummyServerSettings;
+class DummyServerSettings;
 class DummyClient;
 class DummyMessage;
 
@@ -25,12 +24,11 @@ class VirtualServer
 		void	_execDelete(DummyMessage* request);
 		// bool			validateHeaderAgainstSettings(DummyMessage* request);
 		// Attributes
-		// const DummyServerSettings&		_serverSettings; // TODO: This is my Dummy version
-		const ServerSettings&		_serverSettings;
+		const DummyServerSettings&		_serverSettings;
 		// Maybe a static vector of virtual servers. like the one for Sockets.
 
 	public:
-		VirtualServer(const ServerSettings& settings);
+		VirtualServer(const DummyServerSettings& settings);
 		~VirtualServer();
 		VirtualServer(const VirtualServer& src);
 

@@ -26,7 +26,10 @@ WHITE := \033[0;37m
 NC := \033[0m # No color
 
 
-SRCS =		srcs_new/Message/AHeader.cpp\
+SRCS =		srcs_new/Server/VirtualServer.cpp\
+			srcs_new/Server/Delete/DummyClient.cpp\
+			srcs_new/Server/Delete/DummyMessage.cpp\
+			srcs_new/Message/AHeader.cpp\
 			srcs_new/Client/Client.cpp \
 			srcs_new/Client/FdData.cpp \
 			srcs_new/Io/Io.cpp \
@@ -51,7 +54,10 @@ SRCS =		srcs_new/Message/AHeader.cpp\
 			srcs_new/Utils/HttpStatusCode.cpp\
 			srcs_new/Utils/UrlSuffix.cpp
 
-HEADERS =	srcs_new/Message/AHeader.hpp\
+HEADERS =	srcs_new/Server/VirtualServer.hpp\
+			srcs_new/Server/Delete/DummyClient.hpp\
+			srcs_new/Server/Delete/DummyMessage.hpp\
+			srcs_new/Message/AHeader.hpp\
 			srcs_new/Client/Client.hpp \
 			srcs_new/Client/FdData.hpp \
 			srcs_new/Io/Io.hpp \
@@ -94,7 +100,7 @@ $(NAME): $(OBJ) $(HEADERS) srcs_new/main.cpp
 	@printf "\r\033[K"
 	@printf "$(YELLOW)$(NAME)!\n"
 	@$(MAKE) --no-print-directory mainandtest
-	@$(CXX) $(OBJ) obj/srcs_new/main.o -o $(NAME) 
+	@$(CXX) $(OBJ) obj/srcs_new/main.o -o $(NAME)
 	@printf "$(GREEN)$(NAME) created.$(NC)\n"
 	@printf "$(GREEN)$(NAME) done$(NC)\n"
 
@@ -105,7 +111,7 @@ $(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIRS)
 
 mainandtest: | $(OBJ_DIRS) 
 	@$(CXX) $(CXXFLAGS) -c srcs_new/main.cpp -o  obj/srcs_new/main.o
-	@$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
+	# @$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
 
 $(OBJ_DIRS):
 	@mkdir -p $@

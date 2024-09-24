@@ -1,17 +1,13 @@
-#include "VirtualServer.hpp"
-#include "Delete/DummyClient.hpp"
-// #include "Delete/DummyServerSettings.hpp" // TODO: This is my dummy version
-#include "../Parsing/ServerSettings.hpp"
-#include "Delete/DummyMessage.hpp"
+#include "DummyVirtualServer.hpp"
+#include "DummyClient.hpp"
+#include "DummyServerSettings.hpp"
+#include "DummyMessage.hpp"
 
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 #include <fstream>
-
-// Testing
-#include <cstdlib>
 
 //==========================================================================//
 // REGULAR METHODS==========================================================//
@@ -51,40 +47,6 @@ void	VirtualServer::_execGet(DummyMessage* request)
 	std::cout << "GET method executed" << std::endl;
 }
 
-// Method to check is the request is valid (checks against the server settings)
-// Works with the dummy versions
-// bool	VirtualServer::_isvalidRequest(DummyMessage* request)
-// {
-// 	/* PSEUDOCODE:
-// 	if (client.message.method == _serverSettings.method
-// 	&& client.message.protocol == _serverSettings.protocol --> This should be checked while generating the header
-// 	&& client.message.host == _serverSettings.host
-// 	&& client.message.port == _serverSettings.port
-// 	&& client.message.uri == _serverSettings.uri
-// 	&& client.message.cgi == _serverSettings.cgi)
-// 		return (true);
-// 	else
-// 		return (false);
-// 	 */
-// 	std::map<std::string, std::string>& msgHeader = request->getHeader();
-// 	std::vector<std::string> fieldsToCheck = {"method", "host", "port"};
-
-// 	std::vector<std::string>::const_iterator fieldIt = fieldsToCheck.begin();
-// 	for (; fieldIt != fieldsToCheck.end(); ++fieldIt)
-// 	{
-// 		std::map<std::string, std::string>::const_iterator headerIt = msgHeader.find(*fieldIt);
-// 		if (headerIt != msgHeader.end())
-// 		{
-// 			std::cout << "HeaderField:" << headerIt->first << " -- HeaderValue:" << headerIt->second << std::endl;
-// 			std::cout << "ConfigFile:" << headerIt->first << "-- ConfigValue:" << _serverSettings.getValue(headerIt->first) << std::endl;
-// 			// Should I handle when getValue returns an empty string?
-// 			if (_serverSettings.getValue(headerIt->first).find(headerIt->second) == std::string::npos)
-// 				return (false);
-// 		}
-// 	}
-// 	return (true);
-// }
-
 bool	VirtualServer::_isvalidRequest(DummyMessage* request)
 {
 	/* PSEUDOCODE:
@@ -99,12 +61,7 @@ bool	VirtualServer::_isvalidRequest(DummyMessage* request)
 		return (false);
 	 */
 	std::map<std::string, std::string>& msgHeader = request->getHeader();
-	std::string fieldsArray[] = {"method", "host", "port"};
-	std::vector<std::string> fieldsToCheck(fieldsArray, fieldsArray + 3);  // 3 is the number of elements
-
-	std::cout << request->getHeader()["method"] << std::endl;
-	std::cout << request->getHeader()["host"] << std::endl;
-	std::cout << request->getHeader()["port"] << std::endl;
+	std::vector<std::string> fieldsToCheck = {"method", "host", "port"};
 
 	std::vector<std::string>::const_iterator fieldIt = fieldsToCheck.begin();
 	for (; fieldIt != fieldsToCheck.end(); ++fieldIt)
@@ -112,29 +69,11 @@ bool	VirtualServer::_isvalidRequest(DummyMessage* request)
 		std::map<std::string, std::string>::const_iterator headerIt = msgHeader.find(*fieldIt);
 		if (headerIt != msgHeader.end())
 		{
-			if (headerIt->first == "method")
-			{
-				std::cout << request->getHeader()["method"] << std::endl;
-				if (_serverSettings.isMethodAllowed(request->getHeader()["method"]) == false)
-					return (false);
-			}
-			if (headerIt->first == "host")
-			{
-				std::cout << request->getHeader()["host"] << std::endl;
-				if (_serverSettings.getServerName() != request->getHeader()["host"])
-					return (false);
-			}
-			if (headerIt->first == "port")
-			{
-				std::cout << request->getHeader()["port"] << std::endl;
-				if (_serverSettings.getPort() != std::atoi(request->getHeader()["port"].c_str()))
-					return (false);
-			}
-			// std::cout << "HeaderField:" << headerIt->first << " -- HeaderValue:" << headerIt->second << std::endl;
-			// std::cout << "ConfigFile:" << headerIt->first << "-- ConfigValue:" << _serverSettings.getValue(headerIt->first) << std::endl;
-			// // Should I handle when getValue returns an empty string?
-			// if (_serverSettings.getValue(headerIt->first).find(headerIt->second) == std::string::npos)
-			// 	return (false);
+			std::cout << "HeaderField:" << headerIt->first << " -- HeaderValue:" << headerIt->second << std::endl;
+			std::cout << "ConfigFile:" << headerIt->first << "-- ConfigValue:" << _serverSettings.getValue(headerIt->first) << std::endl;
+			// Should I handle when getValue returns an empty string?
+			if (_serverSettings.getValue(headerIt->first).find(headerIt->second) == std::string::npos)
+				return (false);
 		}
 	}
 	return (true);
@@ -174,7 +113,7 @@ void	VirtualServer::generateResponse(DummyClient& client)
 //==========================================================================//
 
 // Custom Constructor
-VirtualServer::VirtualServer(const ServerSettings& settings)
+VirtualServer::VirtualServer(const DummyServerSettings& settings)
 : _serverSettings(settings)
 {}
 

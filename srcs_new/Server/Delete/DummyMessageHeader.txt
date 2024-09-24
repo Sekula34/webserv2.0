@@ -1,8 +1,8 @@
-method=POST
+method=DELETE
 uri=hello.txt
 protocol=HTTP/1.1
 User-Agent=Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-host=www.tutorialspoint.com
+host=[Default Server Name]
 Accept-Language=en-us
 Accept-Encoding=gzip, deflate
 Connection=Keep-Alive

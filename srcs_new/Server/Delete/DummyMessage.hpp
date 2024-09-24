@@ -6,8 +6,8 @@
 # include <iostream>
 
 // For testing
-# define MESSAGE_HEADER "DummyMessageHeader.txt"
-# define MESSAGE_BODY "DummyMessageBody.txt"
+# define MESSAGE_HEADER "srcs_new/Server/Delete/DummyMessageHeader.txt"
+# define MESSAGE_BODY "srcs_new/Server/Delete/DummyMessageBody.txt"
 
 class DummyMessage
 {

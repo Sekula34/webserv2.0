@@ -18,6 +18,11 @@
 // #include <map>
 // #include <list>
 
+// START Testing
+#include "Server/Delete/DummyClient.hpp"
+#include "Server/Delete/DummyMessage.hpp"
+// END Testing
+
 // void	initVars(char** envp, const std::string& configFilePath)
 // {
 // 	Data::setAllCgiLang();
@@ -41,12 +46,12 @@
 // }
 
 
-void assingServer(Client& client, ServersInfo& servers)
+/* void assingServer(Client& client, ServersInfo& servers)
 {
 	///client get port 
 	const ServerSettings* clientServer = servers.getServerByPort(8080);
 	client.setServer(clientServer);
-}
+} */
 
 void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
@@ -55,9 +60,22 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	ServersInfo serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
 	Data::setEnvp(envp);
+	// START of checking
+	ServerSettings virtualServer01 = serverInfo.getAllServers()[0];
+	// virtualServer01.printServerSettings();
+	VirtualServer VS1(virtualServer01);
+	DummyMessage* message = new DummyMessage("test", 0);
+	DummyClient client(4, 7777, 4);
+	client.setRequestMsg(message);
+	std::cout << *client.getMsg(DummyClient::REQ_MSG) << std::endl;
+	VS1.generateResponse(client);
+	delete message;
+	// std::cout << serverInfo.getAllServers().size() << std::endl;
+	// serverInfo.printAllServersInfo();	
+	// END of checking
 	// SocketManager sockets(serverInfo.getUniquePorts());
 
-	// Save all sockets Fds
+	/* // Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
 	for (std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
 		Socket currSocket(*it);
@@ -80,7 +98,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 		// io.ioLoop();
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();
-	}
+	} */
 }
 
 std::string getConfigFilePath(int argc, char** argv)
