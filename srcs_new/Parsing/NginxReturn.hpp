@@ -1,5 +1,6 @@
 #ifndef NGINXRETUNR_HPP
 # define NGINXRETUNR_HPP
+#include <ostream>
 # include <string>
 
 class NginnxReturn
@@ -22,6 +23,8 @@ class NginnxReturn
 		bool				_flag;
 		int					_status;
 		std::string			_redirectPath;
+	public:;
+		friend std::ostream& operator<<(std::ostream& os, const NginnxReturn& redirect);
 };
 
 #endif

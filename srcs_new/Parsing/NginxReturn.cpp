@@ -1,5 +1,6 @@
 #include "NginxReturn.hpp"
 #include <iostream>
+#include <ostream>
 #include <stdexcept>
 
 const bool& NginnxReturn::getFlag() const
@@ -72,4 +73,14 @@ NginnxReturn::NginnxReturn(const NginnxReturn& source)
 NginnxReturn::~NginnxReturn()
 {
 
+}
+
+std::ostream& operator<<(std::ostream& os, const NginnxReturn& redirect)
+{
+	os << "----Nging return print---" << std::endl;
+	os << "Flag: " << redirect.getFlag() << std::endl;
+	os << "Status: " << redirect.getStatus() << std::endl;
+	os << "Redirect Path: " << redirect.getRedirectPath() << std::endl;
+	os << "___________________________" << std::endl;
+	return os;
 }

@@ -164,9 +164,9 @@ void ServerSettings::printServerSettings(void) const
 {
 	std::cout << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
 	std::cout << "Server id: " << _serverId << std::endl;
-	std::cout << "Default server name :" << _serverName << std::endl;
-	std::cout << "Default listen port:" << _listenPort << std::endl;
-	std::cout << "Defautl host: " << _host << std::endl;
+	std::cout << "Default server name :" << p_serverName << std::endl;
+	std::cout << "Default listen port:" << p_listenPort << std::endl;
+	std::cout << "Defautl host: " << p_host << std::endl;
 	//std::cout << "Server directives: "<< std::endl;
 	// for(size_t i = 0; i < _serverDirectives.size(); i++)
 	// {
@@ -186,9 +186,9 @@ std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 {
 	os << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
 	os << "Server id: " << server._serverId << std::endl;
-	os << "Server name :" << server._serverName << std::endl;
-	os << "Server listen port:" << server._listenPort << std::endl;
-	os << "Defautl host: " << server._host << std::endl;
+	os << "Server name :" << server.p_serverName << std::endl;
+	os << "Server listen port:" << server.p_listenPort << std::endl;
+	os << "Defautl host: " << server.p_host << std::endl;
 	//os << "Server directives: "<< std::endl;
 	// for(size_t i = 0; i < _serverDirectives.size(); i++)
 	// {

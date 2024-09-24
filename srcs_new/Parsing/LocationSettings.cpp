@@ -98,13 +98,13 @@ void LocationSettings::printLocationSettings(void) const
 	//_locationServer->printServerSettings();
 	std::cout << "---------------LOCATION SETTINGS ---------------" <<  std::endl;
 	std::cout << "Location :" << _uri << std::endl;
-	std::cout << "Root: " << _root << std::endl;
-	ParsingUtils::printMap(_errorPages, "Location Error Pages");
-	ParsingUtils::printMap(_acceptedMethods, "Location accepted methods");
-	std::cout << "Default client Max Body is " << _clientMaxBody << std::endl;
-	std::cout << "Default Auto index is " << _autoindex << std::endl;
-	_return.printNginxReturnInfo();
-	ParsingUtils::printVector(_index, "indexes");
+	std::cout << "Root: " << p_root << std::endl;
+	ParsingUtils::printMap(p_errorPages, "Location Error Pages");
+	ParsingUtils::printMap(p_acceptedMethods, "Location accepted methods");
+	std::cout << "Default client Max Body is " << p_clientMaxBody << std::endl;
+	std::cout << "Default Auto index is " << p_autoindex << std::endl;
+	p_return.printNginxReturnInfo();
+	ParsingUtils::printVector(p_index, "indexes");
 	std::cout << "Location directives: "<< std::endl;
 	// for(size_t i = 0; i < _locationDirectives.size(); i++)
 	// {
@@ -134,9 +134,9 @@ void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &a
 bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 {
 	pathToIndex.erase();
-	for(size_t i = 0; i < _index.size(); i++)
+	for(size_t i = 0; i < p_index.size(); i++)
 	{
-		std::string path = this->_root + "/" + _index[i];
+		std::string path = this->p_root + "/" + p_index[i];
 		Logger::info("path is ", path);
 		bool found = FileUtils::isPathValid(path);
 		if(found == true)
@@ -162,9 +162,9 @@ bool LocationSettings::isCgiLocation(void) const
 
 bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) const
 {
-	for(size_t i = 0; i < m_cgiExtensions.size(); i++)
+	for(size_t i = 0; i < p_cgiExtensions.size(); i++)
 	{
-		if(m_cgiExtensions[i] == scriptExtension)
+		if(p_cgiExtensions[i] == scriptExtension)
 			return true;
 	}
 	return false;
