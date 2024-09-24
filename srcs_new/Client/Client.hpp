@@ -1,14 +1,7 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 # include "FdData.hpp"
-// # include "CgiProcessor.hpp"
-// # include "../Response/Response.hpp"
-// # include "../Utils/Logger.hpp"
-// # include "../Server/SocketManager.hpp"
-// # include <cstddef>
-// # include <cstring>
-// # include <iostream>
-#include <cstddef>
+# include <cstddef>
 # include <string>
 # include <ctime>
 # include <unistd.h>
@@ -19,34 +12,25 @@
 # include <arpa/inet.h>
 # include <vector>
 # include <map>
-// # include <sstream>
-//# include "CgiProcessor.hpp"
 
-// # define MAXLINE			4096
-// # define MAXLINE			1
 # define MAX_TIMEOUT		3000
 # define DELETED			-1 
 
 class Message;
 
-
-
 class Client
 {
 	public:
 
-
 		enum	e_clientState
 		{
-			NEW,	// Client is new and ready to read it's request message
-			F_REQUEST,	// Client has finished reading Request
-			F_CGIWRITE,	// Client finished writing to CGI
-			F_CGIREAD,	// Client finished reading to CGI 
-			F_RESPONSE,	// Client has finished writing Response
+			DO_REQUEST,	// Client should or does already read the Client request
+			DO_CGIREC,	// Client should or does already receive from CGI 
+			DO_CGISEND,// Client should or does already send to CGI
+			DO_RESPONSE,// Client should or does already send response Response
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
 			DELETEME	// Client wants to be deleted
 		};
-
 
 		enum	e_clientMsgType
 		{
@@ -59,23 +43,16 @@ class Client
 		// Methods
 		Message*				getMsg(e_clientMsgType type);
 		unsigned long			getId() const;
-	//	int						getClientFd() const;
 		FdData&					getFdDataByType(FdData::e_fdType type);
 		FdData&					getFdDataByFd(int fd);
-
 		std::vector<FdData>&	getClientFds(); // Maybe we could come up with a better name.
-
 		const e_clientState&	getClientState() const;
 		unsigned short			getClientPort();
 		std::string				getClientIp() const;
 		std::clock_t			getStartTime() const;
 		int&					getErrorCode();
-		// Message*				getRequestMsg()const;
-		// Message*				getResponseMsg()const;
-		// Message*				getCgiResponseMsg()const;
 		bool					checkTimeout();
 		void					setClientState(e_clientState state);
-		// void					setClientFdState(int idx, e_fdState fdState);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
 		void					setCgiResponseMsg(Message* m);
@@ -87,7 +64,7 @@ class Client
 		void					closeClientFds();
 
 		// Attributes
-		static size_t			client_cntr;
+		static size_t					client_cntr;
 		static std::map<int, Client*>	clients;
 
 	private:
@@ -97,17 +74,9 @@ class Client
 
 		// Attributes
 		const size_t		_id;
-		// fdPairsMap			_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
 		std::vector<FdData>	_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
-		// const int		_fd;
 		e_clientState		_clientState;
-		// e_fdState		_stateFd;
-		// int				_socketToChild;
-		// e_fdState		_stateSocketToChild;
-		// int				_socketFromChild;
-		// e_fdState		_stateSocketFromChild;
 		const std::clock_t	_start;
-		double				_clockstop;
 		int					_errorCode;
 		Message*			_requestMsg;	// client owns so it should delete
 		Message*			_responseMsg;	// client owns so it should delete
@@ -115,6 +84,7 @@ class Client
 		struct sockaddr		_clientAddr;
 		std::string			_clientIp;
 		socklen_t			_addrLen;
+		// double				_clockstop;
 
 	public:
 						Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);

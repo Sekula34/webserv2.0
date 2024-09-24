@@ -1,10 +1,10 @@
-#include "../Server/SocketManager.hpp"
 #include "../Server/Socket.hpp"
 #include "../Utils/Data.hpp"
+#include "../Utils/Logger.hpp"
 #include "../Parsing/ParsingUtils.hpp"
-#include "CgiProcessor.hpp"
-#include "Message.hpp"
-#include "Node.hpp"
+#include "../Message/Message.hpp"
+#include "../Message/Node.hpp"
+#include "Cgi.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,12 +14,12 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-CgiProcessor::CgiProcessor (void):
+Cgi::Cgi (void):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
 {}
 
-CgiProcessor::CgiProcessor (Client& c):
+Cgi::Cgi (Client& c):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
 {
@@ -38,7 +38,7 @@ _nfds(Data::getNfds())
 	_shutdownStart = 0;
 	_sentSigkill = false;
 	_bytesSent = 0;
-	Logger::info("CgiProcessor constructor called"); std::cout << std::endl;
+	Logger::info("Cgi constructor called", "");
 }
 
 /******************************************************************************/
@@ -46,9 +46,9 @@ _nfds(Data::getNfds())
 /******************************************************************************/
 
 
-CgiProcessor::~CgiProcessor (void)
+Cgi::~Cgi (void)
 {
-	Logger::info("CgiProcessor destructor called"); std::cout << std::endl;
+	Logger::info("Cgi destructor called", "");
 	_deleteChararr(_tmp);
 	_deleteChararr(_args);
 	_deleteChararr(_env);
@@ -58,11 +58,11 @@ CgiProcessor::~CgiProcessor (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-CgiProcessor::CgiProcessor(CgiProcessor const & src):
+Cgi::Cgi(Cgi const & src):
 _allSockets(Data::getServerSockets()),
 _nfds(Data::getNfds())
 {
-	//std::cout << "CgiProcessor copy constructor called" << std::endl;
+	//std::cout << "Cgi copy constructor called" << std::endl;
 	*this = src;
 }
 
@@ -70,16 +70,16 @@ _nfds(Data::getNfds())
 /*                      Copy Assignment Operator Overload                     */
 /******************************************************************************/
 
-CgiProcessor &	CgiProcessor::operator=(CgiProcessor const & rhs)
+Cgi &	Cgi::operator=(Cgi const & rhs)
 {
-	//std::cout << "CgiProcessor Copy assignment operator called" << std::endl;
+	//std::cout << "Cgi Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
 	}
 	return (*this);
 }
 
-int	CgiProcessor::getPid()
+int	Cgi::getPid()
 {
 	return (_pid);
 }
@@ -132,7 +132,7 @@ std::string operatingSystem()
     #endif
 }  
 
-std::string	CgiProcessor::getInterpreterPath(std::string suffix)
+std::string	Cgi::getInterpreterPath(std::string suffix)
 {
 	if (suffix == "")
 		return suffix;
@@ -146,12 +146,12 @@ std::string	CgiProcessor::getInterpreterPath(std::string suffix)
 			return (tmp);
 	}
 	_stopCgiSetErrorCode();
-	Logger::warning("CGI interpreter not installed:");
+	Logger::warning("CGI interpreter not installed:", "");
 	std::cout << Data::getCgiLang().at(suffix) << std::endl;
 	return (tmp = "");
 }
 
-std::string	CgiProcessor::getScriptName(std::string suffix)
+std::string	Cgi::getScriptName(std::string suffix)
 {
 	std::vector<std::string> sections = ParsingUtils::splitString((static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getPath(), '/');
 	std::vector<std::string>::iterator it = sections.begin();
@@ -165,7 +165,7 @@ std::string	CgiProcessor::getScriptName(std::string suffix)
 	return ("");
 }
 
-bool	CgiProcessor::_isRegularFile(std::string file)
+bool	Cgi::_isRegularFile(std::string file)
 {
 	struct stat sb;
 
@@ -188,7 +188,7 @@ bool	CgiProcessor::_isRegularFile(std::string file)
 	return (true);
 }
 
-void	CgiProcessor::_initScriptVars()
+void	Cgi::_initScriptVars()
 {
 	// the suffix is .py or .php
 	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
@@ -227,7 +227,7 @@ void	CgiProcessor::_initScriptVars()
 		_stopCgiSetErrorCode();
 }
 
-void	CgiProcessor::_createEnvVector()
+void	Cgi::_createEnvVector()
 {
 	std::string	line;
 	std::string pathInfo = (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getCgiPathInfo();
@@ -339,13 +339,13 @@ void	CgiProcessor::_createEnvVector()
 	_envVec.push_back(line);
 }
 
-void	CgiProcessor::_createArgsVector()
+void	Cgi::_createArgsVector()
 {
 	_argsVec.push_back(_interpreterAbsPath);
 	_argsVec.push_back(_scriptAbsPath);
 }
 
-char**	CgiProcessor::_vecToChararr(std::vector<std::string> list)
+char**	Cgi::_vecToChararr(std::vector<std::string> list)
 {
 	int i = 0;
 	std::vector<std::string>::iterator it = list.begin();
@@ -365,7 +365,7 @@ char**	CgiProcessor::_vecToChararr(std::vector<std::string> list)
 	_tmp = NULL;
 	return (result);
 }
-void	CgiProcessor::_deleteChararr(char ** lines)
+void	Cgi::_deleteChararr(char ** lines)
 {
 	if (!lines)
 		return ;
@@ -376,7 +376,7 @@ void	CgiProcessor::_deleteChararr(char ** lines)
 	delete [] lines;
 }
 
-int	CgiProcessor::_execute()
+int	Cgi::_execute()
 {
 	signal(SIGINT, SIG_IGN);
 	close(_socketsToChild[0]);
@@ -407,7 +407,7 @@ int	CgiProcessor::_execute()
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
-bool	CgiProcessor::_isSocketReady(int socket, int macro)
+bool	Cgi::_isSocketReady(int socket, int macro)
 {
 	for (size_t i = 0; i < static_cast<size_t>(_nfds); ++i)
 	{
@@ -417,7 +417,7 @@ bool	CgiProcessor::_isSocketReady(int socket, int macro)
 	return (false);
 }
 
-void	CgiProcessor::_writeToChild()
+void	Cgi::_writeToChild()
 {
 	int		writeValue = 0;
 
@@ -455,7 +455,7 @@ void	CgiProcessor::_writeToChild()
 	_client->socketToChild = DELETED;
 }
 
-void	CgiProcessor::_readFromChild()
+void	Cgi::_readFromChild()
 {
 	int readValue = 0;
 
@@ -495,7 +495,7 @@ void	CgiProcessor::_readFromChild()
 	}
 }
 
-void	CgiProcessor::_closeCgi()
+void	Cgi::_closeCgi()
 {
 	if (_client->hasReadFromCgi && _client->waitReturn > 0)
 	{
@@ -509,7 +509,7 @@ void	CgiProcessor::_closeCgi()
 	}
 }
 
-void	CgiProcessor::_ioChild()
+void	Cgi::_ioChild()
 {
 	_writeToChild();
 	if (!_client->hasWrittenToCgi)
@@ -526,12 +526,12 @@ void	CgiProcessor::_ioChild()
 	return ;
 }
 
-void	CgiProcessor::terminateChild()
+void	Cgi::terminateChild()
 {
 	_terminate = true;	
 }
 
-void	CgiProcessor::_timeoutKillChild()
+void	Cgi::_timeoutKillChild()
 {
 	if (_sentSigkill)
 		return ;
@@ -545,7 +545,7 @@ void	CgiProcessor::_timeoutKillChild()
 	}
 }
 
-void	CgiProcessor::_handleChildTimeout()
+void	Cgi::_handleChildTimeout()
 {
 	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
 	if ((!_client->checkTimeout() && !sentSigterm) || _terminate)
@@ -561,7 +561,7 @@ void	CgiProcessor::_handleChildTimeout()
 	_timeoutKillChild();
 }
 
-void	CgiProcessor::_handleReturnStatus(int status)
+void	Cgi::_handleReturnStatus(int status)
 {
 		if (WIFSIGNALED(status))
 		{
@@ -581,7 +581,7 @@ void	CgiProcessor::_handleReturnStatus(int status)
 		}
 }
 
-void	CgiProcessor::_waitForChild()
+void	Cgi::_waitForChild()
 {
 	int		status;
 	
@@ -609,7 +609,7 @@ void	CgiProcessor::_waitForChild()
 	return ;
 }
 
-bool	CgiProcessor::_createSockets()
+bool	Cgi::_createSockets()
 {
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, _socketsToChild) < 0)
 		return (false);
@@ -618,7 +618,7 @@ bool	CgiProcessor::_createSockets()
 	return (true);
 }
 
-void	CgiProcessor::_stopCgiSetErrorCode()
+void	Cgi::_stopCgiSetErrorCode()
 {
 	Logger::error("stopping CGI, errorcode 500 ");
 	std::cout << ",id: " << _client->getId() << std::endl;
@@ -628,7 +628,7 @@ void	CgiProcessor::_stopCgiSetErrorCode()
 	_client->setServerMsg(NULL);
 }
 
-void	CgiProcessor::_prepareSockets()
+void	Cgi::_prepareSockets()
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
@@ -641,7 +641,7 @@ void	CgiProcessor::_prepareSockets()
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
 
-int CgiProcessor::process()
+int Cgi::loop()
 {
 	if (!_forked)
 	{

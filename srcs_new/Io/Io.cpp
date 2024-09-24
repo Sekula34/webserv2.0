@@ -9,98 +9,168 @@
 // STATIC METHODS===========================================================//
 //==========================================================================//
 
-void	Io::ioLoop()
+
+static void	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType, Message** message)
 {
-	std::map<int, Client*>::iterator it = Client::clients.begin();
-	for (; it != Client::clients.end(); ++it)
-		_ioClient(*(it->second));
+	// IF CLIENT STATE == NEW, THEN RECEIVE INTO REQUESTMSG, USING CLIENT FD
+	if (client.getClientState() == Client::DO_REQUEST)
+	{
+		fdType = FdData::CLIENT_FD;
+		*message = client.getMsg(Client::REQ_MSG);
+	}
+	else if (client.getClientState() == Client::DO_CGISEND)
+	{
+		fdType = FdData::TOCHILD_FD;
+		*message = client.getMsg(Client::REQ_MSG);
+	}
+	else if (client.getClientState() == Client::DO_CGIREC)
+	{
+		fdType = FdData::FROMCHILD_FD;
+		*message = client.getMsg(Client::CGIRESP_MSG);
+	}
+	else if (client.getClientState() == Client::DO_RESPONSE)
+	{
+		fdType = FdData::CLIENT_FD;
+		*message = client.getMsg(Client::RESP_MSG);
+	}
+}
+
+static void	setFinishedSending(Client& client, FdData& fdData, int error)
+{
+	if (fdData.type == FdData::CLIENT_FD)
+		client.setClientState(Client::DELETEME);
+	else if (fdData.type == FdData::TOCHILD_FD)
+	{
+		if (!error)
+			client.setClientState(Client::DO_CGIREC);
+		else
+			client.setClientState(Client::DELETEME);
+	}
+	fdData.state = FdData::CLOSE;
+}
+
+static void	setFinishedReceiving(Client& client, FdData& fdData, Message* message)
+{
+	if (message->getBytesReceived() == 0)
+	{
+		client.setClientState(Client::DELETEME);
+		fdData.state = FdData::CLOSE;
+		return ;
+	}
+	if (fdData.type == FdData::FROMCHILD_FD)
+		fdData.state = FdData::CLOSE;
+	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
+	if (!message->getHeader())
+		message->_createHeader(); // TODO: Check _header because it uses new.
+	message->setState(COMPLETE);
+}
+
+void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
+{
+ 	int sendValue = 0;
+	std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
+	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	if (message->getBytesSent() == 0)
+		Logger::info("String Response created: ", "\n" + messageStr);
+
+	sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), messageStr.size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
+
+	if (sendValue > 0)
+	Logger::info("Successfully sent bytes: ", sendValue);
+	message->setBytesSent(message->getBytesSent() + sendValue);
+
+	// RETURN IF FULL MESSAGE COULD NOT BE SENT
+	if (message->getBytesSent() < messageStr.size() && sendValue > 0)
+		return ;
+
+	// if unable to send full message, log error and set error Code
+	if (sendValue < 0 || (sendValue == 0 && message->getBytesSent() < messageStr.size()))
+	{
+		Logger::error("failed to send message String in Client with ID:", client.getId());
+		client.setErrorCode(500);
+	}
+
+	setFinishedSending(client, fdData, client.getErrorCode());
+}
+
+void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
+{
+	int 	recValue = 0;
+
+	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (recValue > 0)
+	{
+		Logger::info("Successfully received bytes: ", recValue);
+		message->setBytesReceived(message->getBytesReceived() + recValue);
+	}
+
+
+	// SUCCESSFUL READ -> CONCAT MESSAGE
+	if (recValue > 0)
+		message->bufferToNodes(_buffer, recValue);
+
+	// READ FAILED
+	if (recValue < 0)
+	{
+		setFinishedReceiving(client, fdData, message);
+		Logger::warning("failed to read with return Value: ", recValue);
+		client.setErrorCode(500);
+	}
+
+	// EOF reached, child has gracefully shutdown connection
+	// TODO: implement this when CGI is refactored, not sure it is needed though
+	// if (recValue == 0 && _client->waitReturn != 0)
+	if (recValue == 0 || message->getState() == COMPLETE)
+	{
+		setFinishedReceiving(client, fdData, message);
+
+		// DEBUG
+		// Logger::info("client.getMsg(Client::REQ_MSG)->getHeader();
+	}
 }
 
 void	Io::_ioClient(Client& client)
 {
 	Message* message = NULL;
+	FdData::e_fdType fdType;
 
-	// IF client state is new or we have just finished writing to CGI -> we want to receive
-	if (client.getClientState() == Client::NEW || client.getClientState() == Client::F_CGIWRITE)
+	setFdTypeAndMsg(client, fdType, &message);
+
+	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
+	FdData& fdData = client.getFdDataByType(fdType);
+	if (!message)
+		return ; // TODO: Stop Loop / delete client, panic?
+	
+	if ((client.getClientState() == Client::DO_REQUEST
+		|| client.getClientState() == Client::DO_CGIREC)
+		&&(fdData.state  == FdData::R_RECEIVE
+		|| fdData.state  == FdData::R_SENDREC))
 	{
-		FdData::e_fdType fdType;
-		// if Client state == NEW, then receive into requestMsg
-		if (client.getClientState() == Client::NEW)
-		{
-			fdType = FdData::CLIENT_FD;
-			message = client.getMsg(Client::REQ_MSG);
-		}
-		// if Client state != NEW then we receive into cgiResponse Message 
-		else
-		{
-			fdType = FdData::FROMCHILD_FD;
-			message = client.getMsg(Client::CGIRESP_MSG);
-		}
-		FdData& fdData = client.getFdDataByType(fdType);
-		if (!message)
-			return ; // TODO: Stop Loop / delete client, panic?
-		// If the state of the file descripter allows us to receive -> we receive
-		if (fdData.state  == FdData::R_RECEIVE || fdData.state  == FdData::R_SENDREC)
 			_receiveMsg(client, fdData, message);
-		return ;
 	}
-	// _sendMsg(client);
+
+	// TODO implement this:
+	// IF RECEIVING HAS STARTED, MSG STRING IS NOT EMPTY, MSG STATE IS INCOMPLETE
+	// AND WE ARE SUDDENLY NOT ALLOWED TO RECEIVE -> WE CLOSE MESSAGE,
+	// BECAUSE CLIENT HAS PROBABLY CLOSED SOCKET
+	
+	else if ((client.getClientState() == Client::DO_RESPONSE
+		|| client.getClientState() == Client::DO_CGISEND)
+		&&(fdData.state  == FdData::R_SEND
+		|| fdData.state  == FdData::R_SENDREC))
+	{
+		_sendMsg(client, fdData, message);
+	}
+
+	// TODO same as above for message
 }	
 
-// TODO:
-// void	Io::_sendMsg(Client& client)
-// {
-// 	(void)client;
-// }
-
-void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
+void	Io::ioLoop()
 {
-	int 	readValue = 0;
-
-	readValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
-
-	// successful read -> concat message
-	if (readValue > 0)
-		message->bufferToNodes(_buffer, readValue);
-
-	// failed read
-	if (readValue < 0)
-	{
-		Logger::warning("failed to read with return Value: ", readValue);
-		client.setErrorCode(500);
-		if (fdData.type == FdData::CLIENT_FD)
-			client.setClientState(Client::F_REQUEST);
-		else if (fdData.type == FdData::FROMCHILD_FD)
-		{
-			client.setClientState(Client::F_CGIREAD);
-			fdData.state = FdData::CLOSE;
-		}
-	}
-
-	// EOF reached, child has gracefully shutdown connection
-	// TODO: implement this when CGI is refactored
-	// if (readValue == 0 && _client->waitReturn != 0)
-	client.getMsg(Client::REQ_MSG)->printChain();
-	if (readValue == 0)
-	{
-		Client::e_clientMsgType msgType;
-		if (fdData.type == FdData::CLIENT_FD)
-			msgType = Client::REQ_MSG;
-		else
-		 	msgType = Client::CGIRESP_MSG;
-		if (!client.getMsg(msgType)->getHeader())
-			client.getMsg(msgType)->_createHeader(); // TODO: Check _headwer because it uses new.
-		client.getMsg(msgType)->setState(COMPLETE);
-
-		// TODO: implement this when CGI is refactored
-		//_client->hasReadFromCgi = true;
-
-		// copy the error code in the CgiResponseHeader into client
-		// so that errors from CGI can be processed
-		// if (client.getMsg(msgType) && client.getMsg(msgType)->getHeader() && !client.getErrorCode())
-		// 	client.setErrorCode(client.getMsg(msgType)->getHeader().getHttpStatusCode());
-	}
-
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for (; it != Client::clients.end(); ++it)
+		_ioClient(*(it->second));
 }
 
 

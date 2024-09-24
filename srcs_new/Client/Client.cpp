@@ -199,12 +199,12 @@ void Client::_initVars(int fd)
 {
 	// _socketFromChild = DELETED;
 	// _socketToChild = DELETED;
-	_clientState = NEW;
+	_clientState = DO_REQUEST;
 	_clientFds.push_back(FdData(fd, FdData::CLIENT_FD));
 	// _clientFds.push_back(fdStatePair(fd, NONE));
 	_initClientIp();
 	_errorCode = 0;
-	_clockstop = 1000;
+	// _clockstop = 1000;
 	_requestMsg = NULL;
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
@@ -334,15 +334,10 @@ Client::~Client()
 	_requestMsg = NULL;
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
-	Logger::info("Client destructed, unique ID: ", _id);
 	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
-	// if (_socketToChild != DELETED)
-	// 	close(_socketToChild);
-	// if (_socketFromChild != DELETED)
-	// 	close(_socketFromChild);
-	// close (_fd);
 	closeClientFds();
 	clients.erase(getFdDataByType(FdData::CLIENT_FD).fd);
+	Logger::info("Client destructed, unique ID: ", _id);
 }
 
 // Copy Constructor

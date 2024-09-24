@@ -1,5 +1,7 @@
 #include "./Parsing/ServersInfo.hpp"
 #include "Server/ConnectionManager.hpp"
+#include "Message/Node.hpp"
+#include "Message/Message.hpp"
 #include "Io/Io.hpp"
 #include "Server/Socket.hpp"
 #include "Utils/Data.hpp"
@@ -37,6 +39,17 @@
 // 	ConnectionManager manager(epollFd);
 // }
 
+static void	debugFakeVirtualServer()
+{
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for (; it != Client::clients.end(); ++it)
+	{
+		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
+			&& it->second->getClientState() != Client::DELETEME)
+	  		it->second->setClientState(Client::DO_RESPONSE);	
+	}
+}
+
 void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
 	// ConnectionManager* manager = NULL;
@@ -53,6 +66,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// Initialize epoll
 	int epollFd = epoll_create(1);
+	Logger::info("EPOLL Fd: ", epollFd);
 	if (epollFd == -1)
 		throw (std::runtime_error("epoll_create failed"));
 
@@ -66,6 +80,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	{
 		manager.epollLoop();
 		io.ioLoop();
+		debugFakeVirtualServer();	
 		// io.ioLoop();
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();
