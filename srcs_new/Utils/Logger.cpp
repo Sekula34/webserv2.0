@@ -22,14 +22,6 @@ std::map<Logger::e_color, std::string> autoSetColorMap()
 
 std::map<Logger::e_color, std::string> Logger::_colorMap = autoSetColorMap();
 
-bool Logger::_isPrintingAllowed()
-{
-	if (PRINT == 1)
-	{
-		return true;
-	}
-	return false;
-}
 
 std::ostringstream&	Logger::log(std::string title, std::string type, e_color color)
 {
@@ -73,6 +65,13 @@ void Logger::chars(std::string message, bool newline)
 	if(newline == true)
 		std::cout << std::endl;
 }
+std::string  Logger::getCharSequence(const size_t numberOfChars, char c)
+{
+	std::ostringstream oss;
+	for (size_t i = 0; i < numberOfChars; i++)
+		oss << c;
+	return  oss.str();
+}
 std::ostringstream&  Logger::_printCurrentTime() {
 	timeval curTime;
 	gettimeofday(&curTime, NULL);
@@ -96,12 +95,11 @@ std::ostringstream&  Logger::_printCurrentTime() {
 	return  oss;
 }
 
-
-
-std::string  Logger::getCharSequence(const size_t numberOfChars, char c)
+bool Logger::_isPrintingAllowed()
 {
-	std::ostringstream oss;
-	for (size_t i = 0; i < numberOfChars; i++)
-		oss << c;
-	return  oss.str();
+	if (PRINT == 1)
+	{
+		return true;
+	}
+	return false;
 }
