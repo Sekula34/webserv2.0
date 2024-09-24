@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include "NginxReturn.hpp"
-#include "ParsingUtils.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "Configuration.hpp"
@@ -205,22 +204,12 @@ void DefaultSettings::_setDefaultIndexes(void)
 }
 std::ostream& operator<<(std::ostream& os, const DefaultSettings& settings)
 {
-	os << "---------Http Settings print----- " << std::endl;
+	std::string title = Logger::createFancyTitle("Http Settings print", '^');
+	os << title << std::endl;
 	os << "Client Max Body size: " << settings.p_clientMaxBody << std::endl;
-	os << "Error pages: "; 
-	ParsingUtils::printMap(settings.p_errorPages, "Error pages");
-	os << "---------------DEFAULT ALL SETTINGS PRINT ---------------" <<  std::endl;
-	os << "Default server name :" << settings.p_serverName << std::endl;
-	os << "Default listen port:" << settings.p_listenPort << std::endl;
-	os << "Defautl host: " << settings.p_host << std::endl;
-	os << "Default root: " <<settings.p_root << std::endl;
-	ParsingUtils::printMap(settings.p_errorPages, "ErrorPages");
-	ParsingUtils::printMap(settings.p_acceptedMethods);
-	//os << "Default limit except: " << _limitExcept << std::endl;
-	os << "Default client Max Body is " << settings.p_clientMaxBody << std::endl;
-	os << "Default Auto index is " << settings.p_autoindex << std::endl;
-	os << settings.p_return;
-	ParsingUtils::printVector(settings.p_index, "Index vector");
-	os << "___________________________________________________"<<std::endl;
+	os << "Autoindex: " << settings.p_autoindex << std::endl;
+	os << "Root: " << settings.p_root << std::endl;
+	os << Logger::logMap(settings.p_errorPages, "Error Pages Map").str();
+	os << Logger::logVector(settings.p_index, "Indexes vector").str() << std::endl;
 	return os;
 }
