@@ -51,7 +51,12 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 
 static void	setFinishedReceiving(Client& client, FdData& fdData, Message* message)
 {
-	(void)client;
+	if (message->getBytesReceived() == 0)
+	{
+		client.setClientState(Client::DELETEME);
+		fdData.state = FdData::CLOSE;
+		return ;
+	}
 	if (fdData.type == FdData::FROMCHILD_FD)
 		fdData.state = FdData::CLOSE;
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
@@ -62,20 +67,25 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 {
- 	int writeValue = 0;
-	std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	Logger::info("String Response created: ", messageStr);
+ 	int sendValue = 0;
+	std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
+	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+	if (message->getBytesSent() == 0)
+		Logger::info("String Response created: ", "\n" + messageStr);
 
-	writeValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), messageStr.size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
-	Logger::info("Successfully sent bytes: ", writeValue);
-	message->setBytesSent(message->getBytesSent() + writeValue);
+	sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), messageStr.size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
+
+	if (sendValue > 0)
+	Logger::info("Successfully sent bytes: ", sendValue);
+	message->setBytesSent(message->getBytesSent() + sendValue);
 
 	// RETURN IF FULL MESSAGE COULD NOT BE SENT
-	if (message->getBytesSent() < messageStr.size() && writeValue > 0)
+	if (message->getBytesSent() < messageStr.size() && sendValue > 0)
 		return ;
 
 	// if unable to send full message, log error and set error Code
-	if (writeValue < 0 || (writeValue == 0 && message->getBytesSent() < messageStr.size()))
+	if (sendValue < 0 || (sendValue == 0 && message->getBytesSent() < messageStr.size()))
 	{
 		Logger::error("failed to send message String in Client with ID:", client.getId());
 		client.setErrorCode(500);
@@ -86,31 +96,37 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 
 void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 {
-	int 	readValue = 0;
+	int 	recValue = 0;
 
-	readValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (recValue > 0)
+	{
+		Logger::info("Successfully received bytes: ", recValue);
+		message->setBytesReceived(message->getBytesReceived() + recValue);
+	}
+
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
-	if (readValue > 0)
-		message->bufferToNodes(_buffer, readValue);
+	if (recValue > 0)
+		message->bufferToNodes(_buffer, recValue);
 
 	// READ FAILED
-	if (readValue < 0)
+	if (recValue < 0)
 	{
 		setFinishedReceiving(client, fdData, message);
-		Logger::warning("failed to read with return Value: ", readValue);
+		Logger::warning("failed to read with return Value: ", recValue);
 		client.setErrorCode(500);
 	}
 
 	// EOF reached, child has gracefully shutdown connection
 	// TODO: implement this when CGI is refactored, not sure it is needed though
-	// if (readValue == 0 && _client->waitReturn != 0)
-	if (readValue == 0 || message->getState() == COMPLETE)
+	// if (recValue == 0 && _client->waitReturn != 0)
+	if (recValue == 0 || message->getState() == COMPLETE)
 	{
 		setFinishedReceiving(client, fdData, message);
 
 		// DEBUG
-		client.getMsg(Client::REQ_MSG)->printChain();
+		// Logger::info("client.getMsg(Client::REQ_MSG)->getHeader();
 	}
 }
 
@@ -126,8 +142,6 @@ void	Io::_ioClient(Client& client)
 	if (!message)
 		return ; // TODO: Stop Loop / delete client, panic?
 	
-	// IF CLIENT STATE IS NEW OR WE HAVE JUST FINISHED WRITING TO CGI -> WE WANT TO RECEIVE
-	// AND IF THE STATE OF THE FILE DESCRIPTER ALLOWS US TO RECEIVE -> WE RECEIVE
 	if ((client.getClientState() == Client::DO_REQUEST
 		|| client.getClientState() == Client::DO_CGIREC)
 		&&(fdData.state  == FdData::R_RECEIVE

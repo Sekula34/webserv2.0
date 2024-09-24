@@ -27,7 +27,9 @@ m_httpErrorCode(0)
 		Logger::error("checking header fields failed", true);
 		return;
 	}
-	Logger::info("Header fileds map is successfully filled", true);
+	std::stringstream ss;
+	ss << *this;
+	Logger::info("Header fields map is successfully filled", "\n" + ss.str());
 }
 
 AHeader::AHeader(const AHeader& source)
@@ -43,7 +45,9 @@ AHeader::AHeader(const AHeader& source)
 		Logger::error("checking header fields failed", true);
 		return;
 	}
-	Logger::info("Header fileds map is successfully filled", true);
+	std::stringstream ss;
+	ss << *this;
+	Logger::info("Header fields map is successfully filled", "\n" + ss.str());
 }
 
 AHeader& AHeader::operator=(const AHeader& source)

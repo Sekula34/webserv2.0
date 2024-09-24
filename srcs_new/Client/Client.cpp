@@ -334,15 +334,10 @@ Client::~Client()
 	_requestMsg = NULL;
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
-	Logger::info("Client destructed, unique ID: ", _id);
 	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
-	// if (_socketToChild != DELETED)
-	// 	close(_socketToChild);
-	// if (_socketFromChild != DELETED)
-	// 	close(_socketFromChild);
-	// close (_fd);
 	closeClientFds();
 	clients.erase(getFdDataByType(FdData::CLIENT_FD).fd);
+	Logger::info("Client destructed, unique ID: ", _id);
 }
 
 // Copy Constructor
