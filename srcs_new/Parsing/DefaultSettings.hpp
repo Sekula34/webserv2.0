@@ -10,7 +10,6 @@
 class DefaultSettings 
 {
 	public :
-
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
 		void 							setListenPort(int listenPort);
@@ -24,7 +23,6 @@ class DefaultSettings
 		void 							setRoot(std::string root);
 		void 							setServerName(std::string serverName);
 		void 							setCgiExtensions(std::vector<std::string> extensionsVector);
-		//void 							printAllSettings(void) const;
 		const int&						getPort(void) const;
 		const std::string& 				getRoot(void) const;
 		const std::string& 				getServerName(void) const;
@@ -39,7 +37,7 @@ class DefaultSettings
 		 */
 		const std::string 				getErrorPagePath(const int errorCode) const;
 		const std::vector<std::string>&	getCgiExtensions(void) const;
-		
+
 										DefaultSettings(void);
 										DefaultSettings(const DefaultSettings& source);
 		DefaultSettings& 				operator=(const DefaultSettings& source);
