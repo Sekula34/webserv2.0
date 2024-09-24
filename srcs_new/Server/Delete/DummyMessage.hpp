@@ -4,6 +4,10 @@
 # include <string>
 # include <map>
 
+// For testing
+# define MESSAGE_HEADER "DummyMessageHeader.txt"
+# define MESSAGE_BODY "DummyMessageBody.txt"
+
 class DummyMessage
 {
 	public:
@@ -13,7 +17,7 @@ class DummyMessage
 		void			setHeader(std::map<std::string, std::string>& header);
 		void			setBody(std::string& body);
 		int&			getErrorCode();
-		void			printMessage();
+		// void			printMessage();
 		// Attributes
 
 	private:
@@ -24,7 +28,11 @@ class DummyMessage
 
 	public:
 		DummyMessage();
+		DummyMessage(std::string type, int errorCode);
 		~DummyMessage();
+
+	// Overloaded insertion operator (for testing).
+	friend std::ostream&	operator<<(std::ostream& out, const DummyMessage& message);
 };
 
 #endif

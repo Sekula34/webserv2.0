@@ -9,7 +9,7 @@
 //==========================================================================//
 
 // Method to parse the file and store it in a map
-void	DummyServerSettings::parseFile(const std::string& serverSettings)
+void	DummyServerSettings::loadFile(const std::string& serverSettings)
 {
 	if (serverSettings.empty())
 	{
@@ -45,18 +45,38 @@ std::string		DummyServerSettings::getValue(const std::string& key) const
 	return "";
 }
 
-void		DummyServerSettings::printAllValues() const
-{
-	std::map<std::string, std::string>::const_iterator it = _mappedFile.begin();
-	for (; it != _mappedFile.end(); ++it)
-		std::cout << it->first << "=" << it->second << std::endl;
-}
+// void		DummyServerSettings::printAllValues() const
+// {
+// 	std::cout << std::endl;
+// 	std::cout << "SERVER SETTINGS" << std::endl;
+// 	std::map<std::string, std::string>::const_iterator it = _mappedFile.begin();
+// 	for (; it != _mappedFile.end(); ++it)
+// 		std::cout << it->first << "=" << it->second << std::endl;
+// }
 
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
+// Custom Constructor
+DummyServerSettings::DummyServerSettings(std::string type)
+{
+	if (type != "test")
+		return ;
+	this->loadFile(CONFIGFILE);
+}
+
 // Constructor
 DummyServerSettings::DummyServerSettings() {}
+
+// Overloaded Insertion Operator (For testing).
+std::ostream&	operator<<(std::ostream& out, const DummyServerSettings& serverSettings)
+{
+	out << "SERVER SETTINGS" << std::endl;
+	std::map<std::string, std::string>::const_iterator it = serverSettings._mappedFile.begin();
+	for (; it != serverSettings._mappedFile.end(); ++it)
+		out << it->first << "=" << it->second << std::endl;
+	return (out);
+}
 
 // std::cout << "-----------------DEBUGGING-----------------" << std::endl;
