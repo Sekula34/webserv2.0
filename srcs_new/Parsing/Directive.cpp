@@ -84,21 +84,12 @@ size_t Directive::getDirectivePathSize(void) const
 	return (_dirPath.size());
 }
 
-void Directive::printDirectiveInfor(void) const
-{
-	std::cout << "---------------Directive info--------------" << std::endl;
-	std::cout << "Directive name is [" << _directiveName <<"]" <<std::endl;
-	std::cout << "Directive value is :[" << _directiveValue <<"]" <<std::endl;
-	//std::cout <<"Directive path is : " << std::endl;
-	//Token::printAllTokensInfo(_dirPath);
-	std::cout <<"_____________________________________________" << std::endl;
-}
 
 void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
 {
 	for(size_t i = 0; i < allDirectives.size(); i++)
 	{
-		allDirectives[i].printDirectiveInfor();
+		std::cout << allDirectives[i] << std::endl;
 	}
 }
 
@@ -209,7 +200,6 @@ bool Directive::_isNameValid(const std::string& name, const std::string validLis
 	}
 	for(size_t i = 0; i < size; i++)
 	{
-		//std::cout << "Comparing " << name << " to" << validList[i] << std::endl;
 		if(name == validList[i])
 			return true;
 	}
@@ -246,7 +236,6 @@ std::string Directive::_getNameFromToken(const Token& token) const
 	}
 	name = name.substr(0, spacePos);
 	std::vector<Token> path (token.getTokenPath());
-	//std::cout << "path size is " << path.size() << std::endl;
 	if(path.empty() == true)
 	{
 		std::cout << "Directive is not inside any context " << _directiveName << " in line " << token.getTokenLineNumber() << std::endl;
@@ -305,7 +294,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 		else
 			break;
 	}
-	//std::cout <<"Value is :"<<value<<std::endl;
 	size_t posSemi = value.find(';');
 	value = value.substr(0,posSemi);
 	return value;
@@ -316,8 +304,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 
 void Directive::_applyServerName(DefaultSettings& settings)
 {
-	//std::cout << "Server name applying" << std::endl;
-	//std::cout <<"directive value is " <<_directiveValue << std::endl;
 	settings.setServerName(_directiveValue);
 }
 
@@ -471,7 +457,7 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 		if(Data::isCgiExtensionValid(extensions[i]) == false)
 		{
 			Logger::error("There is no interpreter for :", extensions[i]);
-			// TODO: std::cout << "In line " << _dirLineNumber << std::endl;
+			Logger::error("In line", _dirLineNumber);
 			throw InvalidDirectiveException();
 		}
 	}
@@ -482,4 +468,13 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 const char* Directive::InvalidDirectiveException::what() const throw()
 {
 	return ("Exception: Invalid directive");
+}
+
+std::ostream& operator<<(std::ostream& os, const Directive& directive)
+{
+	os << "---------------Directive info--------------" << std::endl;
+	os << "Directive name is [" << directive._directiveName <<"]" <<std::endl;
+	os << "Directive value is :[" << directive._directiveValue <<"]" <<std::endl;
+	os <<"_____________________________________________" << std::endl;
+	return os;
 }

@@ -4,6 +4,7 @@
 #include "Token.hpp"
 #include <cstddef>
 #include <exception>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -33,7 +34,6 @@ class Directive
 		const size_t&					getDirectiveLineNum(void) const;
 		size_t							getDirectivePathSize(void) const;
 		void							apply(DefaultSettings& settings);
-		void							printDirectiveInfor(void) const;
 
 										Directive();
 										Directive(std::string dirName, std::string dirValue);
@@ -88,6 +88,9 @@ class Directive
 					return (directive._directiveName == _directiveName);
 				}
 		};
+
+
+	friend std::ostream& operator<<(std::ostream& os, const Directive& directive);
 };
 
 #endif 
