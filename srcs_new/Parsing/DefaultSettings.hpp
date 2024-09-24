@@ -45,9 +45,9 @@ class DefaultSettings
 
 	protected :
 		//server stuff 
-		std::string					p_serverName;
+		std::string					p_serverName; // This is host
 		int 						p_listenPort;
-		std::string					p_host;
+		std::string					p_host; //TODO remove this it is replace with host
 		//location stuff
 		std::map<int, std::string>	p_errorPages;
 		std::map<std::string, bool>	p_acceptedMethods;// limitExcept
