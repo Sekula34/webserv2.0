@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <sstream>
 
 //==========================================================================//
 // REGULAR METHODS==========================================================//
@@ -16,15 +15,18 @@
 
 void	VirtualServer::_execDelete(DummyMessage* request)
 {
-	// Execute GET method as filip was doing.
-	(void)request;
+	// Execute DELETE method.
+	// (void)request;
 	std::cout << "DELETE method executed" << std::endl;
+	std::map<std::string, std::string>& msgHeader = request->getHeader();
+	std::string filename = msgHeader["uri"];
+	if (remove(filename.c_str()) != 0)
+		std::cerr << "Unable to DELETE file!" << std::endl;
 }
 
 void	VirtualServer::_execPost(DummyMessage* request)
 {
 	// Execute POST method.
-	// (void)request;
 	std::cout << "POST method executed" << std::endl;
 	std::map<std::string, std::string>& msgHeader = request->getHeader();
 	std::string filename = msgHeader["uri"];
@@ -34,7 +36,6 @@ void	VirtualServer::_execPost(DummyMessage* request)
 		std::cerr << "Unable to create POST file!" << std::endl;
 		return ;
 	}
-	// outputFile << "This is a simple test";
 	outputFile << *request;
 	outputFile.close();
 }
@@ -48,7 +49,7 @@ void	VirtualServer::_execGet(DummyMessage* request)
 
 bool	VirtualServer::_isvalidRequest(DummyMessage* request)
 {
-	/* 
+	/* PSEUDOCODE:
 	if (client.message.method == _serverSettings.method
 	&& client.message.protocol == _serverSettings.protocol --> This should be checked while generating the header
 	&& client.message.host == _serverSettings.host
