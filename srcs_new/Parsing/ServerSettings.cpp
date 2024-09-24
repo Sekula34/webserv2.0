@@ -177,7 +177,8 @@ void ServerSettings::printServerSettings(void) const
 	std::cout << "\t" << std::endl;
 	for(size_t i = 0; i < _serverLocations.size(); i++)
 	{
-		_serverLocations[i].printLocationSettings();
+		//TODO: fix this
+		//_serverLocations[i].printLocationSettings();
 	}
 	std::cout << "___________________________________________________"<<std::endl;
 }
@@ -199,7 +200,8 @@ std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 	os << "\t" << std::endl;
 	for(size_t i = 0; i < server._serverLocations.size(); i++)
 	{
-		server._serverLocations[i].printLocationSettings();
+		//TODO: fix this
+		//server._serverLocations[i].printLocationSettings();
 	}
 	os << "___________________________________________________"<<std::endl;
 	return os;

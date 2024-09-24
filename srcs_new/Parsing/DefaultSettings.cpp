@@ -205,8 +205,10 @@ void DefaultSettings::_setDefaultIndexes(void)
 }
 std::ostream& operator<<(std::ostream& os, const DefaultSettings& settings)
 {
-	os << "Default Settings print " << std::endl;
-	ParsingUtils::printVector(settings.p_cgiExtensions, "Cgi extensions"); 
+	os << "---------Http Settings print----- " << std::endl;
+	os << "Client Max Body size: " << settings.p_clientMaxBody << std::endl;
+	os << "Error pages: "; 
+	ParsingUtils::printMap(settings.p_errorPages, "Error pages");
 	os << "---------------DEFAULT ALL SETTINGS PRINT ---------------" <<  std::endl;
 	os << "Default server name :" << settings.p_serverName << std::endl;
 	os << "Default listen port:" << settings.p_listenPort << std::endl;

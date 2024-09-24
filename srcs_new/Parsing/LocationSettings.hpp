@@ -12,7 +12,7 @@ class LocationSettings : public DefaultSettings
 	public :
 		const std::vector<Directive>&	getLocationDirectives(void) const;
 		const std::string& 				getLocationUri(void) const;
-		void							printLocationSettings(void) const;
+		//void							printLocationSettings(void) const;
 		static void						printAllLocationSettings(std::vector<LocationSettings>& allLocations);
 		/**
 		 * @brief Set the Index Page Path object

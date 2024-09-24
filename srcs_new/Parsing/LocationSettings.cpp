@@ -11,25 +11,25 @@
 #include "../Utils/FileUtils.hpp"
 
 
-void LocationSettings::printLocationSettings(void) const 
-{
-	//_locationServer->printServerSettings();
-	std::cout << "---------------LOCATION SETTINGS ---------------" <<  std::endl;
-	std::cout << "Location :" << _uri << std::endl;
-	std::cout << "Root: " << p_root << std::endl;
-	ParsingUtils::printMap(p_errorPages, "Location Error Pages");
-	ParsingUtils::printMap(p_acceptedMethods, "Location accepted methods");
-	std::cout << "Default client Max Body is " << p_clientMaxBody << std::endl;
-	std::cout << "Default Auto index is " << p_autoindex << std::endl;
-	p_return.printNginxReturnInfo();
-	ParsingUtils::printVector(p_index, "indexes");
-	std::cout << "Location directives: "<< std::endl;
-	// for(size_t i = 0; i < _locationDirectives.size(); i++)
-	// {
-	// 	_locationDirectives[i].printDirectiveInfor();
-	// }
-	std::cout << "___________________________________________________"<<std::endl;
-}
+// void LocationSettings::printLocationSettings(void) const 
+// {
+// 	//_locationServer->printServerSettings();
+// 	std::cout << "---------------LOCATION SETTINGS ---------------" <<  std::endl;
+// 	std::cout << "Location :" << _uri << std::endl;
+// 	std::cout << "Root: " << p_root << std::endl;
+// 	ParsingUtils::printMap(p_errorPages, "Location Error Pages");
+// 	ParsingUtils::printMap(p_acceptedMethods, "Location accepted methods");
+// 	std::cout << "Default client Max Body is " << p_clientMaxBody << std::endl;
+// 	std::cout << "Default Auto index is " << p_autoindex << std::endl;
+// 	p_return.printNginxReturnInfo();
+// 	ParsingUtils::printVector(p_index, "indexes");
+// 	std::cout << "Location directives: "<< std::endl;
+// 	// for(size_t i = 0; i < _locationDirectives.size(); i++)
+// 	// {
+// 	// 	_locationDirectives[i].printDirectiveInfor();
+// 	// }
+// 	std::cout << "___________________________________________________"<<std::endl;
+// }
 
 const std::vector<Directive>& LocationSettings::getLocationDirectives(void) const
 {
@@ -45,7 +45,8 @@ void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &a
 {
 	for(size_t i = 0; i < allLocations.size(); i++)
 	{
-		allLocations[i].printLocationSettings();
+		//TODO: fix this
+		//allLocations[i].printLocationSettings();
 	}
 }
 
