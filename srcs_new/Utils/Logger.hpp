@@ -92,7 +92,7 @@ class Logger
 		template <typename T>
 		static std::ostringstream& logVector(std::vector<T> customVector, std::string vectorTitle)
 		{
-			std::string fancyTitle = _createFancyTitle(vectorTitle);
+			std::string fancyTitle = createFancyTitle(vectorTitle);
 			static std::ostringstream oss;
 			oss.str("");
 			oss.clear();
@@ -104,7 +104,7 @@ class Logger
 				for(size_t i = 0; i < customVector.size(); i++)
 					oss << customVector[i] << std::endl;
 			}
-			oss << _createCharSequence(fancyTitle.size()) << std::endl;
+			oss << getCharSequence(fancyTitle.size()) << std::endl;
 			return oss;
 		}
 
@@ -119,7 +119,7 @@ class Logger
 		template <typename T, typename U>
 		static std::ostringstream& logMap(std::map<T, U> customMap, std::string mapTitle)
 		{
-			std::string fancyTitle = _createFancyTitle(mapTitle, '=', 10);
+			std::string fancyTitle = createFancyTitle(mapTitle, '=', 10);
 			static std::ostringstream oss;
 			oss.str("");
 			oss.clear();
@@ -132,20 +132,20 @@ class Logger
 				typename std::map<T, U>::const_iterator end = customMap.end();
 				for(; it != end; ++it)
 				{
-					oss << _createCharSequence(10, '_') << std::endl;
+					oss << getCharSequence(10, '_') << std::endl;
 					oss << "Map key: " << it->first << std::endl;
 					oss << "Map Value: " << it->second << std::endl;
-					oss << _createCharSequence(10, '-') << std::endl;
+					oss << getCharSequence(10, '-') << std::endl;
 				}
 			}
-			oss << std::endl << _createCharSequence(fancyTitle.size(), '=') << std::endl;
+			oss << std::endl << getCharSequence(fancyTitle.size(), '=') << std::endl;
 			return oss;
 		}
 		static void chars(std::string message, bool newline);
+		static std::string 						createFancyTitle(const std::string title, char c = '-', size_t numberOfChars = 10);
+		static std::string 						getCharSequence(const size_t numberOfChars = 10, char c = '-');
 
 	private:
-		static std::string 						_createFancyTitle(const std::string title, char c = '-', size_t numberOfChars = 10);
-		static std::string 						_createCharSequence(const size_t numberOfChars = 10, char c = '-');
 		static std::ostringstream&				_printCurrentTime();
 		static bool								_isPrintingAllowed();
 		static std::map<e_color, std::string>	_colorMap;

@@ -52,6 +52,14 @@ void printEscapeCharacters(const std::string& str) {
 	}
 }
 
+std::string Logger::createFancyTitle(const std::string title, char c, size_t numberOfChars)
+{
+	std::ostringstream oss;
+	oss << getCharSequence(numberOfChars, c);
+	oss << title; 
+	oss << getCharSequence(numberOfChars, c);
+	return oss.str();
+}
 void Logger::chars(std::string message, bool newline)
 {
 	if(_isPrintingAllowed() == false)
@@ -89,16 +97,8 @@ std::ostringstream&  Logger::_printCurrentTime() {
 }
 
 
-std::string Logger::_createFancyTitle(const std::string title, char c, size_t numberOfChars)
-{
-	std::ostringstream oss;
-	oss << _createCharSequence(numberOfChars, c);
-	oss << title; 
-	oss << _createCharSequence(numberOfChars, c);
-	return oss.str();
-}
 
-std::string  Logger::_createCharSequence(const size_t numberOfChars, char c)
+std::string  Logger::getCharSequence(const size_t numberOfChars, char c)
 {
 	std::ostringstream oss;
 	for (size_t i = 0; i < numberOfChars; i++)
