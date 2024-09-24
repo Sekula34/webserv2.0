@@ -147,7 +147,8 @@ const int& ServerSettings::getServerId() const
 std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithUri(const std::string uri, bool& found) const
 {
 	found = true;
-	std::vector<LocationSettings>::const_iterator it = std::find_if(_serverLocations.begin(), _serverLocations.end(), FindByUri(uri));
+	LocationSettings::FindByUri functor(uri);
+	std::vector<LocationSettings>::const_iterator it = std::find_if(_serverLocations.begin(), _serverLocations.end(), functor);
 	if(it == _serverLocations.end())
 	{
 		found = false;
