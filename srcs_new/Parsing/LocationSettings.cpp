@@ -4,32 +4,13 @@
 #include "ServerSettings.hpp"
 #include "Token.hpp"
 #include <cstddef>
-#include <iostream>
+#include <ostream>
+#include <string>
 #include <vector>
-#include "ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
 
 
-// void LocationSettings::printLocationSettings(void) const 
-// {
-// 	//_locationServer->printServerSettings();
-// 	std::cout << "---------------LOCATION SETTINGS ---------------" <<  std::endl;
-// 	std::cout << "Location :" << _uri << std::endl;
-// 	std::cout << "Root: " << p_root << std::endl;
-// 	ParsingUtils::printMap(p_errorPages, "Location Error Pages");
-// 	ParsingUtils::printMap(p_acceptedMethods, "Location accepted methods");
-// 	std::cout << "Default client Max Body is " << p_clientMaxBody << std::endl;
-// 	std::cout << "Default Auto index is " << p_autoindex << std::endl;
-// 	p_return.printNginxReturnInfo();
-// 	ParsingUtils::printVector(p_index, "indexes");
-// 	std::cout << "Location directives: "<< std::endl;
-// 	// for(size_t i = 0; i < _locationDirectives.size(); i++)
-// 	// {
-// 	// 	_locationDirectives[i].printDirectiveInfor();
-// 	// }
-// 	std::cout << "___________________________________________________"<<std::endl;
-// }
 
 const std::vector<Directive>& LocationSettings::getLocationDirectives(void) const
 {
@@ -41,14 +22,6 @@ const std::string& LocationSettings::getLocationUri() const
 	return(_uri);
 }
 
-void LocationSettings::printAllLocationSettings(std::vector<LocationSettings> &allLocations)
-{
-	for(size_t i = 0; i < allLocations.size(); i++)
-	{
-		//TODO: fix this
-		//allLocations[i].printLocationSettings();
-	}
-}
 
 bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
 {
@@ -171,3 +144,35 @@ std::vector<Directive> LocationSettings::_setLocationDirectives()
 	}
 	return (locationDirectives);
 }
+
+std::ostream& operator<<(std::ostream& os, const LocationSettings& location)
+{
+	std::string title = Logger::createFancyTitle("Location setting print");
+	os << title << std::endl;
+	os << "Location uri: " << location.getLocationUri() << std::endl;
+	os << Logger::logMap(location.p_acceptedMethods, "Limit except map").str();
+	os << location.getNginxReturn() << std::endl;
+	os << "I belong to this server " << std::endl;
+	//TODO os << serverSettings
+	return os;
+
+}
+// void LocationSettings::printLocationSettings(void) const 
+// {
+// 	//_locationServer->printServerSettings();
+// 	std::cout << "---------------LOCATION SETTINGS ---------------" <<  std::endl;
+// 	std::cout << "Location :" << _uri << std::endl;
+// 	std::cout << "Root: " << p_root << std::endl;
+// 	ParsingUtils::printMap(p_errorPages, "Location Error Pages");
+// 	ParsingUtils::printMap(p_acceptedMethods, "Location accepted methods");
+// 	std::cout << "Default client Max Body is " << p_clientMaxBody << std::endl;
+// 	std::cout << "Default Auto index is " << p_autoindex << std::endl;
+// 	p_return.printNginxReturnInfo();
+// 	ParsingUtils::printVector(p_index, "indexes");
+// 	std::cout << "Location directives: "<< std::endl;
+// 	// for(size_t i = 0; i < _locationDirectives.size(); i++)
+// 	// {
+// 	// 	_locationDirectives[i].printDirectiveInfor();
+// 	// }
+// 	std::cout << "___________________________________________________"<<std::endl;
+// }

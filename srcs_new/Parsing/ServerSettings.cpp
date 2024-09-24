@@ -8,7 +8,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
-
+#include "../Utils/Logger.hpp"
 
 ServerSettings::ServerSettings()
 {
@@ -186,23 +186,16 @@ void ServerSettings::printServerSettings(void) const
 
 std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 {
-	os << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
-	os << "Server id: " << server._serverId << std::endl;
-	os << "Server name :" << server.p_serverName << std::endl;
-	os << "Server listen port:" << server.p_listenPort << std::endl;
-	os << "Defautl host: " << server.p_host << std::endl;
-	//os << "Server directives: "<< std::endl;
-	// for(size_t i = 0; i < _serverDirectives.size(); i++)
-	// {
-	// 	_serverDirectives[i].printDirectiveInfor();
-	// }
-	os <<"Server locations are :" << std::endl;
-	os << "\t" << std::endl;
-	for(size_t i = 0; i < server._serverLocations.size(); i++)
-	{
-		//TODO: fix this
-		//server._serverLocations[i].printLocationSettings();
-	}
+	std::vector<std::string> locationsUri;
+	for(size_t i = 0 ; i < server.getServerLocations().size(); ++i)
+		locationsUri.push_back(server.getServerLocations()[i].getLocationUri());
+	std::string title = Logger::createFancyTitle("Server Settings print");
+	os << title << std::endl;
+	os << "Server id: " << server.getServerId() << std::endl;
+	os << "Server name: " << server.getServerName() << std::endl;
+	os << "Server port: " << server.getPort() << std::endl;
+	os << Logger::logVector(locationsUri, "Locations Uri").str();
+	os << static_cast<DefaultSettings>(server) << std::endl;
 	os << "___________________________________________________"<<std::endl;
 	return os;
 }
