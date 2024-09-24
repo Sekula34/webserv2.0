@@ -1,6 +1,10 @@
 #ifndef LOGGER_HPP
 # define LOGGER_HPP
 
+#include <cstddef>
+#include <ostream>
+#include <sstream>
+#include <vector>
 # ifndef PRINT 
 #  define PRINT 1
 # endif
@@ -19,7 +23,7 @@ class Logger
 {
 
 	private:
-		static void _printCurrentTime();
+		static std::ostringstream& _printCurrentTime();
 		static bool _isPrintingAllowed();
 		static const std::string returnColor();
 
@@ -31,43 +35,61 @@ class Logger
 		static const std::string BLUE;
 		static const std::string PURPLE;
 
-		static void log(std::string title, std::string type = "INFO", std::string color = GREEN);
+		static std::ostringstream& log(std::string title, std::string type = "INFO", std::string color = GREEN);
 
 		template <typename T>
-		static void log(std::string title, T value = "", std::string type = "INFO", std::string color = GREEN)
+		static std::ostringstream& log(std::string title, T value = "", std::string type = "INFO", std::string color = GREEN)
 		{
+			static std::ostringstream oss;
+			oss.str("");
+			oss.clear();
 			if(_isPrintingAllowed() == false)
-			{
-				return;
-			}
-			std::cout << color;
-			_printCurrentTime();
-			std::cout << type << " " << title << " " << RESET;
-			std::cout << value << std::endl;
+				return oss;
+			oss << color;
+			oss << _printCurrentTime().str();
+			oss << type << " " << title << " " << RESET;
+			oss << value << std::endl;
+			return oss;
 		}
 
 		template <typename T>
 		static void warning(std::string title, T value = "")
 		{
-			log(title, value, "WARNING", YELLOW);
+			std::cout << log(title, value, "WARNING", YELLOW).str();
 		}
 
 		template <typename T>
 		static void error(std::string title, T value = "")
 		{
-			log(title, value, "ERROR", RED);
+			std::cout << log(title, value, "ERROR", RED).str();
 		}
 
 		template <typename T>
 		static void info(std::string title, T value = "")
 		{
-			log(title, value, "INFO", GREEN);
+			std::cout << log(title, value, "INFO", GREEN).str();
 		}
 		
 		template <typename T>
 		static void testCase(std::string title, T value = "")
 		{
-			log(title, value, "TESTCASE", BLUE);
+			std::cout << log(title, value, "TESTCASE", BLUE).str();
+		}
+
+		template <typename T>
+		static std::ostringstream printVector(std::vector<T> customVector, std::string vectorTitle = "Vector print")
+		{
+			std::ostringstream oss;
+			oss << "-------" << vectorTitle << "-------"<<std::endl;
+			if(customVector.size() == 0)
+			{
+				oss << "Vector is empty";
+				return oss;
+			}
+			for(size_t i = 0; i < customVector.size(); i++)
+			{
+				oss << customVector[i] << std::endl;
+			}
 		}
 
 		static void chars(std::string message, bool newline);

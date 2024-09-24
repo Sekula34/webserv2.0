@@ -1,5 +1,6 @@
 #include "Logger.hpp"
 #include <iostream>
+#include <sstream>
 #include <sys/time.h>
 #include <ctime>
 #include <iomanip>
@@ -20,9 +21,12 @@ bool Logger::_isPrintingAllowed()
 	return false;
 }
 
-void  Logger::_printCurrentTime() {
+std::ostringstream&  Logger::_printCurrentTime() {
 	timeval curTime;
 	gettimeofday(&curTime, NULL);
+	static std::ostringstream oss;
+    oss.str(""); // Clear the stream
+    oss.clear(); // Clear any error flags
 
 	// Get the current time in seconds
 	time_t now = curTime.tv_sec;
@@ -34,14 +38,15 @@ void  Logger::_printCurrentTime() {
 	int milliseconds = curTime.tv_usec / 1000;
 
 	// Print the time in the desired format
-	std::cout << std::setw(2) << std::setfill('0') << minutes << ":"
+	oss << std::setw(2) << std::setfill('0') << minutes << ":"
 			<< std::setw(2) << std::setfill('0') << seconds << ":"
 			<< std::setw(3) << std::setfill('0') << milliseconds << " ";
+	return  oss;
 }
 
-void	Logger::log(std::string title, std::string type, std::string color)
+std::ostringstream&	Logger::log(std::string title, std::string type, std::string color)
 {
-	Logger::log(title, "", type, color);
+	return Logger::log(title, "", type, color);
 }
 
 void printEscapeCharacters(const std::string& str) {
