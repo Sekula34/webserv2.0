@@ -7,6 +7,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
@@ -21,8 +24,19 @@ void	VirtualServer::_execDelete(DummyMessage* request)
 void	VirtualServer::_execPost(DummyMessage* request)
 {
 	// Execute POST method.
-	(void)request;
+	// (void)request;
 	std::cout << "POST method executed" << std::endl;
+	std::map<std::string, std::string>& msgHeader = request->getHeader();
+	std::string filename = msgHeader["uri"];
+	std::ofstream outputFile(filename.c_str());
+	if (!outputFile.is_open())
+	{
+		std::cerr << "Unable to create POST file!" << std::endl;
+		return ;
+	}
+	// outputFile << "This is a simple test";
+	outputFile << *request;
+	outputFile.close();
 }
 
 void	VirtualServer::_execGet(DummyMessage* request)
@@ -62,20 +76,6 @@ bool	VirtualServer::_isvalidRequest(DummyMessage* request)
 		}
 	}
 	return (true);
-	// return (true);
-	//  std::map<std::string, std::string>::const_iterator it = msgHeader.find("method");
-	// if (it != msgHeader.end() && _serverSettings.getValue(it->first).find(it->second) != std::string::npos
-	// && )
-	
-	
-	
-	// if (it != msgHeader.end())
-	// 	std::string headerField = it->first;
-
-
-	//  	_serverSettings.getValue(it->first).find_first_of(it->second);
-
-	//  return (false);
 }
 
 void	VirtualServer::generateResponse(DummyClient& client)
@@ -91,8 +91,6 @@ void	VirtualServer::generateResponse(DummyClient& client)
 		std::cout << "Invalid request" << std::endl;
 		return ;
 	}
-	// std::map<std::string, std::string>::const_iterator it = client.getMsg(DummyClient::REQ_MSG)->getHeader().begin();
-	// std::map<std::string, std::string>::const_iterator it = client.getMsg(DummyClient::REQ_MSG)->getHeader().find("method");
 	std::map<std::string, std::string>& clientMsgHeader = client.getMsg(DummyClient::REQ_MSG)->getHeader();
 	std::map<std::string, std::string>::const_iterator it = clientMsgHeader.find("method");
 	if (it != clientMsgHeader.end() && it->second == "GET")

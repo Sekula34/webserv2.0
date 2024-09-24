@@ -9,7 +9,7 @@ int	main()
 	DummyServerSettings serverSettings("test");
 	// std::cout << serverSettings << std::endl;
 	DummyMessage* message = new DummyMessage("test", 0);
-	// std::cout << message << std::endl;
+	// std::cout << *message << std::endl;
 	DummyClient client(4, 7777, 4);
 	std::cout << std::endl;
 	std::cout << client << std::endl;
@@ -19,6 +19,7 @@ int	main()
 	VirtualServer VS1(serverSettings);
 	std::cout << VS1 << std::endl;
 	VS1.generateResponse(client);
+	// std::cout << client << std::endl;
 	delete message;
 	return (0);
 }

@@ -22,6 +22,7 @@ class VirtualServer
 		void	_execGet(DummyMessage* request);
 		void	_execPost(DummyMessage* request);
 		void	_execDelete(DummyMessage* request);
+		// bool			validateHeaderAgainstSettings(DummyMessage* request);
 		// Attributes
 		const DummyServerSettings&		_serverSettings;
 		// Maybe a static vector of virtual servers. like the one for Sockets.

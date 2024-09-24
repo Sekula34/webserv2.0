@@ -68,8 +68,4 @@ class DummyClient
 	friend std::ostream&	operator<<(std::ostream& out, const DummyClient& client);
 };
 
-// Overloaded insertion operator.
-// std::ostream&	operator<<(std::ostream& out, const DummyClient::e_clientState& clientState);
-// std::ostream&	operator<<(std::ostream& out, const DummyClient& client);
-
 #endif

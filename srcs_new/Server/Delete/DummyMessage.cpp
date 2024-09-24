@@ -99,7 +99,7 @@ std::ostream&	operator<<(std::ostream& out, const DummyMessage& message)
 	out << "--------------------HEADER--------------------" << std::endl;
 	std::map<std::string, std::string>::const_iterator it = message._header.begin();
 	for (; it != message._header.end(); ++it)
-		std::cout << it->first << "=" << it->second << std::endl;
+		out << it->first << "=" << it->second << std::endl;
 	out << "--------------------BODY--------------------" << std::endl;
 	out << message._body;
 	return (out);
