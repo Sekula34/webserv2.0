@@ -9,30 +9,7 @@
 
 class DefaultSettings 
 {
-	private :
-		void						_setDefaultHttpMethods(void);
-		void						_setDefaultIndexes(void);
-
-	protected :
-		//server stuff 
-		std::string					p_serverName;
-		int 						p_listenPort;
-		std::string					p_host;
-		//location stuff
-		std::map<int, std::string>	p_errorPages;
-		std::map<std::string, bool>	p_acceptedMethods;// limitExcept
-		std::size_t					p_clientMaxBody;
-		bool 						p_autoindex;
-		NginnxReturn 				p_return;
-		std::vector<std::string>	p_index;
-		std::string					p_root;
-		std::vector<std::string>	p_cgiExtensions;
-
 	public :
-										DefaultSettings(void);
-										DefaultSettings(const DefaultSettings& source);
-		DefaultSettings& 				operator=(const DefaultSettings& source);
-										~DefaultSettings();
 
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
@@ -62,7 +39,32 @@ class DefaultSettings
 		 */
 		const std::string 				getErrorPagePath(const int errorCode) const;
 		const std::vector<std::string>&	getCgiExtensions(void) const;
+		
+										DefaultSettings(void);
+										DefaultSettings(const DefaultSettings& source);
+		DefaultSettings& 				operator=(const DefaultSettings& source);
+										~DefaultSettings();
 
+	protected :
+		//server stuff 
+		std::string					p_serverName;
+		int 						p_listenPort;
+		std::string					p_host;
+		//location stuff
+		std::map<int, std::string>	p_errorPages;
+		std::map<std::string, bool>	p_acceptedMethods;// limitExcept
+		std::size_t					p_clientMaxBody;
+		bool 						p_autoindex;
+		NginnxReturn 				p_return;
+		std::vector<std::string>	p_index;
+		std::string					p_root;
+		std::vector<std::string>	p_cgiExtensions;
+	private :
+		void						_setDefaultHttpMethods(void);
+		void						_setDefaultIndexes(void);
+
+
+	public:
 		friend std::ostream& operator<<(std::ostream& os, const DefaultSettings& server);
 };
 

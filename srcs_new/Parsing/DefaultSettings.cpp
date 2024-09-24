@@ -11,44 +11,6 @@
 #include "../Utils/Logger.hpp"
 #include "Configuration.hpp"
 
-DefaultSettings::DefaultSettings()
-{
-	p_serverName = "[Default Server Name]";
-	p_listenPort = 8080;
-	p_host = "[Default HOST]";
-	//_errorPages[404] = "/html/404.html";
-	_setDefaultHttpMethods();
-	_setDefaultIndexes();
-	p_clientMaxBody = 1000000;
-	p_autoindex = false;
-	p_root = "/";
-}
-
-DefaultSettings::DefaultSettings(const DefaultSettings& source)
-{
-	(*this) = source;
-}
-
-DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
-{
-	p_serverName = source.p_serverName;
-	p_listenPort = source.p_listenPort;
-	p_host = source.p_host;
-	p_errorPages = source.p_errorPages;
-	p_acceptedMethods = source.p_acceptedMethods;
-	p_clientMaxBody = source.p_clientMaxBody;
-	p_autoindex = source.p_autoindex;
-	p_return = source.p_return;
-	p_index = source.p_index;
-	p_root = source.p_root;
-	p_cgiExtensions = source.p_cgiExtensions;
-	return (*this);
-}
-
-DefaultSettings::~DefaultSettings()
-{
-
-}
 
 bool DefaultSettings::isMethodAllowed(std::string method) const
 {
@@ -57,8 +19,6 @@ bool DefaultSettings::isMethodAllowed(std::string method) const
 		return true;
 	return false;
 }
-
-
 
 void DefaultSettings::setAllAcceptedMethodsToFalse(void)
 {
@@ -92,19 +52,44 @@ void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dir
 		throw Configuration::InvalidConfigFileException();
 	}
 }
-
-void DefaultSettings::_setDefaultHttpMethods(void)
+DefaultSettings::DefaultSettings()
 {
-	p_acceptedMethods["GET"] = true;
-	p_acceptedMethods["POST"] = true;
-	p_acceptedMethods["DELETE"] = true;
+	p_serverName = "[Default Server Name]";
+	p_listenPort = 8080;
+	p_host = "[Default HOST]";
+	_setDefaultHttpMethods();
+	_setDefaultIndexes();
+	p_clientMaxBody = 1000000;
+	p_autoindex = false;
+	p_root = "/";
 }
 
-void DefaultSettings::_setDefaultIndexes(void)
+DefaultSettings::DefaultSettings(const DefaultSettings& source)
 {
-	p_index.push_back("index");
-	p_index.push_back("index.html");
+	(*this) = source;
 }
+
+DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
+{
+	p_serverName = source.p_serverName;
+	p_listenPort = source.p_listenPort;
+	p_host = source.p_host;
+	p_errorPages = source.p_errorPages;
+	p_acceptedMethods = source.p_acceptedMethods;
+	p_clientMaxBody = source.p_clientMaxBody;
+	p_autoindex = source.p_autoindex;
+	p_return = source.p_return;
+	p_index = source.p_index;
+	p_root = source.p_root;
+	p_cgiExtensions = source.p_cgiExtensions;
+	return (*this);
+}
+
+DefaultSettings::~DefaultSettings()
+{
+
+}
+
 
 void DefaultSettings::setListenPort(int listenPort)
 {
@@ -206,6 +191,18 @@ const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
 	return p_cgiExtensions;
 }
 
+void DefaultSettings::_setDefaultHttpMethods(void)
+{
+	p_acceptedMethods["GET"] = true;
+	p_acceptedMethods["POST"] = true;
+	p_acceptedMethods["DELETE"] = true;
+}
+
+void DefaultSettings::_setDefaultIndexes(void)
+{
+	p_index.push_back("index");
+	p_index.push_back("index.html");
+}
 std::ostream& operator<<(std::ostream& os, const DefaultSettings& settings)
 {
 	os << "Default Settings print " << std::endl;
