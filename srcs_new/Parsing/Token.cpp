@@ -110,17 +110,11 @@ Token::Token(const std::string& info, size_t lineNumber, int serverId)
 :_info(info), _type(UNKOWN), _lineNumber(lineNumber), _serverId(serverId), _contextType(NOT_CONTEXT)
 {
 	if(_info == "{")
-	{
 		_type = OPENING_BRACE;
-	}
 	else if(_info == "}")
-	{
 		_type = CLOSING_BRACE;
-	}
 	else if(_info[_info.size() - 1] == ';')
-	{
 		_type = DIRECTIVE;
-	}
 	else 
 	{
 		_type = CONTEXT;
@@ -153,13 +147,8 @@ Token::~Token()
 void Token::_checkOneToken(void)
 {
 	if(_type == CONTEXT)
-	{
 		_contextChecker();
-	}
-	else if(_type == DIRECTIVE)
-	{
-
-	}
+	//directives are checked while applying
 }
 
 //check if context is valid 
@@ -192,13 +181,10 @@ void Token::_contextChecker(void)
 	throw InvalidTokenException();
 }
 
-
-
 const char * Token::InvalidTokenException::what() const throw()
 {
 	return("Exception Invalid token");
 }
-
 
 std::ostream& operator<<(std::ostream& os, const Token& token)
 {
