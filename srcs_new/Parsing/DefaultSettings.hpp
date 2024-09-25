@@ -47,7 +47,7 @@ class DefaultSettings
 		//server stuff 
 		std::string					p_serverName; // This is host
 		int 						p_listenPort;
-		std::string					p_host; //TODO remove this it is replace with host
+
 		//location stuff
 		std::map<int, std::string>	p_errorPages;
 		std::map<std::string, bool>	p_acceptedMethods;// limitExcept
@@ -57,6 +57,7 @@ class DefaultSettings
 		std::vector<std::string>	p_index;
 		std::string					p_root;
 		std::vector<std::string>	p_cgiExtensions;
+		
 	private :
 		void						_setDefaultHttpMethods(void);
 		void						_setDefaultIndexes(void);

@@ -55,7 +55,6 @@ DefaultSettings::DefaultSettings()
 {
 	p_serverName = "[Default Server Name]";
 	p_listenPort = 8080;
-	p_host = "[Default HOST]";
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	p_clientMaxBody = 1000000;
@@ -72,7 +71,6 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 {
 	p_serverName = source.p_serverName;
 	p_listenPort = source.p_listenPort;
-	p_host = source.p_host;
 	p_errorPages = source.p_errorPages;
 	p_acceptedMethods = source.p_acceptedMethods;
 	p_clientMaxBody = source.p_clientMaxBody;
