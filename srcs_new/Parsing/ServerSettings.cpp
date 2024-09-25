@@ -44,63 +44,6 @@ ServerSettings::~ServerSettings()
 
 }
 
-const std::vector<Directive> ServerSettings::_getServerLevelDirectives() const
-{
-	std::vector<Directive> serverLevelDirectives;
-	for(size_t i = 0; i < _serverDirectives.size(); i++)
-	{
-		//if path is 2 that means directive have http server
-		if(_serverDirectives[i].getDirectivePathSize() == 2)
-			serverLevelDirectives.push_back(_serverDirectives[i]);
-	}
-	return serverLevelDirectives;
-}
-
-//set and apply all location directives and the same time
-std::vector<LocationSettings> ServerSettings::_setServerLocations()
-{
-	std::vector<LocationSettings> serverLocations;
-	for(size_t i = 0; i < _serverTokens.size(); i++)
-	{
-		if(_serverTokens[i].getCurrentTokenContextType() == Token::LOCATION)
-		{
-			LocationSettings location(*this, _serverTokens[i], _serverTokens);
-			serverLocations.push_back(location);
-		}
-	}
-	if(_hasDefaultLocation(serverLocations) == false)
-		_generateDefaultLocation(serverLocations);
-	return serverLocations;
-}
-
-bool ServerSettings::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
-{
-	std::vector<LocationSettings>::const_iterator it = serverLocation.begin();
-	for(;it != serverLocation.end(); it++)
-	{
-		if(it->getLocationUri() == "/")
-			return true;
-	}
-	return false;
-}
-
-void ServerSettings::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
-{
-	LocationSettings location(*this, _serverTokens);
-	serverLocation.push_back(location);
-}
-
-//apply every directive server have //but only on server level check path. Not location Level
-void ServerSettings::_applyAllServerLevelDirectives()
-{
-	for(size_t i = 0; i < _serverDirectives.size(); i++)
-	{
-		//if path is 2 that means directive have http server
-		if(_serverDirectives[i].getDirectivePathSize() == 2)
-			_serverDirectives[i].apply(*this);
-	}
-}
-
 bool ServerSettings::amIServerLocation(const std::string& path) const
 {
 	bool found = true;
@@ -124,12 +67,12 @@ void ServerSettings::addDirectiveToServer(Directive directive)
 	_serverDirectives.push_back(directive);
 }
 
-std::vector<Directive> ServerSettings::getServerDirectives(void) const
+const std::vector<Directive>& ServerSettings::getServerDirectives(void) const
 {
 	return(_serverDirectives);
 }
 
-std::vector<Token> ServerSettings::getServerTokens(void) const 
+const std::vector<Token>& ServerSettings::getServerTokens(void) const 
 {
 	return (_serverTokens);
 }
@@ -156,34 +99,63 @@ std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithU
 	return (it);
 }
 
-void ServerSettings::printServerTokens(void) const 
+const std::vector<Directive> ServerSettings::_getServerLevelDirectives() const
 {
-	std::cout << "Server id: " << _serverId << " tokens are: "<< std::endl;
-	Token::printAllTokensInfo(_serverTokens);
-}
-void ServerSettings::printServerSettings(void) const
-{
-	std::cout << "---------------DEFAULT SERVER SETTINGS PRINT ---------------" <<  std::endl;
-	std::cout << "Server id: " << _serverId << std::endl;
-	std::cout << "Default server name :" << p_serverName << std::endl;
-	std::cout << "Default listen port:" << p_listenPort << std::endl;
-	std::cout << "Defautl host: " << p_host << std::endl;
-	//std::cout << "Server directives: "<< std::endl;
-	// for(size_t i = 0; i < _serverDirectives.size(); i++)
-	// {
-	// 	_serverDirectives[i].printDirectiveInfor();
-	// }
-	std::cout <<"Server locations are :" << std::endl;
-	std::cout << "\t" << std::endl;
-	for(size_t i = 0; i < _serverLocations.size(); i++)
+	std::vector<Directive> serverLevelDirectives;
+	for(size_t i = 0; i < _serverDirectives.size(); i++)
 	{
-		//TODO: fix this
-		//_serverLocations[i].printLocationSettings();
+		//if path is 2 that means directive have http server
+		if(_serverDirectives[i].getDirectivePathSize() == 2)
+			serverLevelDirectives.push_back(_serverDirectives[i]);
 	}
-	std::cout << "___________________________________________________"<<std::endl;
+	return serverLevelDirectives;
 }
 
+//set and apply all location directives and the same time
+std::vector<LocationSettings> ServerSettings::_setServerLocations()
+{
+	std::vector<LocationSettings> serverLocations;
+	for(size_t i = 0; i < _serverTokens.size(); i++)
+	{
+		if(_serverTokens[i].getCurrentTokenContextType() == Token::LOCATION)
+		{
+			LocationSettings location(*this, _serverTokens[i], _serverTokens, *this);
+			serverLocations.push_back(location);
+			std::cout << location << std::endl;
+		}
+	}
+	if(_hasDefaultLocation(serverLocations) == false)
+		_generateDefaultLocation(serverLocations);
+	return serverLocations;
+}
 
+bool ServerSettings::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
+{
+	std::vector<LocationSettings>::const_iterator it = serverLocation.begin();
+	for(;it != serverLocation.end(); it++)
+	{
+		if(it->getLocationUri() == "/")
+			return true;
+	}
+	return false;
+}
+
+void ServerSettings::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
+{
+	LocationSettings location(*this, _serverTokens, *this);
+	serverLocation.push_back(location);
+}
+
+//apply every directive server have //but only on server level check path. Not location Level
+void ServerSettings::_applyAllServerLevelDirectives()
+{
+	for(size_t i = 0; i < _serverDirectives.size(); i++)
+	{
+		//if path is 2 that means directive have http server
+		if(_serverDirectives[i].getDirectivePathSize() == 2)
+			_serverDirectives[i].apply(*this);
+	}
+}
 std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 {
 	std::vector<std::string> locationsUri;
@@ -196,6 +168,6 @@ std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
 	os << "Server port: " << server.getPort() << std::endl;
 	os << Logger::logVector(locationsUri, "Locations Uri").str();
 	os << static_cast<DefaultSettings>(server) << std::endl;
-	os << "___________________________________________________"<<std::endl;
+	os << Logger::getCharSequence(title.size(), '-')<<std::endl;
 	return os;
 }

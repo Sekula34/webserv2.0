@@ -13,28 +13,7 @@ class LocationSettings;
 //contains Location
 class ServerSettings : public DefaultSettings
 {
-	private: 
-		void 							_applyAllServerLevelDirectives();
-		void 							_generateDefaultLocation(std::vector<LocationSettings>& serverLocation);
-		bool							_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const;
-		const std::vector<Directive>    _getServerLevelDirectives() const;
-
-	protected: 
-		int _serverId;
-		std::vector<Directive>			_serverDirectives;
-		std::vector<Token>				_serverTokens;
-		std::vector<LocationSettings>	_serverLocations;
-		
-		
-		std::vector<LocationSettings>	_setServerLocations();
-	public :
-		ServerSettings();
-		ServerSettings(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);
-		ServerSettings(const ServerSettings& source);
-		ServerSettings& operator=(const ServerSettings& source);
-		~ServerSettings();
-
-
+	public:
 		/**
 		 * @brief Get the Location Part Of Url object
 		 * if url is /hej/i/am/url/that/is/in/server function will return location that server have
@@ -44,16 +23,32 @@ class ServerSettings : public DefaultSettings
 		 */
 		std::string										getLocationURIfromPath(const std::string& fullPath) const;
 		bool											amIServerLocation(const std::string& path) const;
-		std::vector<Token>								getServerTokens(void) const;
-		std::vector<Directive>							getServerDirectives(void) const;
+		const std::vector<Token>&						getServerTokens(void) const;
+		const std::vector<Directive>&					getServerDirectives(void) const;
 		const std::vector<LocationSettings>&			getServerLocations() const;
 		std::vector<LocationSettings>::const_iterator	fetchLocationWithUri(const std::string uri, bool& found) const;
-		//LocationSettings& fetchLocationFromServer(std::string requestedLocation);
 		const int&										getServerId() const;
-		void											printServerSettings(void) const;
-		void											printServerTokens(void) const;
 		void											addDirectiveToServer(Directive directive);
 
+														ServerSettings();
+														ServerSettings(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);
+														ServerSettings(const ServerSettings& source);
+		ServerSettings& 								operator=(const ServerSettings& source);
+														~ServerSettings();
+	private: 
+		void 							_applyAllServerLevelDirectives();
+		void 							_generateDefaultLocation(std::vector<LocationSettings>& serverLocation);
+		bool							_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const;
+		const std::vector<Directive>    _getServerLevelDirectives() const;
+		std::vector<LocationSettings>	_setServerLocations();
+
+		int 							_serverId;
+		std::vector<Directive>			_serverDirectives;
+		std::vector<Token>				_serverTokens;
+		std::vector<LocationSettings>	_serverLocations;
+
+
+	public:
 		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);
 };
 
