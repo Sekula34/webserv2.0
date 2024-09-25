@@ -12,32 +12,25 @@
 class ServersInfo 
 {
 	private :
-		std::vector<Token> _allTokens;
-		std::vector<ServerSettings> _servers;
-		std::vector<Directive> _httpDirectives;
-		int _numberOfServers;
+		std::vector<Token>			_allTokens;
+		std::vector<ServerSettings>	_servers;
+		std::vector<Directive>		_httpDirectives;
+		int							_numberOfServers;
 
-		void _setHttpDirectives(void);
-		bool _isTokenHttpDirective(const Token& toCheck) const;
+		void 						_setHttpDirectives(void);
+		bool 						_isTokenHttpDirective(const Token& toCheck) const;
 		// bool _validateRequestHeader(const RequestHeader* header) const;
-		std::vector<ServerSettings> _getAllServersIdWithPort(int port) const;
+		std::vector<ServerSettings>	_getAllServersIdWithPort(int port) const;
 
 	public :
-		ServersInfo(std::string configPath = "configuration_files/default.conf");
-		ServersInfo(const ServersInfo& source);
-		ServersInfo& operator=(const ServersInfo& source);
-		~ServersInfo();
-
-		void printAllServersInfo(void) const;
-		const std::vector<ServerSettings>& getAllServers(void) const;
+		const std::vector<ServerSettings>&	getAllServers(void) const;
 		/**
 		 * @brief Get the Server By Id object
 		 * 
 		 * @param serverId id = index + 1;
 		 * @return const ServerSettings& 
 		 */
-		const ServerSettings& getServerById(int serverId) const;
-		
+		const ServerSettings&				getServerById(int serverId) const;
 		/**
 		 * @brief Get the Server By PortNuber 
 		 * 
@@ -46,7 +39,7 @@ class ServersInfo
 		 * @return const ServerSettings& first server that have port == PortNumber 
 		 *if serverName is specified find return first Server with port == portNumber and name == serverName, if not again first with port is retured
 		 */
-		const ServerSettings* getServerByPort(int portNumber, std::string serverName ="") const;
+		const ServerSettings*				getServerByPort(int portNumber, std::string serverName ="") const;
 
 		/**
 		 * @brief get Server resposible for client response
@@ -55,14 +48,19 @@ class ServersInfo
 		 * @return ServerSettings* for client or NULL if there is no Server for that client (400 bad request usually)
 		 */
 		// TODO: This is an importnt function
-		// const ServerSettings* getClientServer(const Client& client) const;
-		
+		//const ServerSettings* getClientServer(const Client& client) const;
+
 		/**
 		 * @brief Get the Unique Ports number for creating listeningSockets
 		 * 
 		 * @return const std::vector<int> 
 		 */
-		const std::vector<int> getUniquePorts(void) const;
+		const std::vector<int>				getUniquePorts(void) const;
+
+											ServersInfo(std::string configPath = "configuration_files/default.conf");
+											ServersInfo(const ServersInfo& source);
+		ServersInfo& 						operator=(const ServersInfo& source);
+											~ServersInfo();
 };
 
 #endif

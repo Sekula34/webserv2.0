@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 #include <algorithm>
 #include "../Utils/Logger.hpp"
 // #include "../Utils/Logger.hpp"
@@ -19,7 +18,6 @@ ServersInfo::ServersInfo(std::string configPath)
 {
 	Configuration serversConf(configPath);
 	_allTokens = serversConf.getAllTokens();
-//	Token::printAllTokensInfo(_allTokens);
 	_numberOfServers = serversConf.getNumberOfServers();
 	if(_numberOfServers < 1)
 	{
@@ -34,7 +32,6 @@ ServersInfo::ServersInfo(std::string configPath)
 	for(int i = 1; i <= _numberOfServers; i++)
 	{
 		ServerSettings oneServer(i,defSettings,_allTokens);
-		//oneServer.printServerSettings();
 		_servers.push_back(oneServer);
 	}
 }
@@ -55,53 +52,6 @@ ServersInfo::~ServersInfo()
 
 }
 
-//check if Token is directive that belongs to http only
-bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
-{
-	if(toCheck.getTokenType() != Token::DIRECTIVE)
-		return false;
-	std::vector<Token> path = toCheck.getTokenPath();
-	if(path.size() != 1)
-		return false;
-	Token::ContextType parentType = path[0].getTokenContextType();
-	if(parentType != Token::HTTP )
-		return false;
-	return true;
-}
-
-std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port) const
-{
-	std::vector<ServerSettings> serversPort;
-	for(size_t i = 0; i < _servers.size(); i++)
-	{
-		const ServerSettings& oneServer(_servers[i]);
-		if(oneServer.getPort() == port)
-			serversPort.push_back(oneServer);
-	}
-	return serversPort;
-}
-
-void ServersInfo::_setHttpDirectives(void)
-{
-	for(size_t i = 0; i < _allTokens.size(); i++)
-	{
-		if(_isTokenHttpDirective(_allTokens[i]) == true)
-		{
-			Directive httpDirective(_allTokens[i]);
-			_httpDirectives.push_back(httpDirective);
-		}
-	}
-}
-
-void ServersInfo::printAllServersInfo(void) const 
-{
-	for(size_t i = 0; i < _servers.size(); i++)
-	{
-		std::cout << "-------------------INFO FOR SERVER " << i << "----------------------------" << std::endl;
-		_servers[i].printServerSettings();
-		std::cout << std::endl;
-	}
-}
 
 const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
 {
@@ -117,8 +67,6 @@ const ServerSettings& ServersInfo::getServerById(int serverId) const
 	}
 	return(_servers[serverIndex]);
 }
-
-
 
 const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string serverName) const
 {
@@ -191,4 +139,42 @@ const std::vector<int> ServersInfo::getUniquePorts() const
 		}
 	}
 	return uniquePorts;
+}
+
+//check if Token is directive that belongs to http only
+bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
+{
+	if(toCheck.getTokenType() != Token::DIRECTIVE)
+		return false;
+	std::vector<Token> path = toCheck.getTokenPath();
+	if(path.size() != 1)
+		return false;
+	Token::ContextType parentType = path[0].getTokenContextType();
+	if(parentType != Token::HTTP )
+		return false;
+	return true;
+}
+
+std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port) const
+{
+	std::vector<ServerSettings> serversPort;
+	for(size_t i = 0; i < _servers.size(); i++)
+	{
+		const ServerSettings& oneServer(_servers[i]);
+		if(oneServer.getPort() == port)
+			serversPort.push_back(oneServer);
+	}
+	return serversPort;
+}
+
+void ServersInfo::_setHttpDirectives(void)
+{
+	for(size_t i = 0; i < _allTokens.size(); i++)
+	{
+		if(_isTokenHttpDirective(_allTokens[i]) == true)
+		{
+			Directive httpDirective(_allTokens[i]);
+			_httpDirectives.push_back(httpDirective);
+		}
+	}
 }
