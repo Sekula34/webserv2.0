@@ -14,19 +14,9 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <iostream>
 // #include <map>
 // #include <list>
 //
-
-volatile sig_atomic_t flag = 0 ;
-
-void handle_sigint(int sig)
-{
-	flag = 1;
-	(void) sig;
-	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
-}
 
 // void	initVars(char** envp, const std::string& configFilePath)
 // {
@@ -50,6 +40,15 @@ void handle_sigint(int sig)
 // 	ConnectionManager manager(epollFd);
 // }
 
+volatile sig_atomic_t flag = 0 ;
+
+void handle_sigint(int sig)
+{
+	flag = 1;
+	(void) sig;
+	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
+}
+
 static void	debugFakeVirtualServer()
 {
 	std::map<int, Client*>::iterator it = Client::clients.begin();
@@ -61,18 +60,22 @@ static void	debugFakeVirtualServer()
 	}
 }
 
-bool	shutdown()
+bool	shutdownServer()
 {
-	if (flag)
+	// SETS THE STATE OF ALL CLIENTS TO DELETEME
+	if (flag == 1)
 	{
 		std::map<int, Client*>::iterator it = Client::clients.begin();
 		for (; it != Client::clients.end(); ++it)
 			it->second->setClientState(Client::DELETEME);
-		if (Client::clients.size() == 0)
-		{
-			Logger::info("Shutdown Procedure complete, Goodbye!", "");
-			return (true);
-		}
+		flag = 2;
+	}
+
+	// IF ALL CLIENTS HAVE BEEN DELETED -> RETURN TRUE TO BREAK OUT OF MAIN LOOP
+	if (flag == 2 && Client::clients.size() == 0)
+	{
+		Logger::info("Shutdown Procedure complete, Goodbye!", "");
+		return (true);
 	}
 	return (false);
 }
@@ -87,17 +90,18 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	Logger::info("SERVER IS TURNED ON", "");
 	Data::setEnvp(envp);
 	// SocketManager sockets(serverInfo.getUniquePorts());
+	
+	// Initialize epoll
+	int epollFd = epoll_create(1);
+	Logger::info("EPOLL Fd: ", epollFd);
+	if (epollFd == -1)
+		throw (std::runtime_error("epoll_create failed"));
 
 	// Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
 	for (std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
 		Socket currSocket(*it);
 
-	// Initialize epoll
-	int epollFd = epoll_create(1);
-	Logger::info("EPOLL Fd: ", epollFd);
-	if (epollFd == -1)
-		throw (std::runtime_error("epoll_create failed"));
 
 	// Create manager instance
 	ConnectionManager manager(epollFd);
@@ -109,10 +113,13 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	{
 		manager.epollLoop();
 		io.ioLoop();
+
+		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
 		debugFakeVirtualServer();	
+
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();
-		if (shutdown())
+		if (shutdownServer())
 			break;
 	}
 }
@@ -136,7 +143,7 @@ int main(int argc, char** argv, char** envp)
 		//const std::string filePath = getConfigFilePath(argc, argv);
 		ConnectionDispatcherTest(envp, FileUtils::getConfigFilePath());
 	}
-	catch(std::exception &e)
+	catch(std::exception& e)
 	{
 		Logger::error("Exception Happened", true);
 		std::cerr << e.what() << std::endl;
