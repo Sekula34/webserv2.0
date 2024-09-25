@@ -16,14 +16,6 @@ const std::string& Configuration::getFilePath() const
 	return (_filePath);
 }
 
-void Configuration::printFileMember(void)
-{
-	for(size_t i = 0; i < _fileLine.size(); i++)
-	{
-		std::cout << "Line " << _fileLine[i].second << " " << _fileLine[i].first << std::endl;
-	} 
-}
-
 std::vector<Token> Configuration::getAllTokens() const 
 {
 	return (_tokensVector);
@@ -285,9 +277,6 @@ void Configuration::_fillTokensVector(void)
 }
 
 
-
-
-
 //takes server id as integer ServerId ad return string that is always
 //"server{ServerId} ex 1, will return server1"
 std::string Configuration::_generateServerIdString(int serverId)
@@ -319,8 +308,6 @@ std::string Configuration::_getCleanConfLine(const std::string& dirtyLine)
 	_removeSpacesAndTabs(cleanLine);
 	return cleanLine;
 }
-
-
 
 //will remove newlineaswell;
 void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)

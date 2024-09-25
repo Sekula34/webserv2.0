@@ -1,6 +1,5 @@
 #ifndef CONFIGURATION_HPP
 # define CONFIGURATION_HPP
-
 # include "Token.hpp"
 # include <cstddef>
 # include <exception>
@@ -8,16 +7,12 @@
 # include <vector>
 # include <utility>
 
-// const std::string yellow= "\033[1;33m";
-// const std::string resetText = "\033[0m";
-
 typedef std::pair<std::string, size_t > linePair ;
 
 class Configuration 
 {
-	public :
+	public:
 		const std::string&		getFilePath() const;
-		void					printFileMember(void);
 		std::vector<Token>		getAllTokens() const;
 		int						getNumberOfServers(void) const;
 
@@ -26,7 +21,7 @@ class Configuration
 		Configuration&			operator=(const Configuration& source);
 								~Configuration();
 
-	private :
+	private:
 	 	int						_serverId;
 		const std::string		_filePath;
 		std::vector<linePair>	_fileLine;
