@@ -82,8 +82,10 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	// sleep(1);
 
 	if (sendValue > 0)
-	Logger::info("Successfully sent bytes: ", sendValue);
-	message->setBytesSent(message->getBytesSent() + sendValue);
+	{
+		Logger::info("Successfully sent bytes: ", sendValue);
+		message->setBytesSent(message->getBytesSent() + sendValue);
+	}
 
 	// RETURN IF FULL MESSAGE COULD NOT BE SENT YET
 	if (message->getBytesSent() < messageStr.size() && sendValue > 0)
