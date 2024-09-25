@@ -7,6 +7,7 @@
 #include "Utils/Data.hpp"
 #include "Utils/FileUtils.hpp"
 #include "Utils/Logger.hpp"
+#include <csignal>
 #include <exception>
 #include <stdexcept>
 #include <iostream>
@@ -16,6 +17,16 @@
 #include <iostream>
 // #include <map>
 // #include <list>
+//
+
+volatile sig_atomic_t flag = 0 ;
+
+void handle_sigint(int sig)
+{
+	flag = 1;
+	(void) sig;
+	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
+}
 
 // void	initVars(char** envp, const std::string& configFilePath)
 // {
@@ -50,8 +61,26 @@ static void	debugFakeVirtualServer()
 	}
 }
 
+bool	shutdown()
+{
+	if (flag)
+	{
+		std::map<int, Client*>::iterator it = Client::clients.begin();
+		for (; it != Client::clients.end(); ++it)
+			it->second->setClientState(Client::DELETEME);
+		if (Client::clients.size() == 0)
+		{
+			Logger::info("Shutdown Procedure complete, Goodbye!", "");
+			return (true);
+		}
+	}
+	return (false);
+}
+
 void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
+	signal(SIGINT, handle_sigint);
+
 	// ConnectionManager* manager = NULL;
 	Data::setAllCgiLang();
 	ServersInfo serverInfo(configFilePath);
@@ -81,9 +110,10 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 		manager.epollLoop();
 		io.ioLoop();
 		debugFakeVirtualServer();	
-		// io.ioLoop();
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();
+		if (shutdown())
+			break;
 	}
 }
 

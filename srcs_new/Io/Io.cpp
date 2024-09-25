@@ -77,8 +77,10 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	if (sendValue > 0)
-	Logger::info("Successfully sent bytes: ", sendValue);
-	message->setBytesSent(message->getBytesSent() + sendValue);
+	{
+		Logger::info("Successfully sent bytes: ", sendValue);
+		message->setBytesSent(message->getBytesSent() + sendValue);
+	}
 
 	// RETURN IF FULL MESSAGE COULD NOT BE SENT
 	if (message->getBytesSent() < messageStr.size() && sendValue > 0)
@@ -104,7 +106,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		Logger::info("Successfully received bytes: ", recValue);
 		message->setBytesReceived(message->getBytesReceived() + recValue);
 	}
-
+	sleep(1);
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
@@ -118,16 +120,9 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		client.setErrorCode(500);
 	}
 
-	// EOF reached, child has gracefully shutdown connection
-	// TODO: implement this when CGI is refactored, not sure it is needed though
-	// if (recValue == 0 && _client->waitReturn != 0)
+	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue == 0 || message->getState() == COMPLETE)
-	{
 		setFinishedReceiving(client, fdData, message);
-
-		// DEBUG
-		// Logger::info("client.getMsg(Client::REQ_MSG)->getHeader();
-	}
 }
 
 void	Io::_ioClient(Client& client)

@@ -3,8 +3,8 @@
 
 # include "../Client/Client.hpp"
 
-// # define MAXLINE 200
-# define MAXLINE 4096
+# define MAXLINE 2
+// # define MAXLINE 4096
 
 
 class Message;

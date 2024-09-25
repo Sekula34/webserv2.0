@@ -178,10 +178,6 @@ void	ConnectionManager::epollLoop()
 	Client* client = NULL;
 
 
-	// signal(SIGINT, handle_sigint);
-
-		// if (!_catchEpollErrorAndSignal())
-			// break;
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
 	for (int idx = 0; idx < nfds && nfds != -1; ++idx)
 	{
@@ -208,5 +204,6 @@ _epollFd(epollFd), _clients(Client::clients)
 // Destructor
 ConnectionManager::~ConnectionManager()
 {
+	close (_epollFd);
 	Socket::closeSockets();
 }
