@@ -61,14 +61,17 @@ bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) con
 	}
 	return false;
 }
-LocationSettings::LocationSettings()
+LocationSettings::LocationSettings(const ServerSettings& locationServer)
+:_locationServer(locationServer)
 {
 
 }
 
 LocationSettings::LocationSettings(const DefaultSettings& settings, const Token& locationToken,
-std::vector<Token>& serverTokens)
-:DefaultSettings(settings),_locationToken(locationToken)
+std::vector<Token>& serverTokens, const ServerSettings& locationServer)
+:
+DefaultSettings(settings),_locationToken(locationToken),
+_locationServer(locationServer)
 {
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
@@ -77,8 +80,10 @@ std::vector<Token>& serverTokens)
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 LocationSettings::LocationSettings(const DefaultSettings& settings,
-std::vector<Token>& serverTokens)
-:DefaultSettings(settings)
+std::vector<Token>& serverTokens, const ServerSettings& locationServer)
+:
+DefaultSettings(settings),
+_locationServer(locationServer)
 {
 	_parentServerTokens = serverTokens;
 	_uri = "/";
@@ -87,8 +92,13 @@ std::vector<Token>& serverTokens)
 }
 
 LocationSettings::LocationSettings(const LocationSettings& source)
-:DefaultSettings(source), _uri(source._uri),  _locationToken(source._locationToken),
-  _locationDirectives(source._locationDirectives), _parentServerTokens(source._parentServerTokens)
+:
+DefaultSettings(source),
+_uri(source._uri),
+_locationToken(source._locationToken),
+_locationDirectives(source._locationDirectives), 
+_parentServerTokens(source._parentServerTokens),
+_locationServer(source._locationServer)
 {
 	//(*this) = source;
 }
@@ -150,12 +160,11 @@ std::ostream& operator<<(std::ostream& os, const LocationSettings& location)
 	std::string title = Logger::createFancyTitle("Location setting print");
 	os << title << std::endl;
 	os << "Location uri: " << location.getLocationUri() << std::endl;
+	os << "I belong to this server: ";
+	os << location._locationServer.getServerName() << ":" <<  location._locationServer.getPort() << std::endl;
 	os << Logger::logMap(location.p_acceptedMethods, "Limit except map").str();
 	os << location.getNginxReturn() << std::endl;
-	os << "I belong to this server " << std::endl;
-	//TODO os << serverSettings
 	return os;
-
 }
 // void LocationSettings::printLocationSettings(void) const 
 // {
