@@ -20,15 +20,6 @@ void Token::checkAllTokensContext(std::vector<Token>& allTokens)
 	}
 }
 
-//print all infromation of every token in allTokens
-void Token::printAllTokensInfo(const std::vector<Token>& allTokens)
-{
-	for(size_t i = 0; i < allTokens.size(); i++)
-	{
-		std::cout << allTokens[i];
-	}
-}
-
 //return vector of Tokens that are part of server matching serverId, not including braces
 std::vector<Token> Token::getAllServerTokens(int serverId, std::vector<Token>& allTokens)
 {
@@ -188,7 +179,8 @@ const char * Token::InvalidTokenException::what() const throw()
 
 std::ostream& operator<<(std::ostream& os, const Token& token)
 {
-	os << "---------------TOKEN INFO---------------"<<std::endl;
+	std::string facnyTitle = Logger::createFancyTitle("TOKEN INFO");
+	os << facnyTitle<<std::endl;
 	os << "Token content: " << token._info << std::endl;
 	os << "Server id :" << token._serverId << std::endl;
 	os << "Token type: "<< token._type << std::endl;
@@ -201,8 +193,8 @@ std::ostream& operator<<(std::ostream& os, const Token& token)
 		if(i != token._path.size() - 1)
 			os <<" ";
 	}
-	os <<std::endl;
+	os << std::endl;
 	os << "Token context type is " << token._contextType << std::endl;
-	os << "________________________________________" << std::endl;
+	os << Logger::getCharSequence(facnyTitle.size())<< std::endl;
 	return os;
 }

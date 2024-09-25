@@ -29,7 +29,6 @@ class Token
 		};
 
 		static void					checkAllTokensContext(std::vector<Token>& allTokens);
-		static void					printAllTokensInfo(const std::vector<Token>& allTokens);
 		static std::vector<Token>	getAllServerTokens(int serverId, std::vector<Token>& allTokens);
 		const std::string&			getTokenInfo() const;
 		const size_t&				getTokenLineNumber() const;
