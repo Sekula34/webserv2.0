@@ -11,18 +11,7 @@
  */
 class ServersInfo 
 {
-	private :
-		std::vector<Token>			_allTokens;
-		std::vector<ServerSettings>	_servers;
-		std::vector<Directive>		_httpDirectives;
-		int							_numberOfServers;
-
-		void 						_setHttpDirectives(void);
-		bool 						_isTokenHttpDirective(const Token& toCheck) const;
-		// bool _validateRequestHeader(const RequestHeader* header) const;
-		std::vector<ServerSettings>	_getAllServersIdWithPort(int port) const;
-
-	public :
+	public:
 		const std::vector<ServerSettings>&	getAllServers(void) const;
 		/**
 		 * @brief Get the Server By Id object
@@ -61,6 +50,16 @@ class ServersInfo
 											ServersInfo(const ServersInfo& source);
 		ServersInfo& 						operator=(const ServersInfo& source);
 											~ServersInfo();
+	private:
+		std::vector<Token>			_allTokens;
+		std::vector<ServerSettings>	_servers;
+		std::vector<Directive>		_httpDirectives;
+		int							_numberOfServers;
+
+		void 						_setHttpDirectives(void);
+		bool 						_isTokenHttpDirective(const Token& toCheck) const;
+		// bool _validateRequestHeader(const RequestHeader* header) const;
+		std::vector<ServerSettings>	_getAllServersIdWithPort(int port) const;
 };
 
 #endif
