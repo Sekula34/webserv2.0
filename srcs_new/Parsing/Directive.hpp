@@ -89,8 +89,8 @@ class Directive
 				}
 		};
 
-
-	friend std::ostream& operator<<(std::ostream& os, const Directive& directive);
+	public :
+		friend std::ostream& operator<<(std::ostream& os, const Directive& directive);
 };
 
 #endif 

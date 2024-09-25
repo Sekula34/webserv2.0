@@ -169,9 +169,6 @@ Directive::~Directive()
 
 }
 
-
-
-
 bool Directive::_isNameValid(const std::string& name, const std::string validList[], Token::ContextType context) const
 {
 	size_t size = 0;
@@ -278,7 +275,6 @@ std::string Directive::_getNameFromToken(const Token& token) const
 	return name;
 }
 
-
 std::string Directive:: _getValueFromToken(const Token& token) const
 {
 	std::string value = token.getTokenInfo();
@@ -298,8 +294,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 	value = value.substr(0,posSemi);
 	return value;
 }
-
-
 
 
 void Directive::_applyServerName(DefaultSettings& settings)
@@ -472,9 +466,10 @@ const char* Directive::InvalidDirectiveException::what() const throw()
 
 std::ostream& operator<<(std::ostream& os, const Directive& directive)
 {
-	os << "---------------Directive info--------------" << std::endl;
-	os << "Directive name is [" << directive._directiveName <<"]" <<std::endl;
+	std::string fancyTitle = Logger::createFancyTitle("DIRECTIVE INFO");
+	os << fancyTitle << std::endl;
+	os << "Directive name is :[" << directive._directiveName <<"]" <<std::endl;
 	os << "Directive value is :[" << directive._directiveValue <<"]" <<std::endl;
-	os <<"_____________________________________________" << std::endl;
+	os << Logger::getCharSequence(fancyTitle.size()) << std::endl;
 	return os;
 }
