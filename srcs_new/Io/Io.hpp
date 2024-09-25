@@ -3,8 +3,8 @@
 
 # include "../Client/Client.hpp"
 
-// # define MAXLINE 200
-# define MAXLINE 4096
+# define MAXLINE 500
+// # define MAXLINE 4096
 
 
 class Message;
@@ -19,7 +19,6 @@ class Io
 	private:
 		// Methods
 		void	_ioClient(Client& client);	
-		//  void	_sendMsg(Client& client);
 		void	_sendMsg(Client& client, FdData& fdData, Message* message);
 		void	_receiveMsg(Client& client, FdData& fdData, Message* message);
 

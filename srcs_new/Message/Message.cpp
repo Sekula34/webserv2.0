@@ -385,6 +385,7 @@ void	Message::_parseNode()
 	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
 	{
+		Logger::info("Header Complete:", "\n" + _it->getStringUnchunked());
 		_createHeader();
 		_headerInfoToNode();
 
