@@ -1,4 +1,5 @@
 #include "NginxReturn.hpp"
+#include "../Utils/Logger.hpp"
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
@@ -77,10 +78,11 @@ NginnxReturn::~NginnxReturn()
 
 std::ostream& operator<<(std::ostream& os, const NginnxReturn& redirect)
 {
-	os << "----Nging return print---" << std::endl;
+	std::string fancyTitle = Logger::createFancyTitle("NGINX RETURN PRINT");
+	os << fancyTitle << std::endl;
 	os << "Flag: " << redirect.getFlag() << std::endl;
 	os << "Status: " << redirect.getStatus() << std::endl;
 	os << "Redirect Path: " << redirect.getRedirectPath() << std::endl;
-	os << "___________________________" << std::endl;
+	os << Logger::getCharSequence(fancyTitle.size()) << std::endl;
 	return os;
 }
