@@ -10,29 +10,30 @@
 //==========================================================================//
 
 
-static void	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType, Message** message)
+static Message*	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType)
 {
-	// IF CLIENT STATE == NEW, THEN RECEIVE INTO REQUESTMSG, USING CLIENT FD
+	Message* message = NULL;
 	if (client.getClientState() == Client::DO_REQUEST)
 	{
 		fdType = FdData::CLIENT_FD;
-		*message = client.getMsg(Client::REQ_MSG);
+		message = client.getMsg(Client::REQ_MSG);
 	}
 	else if (client.getClientState() == Client::DO_CGISEND)
 	{
 		fdType = FdData::TOCHILD_FD;
-		*message = client.getMsg(Client::REQ_MSG);
+		message = client.getMsg(Client::REQ_MSG);
 	}
 	else if (client.getClientState() == Client::DO_CGIREC)
 	{
 		fdType = FdData::FROMCHILD_FD;
-		*message = client.getMsg(Client::CGIRESP_MSG);
+		message = client.getMsg(Client::CGIRESP_MSG);
 	}
 	else if (client.getClientState() == Client::DO_RESPONSE)
 	{
 		fdType = FdData::CLIENT_FD;
-		*message = client.getMsg(Client::RESP_MSG);
+		message = client.getMsg(Client::RESP_MSG);
 	}
+	return message;
 }
 
 static void	setFinishedSending(Client& client, FdData& fdData, int error)
@@ -49,20 +50,22 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 	fdData.state = FdData::CLOSE;
 }
 
-static void	setFinishedReceiving(Client& client, FdData& fdData, Message* message)
+static void	setFinishedReceiving(FdData& fdData, Message* message)
 {
-	if (message->getBytesReceived() == 0)
-	{
-		client.setClientState(Client::DELETEME);
-		fdData.state = FdData::CLOSE;
-		return ;
-	}
 	if (fdData.type == FdData::FROMCHILD_FD)
 		fdData.state = FdData::CLOSE;
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.
 	message->setState(COMPLETE);
+}
+
+void	clearBuffer(char* buffer)
+{
+	if (!buffer)
+		return ;
+	for (size_t i = 0; i < MAXLINE; ++i)
+		buffer[i] = 0;
 }
 
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
@@ -73,8 +76,10 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	if (message->getBytesSent() == 0)
 		Logger::info("String Response created: ", "\n" + messageStr);
 
+	clearBuffer(_buffer);
 	sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), messageStr.size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
+	// sleep(1);
 
 	if (sendValue > 0)
 	{
@@ -82,7 +87,7 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 		message->setBytesSent(message->getBytesSent() + sendValue);
 	}
 
-	// RETURN IF FULL MESSAGE COULD NOT BE SENT
+	// RETURN IF FULL MESSAGE COULD NOT BE SENT YET
 	if (message->getBytesSent() < messageStr.size() && sendValue > 0)
 		return ;
 
@@ -92,7 +97,6 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 		Logger::error("failed to send message String in Client with ID:", client.getId());
 		client.setErrorCode(500);
 	}
-
 	setFinishedSending(client, fdData, client.getErrorCode());
 }
 
@@ -100,37 +104,31 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 {
 	int 	recValue = 0;
 
+	clearBuffer(_buffer);
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
-	if (recValue > 0)
-	{
-		Logger::info("Successfully received bytes: ", recValue);
-		message->setBytesReceived(message->getBytesReceived() + recValue);
-	}
-	sleep(1);
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
-		message->bufferToNodes(_buffer, recValue);
-
-	// READ FAILED
-	if (recValue < 0)
 	{
-		setFinishedReceiving(client, fdData, message);
-		Logger::warning("failed to read with return Value: ", recValue);
-		client.setErrorCode(500);
+		Logger::info("Successfully received bytes: ", recValue);
+		// Logger::chars(_buffer, true);
+		message->setBytesReceived(message->getBytesReceived() + recValue);
+		message->bufferToNodes(_buffer, recValue);
 	}
 
 	// FINISHED READING because either complete message, or connection was shutdown
-	if (recValue == 0 || message->getState() == COMPLETE)
-		setFinishedReceiving(client, fdData, message);
+	if (recValue <= 0 || message->getState() == COMPLETE)
+	{
+		if (recValue < 0)
+			client.setErrorCode(500);
+		setFinishedReceiving(fdData, message);
+	}
 }
 
 void	Io::_ioClient(Client& client)
 {
-	Message* message = NULL;
 	FdData::e_fdType fdType;
-
-	setFdTypeAndMsg(client, fdType, &message);
+	Message* message = setFdTypeAndMsg(client, fdType);
 
 	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
 	FdData& fdData = client.getFdDataByType(fdType);
@@ -145,11 +143,6 @@ void	Io::_ioClient(Client& client)
 			_receiveMsg(client, fdData, message);
 	}
 
-	// TODO implement this:
-	// IF RECEIVING HAS STARTED, MSG STRING IS NOT EMPTY, MSG STATE IS INCOMPLETE
-	// AND WE ARE SUDDENLY NOT ALLOWED TO RECEIVE -> WE CLOSE MESSAGE,
-	// BECAUSE CLIENT HAS PROBABLY CLOSED SOCKET
-	
 	else if ((client.getClientState() == Client::DO_RESPONSE
 		|| client.getClientState() == Client::DO_CGISEND)
 		&&(fdData.state  == FdData::R_SEND
@@ -157,8 +150,6 @@ void	Io::_ioClient(Client& client)
 	{
 		_sendMsg(client, fdData, message);
 	}
-
-	// TODO same as above for message
 }	
 
 void	Io::ioLoop()
