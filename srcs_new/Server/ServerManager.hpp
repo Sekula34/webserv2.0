@@ -5,6 +5,8 @@
 #include <vector>
 // #include "../Client/Client.hpp"
 
+
+class Client;
 /**
  * @brief class that contains all ServerSetting in vector _servers
  * 
@@ -12,6 +14,10 @@
 class ServerManager 
 {
 	public:
+
+		void								loop(void);
+
+		//generate REsponse
 		const std::vector<VirtualServer>&	getAllServers(void) const;
 		/**
 		 * @brief Get the Server By Id object
@@ -56,10 +62,19 @@ class ServerManager
 		std::vector<Directive>		_httpDirectives;
 		int							_numberOfServers;
 
+		bool 						_isCgi(Client& client);
+		void 						_assignVirtualServer(Client& client);
 		void 						_setHttpDirectives(void);
 		bool 						_isTokenHttpDirective(const Token& toCheck) const;
 		// bool _validateRequestHeader(const RequestHeader* header) const;
 		std::vector<VirtualServer>	_getAllServersIdWithPort(int port) const;
+		std::vector<LocationSettings>::const_iterator	_setCgiLocation(Client& client, bool& foundLoc);
+		bool 						_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client);
+		void 						_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client);
+		bool 						_isCgiPathInfoValid(std::string pathInfo);
+		bool						_isSupportedScriptExtenstion(const LocationSettings& location, Client& client);
+		void						_createResponse(Client& client);
+		
 };
 
 #endif

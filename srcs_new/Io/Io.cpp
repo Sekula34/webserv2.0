@@ -45,7 +45,7 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 		if (!error)
 			client.setClientState(Client::DO_CGIREC);
 		else
-			client.setClientState(Client::DELETEME);
+			client.setClientState(Client::DELETEME); // TODO: check whether this correct. If sending to child fails, we should not delete but send error code to client
 	}
 	fdData.state = FdData::CLOSE;
 }
@@ -53,7 +53,9 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 static void	setFinishedReceiving(FdData& fdData, Message* message)
 {
 	if (fdData.type == FdData::FROMCHILD_FD)
+	{
 		fdData.state = FdData::CLOSE;
+	}
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.

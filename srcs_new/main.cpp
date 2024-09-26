@@ -49,16 +49,16 @@ void handle_sigint(int sig)
 	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
 }
 
-static void	debugFakeVirtualServer()
-{
-	std::map<int, Client*>::iterator it = Client::clients.begin();
-	for (; it != Client::clients.end(); ++it)
-	{
-		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
-			&& it->second->getClientState() != Client::DELETEME)
-	  		it->second->setClientState(Client::DO_RESPONSE);	
-	}
-}
+// static void	debugFakeVirtualServer()
+// {
+// 	std::map<int, Client*>::iterator it = Client::clients.begin();
+// 	for (; it != Client::clients.end(); ++it)
+// 	{
+// 		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
+// 			&& it->second->getClientState() != Client::DELETEME)
+// 	  		it->second->setClientState(Client::DO_RESPONSE);	
+// 	}
+// }
 
 bool	shutdownServer()
 {
@@ -113,9 +113,10 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	{
 		manager.epollLoop();
 		io.ioLoop();
+		serverInfo.loop();
 
 		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
-		debugFakeVirtualServer();	
+		//debugFakeVirtualServer();	
 
 		// virtualServer.virtualServerLoop();
 		// cgi.cgiLoop();

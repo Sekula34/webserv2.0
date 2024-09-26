@@ -2,13 +2,12 @@
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
-# include <iostream>
 # include <list>
 # include <sstream>
+# include "AHeader.hpp"
 
 class Node;
 class RequestHeader;
-class AHeader;
 
 class Message {
 

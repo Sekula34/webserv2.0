@@ -321,7 +321,8 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	// _fd(fd),
 	_start(std::clock()),
 	_clientAddr(clientAddr),
-	_addrLen(addrLen)
+	_addrLen(addrLen),
+	_virtualServer(NULL)
 {
 	// _clientFds.push_back(fdStatePair(fd, UNSET));
 	_initVars(fd);
@@ -333,7 +334,9 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 // Default Constructor
 Client::Client(): 
 _id(0),
-_start(std::clock()) {}
+_start(std::clock()),
+_virtualServer(NULL)
+{}
 
 // Destructor
 Client::~Client()
@@ -355,7 +358,8 @@ Client::Client(Client const & src):
 _id(++client_cntr),
 // _fd(src._fd),
 _clientFds(src._clientFds),
-_start(std::clock())
+_start(std::clock()),
+_virtualServer(NULL)
 {
 	*this = src;
 	Logger::warning("Copy Constructor of Client called", src.getId());

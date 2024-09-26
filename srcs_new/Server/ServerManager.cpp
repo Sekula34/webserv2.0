@@ -5,13 +5,106 @@
 #include "VirtualServer.hpp"
 #include "../Parsing/Token.hpp"
 #include <cstddef>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include "../Utils/Logger.hpp"
+#include "../Client/Client.hpp"
+#include "../Message/Message.hpp"
+#include "../Message/Node.hpp"
+#include "../Message/RequestHeader.hpp"
+#include "../Client/Client.hpp"
+#include "../Parsing/ParsingUtils.hpp"
+
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
 // #include "../Message/Message.hpp"
+
+void ServerManager::_assignVirtualServer(Client& client)
+{
+	if(client.getVirtualServer() != NULL)
+		return;
+	if(client.getErrorCode() == 400)
+	{
+		client.setVirtualServer(getServerById(1)); 
+		return;
+	}
+	const RequestHeader* reqHeader = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	int port = reqHeader->getHostPort();
+	std::string serverName = reqHeader->getHostName();
+
+	const VirtualServer* server = getServerByPort(port, serverName);
+	if (server == NULL)
+	{
+		client.setErrorCode(400);
+		client.setVirtualServer(getServerById(1)); 
+		return;
+	}
+	if(server->getPort() != client.getClientPort()) 
+	{
+		client.setErrorCode(400);
+		client.setVirtualServer(getServerById(1)); 
+		return;
+	}
+	client.setVirtualServer(*server);
+}
+
+bool ServerManager::_isCgi(Client& client)
+{
+	bool locFound = false;
+	std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, locFound);
+	if(locFound)
+	{
+		Logger::info("Cgi checked and it exist on this location :", location->getLocationUri()); 
+		if(_parseCgiURLInfo(*location, client) == true)
+			return (ServerManager::_isSupportedScriptExtenstion(*location, client));
+	}
+	return false;
+}
+
+void ServerManager::loop()
+{
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for (; it != Client::clients.end(); ++it)
+	{
+		Client& client = *(it->second);
+		if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE)
+			continue;
+		_assignVirtualServer(client);
+		if(client.getClientState() == Client::DO_REQUEST)
+		{
+			if(client.getErrorCode() != 0)
+				client.setClientState(Client::DO_RESPONSE);
+			else
+			{
+				if(_isCgi(client) == true)
+				{
+					Logger::warning("Client Requested valid cgi", client.getId());
+					//client.setClientState(Client::DO_CGISEND);
+
+					// TODO: this is fake set state, just to make webserve work without cgi
+					client.setClientState(Client::DO_RESPONSE);
+				}
+				else  
+				{
+					Logger::warning("No cgi will be executed ", client.getErrorCode());
+					client.setClientState(Client::DO_RESPONSE);
+				}
+				//change state
+			} 
+		}
+		Logger::info("fuck message about to happen", "");
+		if(client.getClientState() == Client::DO_CGIREC && client.getMsg(Client::CGIRESP_MSG)->getState() == COMPLETE)
+			client.setClientState(Client::DO_RESPONSE);
+		if(client.getClientState() == Client::DO_RESPONSE)
+		{
+			//_createResponse(client);
+			// CREATE RESPONSE
+		}
+	}
+}
+
 
 
 ServerManager::ServerManager(std::string configPath)
@@ -139,6 +232,89 @@ const std::vector<int> ServerManager::getUniquePorts() const
 		}
 	}
 	return uniquePorts;
+}
+
+std::vector<LocationSettings>::const_iterator ServerManager::_setCgiLocation(Client& client, bool& foundLoc)
+{
+	foundLoc = false;
+
+	const VirtualServer& cgiServer = *client.getVirtualServer();
+	RequestHeader* clientHeader =  static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	std::string ServerLocation = cgiServer.getLocationURIfromPath(clientHeader->urlSuffix->getPath());
+	bool found = true;
+	std::vector<LocationSettings>::const_iterator it = cgiServer.fetchLocationWithUri(ServerLocation, found);
+	if(found == false || it->isCgiLocation() == false)
+	{
+		foundLoc = false;
+		return cgiServer.getServerLocations().end();
+	}
+	foundLoc = true;
+	return it;
+}
+
+bool ServerManager::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
+{
+	Logger::info("Called cgi parse url", true);
+	RequestHeader& clientHeader = *static_cast<RequestHeader *>(client.getMsg(Client::REQ_MSG)->getHeader());
+
+	std::string fileName = ParsingUtils::getFileNameFromUrl(clientHeader.urlSuffix->getPath(), cgiLocation.getLocationUri());
+	std::string scriptName = ParsingUtils::extractUntilDelim(fileName, "/", false);
+	if(scriptName == "")
+		scriptName = fileName;
+	if(clientHeader.urlSuffix->setCgiScriptName(scriptName) == false)
+	{
+		Logger::warning("Unsupoorted cgi file type", scriptName);
+		client.setErrorCode(502); 
+		return false;
+	}
+	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
+	_setCgiPathInfo(clientHeader.urlSuffix->getPath(), scriptName, client);
+	std::ostringstream oss;
+	oss << "Script Name " << clientHeader.urlSuffix->getCgiScriptName() << std::endl;
+	oss << "Script extension: " << clientHeader.urlSuffix->getCgiScriptExtension()  << std::endl;
+	oss << "Path info" << clientHeader.urlSuffix->getCgiPathInfo() << std::endl;
+	Logger::info(oss.str(), "");
+	return true;
+}
+
+void ServerManager::_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client)
+{
+	size_t pathInfoPos = urlpath.find(scriptPath);
+	if(pathInfoPos == std::string::npos)
+	{
+		Logger::error("Set cgi path this should never happend", "");
+		return;
+	}
+	std::string pathInfo = urlpath.substr(pathInfoPos + scriptPath.size());
+	if(_isCgiPathInfoValid(pathInfo) == false)
+	{
+		Logger::error("not valid cgi path", pathInfo);
+		client.setErrorCode(502);
+		return;
+	}
+	static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->setCgiPathInfo(pathInfo);
+}
+
+bool ServerManager::_isCgiPathInfoValid(std::string pathInfo)
+{
+	if(pathInfo.find("/..") != std::string::npos || pathInfo.find("~") != std::string::npos)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool ServerManager::_isSupportedScriptExtenstion(const LocationSettings& location, Client& client)
+{
+	RequestHeader* header = static_cast<RequestHeader *>(client.getMsg(Client::REQ_MSG)->getHeader());
+	std::string requestedScriptExtension = header->urlSuffix->getCgiScriptExtension();
+	if(location.isCgiExtensionSet(requestedScriptExtension) == true)
+		return true;
+	std::ostringstream oss; 
+	oss << "403 is set because requested script extension " << requestedScriptExtension << " is not supported on location " << location.getLocationUri();
+	Logger::error(oss.str(), true);
+	client.setErrorCode(403);
+	return false;
 }
 
 //check if Token is directive that belongs to http only
