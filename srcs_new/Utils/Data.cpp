@@ -48,7 +48,8 @@ Data &	Data::operator=(Data const & rhs)
 
 int Data::_nfds = 0;
 char** Data::_envp = NULL;
-int Data::_epollfd = epoll_create(1);
+// int Data::_epollfd = epoll_create(1);
+int Data::_epollfd = 0;
 std::map<int, Client*> emptyClients;
 std::map<int, Client*>&	Data::_clients = emptyClients;
 std::vector<Socket> *	Data::_serverSockets = NULL;
