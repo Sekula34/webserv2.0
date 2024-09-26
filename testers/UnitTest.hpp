@@ -31,6 +31,7 @@ class UnitTest
 		static void testDirBlock();
 		static void testingOpeninDirBlock();
 		static void testOpeningDirCase(const std::string path, int expected_error);
+		static void testingToken();
 
 };
 #endif

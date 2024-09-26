@@ -111,11 +111,10 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	if (recValue > 0)
 	{
 		Logger::info("Successfully received bytes: ", recValue);
-		// Logger::chars(_buffer, true);
 		message->bufferToNodes(_buffer, recValue);
 	}
 
-	// TODO: maybe in case of receiving from Child, need to wait until child as finished
+	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)
 	{
 		if (recValue < 0)

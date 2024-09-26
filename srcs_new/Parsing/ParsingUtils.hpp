@@ -2,7 +2,6 @@
 #define PARSINGUTILS_HPP
 #include <cstddef>
 #include <exception>
-#include <map>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -13,32 +12,6 @@
 class ParsingUtils 
 {
 	public :
-		template<typename KeyType, typename ValueType>
-		static void printMap(std::map<KeyType, ValueType> map, std::string MapTitle ="map")
-		{
-			std::cout << "Map " << MapTitle << " values are: " << std::endl;
-			typename std::map<KeyType, ValueType>::const_iterator it;
-			for(it = map.begin(); it != map.end(); it++)
-			{
-				std::cout <<"Key :[" << it->first <<"], Value: [" << it->second <<"]" << std::endl;
-			}
-			std::cout <<"_____endMap___" << std::endl;
-		}
-
-		template<typename Type>
-		static void printVector(std::vector<Type> vec, std::string VectorTitle = "vector")
-		{
-			std::cout << "-----Vector name : " << VectorTitle << " values are: " << std::endl;
-			typename std::vector<Type>::const_iterator it;
-			for(it = vec.begin(); it != vec.end(); it++)
-			{
-				std::cout << *it;
-				if(it != vec.end() - 1)
-					std::cout << ", ";
-			}
-			std::cout <<std::endl <<"________end of vector ____" << std::endl;
-		}
-
 		template<typename Type>
 		static std::string toString(Type number)
 		{
@@ -59,16 +32,16 @@ class ParsingUtils
 			return stringValue;
 		}
 
-		static std::vector<std::string> splitString(std::string fullString, char delimiter);
-		static std::vector<std::string> splitString(std::string fullString, std::string delimiter);
-		static std::string getStringOutOfVector(const std::vector<std::string> stringVector);		
-		static bool isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
-		static bool isStringNumber(std::string toCheck);
-		static std::string getBaseName(const std::string& fullUrl, const std::string& ServerLocationString);
-		static size_t stringToSizeT(std::string string);
-		static bool isStringEnd(const std::string toCheck, const std::string expectedEnd);
-		static std::string	uriEncode(bool encodeSpaceAsPlus, const std::string& input);
-		static std::string	uriDecode(bool decodePlusAsSpace, const std::string& input);
+		static std::vector<std::string>	splitString(std::string fullString, char delimiter);
+		static std::vector<std::string>	splitString(std::string fullString, std::string delimiter);
+		static std::string				getStringOutOfVector(const std::vector<std::string> stringVector);		
+		static bool						isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
+		static bool						isStringNumber(std::string toCheck);
+		static std::string				getBaseName(const std::string& fullUrl, const std::string& ServerLocationString);
+		static size_t					stringToSizeT(std::string string);
+		static bool 					isStringEnd(const std::string toCheck, const std::string expectedEnd);
+		static std::string				uriEncode(bool encodeSpaceAsPlus, const std::string& input);
+		static std::string				uriDecode(bool decodePlusAsSpace, const std::string& input);
 		/**
 		 * @brief return substring from 0 till delimiter is found example for header till /r/n/r/n is found
 		 * if delimiter is not found return empty string. 
@@ -76,8 +49,8 @@ class ParsingUtils
 		 * @param delimiter 
 		 * @return std::string Delimiter is included
 		 */
-		static std::string extractUntilDelim(const std::string fullString, const std::string delimiter, bool includeDelim = true);
-		static std::string extractAfterDelim(const std::string fullString, const std::string delimiter);
+		static std::string				extractUntilDelim(const std::string fullString, const std::string delimiter, bool includeDelim = true);
+		static std::string				extractAfterDelim(const std::string fullString, const std::string delimiter);
 		/**
 		 * @brief Get the Dir Name dir name. Dir name of /hej/filip2/donot.txt
 		 *  is /hej/filip2/
@@ -85,7 +58,7 @@ class ParsingUtils
 		 * @param fullPath 
 		 * @return std::string dir/name
 		 */
-		static std::string getDirName(std::string fullPath);
+		static std::string				getDirName(std::string fullPath);
 		
 		/**
 		 * @brief Get the Http Plain Value object
@@ -94,9 +67,9 @@ class ParsingUtils
 		 * @param filedValue value that may have one leading and/or one trailing space
 		 * @return std::string  fieldValue without leadin and trailing space;
 		 */
-		static std::string getHttpPlainValue(std::string fieldValue);
+		static std::string				getHttpPlainValue(std::string fieldValue);
 
-		static std::string replaceAllCharsInString(std::string fullString, const std::string oldChar, const std::string neuChar);
+		static std::string				replaceAllCharsInString(std::string fullString, const std::string oldChar, const std::string neuChar);
 
 		/**
 		 * @brief Get the File Name From Urlsuffix, 
@@ -106,7 +79,7 @@ class ParsingUtils
 		 * @param locationUri  like hej/i/
 		 * @return std::string  am/filip.py/anotherfolder/file or "" if there is no file either location is full path or not match
 		 */
-		static std::string getFileNameFromUrl(std::string urlSuffixPath, std::string locationUri);
+		static std::string				getFileNameFromUrl(std::string urlSuffixPath, std::string locationUri);
 
 		class InvalidConversion : public std::exception
 		{

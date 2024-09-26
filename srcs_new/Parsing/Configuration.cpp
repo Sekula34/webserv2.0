@@ -10,12 +10,22 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 
-//either will stay private or will call Configuration(std::string path) where 
-//path will be default config file
-Configuration::Configuration()
+//return string to relative path of ConfFile inside project
+const std::string& Configuration::getFilePath() const
 {
-	std::cout << "Configuration class created" << std::endl;
+	return (_filePath);
 }
+
+std::vector<Token> Configuration::getAllTokens() const 
+{
+	return (_tokensVector);
+}
+
+int Configuration::getNumberOfServers(void) const
+{
+	return (_serverId);
+}
+
 
 //Set filePath to be const std::string variable
 Configuration::Configuration(const std::string& filePath)
@@ -149,7 +159,7 @@ void Configuration::_fillAllTokensPaths(void)
 	std::vector<Token> tokenPath;
 	if(_tokensVector.size() < 3)
 	{
-		std::cerr<<yellow<<"Configuration file should have at least 3 tokkens http and {}." << resetText << std::endl;
+		Logger::error("Configuration file should have at least 3 tokkens http and {}.", "");
 		throw InvalidConfigFileException();
 	}
 	for(size_t i = 0; i < _tokensVector.size() - 1; i++)
@@ -157,23 +167,27 @@ void Configuration::_fillAllTokensPaths(void)
 		Token &currentToken = _tokensVector[i];
 		Token nextToken = _tokensVector[i + 1];
 		currentToken.setTokenPath(tokenPath);
-		if(nextToken.getTokenType() == OPENING_BRACE)
+		if(nextToken.getTokenType() == Token::OPENING_BRACE)
 		{
-			if(currentToken.getTokenType() != CONTEXT)
+			if(currentToken.getTokenType() != Token::CONTEXT)
 			{
-				std::cerr << yellow << "In line " << currentToken.getTokenLineNumber() << " Token :\"";
-				std::cerr<< currentToken.getTokenInfo() <<"\" is not CONTEXT so '{' cannot come after it" << resetText <<std::endl;
+				std::ostringstream oss;
+				oss << "In line " << currentToken.getTokenLineNumber() << " Token :\"";
+				oss<< currentToken.getTokenInfo() <<"\" is not CONTEXT so '{' cannot come after it";
+				Logger::error(oss.str(), "");
 				throw InvalidConfigFileException();
 			}
 			tokenPath.push_back(currentToken);
 			continue;
 		}
-		if(nextToken.getTokenType() == CLOSING_BRACE)
+		if(nextToken.getTokenType() == Token::CLOSING_BRACE)
 		{
 			if(tokenPath.size() == 0)
 			{
-				std::cerr<<yellow<< "'}' in line " << nextToken.getTokenLineNumber();
-				std::cerr<< " does not have matching opening brace '{'" << resetText << std::endl;
+				std::ostringstream oss;
+				oss << "'}' in line " << nextToken.getTokenLineNumber();
+				oss<< " does not have matching opening brace '{'";
+				Logger::error(oss.str(), "");
 				throw InvalidConfigFileException();
 			}
 			tokenPath.pop_back();
@@ -181,7 +195,9 @@ void Configuration::_fillAllTokensPaths(void)
 	}
 	if(tokenPath.size() > 0)
 	{
-		std::cerr << yellow<< tokenPath.size() << " * '}' closing bracket is missing" <<resetText << std::endl;
+		std::ostringstream oss;
+		oss<< tokenPath.size() << " * '}' closing bracket is missing";
+		Logger::error(oss.str(), "");
 		throw InvalidConfigFileException();
 	}
 }
@@ -253,13 +269,12 @@ void Configuration::_fillTokensVector(void)
 	}
 	if(tokenInfo.empty() == false)
 	{
-		std::cerr <<yellow << "Token \""<< tokenInfo <<"\" is not delimited with anything." <<resetText <<std::endl;
+		std::ostringstream oss;
+		oss << "Token \""<< tokenInfo <<"\" is not delimited with anything.";;
+		Logger::error(oss.str(), "");
 		throw InvalidConfigFileException();
 	}
 }
-
-
-
 
 
 //takes server id as integer ServerId ad return string that is always
@@ -294,8 +309,6 @@ std::string Configuration::_getCleanConfLine(const std::string& dirtyLine)
 	return cleanLine;
 }
 
-
-
 //will remove newlineaswell;
 void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
 {
@@ -325,30 +338,6 @@ void Configuration::_removeSpacesAndTabs(std::string& dirtyLine)
 	dirtyLine = dirtyLine.substr(beginPos, endPos - beginPos);
 }
 
-//return string to relative path of ConfFile inside project
-const std::string& Configuration::getFilePath() const
-{
-	return (_filePath);
-}
-
-
-void Configuration::printFileMember(void)
-{
-	for(size_t i = 0; i < _fileLine.size(); i++)
-	{
-		std::cout << "Line " << _fileLine[i].second << " " << _fileLine[i].first << std::endl;
-	} 
-}
-
-std::vector<Token> Configuration::getAllTokens() const 
-{
-	return (_tokensVector);
-}
-
-int Configuration::getNumberOfServers(void) const
-{
-	return (_serverId);
-}
 
 const char* Configuration::InvalidConfigFileException::what() const throw()
 {

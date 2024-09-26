@@ -3,13 +3,15 @@
 #include <cerrno>
 #include <cstdio>
 #include <exception>
-#include "../srcs/Parsing/Configuration.hpp"
+#include "../srcs_new/Parsing/Configuration.hpp"
 #include <iostream>
 #include <string>
-#include "../srcs/Utils/Logger.hpp"
-#include "../srcs/Parsing/ParsingUtils.hpp"
-#include "../srcs/Utils/UrlSuffix.hpp"
-#include "../srcs/Utils/FileUtils.hpp"
+#include "../srcs_new/Utils/Logger.hpp"
+#include "../srcs_new/Parsing/ParsingUtils.hpp"
+#include "../srcs_new/Utils/UrlSuffix.hpp"
+#include "../srcs_new/Utils/FileUtils.hpp"
+#include "../srcs_new/Parsing/Directive.hpp"
+#include "../srcs_new/Parsing/NginxReturn.hpp"
 
 
 const std::string UnitTest::_constFileFolder = "configuration_files/valid/";
@@ -81,7 +83,16 @@ void UnitTest::urlPathTester(std::string suffixString, std::string expectedpath)
 	_testpassed();
 }
 
+void UnitTest::testingToken()
+{
+	Token token;
+	std::cout << token << std::endl;
+	Directive dir("hej", "ja sam filip");
+	std::cout << dir << std::endl;
 
+	NginnxReturn nxRet;
+	std::cout << nxRet << std::endl;
+}
 
 void UnitTest::urlPathQueryBlock()
 {
@@ -130,7 +141,7 @@ void UnitTest::testingOpeninDirBlock()
 
 void UnitTest::testOpeningDirCase(const std::string path, int expected_error)
 {
-	Logger::testCase("Testing opening dir "); std::cout << path << std::endl;
+	Logger::testCase("Testing opening dir ", path);
 	int statusCode = 0;
 	bool result =  FileUtils::isDirectoryValid(path, statusCode);
 	std::cout << "Result is " << result << std::endl;

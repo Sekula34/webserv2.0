@@ -7,8 +7,10 @@
 #include <sys/epoll.h>
 #include <unistd.h> // FIXME. Used by Logger for getpid()
 #include <vector>
+#include <csignal>
 
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
+extern volatile sig_atomic_t flag;
 
 //==========================================================================//
 // REGULAR METHODS==========================================================//
@@ -175,11 +177,12 @@ void	ConnectionManager::epollLoop()
 	Client* client = NULL;
 
 
-	// signal(SIGINT, handle_sigint);
-
-		// if (!_catchEpollErrorAndSignal())
-			// break;
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
+	if (nfds == -1 && !flag)
+	{
+		Logger::error("epoll_wait failed", "");
+		return ;
+	}
 	for (int idx = 0; idx < nfds && nfds != -1; ++idx)
 	{
 		if (isServerSocket(_events[idx].data.fd))
@@ -205,5 +208,6 @@ _epollFd(epollFd), _clients(Client::clients)
 // Destructor
 ConnectionManager::~ConnectionManager()
 {
+	close (_epollFd);
 	Socket::closeSockets();
 }

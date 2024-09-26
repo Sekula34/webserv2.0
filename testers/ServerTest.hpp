@@ -1,7 +1,7 @@
 #ifndef SERVERTEST_HPP
 # define SERVERTEST_HPP
 #include "UnitTest.hpp"
-#include "../srcs/Parsing/ServerSettings.hpp"
+#include "../srcs_new/Parsing/ServerSettings.hpp"
 #include <cstddef>
 #include <vector>
 

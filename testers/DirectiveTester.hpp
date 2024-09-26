@@ -2,7 +2,7 @@
 # define DIRECTIVETESTER_HPP
 # include "UnitTest.hpp"
 #include <vector>
-#include "../srcs/Parsing/Directive.hpp"
+#include "../srcs_new/Parsing/Directive.hpp"
 
 
 class DirectiveTester : public UnitTest
