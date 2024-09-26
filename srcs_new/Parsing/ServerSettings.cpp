@@ -121,7 +121,6 @@ std::vector<LocationSettings> ServerSettings::_setServerLocations()
 		{
 			LocationSettings location(*this, _serverTokens[i], _serverTokens, *this);
 			serverLocations.push_back(location);
-			std::cout << location << std::endl;
 		}
 	}
 	if(_hasDefaultLocation(serverLocations) == false)
