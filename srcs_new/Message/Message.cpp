@@ -110,14 +110,6 @@ const size_t&				Message::getBytesSent() const
 {
 	return (_bytesSent);
 }
-const size_t&				Message::getBytesReceived() const
-{
-	return (_bytesReceived);
-}
-void						Message::setBytesReceived(size_t num)
-{
-	_bytesReceived = num;
-}
 void						Message::setBytesSent(size_t num)
 {
 	_bytesSent = num;

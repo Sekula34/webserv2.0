@@ -31,8 +31,6 @@ class Message {
 		void						_createHeader();
 		void						_headerInfoToNode();
 		const size_t&				getBytesSent() const;
-		const size_t&				getBytesReceived() const;
-		void						setBytesReceived(size_t num);
 		void						setBytesSent(size_t num);
 
 									//Message specific functions
@@ -47,7 +45,6 @@ class Message {
 		AHeader*					_header;
 		int&						_errorCode;
 		size_t						_bytesSent;
-		size_t						_bytesReceived;
 
 		void						_setNodeComplete();
 		void						_parseNode();

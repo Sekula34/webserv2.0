@@ -112,7 +112,6 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	{
 		Logger::info("Successfully received bytes: ", recValue);
 		// Logger::chars(_buffer, true);
-		message->setBytesReceived(message->getBytesReceived() + recValue);
 		message->bufferToNodes(_buffer, recValue);
 	}
 
