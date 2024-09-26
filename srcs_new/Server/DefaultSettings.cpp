@@ -5,10 +5,10 @@
 #include <ostream>
 #include <string>
 #include <vector>
-#include "NginxReturn.hpp"
+#include "../Parsing/NginxReturn.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "../Utils/Logger.hpp"
-#include "Configuration.hpp"
+#include "../Parsing/Configuration.hpp"
 
 
 bool DefaultSettings::isMethodAllowed(std::string method) const

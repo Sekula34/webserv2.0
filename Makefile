@@ -26,57 +26,56 @@ WHITE := \033[0;37m
 NC := \033[0m # No color
 
 
-SRCS =		srcs_new/Message/AHeader.cpp\
-			srcs_new/Client/Client.cpp \
-			srcs_new/Client/FdData.cpp \
-			srcs_new/Io/Io.cpp \
-			srcs_new/Message/Message.cpp \
-			srcs_new/Message/Node.cpp \
-			srcs_new/Message/RequestHeader.cpp \
-			srcs_new/Parsing/LocationSettings.cpp \
-			srcs_new/Parsing/ServersInfo.cpp \
-			srcs_new/Parsing/Token.cpp \
-			srcs_new/Parsing/DefaultSettings.cpp \
-			srcs_new/Parsing/NginxReturn.cpp \
-			srcs_new/Parsing/Directive.cpp \
-			srcs_new/Parsing/Configuration.cpp \
-			srcs_new/Parsing/ParsingUtils.cpp \
-			srcs_new/Parsing/ServerSettings.cpp \
-			srcs_new/Message/ResponseHeader.cpp\
-			srcs_new/Server/ConnectionManager.cpp \
-			srcs_new/Server/Socket.cpp \
-			srcs_new/Utils/Data.cpp\
-			srcs_new/Utils/FileUtils.cpp\
-			srcs_new/Utils/Logger.cpp\
-			srcs_new/Utils/HttpStatusCode.cpp\
-			srcs_new/Utils/UrlSuffix.cpp\
-			testers/UnitTest.cpp
+SRCS =	srcs_new/Client/Client.cpp \
+	srcs_new/Client/FdData.cpp \
+	srcs_new/Io/Io.cpp \
+	srcs_new/Message/Node.cpp \
+	srcs_new/Message/RequestHeader.cpp \
+	srcs_new/Message/ResponseHeader.cpp \
+	srcs_new/Message/AHeader.cpp \
+	srcs_new/Message/Message.cpp \
+	srcs_new/Parsing/ParsingUtils.cpp \
+	srcs_new/Parsing/Directive.cpp \
+	srcs_new/Parsing/NginxReturn.cpp \
+	srcs_new/Parsing/Token.cpp \
+	srcs_new/Parsing/Configuration.cpp \
+	srcs_new/Server/Socket.cpp \
+	srcs_new/Server/ConnectionManager.cpp \
+	srcs_new/Server/ServerManager.cpp \
+	srcs_new/Server/VirtualServer.cpp \
+	srcs_new/Server/DefaultSettings.cpp \
+	srcs_new/Server/LocationSettings.cpp \
+	srcs_new/Utils/FileUtils.cpp \
+	srcs_new/Utils/HttpStatusCode.cpp \
+	srcs_new/Utils/UrlSuffix.cpp \
+	srcs_new/Utils/Data.cpp \
+	srcs_new/Utils/Logger.cpp \
 
-HEADERS =	srcs_new/Message/AHeader.hpp\
-			srcs_new/Client/Client.hpp \
-			srcs_new/Client/FdData.hpp \
-			srcs_new/Io/Io.hpp \
-			srcs_new/Message/Message.hpp \
-			srcs_new/Message/Node.hpp \
-			srcs_new/Message/RequestHeader.hpp \
-			srcs_new/Parsing/LocationSettings.hpp \
-			srcs_new/Parsing/ServersInfo.hpp \
-			srcs_new/Parsing/Token.hpp \
-			srcs_new/Parsing/DefaultSettings.hpp \
-			srcs_new/Parsing/NginxReturn.hpp \
-			srcs_new/Parsing/Directive.hpp \
-			srcs_new/Parsing/Configuration.hpp \
-			srcs_new/Parsing/ParsingUtils.hpp \
-			srcs_new/Parsing/ServerSettings.hpp \
-			srcs_new/Message/ResponseHeader.hpp\
-			srcs_new/Server/ConnectionManager.hpp \
-			srcs_new/Server/Socket.hpp \
-			srcs_new/Utils/Data.hpp\
-			srcs_new/Utils/FileUtils.hpp\
-			srcs_new/Utils/Logger.hpp\
-			srcs_new/Utils/HttpStatusCode.hpp\
-			srcs_new/Utils/UrlSuffix.hpp \
-			testers/UnitTest.cpp
+
+HEADERS =	srcs_new/Client/Client.hpp \
+	srcs_new/Client/FdData.hpp \
+	srcs_new/Io/Io.hpp \
+	srcs_new/Message/Node.hpp \
+	srcs_new/Message/RequestHeader.hpp \
+	srcs_new/Message/ResponseHeader.hpp \
+	srcs_new/Message/AHeader.hpp \
+	srcs_new/Message/Message.hpp \
+	srcs_new/Parsing/ParsingUtils.hpp \
+	srcs_new/Parsing/Directive.hpp \
+	srcs_new/Parsing/NginxReturn.hpp \
+	srcs_new/Parsing/Token.hpp \
+	srcs_new/Parsing/Configuration.hpp \
+	srcs_new/Server/Socket.hpp \
+	srcs_new/Server/ConnectionManager.hpp \
+	srcs_new/Server/ServerManager.hpp \
+	srcs_new/Server/VirtualServer.hpp \
+	srcs_new/Server/DefaultSettings.hpp \
+	srcs_new/Server/LocationSettings.hpp \
+	srcs_new/Utils/FileUtils.hpp \
+	srcs_new/Utils/HttpStatusCode.hpp \
+	srcs_new/Utils/UrlSuffix.hpp \
+	srcs_new/Utils/Data.hpp \
+	srcs_new/Utils/Logger.hpp 
 			
 
 OBJ_DIR = obj

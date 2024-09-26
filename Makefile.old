@@ -34,14 +34,14 @@ SRCS =		srcs/Client/AHeader.cpp\
 			srcs/Client/CgiProcessor.cpp \
 			srcs/Client/RequestHeader.cpp \
 			srcs/Parsing/LocationSettings.cpp \
-			srcs/Parsing/ServersInfo.cpp \
+			srcs/Parsing/ServerManager.cpp \
 			srcs/Parsing/Token.cpp \
 			srcs/Parsing/DefaultSettings.cpp \
 			srcs/Parsing/NginxReturn.cpp \
 			srcs/Parsing/Directive.cpp \
 			srcs/Parsing/Configuration.cpp \
 			srcs/Parsing/ParsingUtils.cpp \
-			srcs/Parsing/ServerSettings.cpp \
+			srcs/Parsing/VirtualServer.cpp \
 			srcs/Response/Autoindex.cpp\
 			srcs/Response/Response.cpp\
 			srcs/Response/ResponseBody.cpp\
@@ -69,14 +69,14 @@ HEADERS =	srcs/Client/AHeader.hpp\
 			srcs/Client/Node.hpp \
 			srcs/Client/RequestHeader.hpp \
 			srcs/Parsing/LocationSettings.hpp\
-			srcs/Parsing/ServersInfo.hpp\
+			srcs/Parsing/ServerManager.hpp\
 			srcs/Parsing/Token.hpp\
 			srcs/Parsing/DefaultSettings.hpp\
 			srcs/Parsing/NginxReturn.hpp\
 			srcs/Parsing/Directive.hpp\
 			srcs/Parsing/Configuration.hpp\
 			srcs/Parsing/ParsingUtils.hpp\
-			srcs/Parsing/ServerSettings.hpp\
+			srcs/Parsing/VirtualServer.hpp\
 			srcs/Response/Autoindex.hpp\
 			srcs/Response/Response.hpp\
 			srcs/Response/ResponseBody.hpp\

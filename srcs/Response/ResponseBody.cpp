@@ -13,7 +13,7 @@
 
 class Client;
 
-ResponseBody::ResponseBody(const Client& client, const ServerSettings* server)
+ResponseBody::ResponseBody(const Client& client, const VirtualServer* server)
 :_client(client), _server(server), _httpStatusCode(0)
 {
     if(client.getErrorCode() == 400 || server == NULL)

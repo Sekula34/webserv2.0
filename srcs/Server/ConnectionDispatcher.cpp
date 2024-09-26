@@ -31,7 +31,7 @@ void handle_sigint(int sig)
 	//std::cout << "Called custom ctrl + c function" << std::endl;
 }
 
-ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServersInfo& serversInfo):
+ConnectionDispatcher::ConnectionDispatcher(SocketManager& sockets, ServerManager& serversInfo):
 _sockets(sockets),
 _clients(Data::getClients()),
 _serversInfo(serversInfo),
@@ -219,7 +219,7 @@ void	ConnectionDispatcher::writeClient(Client& client,  int idx)
 void	ConnectionDispatcher::_checkCgi(Client& client)
 {
 	client.cgiChecked = true;
-	const ServerSettings*	clientServer = _serversInfo.getClientServer(client);
+	const VirtualServer*	clientServer = _serversInfo.getClientServer(client);
 	if (!clientServer)
 		return ;
 	bool locFound = false;
@@ -305,7 +305,7 @@ bool ConnectionDispatcher::_isCgiPathInfoValid(std::string pathInfo)
 	return true;
 }
 
-std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocation(Client& client, const ServerSettings& cgiServer, bool& foundLoc)
+std::vector<LocationSettings>::const_iterator ConnectionDispatcher::_setCgiLocation(Client& client, const VirtualServer& cgiServer, bool& foundLoc)
 {
 	foundLoc = false;
 	RequestHeader* clientHeader =  static_cast<RequestHeader*>(client.getClientMsg()->getHeader());
@@ -389,7 +389,7 @@ void	ConnectionDispatcher::_handleClient(Client& client, int idx)
 void ConnectionDispatcher::_processAnswer(Client& client)
 {
 	Logger::info("Process answer for client: ");std::cout << client.getId() << std::endl;  
-	const ServerSettings* const responseServer = _serversInfo.getClientServer(client);
+	const VirtualServer* const responseServer = _serversInfo.getClientServer(client);
 	Logger::info("Resposible server is ", true);
 	if(responseServer != NULL)
 	{
@@ -400,7 +400,7 @@ void ConnectionDispatcher::_processAnswer(Client& client)
 	_createAndDelegateResponse(client, responseServer);
 }
 
-void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const ServerSettings* responseServer)
+void ConnectionDispatcher:: _createAndDelegateResponse(Client& client, const VirtualServer* responseServer)
 {
 	Response* clientRespone = client.getResponse();
 	if(clientRespone != NULL)

@@ -1,9 +1,9 @@
-#include "ServersInfo.hpp"
-#include "Configuration.hpp"
+#include "ServerManager.hpp"
+#include "../Parsing/Configuration.hpp"
 #include "DefaultSettings.hpp"
-#include "Directive.hpp"
-#include "ServerSettings.hpp"
-#include "Token.hpp"
+#include "../Parsing/Directive.hpp"
+#include "VirtualServer.hpp"
+#include "../Parsing/Token.hpp"
 #include <cstddef>
 #include <stdexcept>
 #include <vector>
@@ -14,7 +14,7 @@
 // #include "../Message/Message.hpp"
 
 
-ServersInfo::ServersInfo(std::string configPath)
+ServerManager::ServerManager(std::string configPath)
 {
 	Configuration serversConf(configPath);
 	_allTokens = serversConf.getAllTokens();
@@ -31,34 +31,34 @@ ServersInfo::ServersInfo(std::string configPath)
 	Directive::applyAllDirectives(_httpDirectives, defSettings);
 	for(int i = 1; i <= _numberOfServers; i++)
 	{
-		ServerSettings oneServer(i,defSettings,_allTokens);
+		VirtualServer oneServer(i,defSettings,_allTokens);
 		_servers.push_back(oneServer);
 	}
 }
 
-ServersInfo::ServersInfo(const ServersInfo& source)
+ServerManager::ServerManager(const ServerManager& source)
 {
 	(void) source;
 }
 
-ServersInfo& ServersInfo::operator=(const ServersInfo& source)
+ServerManager& ServerManager::operator=(const ServerManager& source)
 {
 	(void) source;
 	return(*this);
 }
 
-ServersInfo::~ServersInfo()
+ServerManager::~ServerManager()
 {
 
 }
 
 
-const std::vector<ServerSettings>& ServersInfo::getAllServers(void) const
+const std::vector<VirtualServer>& ServerManager::getAllServers(void) const
 {
 	return(_servers);
 }
 
-const ServerSettings& ServersInfo::getServerById(int serverId) const 
+const VirtualServer& ServerManager::getServerById(int serverId) const 
 {
 	int serverIndex = serverId - 1;
 	if(serverIndex > _numberOfServers || serverIndex < 0)
@@ -68,11 +68,11 @@ const ServerSettings& ServersInfo::getServerById(int serverId) const
 	return(_servers[serverIndex]);
 }
 
-const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string serverName) const
+const VirtualServer* ServerManager::getServerByPort(int portNumber, std::string serverName) const
 {
 	int serverId;
-	const ServerSettings* toReturn = NULL;
-	std::vector<ServerSettings> ServersId = _getAllServersIdWithPort(portNumber);
+	const VirtualServer* toReturn = NULL;
+	std::vector<VirtualServer> ServersId = _getAllServersIdWithPort(portNumber);
 	if(ServersId.size() == 0)
 		return NULL;
 	if(ServersId.size() == 1 || serverName == "")
@@ -83,7 +83,7 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 	}
 	for(size_t i = 0; i< ServersId.size(); i++)
 	{
-		ServerSettings& oneServer(ServersId[i]);
+		VirtualServer& oneServer(ServersId[i]);
 		if(oneServer.getServerName() == serverName)
 		{
 			serverId = oneServer.getServerId();
@@ -95,7 +95,7 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 }
 
 // TODO:
-// bool ServersInfo::_validateRequestHeader(const RequestHeader* header) const
+// bool ServerManager::_validateRequestHeader(const RequestHeader* header) const
 // {
 // 	if(header == NULL)
 // 	{
@@ -113,19 +113,19 @@ const ServerSettings* ServersInfo::getServerByPort(int portNumber, std::string s
 // }
 
 // TODO: Important
-// const ServerSettings* ServersInfo::getClientServer(const Client& client) const
+// const VirtualServer* ServerManager::getClientServer(const Client& client) const
 // {
 // 	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
 // 		return NULL;
 // 	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
-// 	const ServerSettings* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
+// 	const VirtualServer* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
 // 	return toReturn;
 // }
 
 //goes through vector of servers
 //get server Port, check if port is in unique vector if not add it
 //return unique ports;
-const std::vector<int> ServersInfo::getUniquePorts() const 
+const std::vector<int> ServerManager::getUniquePorts() const 
 {
 	std::vector<int> uniquePorts;
 	for(size_t i = 0; i < _servers.size(); i++)
@@ -142,7 +142,7 @@ const std::vector<int> ServersInfo::getUniquePorts() const
 }
 
 //check if Token is directive that belongs to http only
-bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
+bool ServerManager::_isTokenHttpDirective(const Token& toCheck) const
 {
 	if(toCheck.getTokenType() != Token::DIRECTIVE)
 		return false;
@@ -155,19 +155,19 @@ bool ServersInfo::_isTokenHttpDirective(const Token& toCheck) const
 	return true;
 }
 
-std::vector<ServerSettings> ServersInfo::_getAllServersIdWithPort(int port) const
+std::vector<VirtualServer> ServerManager::_getAllServersIdWithPort(int port) const
 {
-	std::vector<ServerSettings> serversPort;
+	std::vector<VirtualServer> serversPort;
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
-		const ServerSettings& oneServer(_servers[i]);
+		const VirtualServer& oneServer(_servers[i]);
 		if(oneServer.getPort() == port)
 			serversPort.push_back(oneServer);
 	}
 	return serversPort;
 }
 
-void ServersInfo::_setHttpDirectives(void)
+void ServerManager::_setHttpDirectives(void)
 {
 	for(size_t i = 0; i < _allTokens.size(); i++)
 	{

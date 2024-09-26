@@ -5,13 +5,13 @@
 #include "ResponseBody.hpp"
 
 class Client;
-//#include "../Parsing/ServerSettings.hpp"
+//#include "../Parsing/VirtualServer.hpp"
 
 class Response 
 {
 	private :
 		const Client& _client;
-		const ServerSettings* _server; //This class is not resposible for deleting
+		const VirtualServer* _server; //This class is not resposible for deleting
 		ResponseHeader* _responseHeader; //owning
 		//CLASS HEADER;
 		ResponseBody _responseBody;
@@ -22,7 +22,7 @@ class Response
 		std::string _createResponseString(void);
 
 	public :
-		Response(const Client& client, const ServerSettings* server);
+		Response(const Client& client, const VirtualServer* server);
 		Response(const Response& source);
 		Response& operator=(const Response& source);
 		~Response();

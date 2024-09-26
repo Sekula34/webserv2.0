@@ -1,6 +1,6 @@
 #ifndef  RESPONSEBODY_HPP
 # define RESPONSEBODY_HPP
-#include "../Parsing/ServerSettings.hpp"
+#include "../Parsing/VirtualServer.hpp"
 
 class Client;
 
@@ -9,7 +9,7 @@ class ResponseBody
 {
 	public :
 		//ResponseBody();
-		ResponseBody(const Client& client, const ServerSettings* server);
+		ResponseBody(const Client& client, const VirtualServer* server);
 		ResponseBody(const ResponseBody& source);
 		ResponseBody& operator=(const ResponseBody& source);
 		~ResponseBody();
@@ -19,7 +19,7 @@ class ResponseBody
 
 	private :
 		const Client& _client;
-		const ServerSettings* _server; //do not delete here This class is not resposible for deleting this
+		const VirtualServer* _server; //do not delete here This class is not resposible for deleting this
 		std::string _response;
 		int _httpStatusCode;
 		

@@ -1,4 +1,4 @@
-#include "./Parsing/ServersInfo.hpp"
+#include "Server/ServerManager.hpp"
 #include "Server/ConnectionManager.hpp"
 #include "Message/Node.hpp"
 #include "Message/Message.hpp"
@@ -21,7 +21,7 @@
 // void	initVars(char** envp, const std::string& configFilePath)
 // {
 // 	Data::setAllCgiLang();
-// 	ServersInfo serverInfo(configFilePath);
+// 	ServerManager serverInfo(configFilePath);
 // 	Logger::info("SERVER IS TURNED ON", "");
 // 	Data::setEnvp(envp);
 // 	// SocketManager sockets(serverInfo.getUniquePorts());
@@ -86,7 +86,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// ConnectionManager* manager = NULL;
 	Data::setAllCgiLang();
-	ServersInfo serverInfo(configFilePath);
+	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
 	Data::setEnvp(envp);
 	// SocketManager sockets(serverInfo.getUniquePorts());
