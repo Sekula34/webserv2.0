@@ -215,8 +215,6 @@ void	Client::setChildSocket(int to, int from)
 {
 	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
 	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
-	// _clientFds[to] = fdTypeStatePair(TOCHILD_FD, NONE);
-	// _clientFds[from] = fdTypeStatePair(FROMCHILD_FD, NONE);
 }
 
 void	Client::closeSocketToChild()

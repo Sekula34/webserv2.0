@@ -111,7 +111,7 @@ static Client*		isClient(int fd, std::map<int, Client*>& clients)
 	return (it->second);
 }
 
-// TODO: Decalre an enum to be more verbose for idx of clientFds
+// TODO: Declare an enum to be more verbose for idx of clientFds
 static void	updateClientFds(Client& client, const int& epollIdx, const struct epoll_event* events)
 {
 	const int fd = events[epollIdx].data.fd;
@@ -124,6 +124,8 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 		fdData.state = FdData::R_RECEIVE;
 	if (allowedToSend && allowedToReceive)
 		fdData.state = FdData::R_SENDREC;
+	if (!allowedToSend && !allowedToReceive)
+		fdData.state = FdData::NONE;
 }
 
 // Method for _epollLoop() to update Client Fd state (e_fdState)
@@ -131,15 +133,10 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
 	if (client.getClientState() == Client::DELETEME)
 	{
-		// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
-		// _clients.erase(it);
-
-		// epollRemoveFd(_epollFd, client.getClientFd(), events);
 		epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
 		delete &client; // delete needs an address
 		return ;
 	}
-
 	updateClientFds(client, idx, _events);
 }
 
@@ -147,7 +144,6 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 void		ConnectionManager::_handleCgiFds(const int& idx)
 {
 	int targetFd = _events[idx].data.fd;
-	// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); ++it)
 	{
@@ -162,9 +158,10 @@ void		ConnectionManager::_handleCgiFds(const int& idx)
 			fdData.state = FdData::CLOSED;
 			return ;
 		}
-		if (fdData.state == FdData::NONE)
+		if (fdData.state == FdData::NEW)
 		{
 			epollAddFd(_epollFd, targetFd);
+			fdData.state = FdData::NONE;
 			return ;
 		}
 		updateClientFds(currentClient, idx, _events);

@@ -15,12 +15,13 @@ class FdData
 
 		enum	e_fdState
 		{
-			NONE, // Initial state of fd
-			R_RECEIVE, // fd ready to be read
-			R_SEND, // fd ready to be writted to
-			R_SENDREC, // fd ready to be written to and read from
-			CLOSE, // close fd
-			CLOSED // fd is closed
+			NEW,		// ready to be added to epoll
+			NONE,		// FD is in epoll but not ready for send or receive 
+			R_RECEIVE,	// fd ready for receive
+			R_SEND,		// fd ready for send
+			R_SENDREC,	// fd ready for send and receive
+			CLOSE,		// close fd
+			CLOSED		// fd is closed
 		};
 
 		// Methods

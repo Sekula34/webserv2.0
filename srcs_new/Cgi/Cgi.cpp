@@ -497,31 +497,14 @@ void	Cgi::_readFromChild()
 
 void	Cgi::_closeCgi()
 {
-	if (_client->hasReadFromCgi && _client->waitReturn > 0)
-	{
-		// Logger::warning("removing FD from epoll: ");
-		// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
-		Data::epollRemoveFd(_client->socketFromChild);
-		close(_client->socketFromChild);
-		_client->socketFromChild = DELETED;
-		// _client->_cgiOutput = _client->getCgiMessage();
-		_client->cgiRunning = false;
-	}
 }
 
 void	Cgi::_ioChild()
 {
-	_writeToChild();
-	if (!_client->hasWrittenToCgi)
-		return ;
-
 	// running waitpid to know when childprocess has finished and quit if it crashes
 	_waitForChild();
 	if (!_client->cgiRunning)
 		return ;
-
-	_readFromChild();
-
 	_closeCgi();
 	return ;
 }
@@ -632,12 +615,6 @@ void	Cgi::_prepareSockets()
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
-	// Logger::warning("adding FD to epoll: ");
-	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
-	Data::epollAddFd(_socketsToChild[0]);
-	// Logger::warning("adding FD to epoll: ");
-	// std::cout << "FD: " << _socketsFromChild[0] << " Id: " << _client->getId() << std::endl;
-	Data::epollAddFd(_socketsFromChild[0]);
 	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
 
@@ -658,11 +635,14 @@ int Cgi::loop()
 			signal(SIGINT, SIG_IGN);
 			// runs execve on cgi-script
 			_execute();
-			return (_stopCgiSetErrorCode(), 1);
 		}
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets();
 	}
-	_ioChild();
+	_waitForChild();
+	if (!_client->cgiRunning)
+		return ;
+	if (_client->hasReadFromCgi && _client->waitReturn > 0)
+		_client->cgiRunning = false;
 	return (0);
 }
