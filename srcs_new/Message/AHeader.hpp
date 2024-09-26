@@ -12,8 +12,8 @@ class HeaderTester;
 class AHeader
 {
 	public:
-		AHeader();
-		AHeader(const std::string& headerSection);
+		AHeader(int& errorCode);
+		AHeader(const std::string& headerSection, int& errorCode);
 		AHeader(const AHeader& source);
 		AHeader& operator=(const AHeader& source);
 		//TODO: make destructor virtual
@@ -27,7 +27,7 @@ class AHeader
 	protected:
 		std::map<std::string, std::string> m_headerFields;
 		const std::string m_headerSection; //without start line in string; expected to be delimited by /r/n
-		int m_httpErrorCode;
+		int& m_errorCode;
 		//TODO: uncomment this abstract function 
 		virtual std::string getStartLine() const = 0;
 		//virtual std::string getStartLine() = 0

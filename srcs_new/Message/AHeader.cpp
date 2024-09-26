@@ -8,14 +8,15 @@
 
 
 
-AHeader::AHeader()
+AHeader::AHeader(int& erorCode)
+:m_errorCode(erorCode)
 {
 
 }
 
-AHeader::AHeader(const std::string& headerSection)
+AHeader::AHeader(const std::string& headerSection, int& erorCode)
 : m_headerSection(headerSection),
-m_httpErrorCode(0)
+m_errorCode(erorCode)
 {
 	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
@@ -30,7 +31,8 @@ m_httpErrorCode(0)
 }
 
 AHeader::AHeader(const AHeader& source)
-:m_headerSection(source.m_headerSection)
+:m_headerSection(source.m_headerSection),
+m_errorCode(source.m_errorCode)
 {
 	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
@@ -70,7 +72,7 @@ void AHeader::setOneHeaderField(std::string key, std::string value)
 
 void AHeader::p_setHttpStatusCode(int httpCode)
 {
-	m_httpErrorCode = httpCode;
+	m_errorCode = httpCode;
 }
 
 std::string AHeader::p_getAllHeaderFieldsAsString() const
@@ -87,7 +89,7 @@ std::string AHeader::p_getAllHeaderFieldsAsString() const
 
 const int& AHeader::getHttpStatusCode(void) const
 {
-	return m_httpErrorCode;
+	return m_errorCode;
 }
 
 

@@ -251,9 +251,9 @@ void	Message::_createHeader()
 	if(_header != NULL)
 		return;
 	if (_request)
-		_header = new RequestHeader(_chain.begin()->getStringUnchunked());
+		_header = new RequestHeader(_chain.begin()->getStringUnchunked(), _errorCode);
 	else
-		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), "\n", _createCgiHeaderDel());
+		_header = ResponseHeader::createCgiResponseHeader(_chain.begin()->getStringUnchunked(), _errorCode, "\n", _createCgiHeaderDel());
 
 	if(_header && _header->getHttpStatusCode() != 0)
 	{

@@ -1,7 +1,6 @@
 #ifndef RESPONSEHEADER_HPP
 # define RESPONSEHEADER_HPP
 #include "AHeader.hpp"
-#include <cstddef>
 #include <ostream>
 #include <string>
 
@@ -12,19 +11,20 @@ struct StatusLineElements
 	std::string ReasonPhrase;
 };
 
+//FIXME: there could be problem with http code 
 class ResponseHeader : public AHeader
 {
 
 	public:
-		ResponseHeader(std::string header, const int httpCode = 200);
-		ResponseHeader(const int& httpCode, size_t contentLength);
+		ResponseHeader(std::string header, int& errorCode);
+		//ResponseHeader(const int& httpCode, size_t contentLength);
 		ResponseHeader(const ResponseHeader& source);
 		ResponseHeader& operator=(const ResponseHeader& source);
 		~ResponseHeader();
 
 		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
-		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
+		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, int& clientError, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
 		void changeHttpCode(int newHttpCode);
 
 	private:
