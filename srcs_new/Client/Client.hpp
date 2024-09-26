@@ -17,6 +17,7 @@
 # define DELETED			-1 
 
 class Message;
+class VirtualServer;
 
 class Client
 {
@@ -50,8 +51,10 @@ class Client
 		unsigned short			getClientPort();
 		std::string				getClientIp() const;
 		std::clock_t			getStartTime() const;
+		const VirtualServer*	getVirtualServer() const;
 		int&					getErrorCode();
 		bool					checkTimeout();
+		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
@@ -73,17 +76,18 @@ class Client
 		void				_initVars(int fd);
 
 		// Attributes
-		const size_t		_id;
-		std::vector<FdData>	_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
-		e_clientState		_clientState;
-		const std::clock_t	_start;
-		int					_errorCode;
-		Message*			_requestMsg;	// client owns so it should delete
-		Message*			_responseMsg;	// client owns so it should delete
-		Message*			_cgiResponseMsg;
-		struct sockaddr		_clientAddr;
-		std::string			_clientIp;
-		socklen_t			_addrLen;
+		const size_t			_id;
+		std::vector<FdData>		_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		e_clientState			_clientState;
+		const std::clock_t		_start;
+		int						_errorCode;
+		Message*				_requestMsg;	// client owns so it should delete
+		Message*				_responseMsg;	// client owns so it should delete
+		Message*				_cgiResponseMsg;
+		struct sockaddr			_clientAddr;
+		std::string				_clientIp;
+		socklen_t				_addrLen;
+		const VirtualServer*	_virtualServer;
 		// double				_clockstop;
 
 	public:

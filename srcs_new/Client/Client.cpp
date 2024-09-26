@@ -139,6 +139,16 @@ std::string	Client::getClientIp() const
 	return (_clientIp);
 }
 
+const VirtualServer* Client::getVirtualServer() const
+{
+	return _virtualServer;
+}
+
+void Client::setVirtualServer(const VirtualServer& vs)
+{
+	_virtualServer = &vs;
+}
+
 void	Client::setErrorCode(int c)
 {
 	_errorCode = c;
