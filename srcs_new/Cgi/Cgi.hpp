@@ -46,10 +46,10 @@ class Cgi {
 		std::clock_t				_shutdownStart;
 
 		void						_ioChild();
-		int 						_cgiClient(Client& client);
+		void 						_cgiClient(Client& client);
 		void						_initScriptVars(Client& c);
 		bool						_checkInterpreterScript();
-		void						_stopCgiSetErrorCode();
+		void						_stopCgiSetErrorCode(Client& c);
 		bool						_createSockets();
 		void						_prepareSockets(Client& client);
 		char**						_create_env();

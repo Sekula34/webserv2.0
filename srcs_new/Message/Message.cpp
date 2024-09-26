@@ -30,7 +30,6 @@ Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
 	_state = INCOMPLETE;
 	_header = NULL;
 	_bytesSent = 0;
-	_bytesReceived = 0;
 }
 
 /******************************************************************************/

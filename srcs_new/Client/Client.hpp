@@ -14,7 +14,6 @@
 # include <map>
 
 # define MAX_TIMEOUT		3000
-# define DELETED			-1 
 
 class Message;
 
@@ -26,7 +25,7 @@ class Client
 		{
 			DO_REQUEST,	// Client should or does already read the Client request
 			DO_CGIREC,	// Client should or does already receive from CGI 
-			DO_CGISEND,// Client should or does already send to CGI
+			DO_CGISEND,	// Client should or does already send to CGI
 			DO_RESPONSE,// Client should or does already send response Response
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
 			DELETEME	// Client wants to be deleted

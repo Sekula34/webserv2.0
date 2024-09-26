@@ -468,13 +468,13 @@ void	Cgi::_waitForChild(Client& client)
 	if (client.waitReturn == -1)
 	{
 		Logger::error("waitpid, stopping CGI in client with ID", client.getId());
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(client);
 		return ;
 	}
 
 	// waitpid success
 	if (client.waitReturn > 0)	
-		_handleReturnStatus(status);
+		_handleReturnStatus(status, client);
 	return ;
 }
 
@@ -482,10 +482,7 @@ void	Cgi::_stopCgiSetErrorCode(Client& client)
 {
 	Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
 	client.setErrorCode(500);
-	// TODO: handle these three lines
-	// clientcgiRunning = false;
-	// delete client.getServerMsg();
-	// client->setServerMsg(NULL);
+	client.setClientState(Client::DO_RESPONSE);
 }
 
 bool	Cgi::_createSockets()
@@ -510,29 +507,40 @@ int Cgi::loop()
 		_cgiClient(*(it->second));
 }
 
-int Cgi::_cgiClient(Client& client)
+void Cgi::_cgiClient(Client& client)
 {
+	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
+	if (client.getClientState() != Client::DO_CGIREC
+		|| client.getClientState() != Client::DO_CGISEND)
+	{
+		return ;
+	}
+
+	// CREATE CHILD SOCKETS AND FORK ONCE
 	if (client.getClientFds().size() == 1)
 	{
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
-			return (_stopCgiSetErrorCode(), 1);
+		{
+			_stopCgiSetErrorCode();
+			return ;
+		}
 		// FORK!!
 		if ((_pid = fork()) == -1)
-			return (_stopCgiSetErrorCode(), 1);
+		{
+			_stopCgiSetErrorCode();
+			return ;
+		}
 		if (_pid == CHILD)
 		{
 			signal(SIGINT, SIG_IGN);
-			// runs execve on cgi-script
 			_execute();
 		}
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets(client);
 	}
+
+	// RUN WAIT FOR CHILD
 	_waitForChild(client);
-	if (!client.getClientState() == Client::D)
-		return ;
-	if (client->hasReadFromCgi && client->waitReturn > 0)
-		client->cgiRunning = false;
-	return (0);
+	return ;
 }
