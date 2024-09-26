@@ -102,9 +102,10 @@ int main(int argc, char** argv, char** envp)
 {
 	try
 	{
-		FileUtils::setConfigFilePath(getConfigFilePath(argc, argv));
+		std::string configFilePath = getConfigFilePath(argc, argv);
+		FileUtils::setConfigFilePath(configFilePath);
 		//const std::string filePath = getConfigFilePath(argc, argv);
-		ConnectionDispatcherTest(envp, FileUtils::getConfigFilePath());
+		ConnectionDispatcherTest(envp, configFilePath);
 	}
 	catch(std::exception &e)
 	{

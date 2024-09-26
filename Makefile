@@ -49,7 +49,8 @@ SRCS =		srcs_new/Message/AHeader.cpp\
 			srcs_new/Utils/FileUtils.cpp\
 			srcs_new/Utils/Logger.cpp\
 			srcs_new/Utils/HttpStatusCode.cpp\
-			srcs_new/Utils/UrlSuffix.cpp
+			srcs_new/Utils/UrlSuffix.cpp\
+			testers/UnitTest.cpp
 
 HEADERS =	srcs_new/Message/AHeader.hpp\
 			srcs_new/Client/Client.hpp \
@@ -74,7 +75,8 @@ HEADERS =	srcs_new/Message/AHeader.hpp\
 			srcs_new/Utils/FileUtils.hpp\
 			srcs_new/Utils/Logger.hpp\
 			srcs_new/Utils/HttpStatusCode.hpp\
-			srcs_new/Utils/UrlSuffix.hpp
+			srcs_new/Utils/UrlSuffix.hpp \
+			testers/UnitTest.cpp
 			
 
 OBJ_DIR = obj
