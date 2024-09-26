@@ -4,6 +4,7 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Message/Message.hpp"
 #include "../Message/Node.hpp"
+#include "../Message/RequestHeader.hpp"
 #include "Cgi.hpp"
 #include <unistd.h>
 #include <sys/types.h>
@@ -14,22 +15,16 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-Cgi::Cgi (void):
-_allSockets(Data::getServerSockets()),
-_nfds(Data::getNfds())
+Cgi::Cgi (void)
 {}
 
-Cgi::Cgi (Client& c):
-_allSockets(Data::getServerSockets()),
-_nfds(Data::getNfds())
+Cgi::Cgi (Client& client)
 {
-	_client = &c;
 	_args = NULL;
 	_env = NULL;
 	_tmp = NULL;
-	_forked = false;
-	_initScriptVars();
-	_createEnvVector();
+	_initScriptVars(client);
+	_createEnvVector(client);
 	_createArgsVector();
 	_env = _vecToChararr(_envVec);
 	_args = _vecToChararr(_argsVec);
@@ -37,7 +32,6 @@ _nfds(Data::getNfds())
 	_terminate = false;
 	_shutdownStart = 0;
 	_sentSigkill = false;
-	_bytesSent = 0;
 	Logger::info("Cgi constructor called", "");
 }
 
@@ -58,9 +52,7 @@ Cgi::~Cgi (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-Cgi::Cgi(Cgi const & src):
-_allSockets(Data::getServerSockets()),
-_nfds(Data::getNfds())
+Cgi::Cgi(Cgi const & src)
 {
 	//std::cout << "Cgi copy constructor called" << std::endl;
 	*this = src;
@@ -151,9 +143,9 @@ std::string	Cgi::getInterpreterPath(std::string suffix)
 	return (tmp = "");
 }
 
-std::string	Cgi::getScriptName(std::string suffix)
+std::string	Cgi::getScriptName(std::string suffix, Client& client)
 {
-	std::vector<std::string> sections = ParsingUtils::splitString((static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getPath(), '/');
+	std::vector<std::string> sections = ParsingUtils::splitString((static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getPath(), '/');
 	std::vector<std::string>::iterator it = sections.begin();
 	for (; it != sections.end(); it++)
 	{
@@ -188,10 +180,10 @@ bool	Cgi::_isRegularFile(std::string file)
 	return (true);
 }
 
-void	Cgi::_initScriptVars()
+void	Cgi::_initScriptVars(Client& client)
 {
 	// the suffix is .py or .php
-	std::string suffix = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptExtension();
+	std::string suffix = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptExtension();
 
 	// this is the location on the server and is hardcoded
 	std::string location = "/cgi-bin/";
@@ -205,7 +197,7 @@ void	Cgi::_initScriptVars()
 		return ;
 	}
 
-	_scriptName = static_cast<RequestHeader*>(_client->getClientMsg()->getHeader())->urlSuffix->getCgiScriptName();
+	_scriptName = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptName();
 	if (_scriptName.empty())
 		return ;
 
@@ -218,8 +210,7 @@ void	Cgi::_initScriptVars()
 	// Logger::info(_scriptAbsPath, true);
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
 	{
-		Logger::warning("CGI script not executable: ");
-		std::cout << _scriptAbsPath << std::endl;
+		Logger::warning("CGI script not executable: ", _scriptAbsPath);
 		_stopCgiSetErrorCode();
 		return ;
 	}
@@ -227,10 +218,10 @@ void	Cgi::_initScriptVars()
 		_stopCgiSetErrorCode();
 }
 
-void	Cgi::_createEnvVector()
+void	Cgi::_createEnvVector(Client& client)
 {
 	std::string	line;
-	std::string pathInfo = (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getCgiPathInfo();
+	std::string pathInfo = (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getCgiPathInfo();
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
@@ -238,18 +229,18 @@ void	Cgi::_createEnvVector()
 
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
-	if (_client->getClientMsg()->getChain().begin()->getBodySize() > 0)
+	if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getBodySize() > 0)
 	{
 		std::stringstream ss;
-		ss << _client->getClientMsg()->getChain().begin()->getBodySize();
+		ss << client.getMsg(Client::REQ_MSG)->getChain().begin()->getBodySize();
 		line += ss.str();
 	}
 	_envVec.push_back(line);
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
-	if (_client->getClientMsg()->getHeader()->getHeaderFieldMap().find("Content-Type") != _client->getClientMsg()->getHeader()->getHeaderFieldMap().end())
-		line +=_client->getClientMsg()->getHeader()->getHeaderFieldMap().find("Content-Type")->second;
+	if (client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().find("Content-Type") != client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().end())
+		line +=client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().find("Content-Type")->second;
 	_envVec.push_back(line);
 
 	// GATEWAY_INTERFACE
@@ -285,12 +276,12 @@ void	Cgi::_createEnvVector()
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
-	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getQueryParameters();
+	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getQueryParameters();
 	_envVec.push_back(line);
 
 	// REMOTE_ADDR
 	line = "REMOTE_ADDR="; 
-	line += _client->getClientIp();
+	line += client.getClientIp();
 	_envVec.push_back(line);
 
 	// REMOTE_HOST -> not mandatory according to RFC
@@ -301,30 +292,30 @@ void	Cgi::_createEnvVector()
 	
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
-	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getRequestLine().requestMethod;
+	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getRequestLine().requestMethod;
 	_envVec.push_back(line);
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
-	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->urlSuffix->getPath();
+	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
-	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getHostName();
+	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getHostName();
 	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
-	ss2 << (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getHostPort();
+	ss2 << (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getHostPort();
 	line += ss2.str();
 	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
-	line += (static_cast<RequestHeader*>(_client->getClientMsg()->getHeader()))->getRequestLine().protocolVersion;
+	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getRequestLine().protocolVersion;
 	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
@@ -407,108 +398,6 @@ int	Cgi::_execute()
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
-bool	Cgi::_isSocketReady(int socket, int macro)
-{
-	for (size_t i = 0; i < static_cast<size_t>(_nfds); ++i)
-	{
-		if (Data::setEvents()[i].data.fd == socket && Data::setEvents()[i].events & macro)
-			return (true);
-	}
-	return (false);
-}
-
-void	Cgi::_writeToChild()
-{
-	int		writeValue = 0;
-
-	// return if epoll does not allow us to write to socket
-	if (_client->hasWrittenToCgi || !_isSocketReady(_client->socketToChild, EPOLLOUT))
-		return ;
-
-	// SEND
-	const std::string& bodystr = _client->getClientMsg()->getBodyString();
-
-	if (bodystr.size() > 0)
-		writeValue = send(_client->socketToChild, bodystr.c_str() + _bytesSent, bodystr.size() - _bytesSent, MSG_DONTWAIT | MSG_NOSIGNAL);
-	// std::cout << "bytes written to CGI child process: " << writeValue << std::endl;
-	_bytesSent += writeValue;
-
-	// return if full message could not be sent
-	if (_bytesSent < bodystr.size() && writeValue > 0)
-		return ;
-
-	// if unable to send full message, log error and set error Code
-	if (writeValue < 0 || (writeValue == 0 && _bytesSent < bodystr.size()))
-	{
-		Logger::error("failed to send Request Body to CGI", true);
-		_client->setErrorCode(500);
-	}
-
-	// finished writing
-	_client->hasWrittenToCgi = true;
-
-	// closing Socket and and removing it from epoll
-	// Logger::warning("removing FD from epoll: ");
-	// std::cout << "FD: " << _socketsToChild[0] << " Id: " << _client->getId() << std::endl;
-	Data::epollRemoveFd(_client->socketToChild);
-	close(_client->socketToChild);
-	_client->socketToChild = DELETED;
-}
-
-void	Cgi::_readFromChild()
-{
-	int readValue = 0;
-
-	if (!_client->hasReadFromCgi && _isSocketReady(_client->socketFromChild, EPOLLIN))
-	{
-
-		if (!_client->getServerMsg())
-			_client->setServerMsg(new Message(false));
-
-		_client->clearRecvLine();
-		readValue = recv(_client->socketFromChild, _client->getRecvLine(), MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
-
-		// successful read -> concat message
-		if (readValue > 0)
-			_client->getServerMsg()->bufferToNodes(_client->getRecvLine(), readValue);
-
-		// failed read -> stop CGI and set errorcode = 500
-		if (readValue < 0)
-		{
-			Logger::warning("failed tor read from Child Process", true);
-			_stopCgiSetErrorCode();
-		}
-
-		// EOF reached, child has gracefully shutdown connection
-		if (readValue == 0 && _client->waitReturn != 0)
-		{
-			if (!_client->getServerMsg()->getHeader())
-				_client->getServerMsg()->_createHeader();
-			_client->getServerMsg()->setState(COMPLETE);
-			_client->hasReadFromCgi = true;
-			// _client->getServerMsg()->printChain();
-			// copy the error code in the CgiResponseHeader into client
-			// so that errors from CGI can be processed
-			if (_client->getServerMsg() && _client->getServerMsg()->getHeader() && !_client->getErrorCode())
-				_client->setErrorCode(_client->getServerMsg()->getHeader()->getHttpStatusCode());
-		}
-	}
-}
-
-void	Cgi::_closeCgi()
-{
-}
-
-void	Cgi::_ioChild()
-{
-	// running waitpid to know when childprocess has finished and quit if it crashes
-	_waitForChild();
-	if (!_client->cgiRunning)
-		return ;
-	_closeCgi();
-	return ;
-}
-
 void	Cgi::terminateChild()
 {
 	_terminate = true;	
@@ -521,75 +410,82 @@ void	Cgi::_timeoutKillChild()
 	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
 	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
 	{	
-		Logger::error("killing child process with PID: ");
-		std::cout << _pid << std::endl;
+		Logger::error("killing child process with PID: ", _pid);
 		kill(_pid, SIGKILL);
 		_sentSigkill = true;
 	}
 }
 
-void	Cgi::_handleChildTimeout()
+void	Cgi::_handleChildTimeout(Client& client)
 {
 	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
-	if ((!_client->checkTimeout() && !sentSigterm) || _terminate)
+	if ((!client.checkTimeout() && !sentSigterm) || _terminate)
 	{
 		_shutdownStart = std::clock();
 		_terminate = false;
 		sentSigterm = true;
-		Logger::warning("calling SIGTERM on child process: ");
-		std::cout << _pid << std::endl;
+		Logger::warning("calling SIGTERM on child process: ", _pid);
 		kill(_pid, SIGTERM);
 	}
 	// if SIGTERM not successful send SIGKILL after MAX_TIMEOUT / 2
 	_timeoutKillChild();
 }
 
-void	Cgi::_handleReturnStatus(int status)
+void	Cgi::_handleReturnStatus(int status, Client& client)
 {
 		if (WIFSIGNALED(status))
 		{
-			Logger::warning("child exited due to SIGNAL: ");
-			std::cout << WTERMSIG(status);
-			std::cout << ", ID: " << _client->getId() <<  std::endl;
+
+			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
+			Logger::warning("Child ID:", client.getId());
 			_stopCgiSetErrorCode();
 		}
 		if (WIFEXITED(status))
 		{
 			_exitstatus = WEXITSTATUS(status);
-			Logger::warning("child exited with code: ");
-			std::cout << _exitstatus;
-			std::cout << ", ID: " << _client->getId() <<  std::endl;
+			Logger::warning("child exited with code: ", _exitstatus);
+			Logger::warning("Child ID:", client.getId());
 			if (_exitstatus != 0)
 				_stopCgiSetErrorCode();
 		}
 }
 
-void	Cgi::_waitForChild()
+void	Cgi::_waitForChild(Client& client)
 {
 	int		status;
 	
 	// return if waitpid was already successful once
-	if (_client->waitReturn > 0)
+	if (client.waitReturn > 0)
 		return ;
 
 	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
-	_handleChildTimeout();
+	_handleChildTimeout(client);
 
 	// WAITPID
-	_client->waitReturn = waitpid(_pid, &status, WNOHANG);
+	client.waitReturn = waitpid(_pid, &status, WNOHANG);
 
 	// waitpid fail
-	if (_client->waitReturn == -1)
+	if (client.waitReturn == -1)
 	{
-		Logger::error("waitpid, stopping CGI", true);
+		Logger::error("waitpid, stopping CGI in client with ID", client.getId());
 		_stopCgiSetErrorCode();
 		return ;
 	}
 
 	// waitpid success
-	if (_client->waitReturn > 0)	
+	if (client.waitReturn > 0)	
 		_handleReturnStatus(status);
 	return ;
+}
+
+void	Cgi::_stopCgiSetErrorCode(Client& client)
+{
+	Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
+	client.setErrorCode(500);
+	// TODO: handle these three lines
+	// clientcgiRunning = false;
+	// delete client.getServerMsg();
+	// client->setServerMsg(NULL);
 }
 
 bool	Cgi::_createSockets()
@@ -601,29 +497,23 @@ bool	Cgi::_createSockets()
 	return (true);
 }
 
-void	Cgi::_stopCgiSetErrorCode()
-{
-	Logger::error("stopping CGI, errorcode 500 ");
-	std::cout << ",id: " << _client->getId() << std::endl;
-	_client->setErrorCode(500);
-	_client->cgiRunning = false;
-	delete _client->getServerMsg();
-	_client->setServerMsg(NULL);
-}
-
-void	Cgi::_prepareSockets()
+void	Cgi::_prepareSockets(Client& client)
 {
 	close(_socketsToChild[1]);
 	close(_socketsFromChild[1]);
-	_client->setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
+	client.setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
-
 int Cgi::loop()
 {
-	if (!_forked)
-	{
-		_forked = true;
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for (; it != Client::clients.end(); ++it)
+		_cgiClient(*(it->second));
+}
 
+int Cgi::_cgiClient(Client& client)
+{
+	if (client.getClientFds().size() == 1)
+	{
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
 			return (_stopCgiSetErrorCode(), 1);
@@ -637,12 +527,12 @@ int Cgi::loop()
 			_execute();
 		}
 		//closing unused sockets and adding relevant sockets to epoll
-		_prepareSockets();
+		_prepareSockets(client);
 	}
-	_waitForChild();
-	if (!_client->cgiRunning)
+	_waitForChild(client);
+	if (!client.getClientState() == Client::D)
 		return ;
-	if (_client->hasReadFromCgi && _client->waitReturn > 0)
-		_client->cgiRunning = false;
+	if (client->hasReadFromCgi && client->waitReturn > 0)
+		client->cgiRunning = false;
 	return (0);
 }

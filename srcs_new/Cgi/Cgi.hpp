@@ -22,13 +22,12 @@ class Cgi {
 									~Cgi(void);
 		int							loop(void);
 		std::string					getInterpreterPath(std::string suffix);
-		std::string					getScriptName(std::string suffix);
+		std::string					getScriptName(std::string suffix, Client& c);
 		int							getPid();
 		void						terminateChild();
 		bool						sentSigterm;
 
 	private:
-		Client *					_client;
 		int							_pid;
 		int							_socketsToChild[2];
 		int							_socketsFromChild[2];
@@ -37,10 +36,7 @@ class Cgi {
 		char**						_args;
 		char**						_env;
 		char**						_tmp;
-		bool						_forked;
 		int							_exitstatus;
-		const std::vector<Socket>&	_allSockets;
-		const int &					_nfds;	
 		std::string					_interpreterAbsPath;
 		std::string					_scriptAbsPath;
 		std::string					_scriptName;
@@ -48,30 +44,26 @@ class Cgi {
 		bool						_terminate;
 		bool						_sentSigkill;
 		std::clock_t				_shutdownStart;
-		size_t						_bytesSent;
 
 		void						_ioChild();
-		void						_initScriptVars();
+		int 						_cgiClient(Client& client);
+		void						_initScriptVars(Client& c);
 		bool						_checkInterpreterScript();
-		void						_readFromChild();
-		void						_writeToChild();
 		void						_stopCgiSetErrorCode();
 		bool						_createSockets();
-		void						_prepareSockets();
-		bool						_isSocketReady(int socket, int macro);
+		void						_prepareSockets(Client& client);
 		char**						_create_env();
 		char**						_create_argv();
 		int							_execute();
 		char**						_vecToChararr(std::vector<std::string>);
 		void						_deleteChararr(char ** lines);
-		void						_createEnvVector();
+		void						_createEnvVector(Client& client);
 		void						_createArgsVector();
-		void						_waitForChild();
-		void						_handleChildTimeout();
+		void						_waitForChild(Client& client);
+		void						_handleChildTimeout(Client& client);
 		void						_timeoutKillChild();
 		bool						_isRegularFile(std::string file);
-		void						_closeCgi();
-		void						_handleReturnStatus(int status);
+		void						_handleReturnStatus(int status, Client& client);
 
 									Cgi(void);
 									Cgi(Cgi const & src);
