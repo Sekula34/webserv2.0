@@ -219,6 +219,7 @@ void Client::_initVars(int fd)
 	_responseMsg = NULL;
 	_cgiResponseMsg = NULL;
 	clients[fd] = this;
+	_isRequestChecked = false;
 }
 
 void	Client::setChildSocket(int to, int from)
@@ -266,6 +267,16 @@ unsigned short	Client::getClientPort()
 		return (0);
 	}
 	return (ntohs(local_addr.sin_port));
+}
+
+const bool&	Client::getIsRequestChecked() const
+{
+	return (_isRequestChecked);
+}
+
+void	Client::setIsRequestChecked()
+{
+	_isRequestChecked = true;
 }
 
 void	Client::_initClientIp()

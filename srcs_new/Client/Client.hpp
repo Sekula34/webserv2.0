@@ -53,6 +53,7 @@ class Client
 		std::clock_t			getStartTime() const;
 		const VirtualServer*	getVirtualServer() const;
 		int&					getErrorCode();
+		const bool&				getIsRequestChecked() const;
 		bool					checkTimeout();
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
@@ -62,6 +63,7 @@ class Client
 		void					setErrorCode(int e);
 		void					setAddrlen(socklen_t addrlen);
 		void					setChildSocket(int in, int out);
+		void					setIsRequestChecked();
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -88,6 +90,7 @@ class Client
 		std::string				_clientIp;
 		socklen_t				_addrLen;
 		const VirtualServer*	_virtualServer;
+		bool					_isRequestChecked;
 		// double				_clockstop;
 
 	public:
