@@ -31,7 +31,7 @@ void ServerManager::_assignVirtualServer(Client& client)
 		return;
 	}
 	const RequestHeader* reqHeader = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
-	int port = reqHeader->getHostPort();
+	int port = reqHeader->getHostPort(); //TODO: change getHostPort to return error value when there is no Host Port
 	std::string serverName = reqHeader->getHostName();
 
 	const VirtualServer* server = getServerByPort(port, serverName);
@@ -69,34 +69,30 @@ void ServerManager::loop()
 	for (; it != Client::clients.end(); ++it)
 	{
 		Client& client = *(it->second);
+		if(client.getErrorCode() != 0)
+			client.setClientState(Client::DO_RESPONSE);
 		if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE)
 			continue;
-		_assignVirtualServer(client);
+		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
 		if(client.getClientState() == Client::DO_REQUEST)
 		{
-			if(client.getErrorCode() != 0)
-				client.setClientState(Client::DO_RESPONSE);
-			else
+			// if(client.getErrorCode() != 0)
+			// 	client.setClientState(Client::DO_RESPONSE);
+			if(_isCgi(client) == true)
 			{
-				if(_isCgi(client) == true)
-				{
-					Logger::warning("Client Requested valid cgi", client.getId());
-					//client.setClientState(Client::DO_CGISEND);
+				Logger::warning("Client Requested valid cgi", client.getId());
+				//client.setClientState(Client::DO_CGISEND);
 
-					// TODO: this is fake set state, just to make webserve work without cgi
-					client.setClientState(Client::DO_RESPONSE);
-				}
-				else  
-				{
-					Logger::warning("No cgi will be executed ", client.getErrorCode());
-					client.setClientState(Client::DO_RESPONSE);
-				}
-				//change state
-			} 
+				// TODO: this is fake set state, just to make webserve work without cgi
+				client.setClientState(Client::DO_RESPONSE);
+			}
+			else  
+			{
+				Logger::warning("No cgi will be executed ", client.getErrorCode());
+				client.setClientState(Client::DO_RESPONSE);
+			}
+			//change state
 		}
-		Logger::info("fuck message about to happen", "");
-		if(client.getClientState() == Client::DO_CGIREC && client.getMsg(Client::CGIRESP_MSG)->getState() == COMPLETE)
-			client.setClientState(Client::DO_RESPONSE);
 		if(client.getClientState() == Client::DO_RESPONSE)
 		{
 			//_createResponse(client);

@@ -44,18 +44,20 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 	{
 		if (!error)
 			client.setClientState(Client::DO_CGIREC);
-		else
-			client.setClientState(Client::DELETEME); // TODO: check whether this correct. If sending to child fails, we should not delete but send error code to client
+		// else
+		// 	client.setClientState(Client::DO_RESPONSE);
 	}
 	fdData.state = FdData::CLOSE;
 }
 
-static void	setFinishedReceiving(FdData& fdData, Message* message)
+static void	setFinishedReceiving(Client& client, FdData& fdData, Message* message)
 {
 	if (fdData.type == FdData::FROMCHILD_FD)
 	{
+		client.setClientState(Client::DO_RESPONSE);
 		fdData.state = FdData::CLOSE;
 	}
+
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.
@@ -122,7 +124,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	{
 		if (recValue < 0)
 			client.setErrorCode(500);
-		setFinishedReceiving(fdData, message);
+		setFinishedReceiving(client, fdData, message);
 	}
 }
 
