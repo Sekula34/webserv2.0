@@ -2,6 +2,7 @@
 #include "../Parsing/Configuration.hpp"
 #include "DefaultSettings.hpp"
 #include "../Parsing/Directive.hpp"
+#include "LocationSettings.hpp"
 #include "VirtualServer.hpp"
 #include "../Parsing/Token.hpp"
 #include <cstddef>
@@ -64,6 +65,40 @@ bool ServerManager::_isCgi(Client& client)
 	return false;
 }
 
+//false is error
+//true is good
+bool	ServerManager::_checkIfRequestAllowed(Client& client)
+{
+	if(client.getErrorCode() != 0)
+		return false;
+	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	const VirtualServer& server = *client.getVirtualServer();
+
+	std::string clientMethod = header.getRequestLine().requestMethod;
+	const std::string& clientUriPath = header.urlSuffix->getPath();
+	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+	bool found = false;
+	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	if(found == true)
+	{
+		const LocationSettings& reponseLocation = *it;
+		if(reponseLocation.isMethodAllowed(clientMethod) == false)
+		{
+			client.setErrorCode(405);
+			Logger::warning("Seted 405 method not allowed", 405);
+			return false;
+		}
+	}
+	else
+	{
+		Logger::warning("Client requested location that is not in this server ", clientUriPath);
+		client.setErrorCode(404);
+		return false;
+	}
+	Logger::warning("Client can access this", serverLocationUri);
+	return true;
+}
+
 void ServerManager::loop()
 {
 	std::map<int, Client*>::iterator it = Client::clients.begin();
@@ -75,6 +110,12 @@ void ServerManager::loop()
 		if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE)
 			continue;
 		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
+		if(client.getIsRequestChecked() == false)
+		{
+			if(_checkIfRequestAllowed(client) == false)
+				client.setClientState(Client::DO_RESPONSE);
+			client.setIsRequestChecked();
+		}
 		if(client.getClientState() == Client::DO_REQUEST)
 		{
 			// if(client.getErrorCode() != 0)
