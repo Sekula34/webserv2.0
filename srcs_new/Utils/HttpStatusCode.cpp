@@ -8,6 +8,7 @@ std::map<int, std::string> HttpStatusCode::_statusCode = _getFilledMap();
 std::map<int, std::string> HttpStatusCode::_getFilledMap()
 {
 	std::map<int, std::string> filledMap;
+    filledMap[0] = "So far so good";
     filledMap[100] = "Continue";
     filledMap[101] = "Switching Protocols";
     

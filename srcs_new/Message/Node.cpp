@@ -157,6 +157,10 @@ size_t	Node::getChunkHeaderSize()
 {
 	return (_chunkHeaderSize);
 }
+const std::string&			Node::getString()
+{
+	return (_str);
+}
 
 void	Node::setChunkHeader(bool b)
 {
@@ -189,7 +193,8 @@ std::string	Node::_chunk()
 	std::string result;
 	std::string del = ("\r\n");
 	ss << std::hex << _str.size();
-	result = ss.str() + del + _str + del;
+	_str = ss.str() + del + _str + del;
+	// result = ss.str() + del + _str + del;
 	return (result);
 }
 

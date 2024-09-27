@@ -102,6 +102,8 @@ const std::list<Node>::iterator& 	Message::getIterator()
 	return (_it);
 }
 
+
+
 void	Message::setState(int s)
 {
 	_state = s;
@@ -464,14 +466,15 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_parseNode();
 	}
 }
-void	Message::stringsToChain(ResponseHeader* header, std::string& body)
+void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 {
 	_header = header;
 
 	if (body.size() < MAX_BODY_SIZE)
 	{
 		header->setOneHeaderField("Content-Length", ParsingUtils::toString(body.size()));
-		_chain.begin()->setString(header->turnResponseHeaderToString());
+		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
+		// Logger::chars(header->turnResponseHeaderToString(), true);
 		_chain.push_back(Node("", BODY, _request));
 		std::list<Node>::iterator it = _chain.begin();
 		it++;
@@ -480,7 +483,16 @@ void	Message::stringsToChain(ResponseHeader* header, std::string& body)
 	else
 	{
 		header->setOneHeaderField("Transfer-Encoding", "chunked");
-		_chain.begin()->setString(header->turnResponseHeaderToString());
+		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		_bodyToChunks(body);
 	}
+}
+void	Message::resetIterator()
+{
+	_it = _chain.begin();
+}
+void	Message::advanceIterator()
+{
+	if (_it != _chain.end())
+		_it++;
 }

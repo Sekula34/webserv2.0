@@ -8,19 +8,27 @@
 #include "../Utils/FileUtils.hpp"
 #include "../Message/ResponseHeader.hpp"
 #include "../Utils/Logger.hpp"
+#include "../Message/Message.hpp"
+#include "../Message/Node.hpp"
 
 void ResponseGenerator::generateClientResponse(Client &client)
 {
-	ResponseGenerator oneResponse(client);
+    if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE)
+        return;
+    ResponseGenerator oneResponse(client);
     //std::cout << oneResponse.getResponse() << std::endl;
     Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
-   // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
-   ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-   header->setOneHeaderField("Connection", "close");
-   header->setOneHeaderField("Content-Type", "txt/html");
-   header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
-   std::cout << header->turnResponseHeaderToString() << std::endl;
-   std::cout << oneResponse.getResponse() << std::endl;
+    // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
+    ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
+    header->setOneHeaderField("Connection", "close");
+    header->setOneHeaderField("Content-Type", "text/html; charset=utf-8");
+    //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
+    std::cout << header->turnResponseHeaderToString() << std::endl;
+    std::cout << oneResponse.getResponse() << std::endl;
+    Message* message = client.getMsg(Client::RESP_MSG);
+    message->resetIterator();
+    message->stringsToChain(header, oneResponse.getResponse());
+    client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 
    //if(client.g)
 

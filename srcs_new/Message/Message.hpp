@@ -7,7 +7,7 @@
 #include <string>
 # include "AHeader.hpp"
 
-# define MAX_BODY_SIZE	4096
+# define MAX_BODY_SIZE	20
 # define MAX_CHUNKSIZE	30
 
 class Node;
@@ -23,7 +23,7 @@ class Message {
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
 		void						_chunksToBody();
-		void						stringsToChain(ResponseHeader* header, std::string& body);
+		void						stringsToChain(ResponseHeader* header, const std::string& body);
 
 									// set and get
 		int							getState() const;
@@ -38,6 +38,8 @@ class Message {
 		const size_t&				getBytesReceived() const;
 		void						setBytesReceived(size_t num);
 		void						setBytesSent(size_t num);
+		void						resetIterator();
+		void						advanceIterator();
 
 									//Message specific functions
 	private:
