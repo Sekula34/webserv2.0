@@ -193,7 +193,7 @@ void	Cgi::_initScriptVars(Client& client)
 	_interpreterAbsPath = getInterpreterPath(suffix);
 	if (_interpreterAbsPath.empty())
 	{
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(client);
 		return ;
 	}
 
@@ -211,17 +211,19 @@ void	Cgi::_initScriptVars(Client& client)
 	if (access(_scriptAbsPath.c_str(), X_OK) != 0)	
 	{
 		Logger::warning("CGI script not executable: ", _scriptAbsPath);
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(client);
 		return ;
 	}
 	if (!_isRegularFile(_scriptAbsPath))
-		_stopCgiSetErrorCode();
+		_stopCgiSetErrorCode(client);
 }
 
 void	Cgi::_createEnvVector(Client& client)
 {
+	RequestHeader* requestHeader = (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()));
+	Message* requestMessage = client.getMsg(Client::REQ_MSG);
 	std::string	line;
-	std::string pathInfo = (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getCgiPathInfo();
+	std::string pathInfo = requestHeader->urlSuffix->getCgiPathInfo();
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
@@ -229,18 +231,18 @@ void	Cgi::_createEnvVector(Client& client)
 
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
-	if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getBodySize() > 0)
+	if (requestMessage->getChain().begin()->getBodySize() > 0)
 	{
 		std::stringstream ss;
-		ss << client.getMsg(Client::REQ_MSG)->getChain().begin()->getBodySize();
+		ss << requestMessage->getChain().begin()->getBodySize();
 		line += ss.str();
 	}
 	_envVec.push_back(line);
 
 	// CONTENT_TYPE 
 	line = "CONTENT_TYPE="; 		
-	if (client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().find("Content-Type") != client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().end())
-		line +=client.getMsg(Client::REQ_MSG)->getHeader()->getHeaderFieldMap().find("Content-Type")->second;
+	if (requestHeader->getHeaderFieldMap().find("Content-Type") != requestHeader->getHeaderFieldMap().end())
+		line += requestHeader->getHeaderFieldMap().find("Content-Type")->second;
 	_envVec.push_back(line);
 
 	// GATEWAY_INTERFACE
@@ -276,7 +278,7 @@ void	Cgi::_createEnvVector(Client& client)
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
-	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getQueryParameters();
+	line += requestHeader->urlSuffix->getQueryParameters();
 	_envVec.push_back(line);
 
 	// REMOTE_ADDR
@@ -292,30 +294,30 @@ void	Cgi::_createEnvVector(Client& client)
 	
 	//REQUEST_METHOD
 	line = "REQUEST_METHOD="; 
-	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getRequestLine().requestMethod;
+	line += requestHeader->getRequestLine().requestMethod;
 	_envVec.push_back(line);
 
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
-	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->urlSuffix->getPath();
+	line += requestHeader->urlSuffix->getPath();
 	_envVec.push_back(line);
 	
 	//SERVER_NAME
 	line = "SERVER_NAME="; 
-	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getHostName();
+	line += requestHeader->getHostName();
 	_envVec.push_back(line);
 	
 	//SERVER_PORT
 	std::stringstream ss2;
 	line = "SERVER_PORT="; 
-	ss2 << (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getHostPort();
+	ss2 << requestHeader->getHostPort();
 	line += ss2.str();
 	_envVec.push_back(line);
 	
 	//SERVER_PROTOCOL 
 	line = "SERVER_PROTOCOL="; 
-	line += (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()))->getRequestLine().protocolVersion;
+	line += requestHeader->getRequestLine().protocolVersion;
 	_envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
@@ -438,7 +440,7 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 
 			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
 			Logger::warning("Child ID:", client.getId());
-			_stopCgiSetErrorCode();
+			_stopCgiSetErrorCode(client);
 		}
 		if (WIFEXITED(status))
 		{
@@ -446,7 +448,7 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 			Logger::warning("child exited with code: ", _exitstatus);
 			Logger::warning("Child ID:", client.getId());
 			if (_exitstatus != 0)
-				_stopCgiSetErrorCode();
+				_stopCgiSetErrorCode(client);
 		}
 }
 
@@ -522,13 +524,13 @@ void Cgi::_cgiClient(Client& client)
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
 		{
-			_stopCgiSetErrorCode();
+			_stopCgiSetErrorCode(client);
 			return ;
 		}
 		// FORK!!
 		if ((_pid = fork()) == -1)
 		{
-			_stopCgiSetErrorCode();
+			_stopCgiSetErrorCode(client);
 			return ;
 		}
 		if (_pid == CHILD)
