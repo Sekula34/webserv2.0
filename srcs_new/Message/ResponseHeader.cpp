@@ -101,6 +101,7 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 
 ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &rg)
 {
+	
 	ResponseHeader* rgHeader = new ResponseHeader();
 	rgHeader->changeHttpCode(rg.getResponseHttpStatus());
 	//rgHeader->setOneHeaderField("Content-Type", std::string value)

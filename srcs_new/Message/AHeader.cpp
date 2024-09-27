@@ -72,6 +72,11 @@ void AHeader::setOneHeaderField(std::string key, std::string value)
 
 void AHeader::p_setHttpStatusCode(int httpCode)
 {
+	if(m_errorCode != 0)
+	{
+		Logger::warning("Overwriting error code, old: ", m_errorCode);
+		Logger::warning("New error code", httpCode);
+	}
 	m_errorCode = httpCode;
 }
 

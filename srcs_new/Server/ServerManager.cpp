@@ -105,6 +105,8 @@ void ServerManager::loop()
 	for (; it != Client::clients.end(); ++it)
 	{
 		Client& client = *(it->second);
+		if(client.getClientState() == Client::DELETEME)
+			continue;
 		if(client.getErrorCode() != 0)
 			client.setClientState(Client::DO_RESPONSE);
 		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODOD: check if header is complete not full req
@@ -140,6 +142,7 @@ void ServerManager::loop()
 		if(client.getClientState() == Client::DO_RESPONSE)
 		{
 			ResponseGenerator::generateClientResponse(client);
+			//client.setClientState(Client::DELETEME);
 			//_createResponse(client);
 			// CREATE RESPONSE
 		}

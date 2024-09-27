@@ -6,18 +6,31 @@
 #include "../Server/VirtualServer.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Utils/FileUtils.hpp"
-#include "../Message/Message.hpp"
+#include "../Message/ResponseHeader.hpp"
+#include "../Utils/Logger.hpp"
 
 void ResponseGenerator::generateClientResponse(Client &client)
 {
 	ResponseGenerator oneResponse(client);
-    client.setErrorCode(0);
-    Message responseMsg(false, client.getErrorCode());
-    Logger::warning("Message object is generated", "");
-    std::string cRes = oneResponse.getResponse().c_str();
-    char * nonConst = const_cast<char*>(cRes.c_str()); 
-    responseMsg.bufferToNodes(nonConst, oneResponse.getResponse().size());
-    std::cout << "[" <<responseMsg.getBodyString() << "]" << std::endl;
+    //std::cout << oneResponse.getResponse() << std::endl;
+    Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
+   // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
+   ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
+   header->setOneHeaderField("Connection", "close");
+   header->setOneHeaderField("Content-Type", "txt/html");
+   header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
+   std::cout << header->turnResponseHeaderToString() << std::endl;
+   std::cout << oneResponse.getResponse() << std::endl;
+
+   //if(client.g)
+
+    // client.setErrorCode(0);
+    // Message responseMsg(false, client.getErrorCode());
+    // Logger::warning("Message object is generated", "");
+    // std::string cRes = oneResponse.getResponse().c_str();
+    // char * nonConst = const_cast<char*>(cRes.c_str()); 
+    // responseMsg.bufferToNodes(nonConst, oneResponse.getResponse().size());
+    //std::cout << "[" <<responseMsg.getBodyString() << "]" << std::endl;
 	//Response message 
 	//generate message
 	//store message in client
@@ -34,7 +47,7 @@ const int& ResponseGenerator::getResponseHttpStatus() const
 }
 
 ResponseGenerator::ResponseGenerator(Client& client)
-:_client(client)
+:_client(client), _httpStatus(client.getErrorCode())
 {
 	_fileType = FileUtils::HTML;
 	_responseMenu();
@@ -124,6 +137,7 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
         errorHtml = _generateErrorPage(errorCode);
         Logger::info("Response body is generated and it is", errorHtml);
     }
+    Logger::warning("Http status code ", _httpStatus);
 	return errorHtml;
 }
 
