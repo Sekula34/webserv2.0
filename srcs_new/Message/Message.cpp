@@ -5,13 +5,13 @@
 #include "ResponseHeader.hpp"
 #include "../Client/Client.hpp"
 #include "../Utils/Logger.hpp"
-// #include "../Parsing/ParsingUtils.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include <sstream>
 #include <cmath>
 
 
 
-#define MAX_CHUNKSIZE	30
+
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -156,16 +156,27 @@ void	Message::_findBody(std::list<Node>::iterator& it)
 	it = _chain.begin();
 }
 
-size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
+// size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
+// {
+// 	if (it == _chain.begin() || MAX_CHUNKSIZE <= 0)
+// 	{
+// 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
+// 		return (0);
+// 	}
+// 	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
+// 	int result = std::ceil(static_cast<double>(it->getBodySize()) / ceiling);
+// 	return (result);
+// }
+
+size_t	Message::_calcOptimalChunkSize(const std::string& body)
 {
-	_findBody(it);
-	if (it == _chain.begin() || MAX_CHUNKSIZE <= 0)
+	if (MAX_CHUNKSIZE <= 0)
 	{
 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
 		return (0);
 	}
-	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
-	int result = std::ceil(static_cast<double>(it->getBodySize()) / ceiling);
+	int ceiling = std::ceil(static_cast<double>(body.size()) / static_cast<double>(MAX_CHUNKSIZE));
+	int result = std::ceil(static_cast<double>(body.size()) / ceiling);
 	return (result);
 }
 
@@ -180,19 +191,49 @@ Node	Message::_newChunkNode(size_t size)
 	return (node);
 }
 
-void	Message::_bodyToChunks()
+// void	Message::_bodyToChunks()
+// {
+// 	std::list<Node>::iterator it;
+// 	_findBody(it);
+// 	std::list<Node>::iterator currentNode;
+// 	size_t	optimalSize = _calcOptimalChunkSize(it);
+// 	size_t	remainSize = it->getBodySize();
+// 	std::string str = it->getStringUnchunked();	
+// 	size_t	sizeInNode = 0;
+// 	size_t	strPos = 0;
+	
+// 	currentNode = _chain.begin();
+
+// 	_chain.pop_back();
+// 	while (remainSize)
+// 	{
+// 		if (remainSize > optimalSize)
+// 			sizeInNode = optimalSize;
+// 		else
+// 			sizeInNode = remainSize;
+// 		remainSize -= sizeInNode;
+// 		_chain.push_back((_newChunkNode(sizeInNode)));
+// 		currentNode++;
+// 		currentNode->setStringChunked(str.substr(strPos, sizeInNode));	
+// 		strPos +=sizeInNode;
+// 	}
+// 	_chain.push_back(_newChunkNode(0));
+// 	_chain.back().setType(LCHUNK);
+// 	_chain.back().setString("0\r\n\r\n");
+// }
+
+void	Message::_bodyToChunks(const std::string& body)
 {
-	std::list<Node>::iterator it;
+
 	std::list<Node>::iterator currentNode;
-	size_t	optimalSize = _calcOptimalChunkSize(it);
-	size_t	remainSize = it->getBodySize();
-	std::string str = it->getStringUnchunked();	
+	size_t	optimalSize = _calcOptimalChunkSize(body);
+	size_t	remainSize = body.size();	
 	size_t	sizeInNode = 0;
 	size_t	strPos = 0;
 	
 	currentNode = _chain.begin();
 
-	_chain.pop_back();
+	// _chain.pop_back();
 	while (remainSize)
 	{
 		if (remainSize > optimalSize)
@@ -202,7 +243,7 @@ void	Message::_bodyToChunks()
 		remainSize -= sizeInNode;
 		_chain.push_back((_newChunkNode(sizeInNode)));
 		currentNode++;
-		currentNode->setStringChunked(str.substr(strPos, sizeInNode));	
+		currentNode->setStringChunked(body.substr(strPos, sizeInNode));	
 		strPos +=sizeInNode;
 	}
 	_chain.push_back(_newChunkNode(0));
@@ -421,5 +462,25 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_it->concatString(buffer, bufferPos, num);
 		_setNodeComplete();
 		_parseNode();
+	}
+}
+void	Message::stringsToChain(ResponseHeader* header, std::string& body)
+{
+	_header = header;
+
+	if (body.size() < MAX_BODY_SIZE)
+	{
+		header->setOneHeaderField("Content-Length", ParsingUtils::toString(body.size()));
+		_chain.begin()->setString(header->turnResponseHeaderToString());
+		_chain.push_back(Node("", BODY, _request));
+		std::list<Node>::iterator it = _chain.begin();
+		it++;
+		it->setString(body);
+	}
+	else
+	{
+		header->setOneHeaderField("Transfer-Encoding", "chunked");
+		_chain.begin()->setString(header->turnResponseHeaderToString());
+		_bodyToChunks(body);
 	}
 }

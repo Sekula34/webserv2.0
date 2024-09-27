@@ -4,10 +4,15 @@
 
 # include <list>
 # include <sstream>
+#include <string>
 # include "AHeader.hpp"
+
+# define MAX_BODY_SIZE	4096
+# define MAX_CHUNKSIZE	30
 
 class Node;
 class RequestHeader;
+class ResponseHeader;
 
 class Message {
 
@@ -17,8 +22,8 @@ class Message {
 		virtual						~Message(void);
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
-		void						_bodyToChunks();
 		void						_chunksToBody();
+		void						stringsToChain(ResponseHeader* header, std::string& body);
 
 									// set and get
 		int							getState() const;
@@ -48,12 +53,15 @@ class Message {
 		size_t						_bytesSent;
 		size_t						_bytesReceived;
 
+		void						_bodyToChunks(const std::string& body);
+		// void						_bodyToChunks();
 		void						_setNodeComplete();
 		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
-		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
+		// size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
+		size_t						_calcOptimalChunkSize(const std::string& body);
 		Node						_newChunkNode(size_t size);
 		std::string					_createCgiHeaderDel();
 		// void						_createHeader();

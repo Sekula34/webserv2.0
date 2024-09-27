@@ -280,6 +280,7 @@ std::string ResponseBody::_convertToServerPath(const LocationSettings& location)
 
 void ResponseBody::_generateServerResponse()
 {
+    //TODO: check if this is checked in AHeader
     if(static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->getRequestLine().protocolVersion != "HTTP/1.1")
     {
         _renderServerErrorPage(505);
