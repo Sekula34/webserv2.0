@@ -73,7 +73,6 @@ class ServerManager
 		void 						_setCgiPathInfo(const std::string& urlpath, const std::string scriptPath, Client& client);
 		bool 						_isCgiPathInfoValid(std::string pathInfo);
 		bool						_isSupportedScriptExtenstion(const LocationSettings& location, Client& client);
-		void						_createResponse(Client& client);
 		
 };
 

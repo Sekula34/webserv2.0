@@ -41,6 +41,7 @@ SRCS =	srcs_new/Client/Client.cpp \
 	srcs_new/Parsing/Configuration.cpp \
 	srcs_new/Server/Socket.cpp \
 	srcs_new/Server/ConnectionManager.cpp \
+	srcs_new/Server/ResponseGenerator.cpp \
 	srcs_new/Server/ServerManager.cpp \
 	srcs_new/Server/VirtualServer.cpp \
 	srcs_new/Server/DefaultSettings.cpp \
@@ -67,6 +68,7 @@ HEADERS =	srcs_new/Client/Client.hpp \
 	srcs_new/Parsing/Configuration.hpp \
 	srcs_new/Server/Socket.hpp \
 	srcs_new/Server/ConnectionManager.hpp \
+	srcs_new/Server/ResponseGenerator.cpp \
 	srcs_new/Server/ServerManager.hpp \
 	srcs_new/Server/VirtualServer.hpp \
 	srcs_new/Server/DefaultSettings.hpp \

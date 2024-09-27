@@ -4,6 +4,8 @@
 #include <ostream>
 #include <string>
 
+class ResponseGenerator;
+
 struct StatusLineElements
 {
 	std::string HttpVersion;
@@ -16,6 +18,7 @@ class ResponseHeader : public AHeader
 {
 
 	public:
+		ResponseHeader();
 		ResponseHeader(std::string header, int& errorCode);
 		//ResponseHeader(const int& httpCode, size_t contentLength);
 		ResponseHeader(const ResponseHeader& source);
@@ -25,6 +28,8 @@ class ResponseHeader : public AHeader
 		std::string getStartLine() const;
 		std::string turnResponseHeaderToString(void) const;
 		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, int& clientError, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
+		static ResponseHeader* createRgResponseHeader(const ResponseGenerator& rg);
+		
 		void changeHttpCode(int newHttpCode);
 
 	private:

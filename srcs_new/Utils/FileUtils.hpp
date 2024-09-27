@@ -5,6 +5,13 @@
 class FileUtils
 {
 	public :
+		enum e_fileType
+		{
+			HTML, 
+			CSS,
+			TXT,
+			UNKOWN 
+		};
 
 		static void setConfigFilePath(const std::string &configFilePath);
 		static const std::string& getConfigFilePath(); 

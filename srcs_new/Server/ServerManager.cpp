@@ -16,6 +16,7 @@
 #include "../Message/RequestHeader.hpp"
 #include "../Client/Client.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include "ResponseGenerator.hpp"
 
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
@@ -99,6 +100,7 @@ void ServerManager::loop()
 			client.setClientState(Client::DO_RESPONSE);
 		if(client.getClientState() == Client::DO_RESPONSE)
 		{
+			ResponseGenerator::generateClientResponse(client);
 			//_createResponse(client);
 			// CREATE RESPONSE
 		}

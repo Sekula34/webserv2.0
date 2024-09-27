@@ -1,11 +1,19 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include "AHeader.hpp"
 #include <cstddef>
 #include <ostream>
 #include <sstream>
 #include <vector>
+#include "../Server/ResponseGenerator.hpp"
 
+
+ResponseHeader::ResponseHeader()
+:AHeader(_httpCode = 0)
+{
+	
+}
 
 ResponseHeader::ResponseHeader(std::string headerSection, int& errorCode)
 :AHeader(headerSection, errorCode)
@@ -89,6 +97,19 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		toReturn->changeHttpCode(newHttpCode);
 	}
 	return toReturn;
+}
+
+ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &rg)
+{
+	ResponseHeader* rgHeader = new ResponseHeader();
+	rgHeader->changeHttpCode(rg.getResponseHttpStatus());
+	rgHeader->setOneHeaderField("Content-Type", std::string value)
+	//Content-Type: text/html; charset=ISO-8859-1
+
+
+
+	return rgHeader;
+	//rgHeader->setOneHeaderField(std::string key, std::string value)
 }
 
 void ResponseHeader::changeHttpCode(int newHttpCode)

@@ -23,6 +23,7 @@ class AHeader
 		const int& getHttpStatusCode(void) const;
 		bool isBodyExpected() const;
 		void setOneHeaderField(std::string key, std::string value);
+		void setContentType()
 
 	protected:
 		std::map<std::string, std::string> m_headerFields;
