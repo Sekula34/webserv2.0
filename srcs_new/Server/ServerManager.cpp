@@ -107,7 +107,7 @@ void ServerManager::loop()
 		Client& client = *(it->second);
 		if(client.getErrorCode() != 0)
 			client.setClientState(Client::DO_RESPONSE);
-		if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE)
+		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODOD: check if header is complete not full req
 			continue;
 		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
 		if(client.getIsRequestChecked() == false)
@@ -116,7 +116,9 @@ void ServerManager::loop()
 				client.setClientState(Client::DO_RESPONSE);
 			client.setIsRequestChecked();
 		}
-		if(client.getClientState() == Client::DO_REQUEST)
+		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODOD: check if header is complete not full req
+		// 	continue;
+		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
 		{
 			// if(client.getErrorCode() != 0)
 			// 	client.setClientState(Client::DO_RESPONSE);
