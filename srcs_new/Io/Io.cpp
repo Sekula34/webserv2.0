@@ -109,6 +109,8 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	int 	recValue = 0;
 
 	clearBuffer(_buffer);
+
+	
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
@@ -143,6 +145,8 @@ void	Io::_ioClient(Client& client)
 		&&(fdData.state  == FdData::R_RECEIVE
 		|| fdData.state  == FdData::R_SENDREC))
 	{
+			if (message->getChain().begin()->getState() == COMPLETE && client.getIsRequestChecked() != true)
+				return ;
 			_receiveMsg(client, fdData, message);
 	}
 
