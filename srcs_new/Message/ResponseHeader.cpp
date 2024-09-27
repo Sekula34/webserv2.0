@@ -103,7 +103,7 @@ ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &
 {
 	ResponseHeader* rgHeader = new ResponseHeader();
 	rgHeader->changeHttpCode(rg.getResponseHttpStatus());
-	rgHeader->setOneHeaderField("Content-Type", std::string value)
+	//rgHeader->setOneHeaderField("Content-Type", std::string value)
 	//Content-Type: text/html; charset=ISO-8859-1
 
 
