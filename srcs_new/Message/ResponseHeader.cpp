@@ -109,7 +109,7 @@ ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &
 		rgHeader->setOneHeaderField("Location", rg.getRedirect().getRedirectPath());
 	}
 	//rgHeader->setOneHeaderField("Connection", "close");
-	rgHeader->setOneHeaderField("Content-Type", "text/html; charset=utf-8");//TODO: either left it out or decide based on file extension
+	//rgHeader->setOneHeaderField("Content-Type", "text/html; charset=utf-8");//TODO: either left it out or decide based on file extension
 	//rgHeader->setOneHeaderField("Content-Type", std::string value)
 	//Content-Type: text/html; charset=ISO-8859-1
 

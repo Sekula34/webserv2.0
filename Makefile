@@ -46,11 +46,12 @@ SRCS =	srcs_new/Client/Client.cpp \
 	srcs_new/Server/VirtualServer.cpp \
 	srcs_new/Server/DefaultSettings.cpp \
 	srcs_new/Server/LocationSettings.cpp \
+	srcs_new/Utils/Autoindex.cpp \
 	srcs_new/Utils/FileUtils.cpp \
 	srcs_new/Utils/HttpStatusCode.cpp \
 	srcs_new/Utils/UrlSuffix.cpp \
 	srcs_new/Utils/Data.cpp \
-	srcs_new/Utils/Logger.cpp \
+	srcs_new/Utils/Logger.cpp
 
 
 HEADERS =	srcs_new/Client/Client.hpp \
@@ -73,6 +74,7 @@ HEADERS =	srcs_new/Client/Client.hpp \
 	srcs_new/Server/VirtualServer.hpp \
 	srcs_new/Server/DefaultSettings.hpp \
 	srcs_new/Server/LocationSettings.hpp \
+	srcs_new/Utils/Autoindex.hpp \
 	srcs_new/Utils/FileUtils.hpp \
 	srcs_new/Utils/HttpStatusCode.hpp \
 	srcs_new/Utils/UrlSuffix.hpp \

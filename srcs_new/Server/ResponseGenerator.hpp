@@ -29,6 +29,8 @@ class ResponseGenerator
 		void 		_redirectHandler(const LocationSettings& location);
 		void		_getHandler(const LocationSettings& location);
 		void		_generateHtml(const LocationSettings& location);
+		void 		_autoindexHtml(const std::string& serverFilePath, const LocationSettings& location);
+		//void		_dirHtml(const std::string& file, const LocationSettings& location);
 
 
 		Client&		_client;

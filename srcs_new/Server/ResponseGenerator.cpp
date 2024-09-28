@@ -13,7 +13,7 @@
 #include "../Message/RequestHeader.hpp"
 #include "../Utils/Logger.hpp"
 #include "LocationSettings.hpp"
-
+#include "../Utils/Autoindex.hpp"
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
@@ -151,6 +151,47 @@ static bool _fileHtml(const std::string& file, std::string& response)
     return false;
 }
 
+static bool _constructIndex(const std::string& file, const LocationSettings& location, std::string& response)
+{
+    for(size_t i = 0; i < location.getIndexes().size(); i++)
+    {
+        std::string fileName = file + (location.getIndexes()[i]);
+        if(_fileHtml(fileName, response) == true)
+            return true;
+    }
+    return false;
+}
+
+static bool _dirHtml(const std::string& file, const LocationSettings& location, std::string& response)
+{
+    Logger::info("Dir html", true);
+    if(_constructIndex(file, location, response) == true)
+    {
+        return true; //200set
+    }
+    return false;
+    //_autoindexHtml(file,location);
+}
+
+void ResponseGenerator::_autoindexHtml(const std::string& relativePath, const LocationSettings& location)
+{
+    if(location.getAutoindexFlag() == true)
+    {
+        _httpStatus = 0;
+        Logger::warning("getFullClientURL ", static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->getFullClientURL());
+        Autoindex autoindex(relativePath, _httpStatus, static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->getFullClientURL());
+        _response = autoindex.getAutoIndexHtml();
+        if(_httpStatus != 0)
+        {
+            _response = _renderServerErrorPage(_httpStatus);
+            return;
+        }
+        _httpStatus = 200;
+    }
+    else 
+        _response = _renderServerErrorPage(404);
+}
+
 void ResponseGenerator::_generateHtml(const LocationSettings& location)
 {
     const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
@@ -171,9 +212,11 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
     }
     else
     {
-        //_dirHtml(relativePath, location);
+        if(_dirHtml(relativePath, location, _response) == true)
+            _httpStatus = 200; 
+        else 
+            _autoindexHtml(relativePath, location);
     }
-    Logger::info("Response is ", _response);
     return;
 }
 
