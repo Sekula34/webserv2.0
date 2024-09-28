@@ -12,6 +12,7 @@ class ResponseGenerator
 	typedef FileUtils::e_fileType fileType;
 	public: 
 		static void		generateClientResponse(Client& client);
+		const NginnxReturn& getRedirect() const;
 
 		const std::string& getResponse() const;
 		const int&		getResponseHttpStatus() const;

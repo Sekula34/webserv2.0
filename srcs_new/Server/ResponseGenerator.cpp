@@ -34,8 +34,6 @@ void ResponseGenerator::generateClientResponse(Client &client)
         Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
         // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
         ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-        header->setOneHeaderField("Connection", "close");
-        header->setOneHeaderField("Content-Type", "text/html; charset=utf-8");
         //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
         std::cout << header->turnResponseHeaderToString() << std::endl;
         std::cout << oneResponse.getResponse() << std::endl;
@@ -102,6 +100,11 @@ static const LocationSettings& getClientRequestedLocation(Client& client)
     Logger::error("THIS SHOULD NEVER HAPPEND, requested location is not found", serverLocationUri);
     return server.getServerLocations()[0];
 } 
+
+const NginnxReturn& ResponseGenerator::getRedirect() const
+{
+    return (_redirect);
+}
 
 
 void ResponseGenerator::_redirectHandler(const LocationSettings& location)
