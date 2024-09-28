@@ -115,19 +115,66 @@ void ResponseGenerator::_redirectHandler(const LocationSettings& location)
     _response = _renderServerErrorPage(_httpStatus); //FIXME: check what if user provide you error page that does not exist in config file 
 }
 
+static std::string _pathRelativeToExecutable(const LocationSettings& location, const UrlSuffix& suffix)
+{
+    std::string serverPath = suffix.getPath();
+   // std::string serverPath(static_cast<RequestHeader*>(_client.getClientMsg()->getHeader())->urlSuffix->getPath());
+    size_t startingPos = 0;
+    const size_t& replaceLen = location.getLocationUri().size();
+    const std::string& replaceString(location.getRoot() + "/");
+    serverPath.replace(startingPos, replaceLen, replaceString);
+    Logger::info("Relative path ", serverPath);
+    return serverPath;
+}
+
 void ResponseGenerator::_getHandler(const LocationSettings& location)
 {
     Logger::warning("Here will be get request implementation", "");
     Logger::info("Resposible location is", location.getLocationUri());
-    std::cout << location << std::endl;
-    bool result = FileUtils::putFileInString("html/first.html", _response);
-    if(result == true)
-        _httpStatus = 200;
-    else 
-    {
-        _response = _renderServerErrorPage(500);
-    }
+    _generateHtml(location);
+    //g
+    // bool result = FileUtils::putFileInString("html/first.html", _response);
+    // if(result == true)
+    //     _httpStatus = 200;
+    // else 
+    // {
+    //     _response = _renderServerErrorPage(500);
+    // }
     //check if redirected 
+}
+
+static bool _fileHtml(const std::string& file, std::string& response)
+{
+    bool success = FileUtils::putFileInString(file, response);
+    if(success == true)
+        return true;
+    return false;
+}
+
+void ResponseGenerator::_generateHtml(const LocationSettings& location)
+{
+    const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
+    std::string relativePath = _pathRelativeToExecutable(location, suffix);
+    int result = FileUtils::isPathFileOrFolder(relativePath, _httpStatus);
+    if(result == -1)
+    {
+        _response = _renderServerErrorPage(_httpStatus);
+        return;
+    }
+    if(result == 1)
+    {
+        if (_fileHtml(relativePath, _response) == true)
+            _httpStatus = 200;
+        else 
+            _response = _renderServerErrorPage(404);
+        return;
+    }
+    else
+    {
+        //_dirHtml(relativePath, location);
+    }
+    Logger::info("Response is ", _response);
+    return;
 }
 
 void ResponseGenerator::_responseMenu()

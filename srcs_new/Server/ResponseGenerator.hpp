@@ -28,6 +28,8 @@ class ResponseGenerator
 		void 		_setFileType(fileType type);
 		void 		_redirectHandler(const LocationSettings& location);
 		void		_getHandler(const LocationSettings& location);
+		void		_generateHtml(const LocationSettings& location);
+
 
 		Client&		_client;
 		std::string	_response;
