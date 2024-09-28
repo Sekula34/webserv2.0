@@ -61,17 +61,15 @@ bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) con
 	}
 	return false;
 }
-LocationSettings::LocationSettings(const VirtualServer& locationServer)
-:_locationServer(locationServer)
+LocationSettings::LocationSettings()
 {
 
 }
 
 LocationSettings::LocationSettings(const DefaultSettings& settings, const Token& locationToken,
-std::vector<Token>& serverTokens, const VirtualServer& locationServer)
+std::vector<Token>& serverTokens)
 :
-DefaultSettings(settings),_locationToken(locationToken),
-_locationServer(locationServer)
+DefaultSettings(settings),_locationToken(locationToken)
 {
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
@@ -80,10 +78,9 @@ _locationServer(locationServer)
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 LocationSettings::LocationSettings(const DefaultSettings& settings,
-std::vector<Token>& serverTokens, const VirtualServer& locationServer)
+std::vector<Token>& serverTokens)
 :
-DefaultSettings(settings),
-_locationServer(locationServer)
+DefaultSettings(settings)
 {
 	_parentServerTokens = serverTokens;
 	_uri = "/";
@@ -97,8 +94,7 @@ DefaultSettings(source),
 _uri(source._uri),
 _locationToken(source._locationToken),
 _locationDirectives(source._locationDirectives), 
-_parentServerTokens(source._parentServerTokens),
-_locationServer(source._locationServer)
+_parentServerTokens(source._parentServerTokens)
 {
 	//(*this) = source;
 }
@@ -158,9 +154,9 @@ std::ostream& operator<<(std::ostream& os, const LocationSettings& location)
 	std::string title = Logger::createFancyTitle("Location setting print");
 	os << title << std::endl;
 	os << "Location uri: " << location.getLocationUri() << std::endl;
-	os << "I belong to this server: ";
-	os << location._locationServer.getServerName() << ":" <<  location._locationServer.getPort() << std::endl;
+	os << "I belong to this server: " << std::endl;
 	os << Logger::logMap(location.p_acceptedMethods, "Limit except map").str();
 	os << location.getNginxReturn() << std::endl;
+	os << static_cast<DefaultSettings>(location);
 	return os;
 }

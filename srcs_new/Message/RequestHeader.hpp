@@ -48,7 +48,6 @@ class RequestHeader : public AHeader
 		const std::string& getFullMessage(void) const;
 
 		const RequestLine& getRequestLine() const;
-		const std::string& getRequestedUrl() const;
 		const std::string& getURLSuffix() const;
 		/**
 		 * @brief Get the Full Client URL 

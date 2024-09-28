@@ -25,9 +25,9 @@ class LocationSettings : public DefaultSettings
 		bool							isCgiLocation(void) const;
 		bool							isCgiExtensionSet(const std::string& scriptExtension) const;
 
-										LocationSettings(const VirtualServer& locationServer);
-										LocationSettings(const DefaultSettings& settings, const Token& locationToken, std::vector<Token>& serverTokens, const VirtualServer& locationServer);
-										LocationSettings(const DefaultSettings& settings, std::vector<Token>& serverTokens, const VirtualServer& locationServer);
+										LocationSettings();
+										LocationSettings(const DefaultSettings& settings, const Token& locationToken, std::vector<Token>& serverTokens);
+										LocationSettings(const DefaultSettings& settings, std::vector<Token>& serverTokens);
 										LocationSettings(const LocationSettings& source);
 		LocationSettings&				operator=(const LocationSettings& source);
 										~LocationSettings();
@@ -39,7 +39,7 @@ class LocationSettings : public DefaultSettings
 		Token 					_locationToken;
 		std::vector<Directive>	_locationDirectives;
 		std::vector<Token>		_parentServerTokens;
-		const VirtualServer&	_locationServer;
+		// const VirtualServer&	_locationServer;
 
 	public :
 		class FindByUri
