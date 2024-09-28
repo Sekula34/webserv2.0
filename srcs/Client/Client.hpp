@@ -102,7 +102,6 @@ class Client {
 		std::clock_t const	_start;
 		int const			_epollFd;
 		char* 				_recvLine;
-		CgiProcessor*		_cgi;
 		Message*			_clientMsg;	// client owns so it should delete
 		Message*			_serverMsg;	// client owns so it should delete
 		Response*			_response; // client owns so it should delete
@@ -110,7 +109,6 @@ class Client {
 		std::string			_clientIp;
 		socklen_t			_addrLen;
 		double				_clockstop;
-		bool				_writeClient;
 							Client(void);
 							Client(Client const & src);
 		Client &			operator=(Client const & rhs);

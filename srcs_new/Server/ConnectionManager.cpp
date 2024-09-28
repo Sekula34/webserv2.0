@@ -27,6 +27,7 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = fd;
 
+	Logger::warning("added fd to epoll: ", fd);
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
 	return (ret);
@@ -35,6 +36,7 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 // Helper function to remove fd to epoll
 static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event* events)
 {
+	Logger::warning("removing fd from epoll: ", fd);
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
 		Logger::error("The following FD could not be removed from epoll: ", fd);
@@ -142,6 +144,27 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 	updateClientFds(client, idx, _events);
 }
 
+void		ConnectionManager::_addChildSocketsToEpoll()
+{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for (; it != _clients.end(); ++it)
+	{
+		Client& currentClient = *(it->second);
+		std::vector<FdData>& fds = currentClient.getClientFds();
+		if (fds.size() == 1)
+			continue ;
+		std::vector<FdData>::iterator itFd = fds.begin();
+		for (; itFd != fds.end(); ++itFd)
+		{
+			if ((itFd->type == FdData::TOCHILD_FD || itFd->type == FdData::FROMCHILD_FD)
+	   			&& itFd->state == FdData::NEW)
+			{
+				epollAddFd(_epollFd, itFd->fd);
+				itFd->state = FdData::NONE;
+			}
+		}
+	}
+}
 
 void		ConnectionManager::_handleCgiFds(const int& idx)
 {
@@ -160,12 +183,12 @@ void		ConnectionManager::_handleCgiFds(const int& idx)
 			fdData.state = FdData::CLOSED;
 			return ;
 		}
-		if (fdData.state == FdData::NEW)
-		{
-			epollAddFd(_epollFd, targetFd);
-			fdData.state = FdData::NONE;
-			return ;
-		}
+		// if (fdData.state == FdData::NEW)
+		// {
+		// 	epollAddFd(_epollFd, targetFd);
+		// 	fdData.state = FdData::NONE;
+		// 	return ;
+		// }
 		updateClientFds(currentClient, idx, _events);
 		return ;
 	}
@@ -177,6 +200,7 @@ void	ConnectionManager::epollLoop()
 	Client* client = NULL;
 
 
+	_addChildSocketsToEpoll();
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
 	if (nfds == -1 && !flag)
 	{

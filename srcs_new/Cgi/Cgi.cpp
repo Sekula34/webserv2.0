@@ -15,19 +15,11 @@
 /*                               Constructors                                 */
 /******************************************************************************/
 
-Cgi::Cgi (void)
-{}
-
-Cgi::Cgi (Client& client)
+Cgi::Cgi ()
 {
 	_args = NULL;
 	_env = NULL;
 	_tmp = NULL;
-	_initScriptVars(client);
-	_createEnvVector(client);
-	_createArgsVector();
-	_env = _vecToChararr(_envVec);
-	_args = _vecToChararr(_argsVec);
 	sentSigterm = false;
 	_terminate = false;
 	_shutdownStart = 0;
@@ -43,9 +35,6 @@ Cgi::Cgi (Client& client)
 Cgi::~Cgi (void)
 {
 	Logger::info("Cgi destructor called", "");
-	_deleteChararr(_tmp);
-	_deleteChararr(_args);
-	_deleteChararr(_env);
 }
 
 /******************************************************************************/
@@ -124,7 +113,7 @@ std::string operatingSystem()
     #endif
 }  
 
-std::string	Cgi::getInterpreterPath(std::string suffix)
+std::string	Cgi::getInterpreterPath(Client& client, std::string suffix)
 {
 	if (suffix == "")
 		return suffix;
@@ -137,7 +126,7 @@ std::string	Cgi::getInterpreterPath(std::string suffix)
 		if (access(tmp.c_str(), X_OK) == 0)	
 			return (tmp);
 	}
-	_stopCgiSetErrorCode();
+	_stopCgiSetErrorCode(client);
 	Logger::warning("CGI interpreter not installed:", "");
 	std::cout << Data::getCgiLang().at(suffix) << std::endl;
 	return (tmp = "");
@@ -153,7 +142,7 @@ std::string	Cgi::getScriptName(std::string suffix, Client& client)
 			return (*it);
 	}
 	Logger::warning("no valid CGI script name in URI", true);
-	_stopCgiSetErrorCode();
+	_stopCgiSetErrorCode(client);
 	return ("");
 }
 
@@ -180,7 +169,7 @@ bool	Cgi::_isRegularFile(std::string file)
 	return (true);
 }
 
-void	Cgi::_initScriptVars(Client& client)
+bool	Cgi::_initScriptVars(Client& client)
 {
 	// the suffix is .py or .php
 	std::string suffix = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptExtension();
@@ -190,16 +179,16 @@ void	Cgi::_initScriptVars(Client& client)
 
 	// go through PATH variable and check whether interpreter is installed
 	// if not installed stops Cgi sets 500 error
-	_interpreterAbsPath = getInterpreterPath(suffix);
+	_interpreterAbsPath = getInterpreterPath(client, suffix);
 	if (_interpreterAbsPath.empty())
 	{
 		_stopCgiSetErrorCode(client);
-		return ;
+		return (false);
 	}
 
 	_scriptName = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptName();
 	if (_scriptName.empty())
-		return ;
+		return (false);
 
 	_scriptAbsPath = Data::findStringInEnvp("PWD=") + location
 		+ Data::getCgiLang().at(suffix) + "/" + _scriptName;
@@ -212,22 +201,24 @@ void	Cgi::_initScriptVars(Client& client)
 	{
 		Logger::warning("CGI script not executable: ", _scriptAbsPath);
 		_stopCgiSetErrorCode(client);
-		return ;
+		return (false);
 	}
 	if (!_isRegularFile(_scriptAbsPath))
 		_stopCgiSetErrorCode(client);
+	return (true);
 }
 
 void	Cgi::_createEnvVector(Client& client)
 {
 	RequestHeader* requestHeader = (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()));
-	Message* requestMessage = client.getMsg(Client::REQ_MSG);
+	// Message* requestMessage = client.getMsg(Client::REQ_MSG);
 	std::string	line;
 	std::string pathInfo = requestHeader->urlSuffix->getCgiPathInfo();
 
 	// AUTH_TYPE -> should be empty because we don't support authentification
 	line = "AUTH_TYPE=";											
 	_envVec.push_back(line);
+	/*
 
 	// CONTENT_LENGTH
 	line = "CONTENT_LENGTH=";											
@@ -330,6 +321,7 @@ void	Cgi::_createEnvVector(Client& client)
 	line = "DOCUMENT_ROOT="; 
 	line += _scriptLocation;
 	_envVec.push_back(line);
+	*/
 }
 
 void	Cgi::_createArgsVector()
@@ -369,18 +361,18 @@ void	Cgi::_deleteChararr(char ** lines)
 	delete [] lines;
 }
 
-int	Cgi::_execute()
+int	Cgi::_execute(Client& client)
 {
 	signal(SIGINT, SIG_IGN);
 	close(_socketsToChild[0]);
 	close(_socketsFromChild[0]);
-	Data::closeAllFds();
-	if (chdir(_scriptLocation.c_str()) == -1)
-	{
-		close(_socketsFromChild[1]);
-		close(_socketsToChild[1]);
-		throw std::runtime_error("chdir failed in CGI child process");
-	}
+	//Data::closeAllFds();
+	// if (chdir(_scriptLocation.c_str()) == -1)
+	// {
+	// 	close(_socketsFromChild[1]);
+	// 	close(_socketsToChild[1]);
+	// 	throw std::runtime_error("chdir failed in CGI child process");
+	// }
  	if (dup2(_socketsToChild[1], STDIN_FILENO) == -1)
 	{
 		close(_socketsFromChild[1]);
@@ -395,7 +387,8 @@ int	Cgi::_execute()
 	}
 	close(_socketsFromChild[1]);
 
- 	execve(_args[0], _args, _env);
+ 	// execve(_args[0], _args, _env);
+ 	execve(client._args[0], client._args, client._env);
 	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }
@@ -457,17 +450,18 @@ void	Cgi::_waitForChild(Client& client)
 	int		status;
 	
 	// return if waitpid was already successful once
-	if (client.waitReturn > 0)
+	if (client.getWaitReturn() > 0)
 		return ;
 
 	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
-	_handleChildTimeout(client);
+	// _handleChildTimeout(client);
 
 	// WAITPID
-	client.waitReturn = waitpid(_pid, &status, WNOHANG);
+	// client.setWaitReturn(waitpid(_pid, &status, 0));
+	client.setWaitReturn(waitpid(_pid, &status, WNOHANG));
 
 	// waitpid fail
-	if (client.waitReturn == -1)
+	if (client.getWaitReturn() == -1)
 	{
 		Logger::error("waitpid, stopping CGI in client with ID", client.getId());
 		_stopCgiSetErrorCode(client);
@@ -475,7 +469,7 @@ void	Cgi::_waitForChild(Client& client)
 	}
 
 	// waitpid success
-	if (client.waitReturn > 0)	
+	if (client.getWaitReturn() > 0)	
 		_handleReturnStatus(status, client);
 	return ;
 }
@@ -502,7 +496,7 @@ void	Cgi::_prepareSockets(Client& client)
 	close(_socketsFromChild[1]);
 	client.setChildSocket(_socketsToChild[0], _socketsFromChild[0]);
 }
-int Cgi::loop()
+void Cgi::loop()
 {
 	std::map<int, Client*>::iterator it = Client::clients.begin();
 	for (; it != Client::clients.end(); ++it)
@@ -513,7 +507,7 @@ void Cgi::_cgiClient(Client& client)
 {
 	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
 	if (client.getClientState() != Client::DO_CGIREC
-		|| client.getClientState() != Client::DO_CGISEND)
+		&& client.getClientState() != Client::DO_CGISEND)
 	{
 		return ;
 	}
@@ -521,6 +515,13 @@ void Cgi::_cgiClient(Client& client)
 	// CREATE CHILD SOCKETS AND FORK ONCE
 	if (client.getClientFds().size() == 1)
 	{
+		if (_initScriptVars(client) == false)
+			return ;
+		_createEnvVector(client);
+		_createArgsVector();
+		client._env = _vecToChararr(_envVec);
+		client._args = _vecToChararr(_argsVec);
+
 		// creates two socketpairs in order to communicate with child process
 		if(!_createSockets())
 		{
@@ -536,8 +537,13 @@ void Cgi::_cgiClient(Client& client)
 		if (_pid == CHILD)
 		{
 			signal(SIGINT, SIG_IGN);
-			_execute();
+			_execute(client);
 		}
+		// TODO: take care of deleting this in client
+		// _deleteChararr(_tmp);
+		// _deleteChararr(_args);
+		// _deleteChararr(_env);
+		//
 		//closing unused sockets and adding relevant sockets to epoll
 		_prepareSockets(client);
 	}

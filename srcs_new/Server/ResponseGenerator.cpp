@@ -15,7 +15,8 @@
 
 void ResponseGenerator::generateClientResponse(Client &client)
 {
-    if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() != true)
+    if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
+		|| (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
         return;
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
@@ -41,7 +42,10 @@ void ResponseGenerator::generateClientResponse(Client &client)
     }
     else // THIS MEANS CGI RAN SUCCESSFULLY
     {
+        ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
         client.setCgiFlag(false);
+		Logger::warning("string in response Header", header->turnResponseHeaderToString());
+		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
         // correct the Header instance in Message from CGI Response state to final state
         // call turnResponseHEaderToString at put it into Header node
   

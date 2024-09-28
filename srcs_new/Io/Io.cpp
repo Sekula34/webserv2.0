@@ -63,6 +63,7 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.
 	message->setState(COMPLETE);
+	message->resetIterator();
 }
 
 void	clearBuffer(char* buffer)
@@ -128,6 +129,9 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		Logger::info("Successfully received bytes: ", recValue);
 		message->bufferToNodes(_buffer, recValue);
 	}
+
+	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
+		return ;
 
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)

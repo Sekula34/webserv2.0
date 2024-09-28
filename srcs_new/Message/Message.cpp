@@ -75,7 +75,8 @@ AHeader*	Message::getHeader() const
 	return (_header);
 }
 
-const std::list<Node>&	Message::getChain() const
+// const std::list<Node>&	Message::getChain() const
+std::list<Node>&	Message::getChain()
 {
 	return (_chain);
 }

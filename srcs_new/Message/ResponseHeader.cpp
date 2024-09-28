@@ -81,6 +81,8 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 	}
 	else
 		toReturn = new ResponseHeader(aHeaderString, clientError);
+
+	std::cout << "client Error: " << clientError <<  std::endl;
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
 	{
 		// if one server gets invalid response for anothe -> bad getaway 502
@@ -95,6 +97,8 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
 		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
 		toReturn->changeHttpCode(newHttpCode);
+		toReturn->m_headerFields.erase(it);
+
 	}
 	return toReturn;
 }

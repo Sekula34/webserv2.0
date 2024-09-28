@@ -148,6 +148,12 @@ const bool&				Client::getCgiFlag() const
 {
 	return (_cgiFlag);
 }
+
+const int&	Client::getWaitReturn() const
+{
+	return (_waitReturn);
+}
+
 void Client::setVirtualServer(const VirtualServer& vs)
 {
 	_virtualServer = &vs;
@@ -188,6 +194,34 @@ void	Client::setCgiFlag(bool b)
 	_cgiFlag = b;
 }
 
+void	Client::setClientState(e_clientState state)
+{
+	_clientState = state;
+}
+
+void	Client::setWaitReturn(int num)
+{
+	_waitReturn = num;
+}
+
+// void	Client::setClientFdState(int fd, e_fdState fdState)
+// {
+// 	fdPairsMap::iterator it = _clientFds.find(fd);
+// 	if (it == _clientFds.end())
+// 		Logger::error("Trying to change the state of a non-existing fd ", fd);
+// 	else
+// 		_clientFds[fd].second = fdState;
+
+// }
+
+void	Client::setChildSocket(int to, int from)
+{
+	Logger::info("adding socket TOCHILD to client Fds", to);
+	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
+	Logger::info("adding socket FROMCHILD to client Fds", from);
+	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
+}
+
 bool	Client::checkTimeout()
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
@@ -203,21 +237,6 @@ bool	Client::checkTimeout()
 	// }
 	return (true);
 }
-
-void	Client::setClientState(e_clientState state)
-{
-	_clientState = state;
-}
-
-// void	Client::setClientFdState(int fd, e_fdState fdState)
-// {
-// 	fdPairsMap::iterator it = _clientFds.find(fd);
-// 	if (it == _clientFds.end())
-// 		Logger::error("Trying to change the state of a non-existing fd ", fd);
-// 	else
-// 		_clientFds[fd].second = fdState;
-
-// }
 
 void Client::_initVars(int fd)
 {
@@ -235,13 +254,9 @@ void Client::_initVars(int fd)
 	clients[fd] = this;
 	_isRequestChecked = false;
 	_cgiFlag = false;
+	_waitReturn = 0;
 }
 
-void	Client::setChildSocket(int to, int from)
-{
-	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
-	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
-}
 
 void	Client::closeSocketToChild()
 {

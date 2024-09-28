@@ -27,6 +27,7 @@ NC := \033[0m # No color
 
 
 SRCS =	srcs_new/Client/Client.cpp \
+	srcs_new/Cgi/Cgi.cpp \
 	srcs_new/Client/FdData.cpp \
 	srcs_new/Io/Io.cpp \
 	srcs_new/Message/Node.cpp \
@@ -54,6 +55,7 @@ SRCS =	srcs_new/Client/Client.cpp \
 
 
 HEADERS =	srcs_new/Client/Client.hpp \
+	srcs_new/Cgi/Cgi.hpp \
 	srcs_new/Client/FdData.hpp \
 	srcs_new/Io/Io.hpp \
 	srcs_new/Message/Node.hpp \

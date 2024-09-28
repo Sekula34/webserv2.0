@@ -128,10 +128,10 @@ void ServerManager::loop()
 			{
 				client.setCgiFlag(true);
 				Logger::warning("Client Requested valid cgi", client.getId());
-				//client.setClientState(Client::DO_CGISEND);
+				client.setClientState(Client::DO_CGISEND);
 
 				// TODO: this is fake set state, just to make webserve work without cgi
-				client.setClientState(Client::DO_RESPONSE);
+				// client.setClientState(Client::DO_RESPONSE);
 			}
 			else  
 			{

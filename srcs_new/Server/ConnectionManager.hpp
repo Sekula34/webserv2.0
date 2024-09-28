@@ -23,6 +23,7 @@ class ConnectionManager
 		void		_addServerSocketsToEpoll(void); // Make arguments const
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
 		void		_handleCgiFds(const int& idx);
+		void		_addChildSocketsToEpoll();
 
 		// Attributes
 		int							_epollFd;

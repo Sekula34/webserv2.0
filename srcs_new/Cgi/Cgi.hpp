@@ -18,10 +18,10 @@ class Socket;
 class Cgi {
 
 	public:
-									Cgi(Client& client);
-									~Cgi(void);
-		int							loop(void);
-		std::string					getInterpreterPath(std::string suffix);
+									Cgi();
+									~Cgi();
+		void						loop();
+		std::string					getInterpreterPath(Client& client, std::string suffix);
 		std::string					getScriptName(std::string suffix, Client& c);
 		int							getPid();
 		void						terminateChild();
@@ -47,14 +47,14 @@ class Cgi {
 
 		void						_ioChild();
 		void 						_cgiClient(Client& client);
-		void						_initScriptVars(Client& c);
+		bool						_initScriptVars(Client& c);
 		bool						_checkInterpreterScript();
 		void						_stopCgiSetErrorCode(Client& c);
 		bool						_createSockets();
 		void						_prepareSockets(Client& client);
 		char**						_create_env();
 		char**						_create_argv();
-		int							_execute();
+		int							_execute(Client& client);
 		char**						_vecToChararr(std::vector<std::string>);
 		void						_deleteChararr(char ** lines);
 		void						_createEnvVector(Client& client);
@@ -65,9 +65,8 @@ class Cgi {
 		bool						_isRegularFile(std::string file);
 		void						_handleReturnStatus(int status, Client& client);
 
-									Cgi(void);
 									Cgi(Cgi const & src);
-		Cgi &				operator=(Cgi const & rhs);
+		Cgi &						operator=(Cgi const & rhs);
 };
 
 #endif
