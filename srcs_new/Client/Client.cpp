@@ -42,12 +42,12 @@ Message*	Client::getMsg(e_clientMsgType type)
 				_responseMsg = new Message(false, _errorCode);
 			return (_responseMsg);
 		}
-		if (type == CGIRESP_MSG)
-		{	
-			if (!_cgiResponseMsg)
-				_cgiResponseMsg = new Message(false, _errorCode);
-			return (_cgiResponseMsg);
-		}
+		// if (type == CGIRESP_MSG)
+		// {	
+		// 	if (!_cgiResponseMsg)
+		// 		_cgiResponseMsg = new Message(false, _errorCode);
+		// 	return (_cgiResponseMsg);
+		// }
 	}
 	catch (std::exception& e)
 	{
@@ -144,6 +144,10 @@ const VirtualServer* Client::getVirtualServer() const
 	return _virtualServer;
 }
 
+const bool&				Client::getCgiFlag() const
+{
+	return (_cgiFlag);
+}
 void Client::setVirtualServer(const VirtualServer& vs)
 {
 	_virtualServer = &vs;
@@ -174,9 +178,14 @@ void	Client::setResponseMsg(Message* m)
 	_responseMsg = m;
 }
 
-void	Client::setCgiResponseMsg(Message* m)
+// void	Client::setCgiResponseMsg(Message* m)
+// {
+// 	_cgiResponseMsg = m;
+// }
+
+void	Client::setCgiFlag(bool b)
 {
-	_cgiResponseMsg = m;
+	_cgiFlag = b;
 }
 
 bool	Client::checkTimeout()
@@ -220,11 +229,12 @@ void Client::_initVars(int fd)
 	_initClientIp();
 	_errorCode = 0;
 	// _clockstop = 1000;
-	_requestMsg = NULL;
-	_responseMsg = NULL;
-	_cgiResponseMsg = NULL;
+	_requestMsg = new Message(true, _errorCode);
+	_responseMsg = new Message(false, _errorCode);
+	// _cgiResponseMsg = NULL;
 	clients[fd] = this;
 	_isRequestChecked = false;
+	_cgiFlag = false;
 }
 
 void	Client::setChildSocket(int to, int from)
@@ -361,8 +371,8 @@ Client::~Client()
 	_requestMsg = NULL;
 	delete _responseMsg;
 	_responseMsg = NULL;
-	delete _cgiResponseMsg;
-	_cgiResponseMsg = NULL;
+	// delete _cgiResponseMsg;
+	// _cgiResponseMsg = NULL;
 	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
 	closeClientFds();
 	clients.erase(getFdDataByType(FdData::CLIENT_FD).fd);

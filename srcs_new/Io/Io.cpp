@@ -26,7 +26,8 @@ static Message*	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType)
 	else if (client.getClientState() == Client::DO_CGIREC)
 	{
 		fdType = FdData::FROMCHILD_FD;
-		message = client.getMsg(Client::CGIRESP_MSG);
+		// message = client.getMsg(Client::CGIRESP_MSG);
+		message = client.getMsg(Client::RESP_MSG);
 	}
 	else if (client.getClientState() == Client::DO_RESPONSE)
 	{

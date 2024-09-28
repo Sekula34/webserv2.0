@@ -85,12 +85,12 @@ const std::string	Message::getBodyString()
 {
 	std::list<Node>::iterator it;
 
-	if (_chunked)
-	{
-		_chunksToBody();
-		_chunked = false;
-		_trailer = false;
-	}
+	// if (_chunked)
+	// {
+	// 	_chunksToBody();
+	// 	_chunked = false;
+	// 	_trailer = false;
+	// }
 	_findBody(it);
 	if (it == _chain.begin())
 		return ("");
@@ -468,6 +468,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 }
 void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 {
+	delete _header;
 	_header = header;
 
 	if (body.size() < MAX_BODY_SIZE)

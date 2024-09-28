@@ -36,8 +36,8 @@ class Client
 		enum	e_clientMsgType
 		{
 			REQ_MSG,
-			RESP_MSG,
-			CGIRESP_MSG
+			RESP_MSG
+			// CGIRESP_MSG
 		};
 
 	public:
@@ -54,16 +54,18 @@ class Client
 		const VirtualServer*	getVirtualServer() const;
 		int&					getErrorCode();
 		const bool&				getIsRequestChecked() const;
+		const bool&				getCgiFlag() const;
 		bool					checkTimeout();
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
-		void					setCgiResponseMsg(Message* m);
+		// void					setCgiResponseMsg(Message* m);
 		void					setErrorCode(int e);
 		void					setAddrlen(socklen_t addrlen);
 		void					setChildSocket(int in, int out);
 		void					setIsRequestChecked();
+		void					setCgiFlag(bool b);
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -85,12 +87,13 @@ class Client
 		int						_errorCode;
 		Message*				_requestMsg;	// client owns so it should delete
 		Message*				_responseMsg;	// client owns so it should delete
-		Message*				_cgiResponseMsg;
+		// Message*				_cgiResponseMsg;
 		struct sockaddr			_clientAddr;
 		std::string				_clientIp;
 		socklen_t				_addrLen;
 		const VirtualServer*	_virtualServer;
 		bool					_isRequestChecked;
+		bool					_cgiFlag;
 		// double				_clockstop;
 
 	public:

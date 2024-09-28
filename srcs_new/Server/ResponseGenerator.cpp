@@ -10,24 +10,42 @@
 #include "../Utils/Logger.hpp"
 #include "../Message/Message.hpp"
 #include "../Message/Node.hpp"
+#include "../Message/RequestHeader.hpp"
+#include "../Utils/Logger.hpp"
 
 void ResponseGenerator::generateClientResponse(Client &client)
 {
-    if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE)
+    if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() != true)
         return;
-    ResponseGenerator oneResponse(client);
-    //std::cout << oneResponse.getResponse() << std::endl;
-    Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
-    // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
-    ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-    header->setOneHeaderField("Connection", "close");
-    header->setOneHeaderField("Content-Type", "text/html; charset=utf-8");
-    //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
-    std::cout << header->turnResponseHeaderToString() << std::endl;
-    std::cout << oneResponse.getResponse() << std::endl;
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
-    message->stringsToChain(header, oneResponse.getResponse());
+    if (client.getCgiFlag() == false || client.getErrorCode() != 0)
+    {   
+        // if (client.getCgiFlag() == true)
+        // {
+        //     client.setCgiFlag(false);
+        //     delete client.getMsg(Client::RESP_MSG);
+        //     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
+        // }
+        ResponseGenerator oneResponse(client);
+        //std::cout << oneResponse.getResponse() << std::endl;
+        Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
+        // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
+        ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
+        header->setOneHeaderField("Connection", "close");
+        header->setOneHeaderField("Content-Type", "text/html; charset=utf-8");
+        //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
+        std::cout << header->turnResponseHeaderToString() << std::endl;
+        std::cout << oneResponse.getResponse() << std::endl;
+        message->stringsToChain(header, oneResponse.getResponse());
+    }
+    else // THIS MEANS CGI RAN SUCCESSFULLY
+    {
+        client.setCgiFlag(false);
+        // correct the Header instance in Message from CGI Response state to final state
+        // call turnResponseHEaderToString at put it into Header node
+  
+    }
     client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 
    //if(client.g)
@@ -75,7 +93,29 @@ void ResponseGenerator::_responseMenu()
 	}
 	else
 	{
-        Logger::warning("Here should be implemented normal or cgi response", "");
+        RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
+        std::string requestMethod = header.getRequestLine().requestMethod;
+        
+
+        
+        if(requestMethod == "GET")
+        {
+            //getHandler
+        }
+        else if (requestMethod == "POST")
+        {
+            //postHandler
+        }
+        else if(requestMethod == "DELETE")
+        {
+            //deleteMethod
+        }
+        else
+        {
+            Logger::warning("Method not implemneted", requestMethod);
+            _response = _renderServerErrorPage(405);
+        }
+    
 		//if Normal 
 			//generate normal 
 		//else 

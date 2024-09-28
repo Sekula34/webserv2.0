@@ -126,6 +126,7 @@ void ServerManager::loop()
 			// 	client.setClientState(Client::DO_RESPONSE);
 			if(_isCgi(client) == true)
 			{
+				client.setCgiFlag(true);
 				Logger::warning("Client Requested valid cgi", client.getId());
 				//client.setClientState(Client::DO_CGISEND);
 
