@@ -14,6 +14,7 @@
 #include "../Utils/Logger.hpp"
 #include "LocationSettings.hpp"
 #include "../Utils/Autoindex.hpp"
+#include <fstream>
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
@@ -220,6 +221,47 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
     return;
 }
 
+void		ResponseGenerator::_postHandler(const LocationSettings& location)
+{
+    (void)location;
+    // Execute POST method.
+	std::cout << "POST method executed" << std::endl;
+	// std::map<std::string, std::string>& msgHeader = request->getHeader();
+	// std::string filename = msgHeader["uri"];
+    std::string filename = "POST.txt";
+	std::ofstream outputFile(filename.c_str());
+	if (!outputFile.is_open())
+	{
+		std::cerr << "Unable to create POST file!" << std::endl;
+        _httpStatus = 500;
+        _response = _renderServerErrorPage(_httpStatus);
+		return ;
+	}
+	// outputFile << *request;
+    Message& message = *(_client.getMsg(Client::REQ_MSG));
+    const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
+    Logger::warning("getFullMessage() = ", header.getFullMessage());
+    //outputFile << header.getFullMessage();
+    outputFile << message.getBodyString();
+	outputFile.close();
+    _httpStatus = 201;
+    _response = _renderServerErrorPage(_httpStatus);
+}
+
+void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
+{
+    // Execute DELETE method.
+	(void)location;
+	std::cout << "DELETE method executed" << std::endl;
+	// std::map<std::string, std::string>& msgHeader = request->getHeader();
+	// std::string filename = msgHeader["uri"];
+    std::string filename = "POST.txt";
+	if (remove(filename.c_str()) != 0)
+		std::cerr << "Unable to DELETE file!" << std::endl;
+    _httpStatus = 204;
+    _response = "";
+}
+
 void ResponseGenerator::_responseMenu()
 {
 	if(_client.getErrorCode() != 0)
@@ -248,11 +290,11 @@ void ResponseGenerator::_responseMenu()
         }
         else if (requestMethod == "POST")
         {
-            //postHandler
+           _postHandler(requestLocation);
         }
         else if(requestMethod == "DELETE")
         {
-            //deleteMethod
+            _deleteHandler(requestLocation);
         }
         else
         {
