@@ -157,7 +157,7 @@ size_t	Node::getChunkHeaderSize()
 {
 	return (_chunkHeaderSize);
 }
-const std::string&			Node::getString()
+const std::string&			Node::getString() const
 {
 	return (_str);
 }

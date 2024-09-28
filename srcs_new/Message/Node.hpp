@@ -34,7 +34,7 @@ class Node {
 		void				setState(int state);
 		std::string			getStringUnchunked();
 		std::string			getStringChunked();
-		const std::string&	getString();
+		const std::string&	getString() const;
 		const int &			getType() const;
 		const int &			getState() const;
 		bool				getChunkHeader() const;

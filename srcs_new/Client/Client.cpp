@@ -358,10 +358,10 @@ _virtualServer(NULL)
 Client::~Client()
 {
 	delete _requestMsg;
-	delete _responseMsg;
-	delete _cgiResponseMsg;
 	_requestMsg = NULL;
+	delete _responseMsg;
 	_responseMsg = NULL;
+	delete _cgiResponseMsg;
 	_cgiResponseMsg = NULL;
 	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
 	closeClientFds();
