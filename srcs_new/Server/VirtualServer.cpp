@@ -1,8 +1,8 @@
-#include "ServerSettings.hpp"
+#include "VirtualServer.hpp"
 #include "DefaultSettings.hpp"
-#include "Directive.hpp"
+#include "../Parsing/Directive.hpp"
 #include "LocationSettings.hpp"
-#include "ParsingUtils.hpp"
+#include "../Parsing/ParsingUtils.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
@@ -10,12 +10,12 @@
 #include <vector>
 #include "../Utils/Logger.hpp"
 
-ServerSettings::ServerSettings()
+VirtualServer::VirtualServer()
 {
 	_serverId = -1;
 }
 
-ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vector<Token>& allTokens)
+VirtualServer::VirtualServer(int serverId, DefaultSettings& setings, std::vector<Token>& allTokens)
 :DefaultSettings(setings), _serverId(serverId)
 {
 	_serverTokens = Token::getAllServerTokens(serverId, allTokens);
@@ -24,13 +24,13 @@ ServerSettings::ServerSettings(int serverId, DefaultSettings& setings, std::vect
 	_applyAllServerLevelDirectives();
 	_serverLocations = _setServerLocations();
 }
-ServerSettings::ServerSettings(const ServerSettings& source)
+VirtualServer::VirtualServer(const VirtualServer& source)
 : DefaultSettings(source), _serverId(source._serverId)
 {
 	(*this) = source;
 }
 
-ServerSettings& ServerSettings::operator=(const ServerSettings& source)
+VirtualServer& VirtualServer::operator=(const VirtualServer& source)
 {
 	_serverId = source._serverId;
 	_serverDirectives = source._serverDirectives;
@@ -39,19 +39,19 @@ ServerSettings& ServerSettings::operator=(const ServerSettings& source)
 	return(*this);
 }
 
-ServerSettings::~ServerSettings()
+VirtualServer::~VirtualServer()
 {
 
 }
 
-bool ServerSettings::amIServerLocation(const std::string& path) const
+bool VirtualServer::amIServerLocation(const std::string& path) const
 {
 	bool found = true;
 	fetchLocationWithUri(path, found);
 	return found;
 }
 
-std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) const
+std::string VirtualServer::getLocationURIfromPath(const std::string& fullPath) const
 {
 	std::string toTry(fullPath);
 	while (true)
@@ -62,32 +62,32 @@ std::string ServerSettings::getLocationURIfromPath(const std::string& fullPath) 
 	}
 }
 
-void ServerSettings::addDirectiveToServer(Directive directive)
+void VirtualServer::addDirectiveToServer(Directive directive)
 {
 	_serverDirectives.push_back(directive);
 }
 
-const std::vector<Directive>& ServerSettings::getServerDirectives(void) const
+const std::vector<Directive>& VirtualServer::getServerDirectives(void) const
 {
 	return(_serverDirectives);
 }
 
-const std::vector<Token>& ServerSettings::getServerTokens(void) const 
+const std::vector<Token>& VirtualServer::getServerTokens(void) const 
 {
 	return (_serverTokens);
 }
 
-const std::vector<LocationSettings>& ServerSettings::getServerLocations() const 
+const std::vector<LocationSettings>& VirtualServer::getServerLocations() const 
 {
 	return (_serverLocations);
 }
 
-const int& ServerSettings::getServerId() const 
+const int& VirtualServer::getServerId() const 
 {
 	return(_serverId);
 }
 
-std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithUri(const std::string uri, bool& found) const
+std::vector<LocationSettings>::const_iterator VirtualServer::fetchLocationWithUri(const std::string uri, bool& found) const
 {
 	found = true;
 	LocationSettings::FindByUri functor(uri);
@@ -99,7 +99,7 @@ std::vector<LocationSettings>::const_iterator ServerSettings::fetchLocationWithU
 	return (it);
 }
 
-const std::vector<Directive> ServerSettings::_getServerLevelDirectives() const
+const std::vector<Directive> VirtualServer::_getServerLevelDirectives() const
 {
 	std::vector<Directive> serverLevelDirectives;
 	for(size_t i = 0; i < _serverDirectives.size(); i++)
@@ -112,7 +112,7 @@ const std::vector<Directive> ServerSettings::_getServerLevelDirectives() const
 }
 
 //set and apply all location directives and the same time
-std::vector<LocationSettings> ServerSettings::_setServerLocations()
+std::vector<LocationSettings> VirtualServer::_setServerLocations()
 {
 	std::vector<LocationSettings> serverLocations;
 	for(size_t i = 0; i < _serverTokens.size(); i++)
@@ -121,7 +121,6 @@ std::vector<LocationSettings> ServerSettings::_setServerLocations()
 		{
 			LocationSettings location(*this, _serverTokens[i], _serverTokens, *this);
 			serverLocations.push_back(location);
-			std::cout << location << std::endl;
 		}
 	}
 	if(_hasDefaultLocation(serverLocations) == false)
@@ -129,7 +128,7 @@ std::vector<LocationSettings> ServerSettings::_setServerLocations()
 	return serverLocations;
 }
 
-bool ServerSettings::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
+bool VirtualServer::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
 {
 	std::vector<LocationSettings>::const_iterator it = serverLocation.begin();
 	for(;it != serverLocation.end(); it++)
@@ -140,14 +139,14 @@ bool ServerSettings::_hasDefaultLocation(const std::vector<LocationSettings>& se
 	return false;
 }
 
-void ServerSettings::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
+void VirtualServer::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
 {
 	LocationSettings location(*this, _serverTokens, *this);
 	serverLocation.push_back(location);
 }
 
 //apply every directive server have //but only on server level check path. Not location Level
-void ServerSettings::_applyAllServerLevelDirectives()
+void VirtualServer::_applyAllServerLevelDirectives()
 {
 	for(size_t i = 0; i < _serverDirectives.size(); i++)
 	{
@@ -156,7 +155,7 @@ void ServerSettings::_applyAllServerLevelDirectives()
 			_serverDirectives[i].apply(*this);
 	}
 }
-std::ostream& operator<<(std::ostream& os, const ServerSettings& server)
+std::ostream& operator<<(std::ostream& os, const VirtualServer& server)
 {
 	std::vector<std::string> locationsUri;
 	for(size_t i = 0 ; i < server.getServerLocations().size(); ++i)

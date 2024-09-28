@@ -28,15 +28,15 @@ std::string RequestHeader::getHeaderSectionString(const std::string& message)
 	return headerSection;
 }
 
-RequestHeader::RequestHeader(const std::string message)
-:AHeader(getHeaderSectionString(message)),
+RequestHeader::RequestHeader(const std::string message, int& errorCode)
+:AHeader(getHeaderSectionString(message), errorCode),
 _fullRequest(getFullRequest(message))
 {
 	_constructFunction();
 }
 
 RequestHeader::RequestHeader(const RequestHeader& source)
-:AHeader(getHeaderSectionString(source.m_headerSection)),
+:AHeader(getHeaderSectionString(source.m_headerSection), source.m_errorCode),
 _fullRequest(getFullRequest(source.getFullMessage()))
 {
 

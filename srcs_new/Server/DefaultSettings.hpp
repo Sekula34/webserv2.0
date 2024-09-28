@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <map>
 #include <string>
-#include "NginxReturn.hpp"
+#include "../Parsing/NginxReturn.hpp"
 #include <vector>
-#include "Directive.hpp"
+#include "../Parsing/Directive.hpp"
 
 class DefaultSettings 
 {

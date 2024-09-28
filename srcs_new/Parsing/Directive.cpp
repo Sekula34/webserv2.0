@@ -1,5 +1,5 @@
 #include "Directive.hpp"
-#include "DefaultSettings.hpp"
+#include "../Server/DefaultSettings.hpp"
 #include "ParsingUtils.hpp"
 #include "Token.hpp"
 #include <algorithm>

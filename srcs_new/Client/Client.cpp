@@ -42,12 +42,12 @@ Message*	Client::getMsg(e_clientMsgType type)
 				_responseMsg = new Message(false, _errorCode);
 			return (_responseMsg);
 		}
-		if (type == CGIRESP_MSG)
-		{	
-			if (!_cgiResponseMsg)
-				_cgiResponseMsg = new Message(false, _errorCode);
-			return (_cgiResponseMsg);
-		}
+		// if (type == CGIRESP_MSG)
+		// {	
+		// 	if (!_cgiResponseMsg)
+		// 		_cgiResponseMsg = new Message(false, _errorCode);
+		// 	return (_cgiResponseMsg);
+		// }
 	}
 	catch (std::exception& e)
 	{
@@ -139,8 +139,27 @@ std::string	Client::getClientIp() const
 	return (_clientIp);
 }
 
+const VirtualServer* Client::getVirtualServer() const
+{
+	return _virtualServer;
+}
+
+const bool&				Client::getCgiFlag() const
+{
+	return (_cgiFlag);
+}
+void Client::setVirtualServer(const VirtualServer& vs)
+{
+	_virtualServer = &vs;
+}
+
 void	Client::setErrorCode(int c)
 {
+	if(_errorCode != 0)
+	{
+		Logger::error("You are overwriting client error code, old code is", _errorCode);
+		Logger::info("New error code is ", c);
+	}
 	_errorCode = c;
 }
 
@@ -159,9 +178,14 @@ void	Client::setResponseMsg(Message* m)
 	_responseMsg = m;
 }
 
-void	Client::setCgiResponseMsg(Message* m)
+// void	Client::setCgiResponseMsg(Message* m)
+// {
+// 	_cgiResponseMsg = m;
+// }
+
+void	Client::setCgiFlag(bool b)
 {
-	_cgiResponseMsg = m;
+	_cgiFlag = b;
 }
 
 bool	Client::checkTimeout()
@@ -205,10 +229,12 @@ void Client::_initVars(int fd)
 	_initClientIp();
 	_errorCode = 0;
 	// _clockstop = 1000;
-	_requestMsg = NULL;
-	_responseMsg = NULL;
-	_cgiResponseMsg = NULL;
+	_requestMsg = new Message(true, _errorCode);
+	_responseMsg = new Message(false, _errorCode);
+	// _cgiResponseMsg = NULL;
 	clients[fd] = this;
+	_isRequestChecked = false;
+	_cgiFlag = false;
 }
 
 void	Client::setChildSocket(int to, int from)
@@ -254,6 +280,16 @@ unsigned short	Client::getClientPort()
 		return (0);
 	}
 	return (ntohs(local_addr.sin_port));
+}
+
+const bool&	Client::getIsRequestChecked() const
+{
+	return (_isRequestChecked);
+}
+
+void	Client::setIsRequestChecked()
+{
+	_isRequestChecked = true;
 }
 
 void	Client::_initClientIp()
@@ -309,7 +345,8 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 	// _fd(fd),
 	_start(std::clock()),
 	_clientAddr(clientAddr),
-	_addrLen(addrLen)
+	_addrLen(addrLen),
+	_virtualServer(NULL)
 {
 	// _clientFds.push_back(fdStatePair(fd, UNSET));
 	_initVars(fd);
@@ -321,17 +358,19 @@ Client::Client (int const fd, struct sockaddr clientAddr, socklen_t addrLen):
 // Default Constructor
 Client::Client(): 
 _id(0),
-_start(std::clock()) {}
+_start(std::clock()),
+_virtualServer(NULL)
+{}
 
 // Destructor
 Client::~Client()
 {
 	delete _requestMsg;
-	delete _responseMsg;
-	delete _cgiResponseMsg;
 	_requestMsg = NULL;
+	delete _responseMsg;
 	_responseMsg = NULL;
-	_cgiResponseMsg = NULL;
+	// delete _cgiResponseMsg;
+	// _cgiResponseMsg = NULL;
 	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
 	closeClientFds();
 	clients.erase(getFdDataByType(FdData::CLIENT_FD).fd);
@@ -343,7 +382,8 @@ Client::Client(Client const & src):
 _id(++client_cntr),
 // _fd(src._fd),
 _clientFds(src._clientFds),
-_start(std::clock())
+_start(std::clock()),
+_virtualServer(NULL)
 {
 	*this = src;
 	Logger::warning("Copy Constructor of Client called", src.getId());

@@ -1,7 +1,7 @@
-#ifndef SERVERSETTINGS_HPP
-#define SERVERSETTINGS_HPP
+#ifndef VIRTUALSERVER_HPP
+#define VIRTUALSERVER_HPP
 #include "DefaultSettings.hpp"
-#include "Directive.hpp"
+#include "../Parsing/Directive.hpp"
 #include <ostream>
 #include <vector>
 #include "LocationSettings.hpp"
@@ -11,7 +11,7 @@ class LocationSettings;
 //can change default Settings autoindex, error_page
 //client MaxBodySize, index
 //contains Location
-class ServerSettings : public DefaultSettings
+class VirtualServer : public DefaultSettings
 {
 	public:
 		/**
@@ -30,11 +30,11 @@ class ServerSettings : public DefaultSettings
 		const int&										getServerId() const;
 		void											addDirectiveToServer(Directive directive);
 
-														ServerSettings();
-														ServerSettings(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);
-														ServerSettings(const ServerSettings& source);
-		ServerSettings& 								operator=(const ServerSettings& source);
-														~ServerSettings();
+														VirtualServer();
+														VirtualServer(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);
+														VirtualServer(const VirtualServer& source);
+		VirtualServer& 								operator=(const VirtualServer& source);
+														~VirtualServer();
 	private: 
 		void 							_applyAllServerLevelDirectives();
 		void 							_generateDefaultLocation(std::vector<LocationSettings>& serverLocation);
@@ -49,7 +49,7 @@ class ServerSettings : public DefaultSettings
 
 
 	public:
-		friend std::ostream& operator<<(std::ostream& os, const ServerSettings& server);
+		friend std::ostream& operator<<(std::ostream& os, const VirtualServer& server);
 };
 
 #endif

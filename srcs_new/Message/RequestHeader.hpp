@@ -35,7 +35,7 @@ struct Host
 class RequestHeader : public AHeader
 {
 	public:
-		RequestHeader(const std::string fullRequestHeader);
+		RequestHeader(const std::string fullRequestHeader, int& errorCode);
 		RequestHeader(const RequestHeader& source);
 		RequestHeader& operator=(const RequestHeader& source);
 		~RequestHeader();

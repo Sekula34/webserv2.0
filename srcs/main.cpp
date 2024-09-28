@@ -1,4 +1,4 @@
-#include "./Parsing/ServersInfo.hpp"
+#include "./Parsing/ServerManager.hpp"
 #include "Server/ConnectionDispatcher.hpp"
 #include "Server/SocketManager.hpp"
 #include "Utils/Data.hpp"
@@ -15,7 +15,7 @@
 void ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 {
 	Data::setAllCgiLang();
-	ServersInfo serverInfo(configFilePath);
+	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON"); std::cout<<std::endl;
 	Data::setEnvp(envp);
 	SocketManager sockets(serverInfo.getUniquePorts());

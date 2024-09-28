@@ -5,11 +5,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../srcs/Parsing/ServerSettings.hpp"
+#include "../srcs/Parsing/VirtualServer.hpp"
 #include "../srcs/Utils/Logger.hpp"
 #include "../srcs/Parsing/ParsingUtils.hpp"
 
-void ServerTest::_portTester(int expectedPort, const ServerSettings& server)
+void ServerTest::_portTester(int expectedPort, const VirtualServer& server)
 {
 	std::string expectedResult = ParsingUtils::toString(expectedPort);
 	Logger::testCase("Port Tester",expectedResult);
@@ -17,7 +17,7 @@ void ServerTest::_portTester(int expectedPort, const ServerSettings& server)
 	_testpassed();
 }
 
-void ServerTest::_locationFromUrlBlock(const ServerSettings& server)
+void ServerTest::_locationFromUrlBlock(const VirtualServer& server)
 {
 	Logger::testCase("Getting location from URL block", "");
 	_locationFromUrlGetterTest(server, "/another_location/text.txt", "/another_location/");
@@ -36,7 +36,7 @@ void ServerTest::serverTestCase()
 	Configuration conf(fullFilePath);
 	DefaultSettings defSettings;
 	std::vector<Token> allTokens = conf.getAllTokens();
-	ServerSettings server(1, defSettings, allTokens);
+	VirtualServer server(1, defSettings, allTokens);
 
 	_portTester(9090, server);
 
@@ -54,10 +54,10 @@ void ServerTest::serverTestCase()
 	_locationFromUrlBlock(server);
 
 	//server.printServerTokens();
-	//server.printServerSettings();
+	//server.printVirtualServer();
 }
 
-void ServerTest::_locationNumberTester(size_t expectedNumberOfLocations, const ServerSettings& server)
+void ServerTest::_locationNumberTester(size_t expectedNumberOfLocations, const VirtualServer& server)
 {
 	std::string expectedResult = ParsingUtils::toString(expectedNumberOfLocations);
 	Logger::testCase("Number of Locations", expectedResult);
@@ -65,7 +65,7 @@ void ServerTest::_locationNumberTester(size_t expectedNumberOfLocations, const S
 	_testpassed();
 }
 
-void ServerTest::_locationFromUrlGetterTest(const ServerSettings& server, std::string url, std::string expectedResult)
+void ServerTest::_locationFromUrlGetterTest(const VirtualServer& server, std::string url, std::string expectedResult)
 {
 	Logger::testCase("geting location from url " + url, expectedResult);
 	std::string serverLocation = server.getLocationURIfromPath(url);
@@ -73,7 +73,7 @@ void ServerTest::_locationFromUrlGetterTest(const ServerSettings& server, std::s
 	return _testpassed();
 }
 
-void ServerTest::_locationUriTester(const std::vector<std::string> expectedLocations, const ServerSettings& server)
+void ServerTest::_locationUriTester(const std::vector<std::string> expectedLocations, const VirtualServer& server)
 {
 	std::string expectedString = ParsingUtils::getStringOutOfVector(expectedLocations);
 	Logger::testCase("Servers uri", expectedString); std::cout << std::endl;
@@ -95,7 +95,7 @@ void ServerTest::runAllTests()
 	serverTestCase();
 }
 
-void ServerTest::_amIlocationtest(std::string location, const ServerSettings& server, bool expected)
+void ServerTest::_amIlocationtest(std::string location, const VirtualServer& server, bool expected)
 {
 	std::string expectedMessage;
 	if(expected)

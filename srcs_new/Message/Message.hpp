@@ -2,13 +2,17 @@
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
-# include <iostream>
 # include <list>
 # include <sstream>
+#include <string>
+# include "AHeader.hpp"
+
+# define MAX_BODY_SIZE	20
+# define MAX_CHUNKSIZE	30
 
 class Node;
 class RequestHeader;
-class AHeader;
+class ResponseHeader;
 
 class Message {
 
@@ -18,8 +22,8 @@ class Message {
 		virtual						~Message(void);
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
-		void						_bodyToChunks();
 		void						_chunksToBody();
+		void						stringsToChain(ResponseHeader* header, const std::string& body);
 
 									// set and get
 		int							getState() const;
@@ -32,6 +36,8 @@ class Message {
 		void						_headerInfoToNode();
 		const size_t&				getBytesSent() const;
 		void						setBytesSent(size_t num);
+		void						resetIterator();
+		void						advanceIterator();
 
 									//Message specific functions
 	private:
@@ -46,12 +52,15 @@ class Message {
 		int&						_errorCode;
 		size_t						_bytesSent;
 
+		void						_bodyToChunks(const std::string& body);
+		// void						_bodyToChunks();
 		void						_setNodeComplete();
 		void						_parseNode();
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
-		size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
+		// size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
+		size_t						_calcOptimalChunkSize(const std::string& body);
 		Node						_newChunkNode(size_t size);
 		std::string					_createCgiHeaderDel();
 		// void						_createHeader();

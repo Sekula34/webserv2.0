@@ -1,7 +1,5 @@
-#include "./Parsing/ServersInfo.hpp"
+#include "Server/ServerManager.hpp"
 #include "Server/ConnectionManager.hpp"
-#include "Message/Node.hpp"
-#include "Message/Message.hpp"
 #include "Io/Io.hpp"
 #include "Server/Socket.hpp"
 #include "Utils/Data.hpp"
@@ -21,7 +19,7 @@
 // void	initVars(char** envp, const std::string& configFilePath)
 // {
 // 	Data::setAllCgiLang();
-// 	ServersInfo serverInfo(configFilePath);
+// 	ServerManager serverInfo(configFilePath);
 // 	Logger::info("SERVER IS TURNED ON", "");
 // 	Data::setEnvp(envp);
 // 	// SocketManager sockets(serverInfo.getUniquePorts());
@@ -49,16 +47,16 @@ void handle_sigint(int sig)
 	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
 }
 
-static void	debugFakeVirtualServer()
-{
-	std::map<int, Client*>::iterator it = Client::clients.begin();
-	for (; it != Client::clients.end(); ++it)
-	{
-		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
-			&& it->second->getClientState() != Client::DELETEME)
-	  		it->second->setClientState(Client::DO_RESPONSE);	
-	}
-}
+// static void	debugFakeVirtualServer()
+// {
+// 	std::map<int, Client*>::iterator it = Client::clients.begin();
+// 	for (; it != Client::clients.end(); ++it)
+// 	{
+// 		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
+// 			&& it->second->getClientState() != Client::DELETEME)
+// 	  		it->second->setClientState(Client::DO_RESPONSE);	
+// 	}
+// }
 
 bool	shutdownServer()
 {
@@ -86,7 +84,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// ConnectionManager* manager = NULL;
 	Data::setAllCgiLang();
-	ServersInfo serverInfo(configFilePath);
+	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
 	Data::setEnvp(envp);
 	// SocketManager sockets(serverInfo.getUniquePorts());
@@ -113,12 +111,12 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	{
 		manager.epollLoop();
 		io.ioLoop();
-
-		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
-		debugFakeVirtualServer();	
-
-		// virtualServer.virtualServerLoop();
+		serverInfo.loop();
 		// cgi.cgiLoop();
+		
+		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
+		//debugFakeVirtualServer();	
+
 		if (shutdownServer())
 			break;
 	}

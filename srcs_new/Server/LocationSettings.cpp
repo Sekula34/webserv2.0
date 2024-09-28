@@ -1,8 +1,8 @@
 #include "LocationSettings.hpp"
 #include "DefaultSettings.hpp"
-#include "Directive.hpp"
-#include "ServerSettings.hpp"
-#include "Token.hpp"
+#include "../Parsing/Directive.hpp"
+#include "VirtualServer.hpp"
+#include "../Parsing/Token.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -61,14 +61,14 @@ bool LocationSettings::isCgiExtensionSet(const std::string& scriptExtension) con
 	}
 	return false;
 }
-LocationSettings::LocationSettings(const ServerSettings& locationServer)
+LocationSettings::LocationSettings(const VirtualServer& locationServer)
 :_locationServer(locationServer)
 {
 
 }
 
 LocationSettings::LocationSettings(const DefaultSettings& settings, const Token& locationToken,
-std::vector<Token>& serverTokens, const ServerSettings& locationServer)
+std::vector<Token>& serverTokens, const VirtualServer& locationServer)
 :
 DefaultSettings(settings),_locationToken(locationToken),
 _locationServer(locationServer)
@@ -80,7 +80,7 @@ _locationServer(locationServer)
 	Directive::applyAllDirectives(_locationDirectives, (*this));
 }
 LocationSettings::LocationSettings(const DefaultSettings& settings,
-std::vector<Token>& serverTokens, const ServerSettings& locationServer)
+std::vector<Token>& serverTokens, const VirtualServer& locationServer)
 :
 DefaultSettings(settings),
 _locationServer(locationServer)

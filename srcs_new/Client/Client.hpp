@@ -16,6 +16,7 @@
 # define MAX_TIMEOUT		3000
 
 class Message;
+class VirtualServer;
 
 class Client
 {
@@ -34,8 +35,8 @@ class Client
 		enum	e_clientMsgType
 		{
 			REQ_MSG,
-			RESP_MSG,
-			CGIRESP_MSG
+			RESP_MSG
+			// CGIRESP_MSG
 		};
 
 	public:
@@ -49,15 +50,21 @@ class Client
 		unsigned short			getClientPort();
 		std::string				getClientIp() const;
 		std::clock_t			getStartTime() const;
+		const VirtualServer*	getVirtualServer() const;
 		int&					getErrorCode();
+		const bool&				getIsRequestChecked() const;
+		const bool&				getCgiFlag() const;
 		bool					checkTimeout();
+		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
-		void					setCgiResponseMsg(Message* m);
+		// void					setCgiResponseMsg(Message* m);
 		void					setErrorCode(int e);
 		void					setAddrlen(socklen_t addrlen);
 		void					setChildSocket(int in, int out);
+		void					setIsRequestChecked();
+		void					setCgiFlag(bool b);
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -72,17 +79,20 @@ class Client
 		void				_initVars(int fd);
 
 		// Attributes
-		const size_t		_id;
-		std::vector<FdData>	_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
-		e_clientState		_clientState;
-		const std::clock_t	_start;
-		int					_errorCode;
-		Message*			_requestMsg;	// client owns so it should delete
-		Message*			_responseMsg;	// client owns so it should delete
-		Message*			_cgiResponseMsg;
-		struct sockaddr		_clientAddr;
-		std::string			_clientIp;
-		socklen_t			_addrLen;
+		const size_t			_id;
+		std::vector<FdData>		_clientFds; // Cliend fd = 0, socketToChild = 1, socketFromChild = 2
+		e_clientState			_clientState;
+		const std::clock_t		_start;
+		int						_errorCode;
+		Message*				_requestMsg;	// client owns so it should delete
+		Message*				_responseMsg;	// client owns so it should delete
+		// Message*				_cgiResponseMsg;
+		struct sockaddr			_clientAddr;
+		std::string				_clientIp;
+		socklen_t				_addrLen;
+		const VirtualServer*	_virtualServer;
+		bool					_isRequestChecked;
+		bool					_cgiFlag;
 		// double				_clockstop;
 
 	public:

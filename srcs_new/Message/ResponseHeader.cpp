@@ -1,33 +1,40 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
+#include "AHeader.hpp"
 #include <cstddef>
 #include <ostream>
 #include <sstream>
 #include <vector>
+#include "../Server/ResponseGenerator.hpp"
 
 
-ResponseHeader::ResponseHeader(std::string headerSection, const int httpCode)
-:AHeader(headerSection),
-_httpCode(httpCode)
+ResponseHeader::ResponseHeader()
+:AHeader(_httpCode = 0)
+{
+	
+}
+
+ResponseHeader::ResponseHeader(std::string headerSection, int& errorCode)
+:AHeader(headerSection, errorCode)
 {
 	_fillStatusLineElements();
 }
 
-ResponseHeader::ResponseHeader(const int& httpCode, size_t contentLength)
-:_httpCode(httpCode)
-{
-	_fillStatusLineElements();
-	m_headerFields["Connection"] = "close";
-	if(contentLength != 0)
-	{
-		m_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
-		m_headerFields["Content-Language"] = "en";
-	}
-}
+// ResponseHeader::ResponseHeader(int& httpCode, size_t contentLength)
+// :_httpCode(httpCode)
+// {
+// 	_fillStatusLineElements();
+// 	m_headerFields["Connection"] = "close";
+// 	if(contentLength != 0)
+// 	{
+// 		m_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
+// 		m_headerFields["Content-Language"] = "en";
+// 	}
+// }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)
-:AHeader(),
+:AHeader(source.m_errorCode),
 _httpCode(source._httpCode),
 _statusLine(source._statusLine)
 {
@@ -59,7 +66,7 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 	return fullHeader;
 }
 
-ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
+ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
 	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
 	std::string aHeaderString = "\r\n\r\n";
@@ -70,10 +77,10 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		std::string toReplace = cgiHeaderFieldDelimiter;
 		std::string httpDelimiter = "\r\n";
 		aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
-		toReturn = new ResponseHeader(aHeaderString, 200);
+		toReturn = new ResponseHeader(aHeaderString, clientError);
 	}
 	else
-		toReturn = new ResponseHeader(aHeaderString, 200);
+		toReturn = new ResponseHeader(aHeaderString, clientError);
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
 	{
 		// if one server gets invalid response for anothe -> bad getaway 502
@@ -90,6 +97,20 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		toReturn->changeHttpCode(newHttpCode);
 	}
 	return toReturn;
+}
+
+ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &rg)
+{
+	
+	ResponseHeader* rgHeader = new ResponseHeader();
+	rgHeader->changeHttpCode(rg.getResponseHttpStatus());
+	//rgHeader->setOneHeaderField("Content-Type", std::string value)
+	//Content-Type: text/html; charset=ISO-8859-1
+
+
+
+	return rgHeader;
+	//rgHeader->setOneHeaderField(std::string key, std::string value)
 }
 
 void ResponseHeader::changeHttpCode(int newHttpCode)

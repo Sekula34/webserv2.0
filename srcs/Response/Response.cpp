@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include "../Client/Client.hpp"
 
-Response::Response(const Client& client, const ServerSettings* server)
+Response::Response(const Client& client, const VirtualServer* server)
 :_client(client),
 _server(server),
 _responseHeader(NULL),

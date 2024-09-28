@@ -58,9 +58,9 @@ void Logger::chars(std::string message, bool newline)
 	{
 		return;
 	}
-	std::cout << PURPLE;
+	std::cout << _colorMap[PURPLE];
 	std::cout << _printCurrentTime().str();
-	std::cout <<"CHARS: " << RESET;
+	std::cout <<"CHARS: " << _colorMap[RESET];
 	printEscapeCharacters(message);
 	if(newline == true)
 		std::cout << std::endl;
