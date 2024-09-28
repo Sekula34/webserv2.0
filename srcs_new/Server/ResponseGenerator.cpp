@@ -120,7 +120,13 @@ void ResponseGenerator::_getHandler(const LocationSettings& location)
     Logger::warning("Here will be get request implementation", "");
     Logger::info("Resposible location is", location.getLocationUri());
     std::cout << location << std::endl;
-    FileUtils::putFileInString("html1/first.html", _response);
+    bool result = FileUtils::putFileInString("html/first.html", _response);
+    if(result == true)
+        _httpStatus = 200;
+    else 
+    {
+        _response = _renderServerErrorPage(500);
+    }
     //check if redirected 
 }
 
