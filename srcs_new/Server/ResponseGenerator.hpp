@@ -2,7 +2,10 @@
 # define RESPONSE_GENERATOR
 #include "../Client/Client.hpp"
 #include "../Utils/FileUtils.hpp"
+#include "LocationSettings.hpp"
 
+
+class LocationSettings;
 
 class ResponseGenerator
 {
@@ -22,6 +25,7 @@ class ResponseGenerator
 		std::string _renderServerErrorPage(int errorCode);
 		std::string _generateErrorPage(const int httpErrorCode);
 		void 		_setFileType(fileType type);
+		void		_getHandler(const LocationSettings& location);
 
 		Client&		_client;
 		std::string	_response;

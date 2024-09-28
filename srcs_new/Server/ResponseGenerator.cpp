@@ -1,4 +1,5 @@
 #include "ResponseGenerator.hpp"
+#include <cstdio>
 #include <sstream>
 #include <string>
 #include "../Parsing/ParsingUtils.hpp"
@@ -12,6 +13,7 @@
 #include "../Message/Node.hpp"
 #include "../Message/RequestHeader.hpp"
 #include "../Utils/Logger.hpp"
+#include "LocationSettings.hpp"
 
 void ResponseGenerator::generateClientResponse(Client &client)
 {
@@ -83,6 +85,33 @@ ResponseGenerator::~ResponseGenerator()
 
 }
 
+
+static const LocationSettings& getClientRequestedLocation(Client& client) 
+{
+    const VirtualServer& server = * (client.getVirtualServer());
+    const RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+    const std::string& clientUriPath = header.urlSuffix->getPath();
+    const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+    bool found = false;
+    std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+    if(found == true)
+    {
+        const LocationSettings& reponseLocation = *it;
+        return reponseLocation;
+    }
+    Logger::error("THIS SHOULD NEVER HAPPEND, requested location is not found", serverLocationUri);
+    return server.getServerLocations()[0];
+} 
+
+
+void ResponseGenerator::_getHandler(const LocationSettings& location)
+{
+    Logger::warning("Here will be get request implementation", "");
+    Logger::info("Resposible location is", location.getLocationUri());
+    std::cout << location << std::endl;
+    FileUtils::putFileInString("html1/first.html", _response);
+}
+
 void ResponseGenerator::_responseMenu()
 {
 	if(_client.getErrorCode() != 0)
@@ -93,13 +122,13 @@ void ResponseGenerator::_responseMenu()
 	}
 	else
 	{
-        RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
-        std::string requestMethod = header.getRequestLine().requestMethod;
-        
-
-        
+        const RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
+        const std::string& requestMethod = header.getRequestLine().requestMethod;
+        const LocationSettings& requestLocation = getClientRequestedLocation(_client);
         if(requestMethod == "GET")
         {
+            Logger::info("Client requeste url is ", header.urlSuffix->getPath());
+            _getHandler(requestLocation);
             //getHandler
         }
         else if (requestMethod == "POST")
@@ -115,11 +144,6 @@ void ResponseGenerator::_responseMenu()
             Logger::warning("Method not implemneted", requestMethod);
             _response = _renderServerErrorPage(405);
         }
-    
-		//if Normal 
-			//generate normal 
-		//else 
-			//store Cgi?
 	}
 }
 
