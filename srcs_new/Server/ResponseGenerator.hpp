@@ -25,12 +25,15 @@ class ResponseGenerator
 		std::string _renderServerErrorPage(int errorCode);
 		std::string _generateErrorPage(const int httpErrorCode);
 		void 		_setFileType(fileType type);
+		void 		_redirectHandler(const LocationSettings& location);
 		void		_getHandler(const LocationSettings& location);
 
 		Client&		_client;
 		std::string	_response;
 		int			_httpStatus;
 		fileType	_fileType;
+		NginnxReturn _redirect;
+	
 
 };
 

@@ -1,5 +1,4 @@
 #include "ResponseGenerator.hpp"
-#include <cstdio>
 #include <sstream>
 #include <string>
 #include "../Parsing/ParsingUtils.hpp"
@@ -15,6 +14,7 @@
 #include "../Utils/Logger.hpp"
 #include "LocationSettings.hpp"
 
+// Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
     if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() != true)
@@ -104,12 +104,21 @@ static const LocationSettings& getClientRequestedLocation(Client& client)
 } 
 
 
+void ResponseGenerator::_redirectHandler(const LocationSettings& location)
+{
+    _redirect = location.getNginxReturn();
+    _httpStatus = _redirect.getStatus();
+    //_response = _generateErrorPage(302);
+    _response = _renderServerErrorPage(_httpStatus); //FIXME: check what if user provide you error page that does not exist in config file 
+}
+
 void ResponseGenerator::_getHandler(const LocationSettings& location)
 {
     Logger::warning("Here will be get request implementation", "");
     Logger::info("Resposible location is", location.getLocationUri());
     std::cout << location << std::endl;
     FileUtils::putFileInString("html1/first.html", _response);
+    //check if redirected 
 }
 
 void ResponseGenerator::_responseMenu()
@@ -125,7 +134,14 @@ void ResponseGenerator::_responseMenu()
         const RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
         const std::string& requestMethod = header.getRequestLine().requestMethod;
         const LocationSettings& requestLocation = getClientRequestedLocation(_client);
-        if(requestMethod == "GET")
+        
+        if (requestLocation.getNginxReturn().getFlag() == true)
+        {
+            Logger::warning("You are about to be redirected", requestLocation.getNginxReturn().getRedirectPath());
+            _redirectHandler(requestLocation);
+            //redirectHandler
+        }
+        else if(requestMethod == "GET")
         {
             Logger::info("Client requeste url is ", header.urlSuffix->getPath());
             _getHandler(requestLocation);
