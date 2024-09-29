@@ -15,6 +15,9 @@
 #include "LocationSettings.hpp"
 #include "../Utils/Autoindex.hpp"
 #include <fstream>
+
+#include <iostream>
+
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
@@ -228,8 +231,11 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::cout << "POST method executed" << std::endl;
 	// std::map<std::string, std::string>& msgHeader = request->getHeader();
 	// std::string filename = msgHeader["uri"];
+	// std::string query = header.urlSuffix->getQueryParameters();
+	// std::string filename = query;
     std::string filename = "POST.txt";
-	std::ofstream outputFile(filename.c_str());
+	// std::ofstream outputFile(filename.c_str());
+	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
 		std::cerr << "Unable to create POST file!" << std::endl;
@@ -238,11 +244,17 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 		return ;
 	}
 	// outputFile << *request;
-    Message& message = *(_client.getMsg(Client::REQ_MSG));
-    const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
+	Message& message = *(_client.getMsg(Client::REQ_MSG));
+	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
     Logger::warning("getFullMessage() = ", header.getFullMessage());
     //outputFile << header.getFullMessage();
     outputFile << message.getBodyString();
+	// START TESTING
+	// Buffer to hold file chunks (adjust size as needed)
+	// outputFile.write(message.getBodyString().c_str(), message.getBodyString().size());
+	// outputFile.write(message.getBodyString().c_str(), message.getBodyString().size()*sizeof(char)); // --> this works!
+	// outputFile.write(reinterpret_cast<const char*>(message.getBodyString().data()), message.getBodyString().size()*sizeof(char));
+	// END TESTING
 	outputFile.close();
     _httpStatus = 201;
     _response = _renderServerErrorPage(_httpStatus);
