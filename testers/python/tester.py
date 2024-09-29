@@ -113,6 +113,12 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 	
+	def test_disguise_port(self):
+		TestMyWebServer.print_test_title("Testing disguise port")
+		response = CustomRequst.disguise_port()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+	
 	def test_no_host(self):
 		TestMyWebServer.print_test_title("Testing no host")
 		response = CustomRequst.no_host()
@@ -125,7 +131,7 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
 		Colors.test_passed()
 	
-	def test_short_invalid(self):
+	def short_invalid(self):
 		TestMyWebServer.print_test_title("Testing short invalid request")
 		response = CustomRequst.short_invalid_request()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
