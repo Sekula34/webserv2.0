@@ -70,7 +70,7 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 
 ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
-	Logger::error("client ERROR: ", clientError);
+	// Logger::error("client ERROR: ", clientError);
 	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
 	std::string aHeaderString = "\r\n\r\n";
 	ResponseHeader* toReturn = NULL;
@@ -79,12 +79,12 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
 		std::string toReplace = cgiHeaderFieldDelimiter;
 		std::string httpDelimiter = "\r\n";
-		Logger::error("cgiResponse: ", cgiResponse);
-		Logger::chars(toReplace, true);
-		Logger::chars(httpDelimiter, true);
+		// Logger::error("cgiResponse: ", cgiResponse);
+		// Logger::chars(toReplace, true);
+		// Logger::chars(httpDelimiter, true);
 		aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
 		toReturn = new ResponseHeader(aHeaderString, clientError);
-		Logger::chars(aHeaderString, true);
+		// Logger::chars(aHeaderString, true);
 	}
 	else
 		toReturn = new ResponseHeader(aHeaderString, clientError);

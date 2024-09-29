@@ -292,7 +292,7 @@ void	Message::_createHeader()
 
 	if(_header && _header->getHttpStatusCode() != 0)
 	{
-		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
+		Logger::warning("Found Error in Client Header", _header->getHttpStatusCode());
 	}
 }
 

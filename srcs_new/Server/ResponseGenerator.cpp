@@ -17,10 +17,13 @@ void ResponseGenerator::generateClientResponse(Client &client)
 {
     if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
 		|| (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
+	{
         return;
+	}
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
-    if (client.getCgiFlag() == false || client.getErrorCode() != 0)
+    if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
+    // if (client.getCgiFlag() == false || client.getErrorCode() != 0)
     {   
         // if (client.getCgiFlag() == true)
         // {

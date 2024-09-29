@@ -232,10 +232,10 @@ void	Client::setChildPid(int pid)
 	_childPid = pid;
 }
 
-bool	Client::checkTimeout()
+bool	Client::checkTimeout(double maxtime)
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
-	if (diff > MAX_TIMEOUT)
+	if (diff > maxtime)
 	{
 		// Logger::warning("removing Client due to timeout", true);
 		return (false);

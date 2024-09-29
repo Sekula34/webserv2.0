@@ -92,10 +92,10 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	// SocketManager sockets(serverInfo.getUniquePorts());
 	
 	// Initialize epoll
-	int epollFd = epoll_create(1);
-	Logger::info("EPOLL Fd: ", epollFd);
-	if (epollFd == -1)
-		throw (std::runtime_error("epoll_create failed"));
+	// int epollFd = epoll_create(1);
+	// Logger::info("EPOLL Fd: ", epollFd);
+	// if (epollFd == -1)
+	// 	throw (std::runtime_error("epoll_create failed"));
 
 	// Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
@@ -104,7 +104,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 
 	// Create manager instance
-	ConnectionManager manager(epollFd);
+	ConnectionManager manager;
 	Io io;
 	Cgi cgi;
 	Logger::info("my pid is: ", getpid());

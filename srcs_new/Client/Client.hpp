@@ -56,7 +56,7 @@ class Client
 		const bool&				getCgiFlag() const;
 		const int&				getWaitReturn() const;
 		const int&				getChildPid() const;
-		bool					checkTimeout();
+		bool					checkTimeout(double maxtime = MAX_TIMEOUT);
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);

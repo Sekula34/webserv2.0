@@ -1,4 +1,5 @@
 #include "../Server/Socket.hpp"
+#include "../Server/ConnectionManager.hpp"
 #include "../Utils/Data.hpp"
 #include "../Utils/Logger.hpp"
 #include "../Parsing/ParsingUtils.hpp"
@@ -17,6 +18,7 @@
 
 Cgi::Cgi ()
 {
+	_tmp = NULL;
 	Logger::info("Cgi constructor called", "");
 }
 
@@ -53,6 +55,8 @@ Cgi &	Cgi::operator=(Cgi const & rhs)
 	}
 	return (*this);
 }
+
+extern volatile sig_atomic_t flag;
 
 // int	Cgi::getPid()
 // {
@@ -376,15 +380,17 @@ void	Cgi::_deleteChararr(char** lines)
 int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFromChild)
 {
 	signal(SIGINT, SIG_IGN);
+	close (ConnectionManager::getEpollFd());
 	close(socketsToChild[0]);
 	close(socketsFromChild[0]);
-	//Data::closeAllFds();
-	// if (chdir(_scriptLocation.c_str()) == -1)
-	// {
-	// 	close(_socketsFromChild[1]);
-	// 	close(_socketsToChild[1]);
-	// 	throw std::runtime_error("chdir failed in CGI child process");
-	// }
+	ConnectionManager::closeClientFds();
+	Socket::closeSockets();
+	if (chdir(getScriptLocation(args[1]).c_str()) == -1)
+	{
+		close(socketsFromChild[1]);
+		close(socketsToChild[1]);
+		throw std::runtime_error("chdir failed in CGI child process");
+	}
  	if (dup2(socketsToChild[1], STDIN_FILENO) == -1)
 	{
 		close(socketsFromChild[1]);
@@ -444,7 +450,6 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 {
 		if (WIFSIGNALED(status))
 		{
-
 			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
 			Logger::warning("Child ID:", client.getId());
 			_stopCgiSetErrorCode(client);
@@ -468,11 +473,26 @@ void	Cgi::_waitForChild(Client& client)
 		return ;
 
 	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
-	// _handleChildTimeout(client);
+	// if (client.checkTimeout() == false || flag > 0)
+	// {
+	// 	Logger::error("sending sig TERM to child", "");
+	// 	kill(client.getChildPid(), SIGTERM);
+	// }
+	//
+	// // if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
+	// if (client.checkTimeout(15000) == false)
+	// {
+	// 	Logger::error("sending sig KILL to child", "");
+	// 	kill(client.getChildPid(), SIGKILL);
+	// }
 
 	// WAITPID
 	// client.setWaitReturn(waitpid(_pid, &status, 0));
 	client.setWaitReturn(waitpid(client.getChildPid(), &status, WNOHANG));
+
+	if (client.getWaitReturn() != 0)
+		Logger::error("waitpid, caught return ", client.getChildPid());
+
 
 	// waitpid fail
 	if (client.getWaitReturn() == -1)
@@ -493,8 +513,9 @@ void	Cgi::_stopCgiSetErrorCode(Client& client)
 	Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
 	if (client.getErrorCode() != 0)
 		Logger::error("overwriting client Error code in CGI to 500 it was:", client.getErrorCode());
-	client.setCgiFlag(false);
+	// client.setCgiFlag(false);
 	client.setErrorCode(500);
+	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 	client.setClientState(Client::DO_RESPONSE);
 }
 
@@ -534,7 +555,7 @@ char**	Cgi::_argumentList(Client& client)
 	catch(std::bad_alloc& a)
 	{
 		_stopCgiSetErrorCode(client);
-		Logger::error("F@ck", "");
+		Logger::error("F@ck ", a.what());
 		toReturn = NULL;
 	}
 	return (toReturn);
@@ -562,7 +583,8 @@ void Cgi::_cgiClient(Client& client)
 {
 	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
 	if (client.getClientState() != Client::DO_CGIREC
-		&& client.getClientState() != Client::DO_CGISEND)
+		&& client.getClientState() != Client::DO_CGISEND
+		&& client.getClientState() != Client::DO_RESPONSE)
 	{
 		return ;
 	}

@@ -12,6 +12,8 @@
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
 extern volatile sig_atomic_t flag;
 
+int ConnectionManager::_epollFd = epoll_create(1);
+
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
@@ -31,6 +33,11 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
 	return (ret);
+}
+
+const int& ConnectionManager::getEpollFd()
+{
+	return (_epollFd);
 }
 
 // Helper function to remove fd to epoll
@@ -132,10 +139,49 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 		fdData.state = FdData::NONE;
 }
 
+static bool	safeToDelete(Client& client)
+{
+	// CLIENT STATE SAIS DELETE ME
+	if(client.getClientState() == Client::DELETEME)	
+		return (true);
+
+	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
+	if (client.getCgiFlag() == false && client.checkTimeout() == false)
+		return (true);
+	return (false);
+}
+
 // Method for _epollLoop() to update Client Fd state (e_fdState)
 void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
-	if (client.getClientState() == Client::DELETEME)
+	if (client.checkTimeout() == false || flag > 0)
+	{
+		// Logger::error("sending sig TERM to child", "");
+		kill(client.getChildPid(), SIGTERM);
+		if (client.getWaitReturn() != 0)
+		{
+			// client.setCgiFlag(false);
+			client.setClientState(Client::DO_RESPONSE);
+		}
+	}
+
+	// if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
+	if (client.checkTimeout(4000) == false)
+	{
+		// Logger::error("sending sig KILL to child", "");
+		kill(client.getChildPid(), SIGKILL);
+		// client.setCgiFlag(false);
+		// client.setErrorCode(500);
+		client.setClientState(Client::DO_RESPONSE);
+	}
+
+	// Logger::info("Client state", client.getClientState());
+	// Logger::info("Client cgi flag", client.getCgiFlag());
+	// Logger::info("Client error code", client.getErrorCode());
+
+	// TODO: reset Messages and Flags and state in Client if Keep Alive	
+
+	if (safeToDelete(client))
 	{
 		epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
 		delete &client; // delete needs an address
@@ -195,6 +241,24 @@ void		ConnectionManager::_handleCgiFds(const int& idx)
 	Logger::error("Could not find targetFd in any client (while trying to set cgi socket state): ", targetFd);
 }
 
+void ConnectionManager::closeClientFds()
+{
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for(; it != Client::clients.end(); it++)
+	{
+		close(it->second->getFdDataByType(FdData::CLIENT_FD).fd);
+		// if (it->second->socketToChild != DELETED)
+		if (it->second->getClientFds().size() == 1)
+			continue ;
+		if (it->second->getFdDataByType(FdData::TOCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::TOCHILD_FD).fd);
+		// if (it->second->socketFromChild != DELETED)
+		if (it->second->getFdDataByType(FdData::FROMCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::FROMCHILD_FD).fd);
+	}
+}
+
+
 void	ConnectionManager::epollLoop()
 {
 	Client* client = NULL;
@@ -218,14 +282,17 @@ void	ConnectionManager::epollLoop()
 	}
 }
 
+
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
 // Custom Constructor
-ConnectionManager::ConnectionManager(int epollFd) :
-_epollFd(epollFd), _clients(Client::clients)
+ConnectionManager::ConnectionManager() :
+ _clients(Client::clients)
 {
+	if (_epollFd < 0)
+		throw std::runtime_error("epoll create failed");
 	_addServerSocketsToEpoll();
 }
 

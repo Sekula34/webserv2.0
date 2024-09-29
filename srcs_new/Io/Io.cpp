@@ -79,6 +79,8 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
  	int sendValue = 0;
 	if (message->getState() != COMPLETE)
 		return ;
+	if (client.getCgiFlag() == true && client.getWaitReturn() == 0 && client.getClientState() == Client::DO_RESPONSE)
+		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
@@ -94,6 +96,7 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 
 	if (sendValue > 0)
 	{
+		Logger::info("Succesfully sent bytes:", sendValue);
 		Logger:: chars(it->getString(), true);
 		message->setBytesSent(message->getBytesSent() + sendValue);
 		if (message->getBytesSent() == it->getString().size())
@@ -132,8 +135,8 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		message->bufferToNodes(_buffer, recValue);
 	}
 
-	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
-		return ;
+	// if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
+	// 	return ;
 
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)
