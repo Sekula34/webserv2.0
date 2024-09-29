@@ -55,6 +55,7 @@ class Client
 		const bool&				getIsRequestChecked() const;
 		const bool&				getCgiFlag() const;
 		const int&				getWaitReturn() const;
+		const int&				getChildPid() const;
 		bool					checkTimeout();
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
@@ -67,6 +68,7 @@ class Client
 		void					setIsRequestChecked();
 		void					setCgiFlag(bool b);
 		void					setWaitReturn(int num);
+		void					setChildPid(int pid);
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -74,8 +76,6 @@ class Client
 		// Attributes
 		static size_t					client_cntr;
 		static std::map<int, Client*>	clients;
-		char**					_env;
-		char**					_args;
 
 	private:
 		// Methods
@@ -98,6 +98,9 @@ class Client
 		bool					_isRequestChecked;
 		bool					_cgiFlag;
 		int						_waitReturn;
+		int						_childPid;
+		// char**					_env;
+		// char**					_args;
 		// double				_clockstop;
 
 	public:

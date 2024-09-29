@@ -77,6 +77,8 @@ void	clearBuffer(char* buffer)
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 {
  	int sendValue = 0;
+	if (message->getState() != COMPLETE)
+		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";

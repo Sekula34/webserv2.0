@@ -154,6 +154,11 @@ const int&	Client::getWaitReturn() const
 	return (_waitReturn);
 }
 
+const int&	Client::getChildPid() const
+{
+	return (_childPid);
+}
+
 void Client::setVirtualServer(const VirtualServer& vs)
 {
 	_virtualServer = &vs;
@@ -222,6 +227,11 @@ void	Client::setChildSocket(int to, int from)
 	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
 }
 
+void	Client::setChildPid(int pid)
+{
+	_childPid = pid;
+}
+
 bool	Client::checkTimeout()
 {
 	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
@@ -255,6 +265,7 @@ void Client::_initVars(int fd)
 	_isRequestChecked = false;
 	_cgiFlag = false;
 	_waitReturn = 0;
+	_childPid = 0;
 }
 
 
@@ -398,6 +409,7 @@ _id(++client_cntr),
 // _fd(src._fd),
 _clientFds(src._clientFds),
 _start(std::clock()),
+_errorCode(src._errorCode),
 _virtualServer(NULL)
 {
 	*this = src;
