@@ -110,6 +110,7 @@ $(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIRS)
 
 mainandtest: | $(OBJ_DIRS) 
 	@$(CXX) $(CXXFLAGS) -c srcs_new/main.cpp -o  obj/srcs_new/main.o
+	@mkdir -p obj/testers
 	@$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
 
 $(OBJ_DIRS):
