@@ -231,9 +231,11 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::cout << "POST method executed" << std::endl;
 	// std::map<std::string, std::string>& msgHeader = request->getHeader();
 	// std::string filename = msgHeader["uri"];
-	// std::string query = header.urlSuffix->getQueryParameters();
-	// std::string filename = query;
-    std::string filename = "POST.txt";
+	Message& message = *(_client.getMsg(Client::REQ_MSG));
+	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
+	std::string query = header.urlSuffix->getQueryParameters();
+	std::string filename = query;
+    // std::string filename = "POST.txt";
 	// std::ofstream outputFile(filename.c_str());
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
@@ -244,8 +246,6 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 		return ;
 	}
 	// outputFile << *request;
-	Message& message = *(_client.getMsg(Client::REQ_MSG));
-	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
     Logger::warning("getFullMessage() = ", header.getFullMessage());
     //outputFile << header.getFullMessage();
     outputFile << message.getBodyString();
