@@ -12,20 +12,11 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
-/******************************************************************************/
-/*                               Constructors                                 */
-/******************************************************************************/
-
 Cgi::Cgi ()
 {
 	_tmp = NULL;
 	// Logger::info("Cgi constructor called", "");
 }
-
-/******************************************************************************/
-/*                                Destructor                                  */
-/******************************************************************************/
-
 
 Cgi::~Cgi (void)
 {
@@ -33,19 +24,11 @@ Cgi::~Cgi (void)
 	// Logger::info("Cgi destructor called", "");
 }
 
-/******************************************************************************/
-/*                             Copy Constructor                               */
-/******************************************************************************/
-
 Cgi::Cgi(Cgi const & src)
 {
 	//std::cout << "Cgi copy constructor called" << std::endl;
 	*this = src;
 }
-
-/******************************************************************************/
-/*                      Copy Assignment Operator Overload                     */
-/******************************************************************************/
 
 Cgi &	Cgi::operator=(Cgi const & rhs)
 {
@@ -57,36 +40,6 @@ Cgi &	Cgi::operator=(Cgi const & rhs)
 }
 
 extern volatile sig_atomic_t flag;
-
-// int	Cgi::getPid()
-// {
-// 	return (_pid);
-// }
-
-
-/*
- * RFC 3875 - Common Gateway Protocol
- 
-	* The server receives the request from the client
-	
-	* selects a CGI script to handle the request
-	
-	* converts the client request to a CGI request
-	
-	* executes the script
-	
-	* converts the CGI response into a response for the client
-	
-	* When processing the client request, it is responsible for implementing
-	any protocol or transport level authentication and security. 
-
-	The server MUST perform translations and protocol conversions on the
-	client request data required by this specification.
-
-	* Furthermore, the server retains its responsibility to the client
-	to conform to the relevant network protocol even if the CGI script
-	fails to conform to this specification.
-*/
 
 // Because you won’t call the CGI directly, use the full path as PATH_INFO.
 // if no header or incomplete header, create header
@@ -304,6 +257,7 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	line += requestHeader->getRequestLine().requestMethod;
 	envVec.push_back(line);
 
+	//TODO: right now this contains the PATH_INFO subfolders
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
@@ -411,41 +365,6 @@ int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFrom
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
-/*
-void	Cgi::terminateChild()
-{
-	_terminate = true;	
-}
-
-void	Cgi::_timeoutKillChild()
-{
-	if (_sentSigkill)
-		return ;
-	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
-	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
-	{	
-		Logger::error("killing child process with PID: ", _pid);
-		kill(_pid, SIGKILL);
-		_sentSigkill = true;
-	}
-}
-
-void	Cgi::_handleChildTimeout(Client& client)
-{
-	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
-	if ((!client.checkTimeout() && !sentSigterm) || _terminate)
-	{
-		_shutdownStart = std::clock();
-		_terminate = false;
-		sentSigterm = true;
-		Logger::warning("calling SIGTERM on child process: ", _pid);
-		kill(_pid, SIGTERM);
-	}
-	// if SIGTERM not successful send SIGKILL after MAX_TIMEOUT / 2
-	_timeoutKillChild();
-}
-*/
-
 void	Cgi::_handleReturnStatus(int status, Client& client)
 {
 		if (WIFSIGNALED(status))
@@ -472,27 +391,8 @@ void	Cgi::_waitForChild(Client& client)
 	if (client.getWaitReturn() > 0)
 		return ;
 
-	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
-	// if (client.checkTimeout() == false || flag > 0)
-	// {
-	// 	Logger::error("sending sig TERM to child", "");
-	// 	kill(client.getChildPid(), SIGTERM);
-	// }
-	//
-	// // if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
-	// if (client.checkTimeout(15000) == false)
-	// {
-	// 	Logger::error("sending sig KILL to child", "");
-	// 	kill(client.getChildPid(), SIGKILL);
-	// }
-
 	// WAITPID
-	// client.setWaitReturn(waitpid(_pid, &status, 0));
 	client.setWaitReturn(waitpid(client.getChildPid(), &status, WNOHANG));
-
-	// if (client.getWaitReturn() != 0)
-	// 	Logger::error("waitpid, caught return ", client.getChildPid());
-
 
 	// waitpid fail
 	if (client.getWaitReturn() == -1)
@@ -629,8 +529,6 @@ void Cgi::_cgiClient(Client& client)
 			_execute(args, env, socketsToChild, socketsFromChild);
 		}
 
-		// TODO: take care of deleting this in client
-		// _deleteChararr(_tmp);
 		_deleteChararr(args);
 		_deleteChararr(env);
 

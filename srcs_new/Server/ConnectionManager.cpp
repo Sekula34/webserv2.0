@@ -29,7 +29,7 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = fd;
 
-	Logger::warning("added fd to epoll: ", fd);
+	// Logger::warning("adding fd to epoll: ", fd);
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
 	return (ret);
@@ -43,7 +43,7 @@ const int& ConnectionManager::getEpollFd()
 // Helper function to remove fd to epoll
 static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event* events)
 {
-	Logger::warning("removing fd from epoll: ", fd);
+	// Logger::warning("removing fd from epoll: ", fd);
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
 		Logger::error("The following FD could not be removed from epoll: ", fd);

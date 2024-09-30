@@ -58,7 +58,7 @@ bool ServerManager::_isCgi(Client& client)
 	std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, locFound);
 	if(locFound)
 	{
-		Logger::info("Cgi checked and it exist on this location :", location->getLocationUri()); 
+		// Logger::info("Cgi checked and it exist on this location :", location->getLocationUri()); 
 		if(_parseCgiURLInfo(*location, client) == true)
 			return (ServerManager::_isSupportedScriptExtenstion(*location, client));
 	}
@@ -95,7 +95,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 		client.setErrorCode(404);
 		return false;
 	}
-	Logger::warning("Client can access this", serverLocationUri);
+	// Logger::warning("Client can access this", serverLocationUri);
 	return true;
 }
 
@@ -127,7 +127,7 @@ void ServerManager::loop()
 			if(_isCgi(client) == true)
 			{
 				client.setCgiFlag(true);
-				Logger::warning("Client Requested valid cgi", client.getId());
+				Logger::warning("Client Requested valid cgi, ID: ", client.getId());
 				client.setClientState(Client::DO_CGISEND);
 
 				// TODO: this is fake set state, just to make webserve work without cgi
@@ -299,7 +299,7 @@ std::vector<LocationSettings>::const_iterator ServerManager::_setCgiLocation(Cli
 
 bool ServerManager::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client& client)
 {
-	Logger::info("Called cgi parse url", true);
+	// Logger::info("Called cgi parse url", true);
 	RequestHeader& clientHeader = *static_cast<RequestHeader *>(client.getMsg(Client::REQ_MSG)->getHeader());
 
 	std::string fileName = ParsingUtils::getFileNameFromUrl(clientHeader.urlSuffix->getPath(), cgiLocation.getLocationUri());
@@ -314,11 +314,11 @@ bool ServerManager::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client&
 	}
 	std::string scriptPath = cgiLocation.getLocationUri() + fileName;
 	_setCgiPathInfo(clientHeader.urlSuffix->getPath(), scriptName, client);
-	std::ostringstream oss;
-	oss << "Script Name " << clientHeader.urlSuffix->getCgiScriptName() << std::endl;
-	oss << "Script extension: " << clientHeader.urlSuffix->getCgiScriptExtension()  << std::endl;
-	oss << "Path info" << clientHeader.urlSuffix->getCgiPathInfo() << std::endl;
-	Logger::info(oss.str(), "");
+	// std::ostringstream oss;
+	// oss << "Script Name " << clientHeader.urlSuffix->getCgiScriptName() << std::endl;
+	// oss << "Script extension: " << clientHeader.urlSuffix->getCgiScriptExtension()  << std::endl;
+	// oss << "Path info" << clientHeader.urlSuffix->getCgiPathInfo() << std::endl;
+	// Logger::info(oss.str(), "");
 	return true;
 }
 

@@ -21,44 +21,43 @@
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
+	// WE DON'T GENERATE A RESPONSE TO CLIENT IF:
+	// THE RESPONSE MESSAGE IS NOT COMPLETE AND WE ARE NOT RUNNING CGI
+	// OR WE ARE RUNNING CGI BUT THE CHILD PROCESS HAS NOT RETURNED YET
     if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
 		|| (client.getCgiFlag() == true && client.getWaitReturn() == 0))
-		// || (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
 	{
         return;
 	}
+
+	// SELECT THE CORRECT MESSAGE IN CLIENT AND RESET THE ITERATOR TO THE HEADER IN MESSAGE
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
+
+	// WE ARE GENERATING OUT RESPONSE IF
+	// WE DID NOT RUN CGI OR THERE WAS AN ERR ALREADY OR THE CLIENT IS PAST THE TIMEOUT
     if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
-    // if (client.getCgiFlag() == false || client.getErrorCode() != 0)
     {   
-        // if (client.getCgiFlag() == true)
-        // {
-        //     client.setCgiFlag(false);
-        //     delete client.getMsg(Client::RESP_MSG);
-        //     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
-        // }
         client.setCgiFlag(false);
         ResponseGenerator oneResponse(client);
-        //std::cout << oneResponse.getResponse() << std::endl;
-        Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
-        // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
+        // Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
         ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-        //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
-        std::cout << header->turnResponseHeaderToString() << std::endl;
-        std::cout << oneResponse.getResponse() << std::endl;
+		Logger::info("Response header:\n", header->turnResponseHeaderToString());
+		Logger::info("Response body (generated):\n", oneResponse.getResponse());
+
+		// CREATES RESPONSE MESSAGE AND CHUNKS THE BODY IF NECESSARY
         message->stringsToChain(header, oneResponse.getResponse());
     }
+
     else // THIS MEANS CGI RAN SUCCESSFULLY
     {
+        // TODO: correct the Header instance in Message from CGI Response state to final state
         ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
         client.setCgiFlag(false);
-		Logger::warning("string in response Header", header->turnResponseHeaderToString());
+		Logger::info("string in response Header:\n", header->turnResponseHeaderToString());
 		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
-        // correct the Header instance in Message from CGI Response state to final state
-        // call turnResponseHEaderToString at put it into Header node
-  
     }
+
     client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 
 //if(client.g)
@@ -395,7 +394,6 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
     {
         Logger::info("Server doesn't have page for error code ", errorCode);
         errorHtml = _generateErrorPage(errorCode);
-        Logger::info("Response body is generated and it is", errorHtml);
     }
     Logger::warning("Http status code ", _httpStatus);
 	return errorHtml;

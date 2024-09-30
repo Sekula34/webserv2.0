@@ -233,9 +233,9 @@ void	Client::setSignalSent(int num)
 
 void	Client::setChildSocket(int to, int from)
 {
-	Logger::info("adding socket TOCHILD to client Fds", to);
+	// Logger::info("adding socket TOCHILD to client Fds", to);
 	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
-	Logger::info("adding socket FROMCHILD to client Fds", from);
+	// Logger::info("adding socket FROMCHILD to client Fds", from);
 	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
 }
 
