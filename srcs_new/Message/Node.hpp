@@ -13,8 +13,7 @@
 # define	COMPLETE	1
 # define	ERROR		-1
 
-# include <iostream>
-# include <sstream>
+#include <string>
 
 class Node {
 
