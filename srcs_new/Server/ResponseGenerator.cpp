@@ -15,7 +15,7 @@
 #include "LocationSettings.hpp"
 #include "../Utils/Autoindex.hpp"
 #include <fstream>
-
+#include <sys/stat.h>
 // #include <iostream>
 
 // Static function
@@ -222,6 +222,27 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 	return;
 }
 
+static std::string	generateFilename(const std::string& queryString)
+{
+	if (queryString.empty() == false)
+		return (queryString);
+	time_t now = time(NULL);
+	std::ostringstream filename;
+	filename << "file_" << now << ".bin";
+	struct stat buffer;
+	bool exist = (stat(filename.str().c_str(), &buffer) == 0);
+	size_t counter = 1;
+	while (exist)
+	{
+		filename.clear();
+		filename.str("");
+		filename << "file_" << now << "_" << counter << ".bin";
+		exist = (stat(filename.str().c_str(), &buffer) == 0);
+		++counter;
+	}
+	return (filename.str());
+}
+
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
 {
 	// Execute POST method.
@@ -229,8 +250,10 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::cout << "POST method executed" << std::endl;
 	Message& message = *(_client.getMsg(Client::REQ_MSG));
 	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
-	std::string query = header.urlSuffix->getQueryParameters();
-	std::string filename = query;
+	// std::string query = header.urlSuffix->getQueryParameters();
+	// std::string filename = query;
+	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
+	filename  = "html/" + filename;
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
