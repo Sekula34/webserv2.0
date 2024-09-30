@@ -21,45 +21,45 @@
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
-    if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
+	if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
 		|| (client.getCgiFlag() == true && client.getWaitReturn() == 0))
 		// || (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
 	{
-        return;
+		return;
 	}
-    Message* message = client.getMsg(Client::RESP_MSG);
-    message->resetIterator();
-    if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
-    // if (client.getCgiFlag() == false || client.getErrorCode() != 0)
-    {   
-        // if (client.getCgiFlag() == true)
-        // {
-        //     client.setCgiFlag(false);
-        //     delete client.getMsg(Client::RESP_MSG);
-        //     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
-        // }
-        client.setCgiFlag(false);
-        ResponseGenerator oneResponse(client);
-        //std::cout << oneResponse.getResponse() << std::endl;
-        Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
-        // std::cout << oneResponse.getResponseHttpStatus() << std::endl;
-        ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-        //    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
-        std::cout << header->turnResponseHeaderToString() << std::endl;
-        std::cout << oneResponse.getResponse() << std::endl;
-        message->stringsToChain(header, oneResponse.getResponse());
-    }
-    else // THIS MEANS CGI RAN SUCCESSFULLY
-    {
-        ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
-        client.setCgiFlag(false);
+	Message* message = client.getMsg(Client::RESP_MSG);
+	message->resetIterator();
+	if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
+	// if (client.getCgiFlag() == false || client.getErrorCode() != 0)
+	{
+		// if (client.getCgiFlag() == true)
+		// {
+		//     client.setCgiFlag(false);
+		//     delete client.getMsg(Client::RESP_MSG);
+		//     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
+		// }
+		client.setCgiFlag(false);
+		ResponseGenerator oneResponse(client);
+		//std::cout << oneResponse.getResponse() << std::endl;
+		Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
+		// std::cout << oneResponse.getResponseHttpStatus() << std::endl;
+		ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
+		//    header->setOneHeaderField("Content-Length", ParsingUtils::toString(oneResponse.getResponse().size()));
+		std::cout << header->turnResponseHeaderToString() << std::endl;
+		std::cout << oneResponse.getResponse() << std::endl;
+		message->stringsToChain(header, oneResponse.getResponse());
+	}
+	else // THIS MEANS CGI RAN SUCCESSFULLY
+	{
+		ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
+		client.setCgiFlag(false);
 		Logger::warning("string in response Header", header->turnResponseHeaderToString());
 		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
-        // correct the Header instance in Message from CGI Response state to final state
-        // call turnResponseHEaderToString at put it into Header node
-  
-    }
-    client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
+		// correct the Header instance in Message from CGI Response state to final state
+		// call turnResponseHEaderToString at put it into Header node
+
+	}
+	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 
 //if(client.g)
 
@@ -140,7 +140,6 @@ static std::string _pathRelativeToExecutable(const LocationSettings& location, c
 
 void ResponseGenerator::_getHandler(const LocationSettings& location)
 {
-	Logger::warning("Here will be get request implementation", "");
 	Logger::info("Resposible location is", location.getLocationUri());
 	_generateHtml(location);
 	//g
@@ -231,11 +230,14 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 	return;
 }
 
+// Helper function for _postHandler (POST request)
+// it generates a name based in: query_string, or time()
+// and appends counter to avoid duplicate overwrite.
 static std::string	generateFilename(const std::string& queryString)
 {
 	if (queryString.empty() == false)
 		return (queryString);
-	time_t now = time(NULL);
+	time_t now = time(NULL); // seconds since Epoch
 	std::ostringstream filename;
 	filename << "file_" << now << ".bin";
 	struct stat buffer;
@@ -254,16 +256,12 @@ static std::string	generateFilename(const std::string& queryString)
 
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
 {
-	// Execute POST method.
-	(void)location;	
 	std::cout << "POST method executed" << std::endl;
 	Message& message = *(_client.getMsg(Client::REQ_MSG));
 	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
-	// std::string query = header.urlSuffix->getQueryParameters();
-	// std::string filename = query;
 	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
-	std::string folderName = location.getUploadFolder() + "/";
-	filename  = folderName + filename;
+	std::string folderName = location.getUploadFolder();
+	filename  = folderName + "/" + filename;
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
@@ -272,7 +270,6 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 		_response = _renderServerErrorPage(_httpStatus);
 		return ;
 	}
-	Logger::warning("getFullMessage() = ", header.getFullMessage());
 	outputFile << message.getBodyString();
 	outputFile.close();
 	_httpStatus = 201;
@@ -281,57 +278,57 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 
 void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
 {
-    // Execute DELETE method.
-	(void)location;
 	std::cout << "DELETE method executed" << std::endl;
-	// std::map<std::string, std::string>& msgHeader = request->getHeader();
-	// std::string filename = msgHeader["uri"];
-    std::string filename = "POST.txt";
+	const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
+	std::string filename = _pathRelativeToExecutable(location, suffix);
 	if (remove(filename.c_str()) != 0)
-		std::cerr << "Unable to DELETE file!" << std::endl;
-    _httpStatus = 204;
-    _response = "";
+	{
+		Logger::error("Unable to DELETE file!", filename);
+		_httpStatus = 404;
+		_response = _renderServerErrorPage(_httpStatus);
+		return ;
+	}
+	_httpStatus = 204;
+	_response = "";
 }
 
 void ResponseGenerator::_responseMenu()
 {
 	if(_client.getErrorCode() != 0)
 	{
-        Logger::info("Generating error response", _client.getErrorCode());
+		Logger::info("Generating error response", _client.getErrorCode());
 		_response = _renderServerErrorPage(_client.getErrorCode());
 		//Generate Error
 	}
 	else
 	{
-        const RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
-        const std::string& requestMethod = header.getRequestLine().requestMethod;
-        const LocationSettings& requestLocation = getClientRequestedLocation(_client);
-        
-        if (requestLocation.getNginxReturn().getFlag() == true)
-        {
-            Logger::warning("You are about to be redirected", requestLocation.getNginxReturn().getRedirectPath());
-            _redirectHandler(requestLocation);
-            //redirectHandler
-        }
-        else if(requestMethod == "GET")
-        {
-            Logger::info("Client requeste url is ", header.urlSuffix->getPath());
-            _getHandler(requestLocation);
-            //getHandler
-        }
-        else if (requestMethod == "POST")
-        {
-           _postHandler(requestLocation);
-        }
-        else if(requestMethod == "DELETE")
-        {
-            _deleteHandler(requestLocation);
-        }
-        else
-        {
-            Logger::warning("Method not implemneted", requestMethod);
-            _response = _renderServerErrorPage(405);
-        }
+		const RequestHeader& header = *static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader());
+		const std::string& requestMethod = header.getRequestLine().requestMethod;
+		const LocationSettings& requestLocation = getClientRequestedLocation(_client);
+		
+		if (requestLocation.getNginxReturn().getFlag() == true)
+		{
+			Logger::warning("You are about to be redirected", requestLocation.getNginxReturn().getRedirectPath());
+			_redirectHandler(requestLocation);
+		}
+		else if(requestMethod == "GET")
+		{
+			Logger::info("Client requeste url is ", header.urlSuffix->getPath());
+			_getHandler(requestLocation);
+		}
+		else if (requestMethod == "POST")
+		{
+		_postHandler(requestLocation);
+		}
+		else if(requestMethod == "DELETE")
+		{
+			_deleteHandler(requestLocation);
+		}
+		else
+		{
+			Logger::warning("Method not implemneted", requestMethod);
+			_response = _renderServerErrorPage(405);
+		}
 	}
 }
 
@@ -340,64 +337,64 @@ std::string ResponseGenerator::_generateErrorPage(const int httpErrorCode)
 	std::ostringstream errorPage;
 	errorPage << 
 	"<!DOCTYPE html>\n"
-    "<html>\n"
-    "<head>\n"
-    "    <title>" << ParsingUtils::toString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode) << "</title>\n"
-    "    <style>\n"
-    "        body {\n"
-    "            text-align: center;\n"
-    "            padding: 20px;\n"
-    "        }\n"
-    "        h1 {\n"
-    "            font-size: 50px;\n"
-    "        }\n"
-    "        body {\n"
-    "            font: 20px Helvetica, sans-serif;\n"
-    "            color: #333;\n"
-    "        }\n"
-    "    </style>\n"
-    "</head>\n"
-    "<body>\n"
-    "    <h1>" <<ParsingUtils::toString(httpErrorCode) << "</h1>\n"
-    "    <p>" << HttpStatusCode::getReasonPhrase(httpErrorCode) << "</p>\n"
-    "</body>\n"
-    "</html>\n";
+	"<html>\n"
+	"<head>\n"
+	"    <title>" << ParsingUtils::toString(httpErrorCode) + " " + HttpStatusCode::getReasonPhrase(httpErrorCode) << "</title>\n"
+	"    <style>\n"
+	"        body {\n"
+	"            text-align: center;\n"
+	"            padding: 20px;\n"
+	"        }\n"
+	"        h1 {\n"
+	"            font-size: 50px;\n"
+	"        }\n"
+	"        body {\n"
+	"            font: 20px Helvetica, sans-serif;\n"
+	"            color: #333;\n"
+	"        }\n"
+	"    </style>\n"
+	"</head>\n"
+	"<body>\n"
+	"    <h1>" <<ParsingUtils::toString(httpErrorCode) << "</h1>\n"
+	"    <p>" << HttpStatusCode::getReasonPhrase(httpErrorCode) << "</p>\n"
+	"</body>\n"
+	"</html>\n";
 	_setFileType(FileUtils::HTML);
-    _httpStatus = httpErrorCode;
+	_httpStatus = httpErrorCode;
 	return  errorPage.str();
 }
 
-    /*
-        check if server have that error page 
-        if yes 
-            put that file in string 
-            if that fails 
-                generate errorPage(500) 
-        if not 
-            generate that ServerErrorPage
-    */
+/*
+	check if server have that error page 
+	if yes 
+		put that file in string 
+		if that fails 
+			generate errorPage(500) 
+	if not 
+		generate that ServerErrorPage
+*/
 std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
 {
 	std::string errorHtml;
 	const VirtualServer& server = *(_client.getVirtualServer());
-    std::string errorPagePath = "";
-    errorPagePath = server.getErrorPagePath(errorCode); //TODO: check extenstion of page path and set it accordingly .css CSS, .html HTML
-    if(errorPagePath != "")
-    {
-        Logger::info("Server have that page and path to it is ", errorPagePath);
-        bool success = FileUtils::putFileInString(errorPagePath, errorHtml);
-        if(success == true)
-            _httpStatus = errorCode;
-        else
-            errorHtml = _generateErrorPage(500);
-    }
-    else 
-    {
-        Logger::info("Server doesn't have page for error code ", errorCode);
-        errorHtml = _generateErrorPage(errorCode);
-        Logger::info("Response body is generated and it is", errorHtml);
-    }
-    Logger::warning("Http status code ", _httpStatus);
+	std::string errorPagePath = "";
+	errorPagePath = server.getErrorPagePath(errorCode); //TODO: check extenstion of page path and set it accordingly .css CSS, .html HTML
+	if(errorPagePath != "")
+	{
+		Logger::info("Server have that page and path to it is ", errorPagePath);
+		bool success = FileUtils::putFileInString(errorPagePath, errorHtml);
+		if(success == true)
+			_httpStatus = errorCode;
+		else
+			errorHtml = _generateErrorPage(500);
+	}
+	else 
+	{
+		Logger::info("Server doesn't have page for error code ", errorCode);
+		errorHtml = _generateErrorPage(errorCode);
+		Logger::info("Response body is generated and it is", errorHtml);
+	}
+	Logger::warning("Http status code ", _httpStatus);
 	return errorHtml;
 }
 
