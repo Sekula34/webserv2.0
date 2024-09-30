@@ -66,6 +66,7 @@ class Directive
 		void 		_apllyRoot(DefaultSettings& settings);
 		void 		_applyServerName(DefaultSettings& settings);
 		void 		_applyCgiExtension(DefaultSettings& settings);
+		void		_applyUploadFolder(DefaultSettings& settings);
 
 	public:
 		class InvalidDirectiveException : public std::exception 

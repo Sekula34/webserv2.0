@@ -106,7 +106,33 @@ void FileUtils::_setDirFailStatusCode(int errnoNum, int& httpStatusCode)
 	httpStatusCode = 500;
 }
 
-
+// Method to check if a given filename or foldername is valid:
+// - If it does not contain path travelsal sequences like '../' or '~/'
+// - If the name is not empty, and it's not '.', '..' or '~'
+bool	FileUtils::isValidName(const std::string& fileName)
+{
+	if (fileName.empty() == true)
+	{
+		Logger::warning("file folder name is empty!","");
+		return (false);
+	}
+	size_t len = fileName.length(); // This var is used to avoid out-of-bounds access. 
+	if (len == 1 && (fileName[0] == '.' || fileName[0] == '~'))
+		return (false);
+	if (len == 2 && (fileName[0] == '.' && fileName[1] == '.'))
+		return (false);
+	if (fileName.find("~/") == 0 || fileName.find("../") == 0)
+		return (false);
+	size_t pos = fileName.find("/~");
+	if (pos != std::string::npos
+		 && (len >= pos + 2) && (fileName[pos + 2] == '/' || fileName[pos + 2] == '\0'))
+		 return (false);
+	pos = fileName.find("/..");
+	if (pos != std::string::npos
+		 && (len >= pos + 3) && (fileName[pos + 3] == '/' || fileName[pos + 3] == '\0'))
+		 return (false);
+	return (true);
+}
 
 int FileUtils::isPathFileOrFolder(const std::string &serverFilePath, int& httpStatusCode)
 {

@@ -13,8 +13,7 @@
 # define	COMPLETE	1
 # define	ERROR		-1
 
-# include <iostream>
-# include <sstream>
+#include <string>
 
 class Node {
 
@@ -24,7 +23,7 @@ class Node {
 							Node (const std::string & str, int type, size_t size, bool r);
 							~Node(void);
 							Node(void);
-							Node(Node const & src);
+							Node(const Node & src);
 
 		void				concatString(char* buffer, size_t & bufferPos, size_t num);
 
@@ -72,7 +71,7 @@ class Node {
 		size_t				_calcBtrCgi(char* buffer, size_t & bufferPos, size_t num);
 		void				_setBtr(char* buffer, size_t & bufferPos, size_t num);
 
-		Node &				operator=(Node const & rhs);
+		Node &				operator=(const Node & rhs);
 };
 
 #endif

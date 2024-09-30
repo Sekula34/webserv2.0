@@ -18,6 +18,7 @@ ResponseHeader::ResponseHeader()
 ResponseHeader::ResponseHeader(std::string headerSection, int& errorCode)
 :AHeader(headerSection, errorCode)
 {
+	_httpCode = errorCode;
 	_fillStatusLineElements();
 }
 
@@ -68,19 +69,25 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 
 ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
+	// Logger::error("client ERROR: ", clientError);
 	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
 	std::string aHeaderString = "\r\n\r\n";
-	ResponseHeader* toReturn;
+	ResponseHeader* toReturn = NULL;
 	if (pos != std::string::npos)
 	{
 		cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
 		std::string toReplace = cgiHeaderFieldDelimiter;
 		std::string httpDelimiter = "\r\n";
+		// Logger::error("cgiResponse: ", cgiResponse);
+		// Logger::chars(toReplace, true);
+		// Logger::chars(httpDelimiter, true);
 		aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
 		toReturn = new ResponseHeader(aHeaderString, clientError);
+		// Logger::chars(aHeaderString, true);
 	}
 	else
 		toReturn = new ResponseHeader(aHeaderString, clientError);
+
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
 	{
 		// if one server gets invalid response for anothe -> bad getaway 502
@@ -94,7 +101,10 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
 		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
+		//FIXME: newHttpCode is http code from CGI, WHAT SHOULD WE DOO if cgi for example provide 600? correct it ? 400 /500/502?
 		toReturn->changeHttpCode(newHttpCode);
+		toReturn->m_headerFields.erase(it);
+
 	}
 	return toReturn;
 }
@@ -146,6 +156,8 @@ bool ResponseHeader::_cgiStatusLine() const
 
 void ResponseHeader::_fillStatusLineElements()
 {
+	if(_httpCode == 0) //if _http code is 0 that means client had no error so far so we turn it into 200 ok
+		_httpCode = 200;
 	_statusLine.HttpVersion = "HTTP/1.1";
 	_statusLine.statusCode = _httpCode;
 	_statusLine.ReasonPhrase =  HttpStatusCode::getReasonPhrase(_httpCode);

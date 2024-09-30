@@ -1,6 +1,7 @@
 #include "Server/ServerManager.hpp"
 #include "Server/ConnectionManager.hpp"
 #include "Io/Io.hpp"
+#include "Cgi/Cgi.hpp"
 #include "Server/Socket.hpp"
 #include "Utils/Data.hpp"
 #include "Utils/FileUtils.hpp"
@@ -84,16 +85,17 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// ConnectionManager* manager = NULL;
 	Data::setAllCgiLang();
+	Data::setEnvp(envp);
 	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
 	Data::setEnvp(envp);
 	// SocketManager sockets(serverInfo.getUniquePorts());
 	
 	// Initialize epoll
-	int epollFd = epoll_create(1);
-	Logger::info("EPOLL Fd: ", epollFd);
-	if (epollFd == -1)
-		throw (std::runtime_error("epoll_create failed"));
+	// int epollFd = epoll_create(1);
+	// Logger::info("EPOLL Fd: ", epollFd);
+	// if (epollFd == -1)
+	// 	throw (std::runtime_error("epoll_create failed"));
 
 	// Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
@@ -102,8 +104,9 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 
 	// Create manager instance
-	ConnectionManager manager(epollFd);
+	ConnectionManager manager;
 	Io io;
+	Cgi cgi;
 	Logger::info("my pid is: ", getpid());
 	// initVars(envp, configFilePath);
 	// Main Loop
@@ -112,7 +115,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 		manager.epollLoop();
 		io.ioLoop();
 		serverInfo.loop();
-		// cgi.cgiLoop();
+		cgi.loop();
 		
 		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
 		//debugFakeVirtualServer();	

@@ -29,14 +29,13 @@ class Message {
 		int							getState() const;
 		void						setState(int s);
 		AHeader*					getHeader() const;
-		const std::list<Node>&		getChain() const;
+		// const std::list<Node>&		getChain() const;
+		std::list<Node>&		getChain();
 		const std::string			getBodyString();
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
 		void						_createHeader();
 		void						_headerInfoToNode();
 		const size_t&				getBytesSent() const;
-		const size_t&				getBytesReceived() const;
-		void						setBytesReceived(size_t num);
 		void						setBytesSent(size_t num);
 		void						resetIterator();
 		void						advanceIterator();
@@ -53,7 +52,6 @@ class Message {
 		AHeader*					_header;
 		int&						_errorCode;
 		size_t						_bytesSent;
-		size_t						_bytesReceived;
 
 		void						_bodyToChunks(const std::string& body);
 		// void						_bodyToChunks();

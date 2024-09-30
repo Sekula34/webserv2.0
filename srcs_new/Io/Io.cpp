@@ -10,6 +10,9 @@
 //==========================================================================//
 
 
+// select the correct Fd type and the correct message that we want to do io with
+// the selection happens based on the client state
+// if we want to receive the Client request, we need the ClientFd and the request message
 static Message*	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType)
 {
 	Message* message = NULL;
@@ -63,6 +66,7 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.
 	message->setState(COMPLETE);
+	message->resetIterator();
 }
 
 void	clearBuffer(char* buffer)
@@ -76,6 +80,10 @@ void	clearBuffer(char* buffer)
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 {
  	int sendValue = 0;
+	if (message->getState() != COMPLETE)
+		return ;
+	if (client.getCgiFlag() == true && client.getWaitReturn() != 0 && client.getClientState() == Client::DO_RESPONSE)
+		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
@@ -91,6 +99,7 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 
 	if (sendValue > 0)
 	{
+		Logger::info("Succesfully sent bytes:", sendValue);
 		Logger:: chars(it->getString(), true);
 		message->setBytesSent(message->getBytesSent() + sendValue);
 		if (message->getBytesSent() == it->getString().size())
@@ -118,21 +127,22 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	int 	recValue = 0;
 
 	clearBuffer(_buffer);
-
-	
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
 		Logger::info("Successfully received bytes: ", recValue);
-		message->setBytesReceived(message->getBytesReceived() + recValue);
 		message->bufferToNodes(_buffer, recValue);
 	}
+
+	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
+		return ;
 
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)
 	{
+		Logger::warning("stopping receiving with recValue: ", recValue);
 		if (recValue < 0)
 			client.setErrorCode(500);
 		setFinishedReceiving(client, fdData, message);
@@ -144,10 +154,15 @@ void	Io::_ioClient(Client& client)
 	FdData::e_fdType fdType;
 	Message* message = setFdTypeAndMsg(client, fdType);
 
-	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
-	FdData& fdData = client.getFdDataByType(fdType);
+	// if (!message || (fdType == FdData::TOCHILD_FD || fdType == FdData::FROMCHILD_FD)
 	if (!message)
 		return ; // TODO: Stop Loop / delete client, panic?
+	
+	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
+	FdData& fdData = client.getFdDataByType(fdType);
+	// std::cout << "bullshit happening here: clientID: " << client.getId() <<  ", fdType: "<<
+	// 	fdType << ", size of fds: " << client.getClientFds().size() <<
+	// 	", fd: "<< fdData.fd << " fd state: "<< fdData.state <<  std::endl;
 	
 	if ((client.getClientState() == Client::DO_REQUEST
 		|| client.getClientState() == Client::DO_CGIREC)

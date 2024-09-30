@@ -2,6 +2,7 @@
 // #include "../Client/Client.hpp"
 #include "../Io/Io.hpp"
 #include <sstream>
+#include <iostream>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -68,7 +69,7 @@ Node::~Node (void)
 /*                             Copy Constructor                               */
 /******************************************************************************/
 
-Node::Node(Node const & src):
+Node::Node(const Node& src):
 _state(src._state),
 _type(src._type),
 _str(src._str),
@@ -89,7 +90,7 @@ _hasCgiDel(src._hasCgiDel)
 /*                      Copy Assignment Operator Overload                     */
 /******************************************************************************/
 
-Node &	Node::operator=(Node const & rhs)
+Node &	Node::operator=(const Node & rhs)
 {
 	//std::cout << "Node Copy assignment operator called" << std::endl;
 	if (this != &rhs)

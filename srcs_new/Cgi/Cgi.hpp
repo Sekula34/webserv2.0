@@ -2,13 +2,10 @@
 # define CGIPROCESSOR_HPP
 
 # include "../Client/Client.hpp"
-# include <iostream>
 # include <fcntl.h>
 # include <unistd.h>
 # include <sys/wait.h>
-# include <string.h>
 # include <vector>
-# include <stdio.h>
 
 # define CHILD 0
 
@@ -18,65 +15,43 @@ class Socket;
 class Cgi {
 
 	public:
-									Cgi(Client& client);
-									~Cgi(void);
-		int							loop(void);
-		std::string					getInterpreterPath(std::string suffix);
-		std::string					getScriptName(std::string suffix);
-		int							getPid();
-		void						terminateChild();
-		bool						sentSigterm;
+									Cgi();
+									~Cgi();
+		void						loop();
 
 	private:
-		Client *					_client;
-		int							_pid;
-		int							_socketsToChild[2];
-		int							_socketsFromChild[2];
-		std::vector<std::string>	_argsVec;
-		std::vector<std::string>	_envVec;
-		char**						_args;
-		char**						_env;
+		// bool						_terminate;
+		// bool						_sentSigkill;
+		// std::clock_t				_shutdownStart;
 		char**						_tmp;
-		bool						_forked;
-		int							_exitstatus;
-		const std::vector<Socket>&	_allSockets;
-		const int &					_nfds;	
-		std::string					_interpreterAbsPath;
-		std::string					_scriptAbsPath;
-		std::string					_scriptName;
-		std::string					_scriptLocation;
-		bool						_terminate;
-		bool						_sentSigkill;
-		std::clock_t				_shutdownStart;
-		size_t						_bytesSent;
 
 		void						_ioChild();
-		void						_initScriptVars();
+		void 						_cgiClient(Client& client);
+		bool						_initArgsList(Client& c, std::vector<std::string>& _argsVec);
 		bool						_checkInterpreterScript();
-		void						_readFromChild();
-		void						_writeToChild();
-		void						_stopCgiSetErrorCode();
-		bool						_createSockets();
-		void						_prepareSockets();
-		bool						_isSocketReady(int socket, int macro);
+		bool						_checkScriptAbsPath(Client& client, std::vector<std::string>& argsVec);
+		void						_stopCgiSetErrorCode(Client& c);
+		bool						_createSockets(int* socketsToChild, int* socketsFromChild);
+		void						_prepareSockets(Client& client, int* socketsToChild, int* socketsFromChild);
 		char**						_create_env();
 		char**						_create_argv();
-		int							_execute();
+		int							_execute(char** args, char** env, int* socketsToChild, int* socketsFromChild);
 		char**						_vecToChararr(std::vector<std::string>);
 		void						_deleteChararr(char ** lines);
-		void						_createEnvVector();
-		void						_createArgsVector();
-		void						_waitForChild();
-		void						_handleChildTimeout();
+		void						_createEnvVector(Client& client, std::vector<std::string>& envVec, char **args);
+		void						_waitForChild(Client& client);
+		void						_handleChildTimeout(Client& client);
 		void						_timeoutKillChild();
 		bool						_isRegularFile(std::string file);
-		void						_closeCgi();
-		void						_handleReturnStatus(int status);
+		void						_handleReturnStatus(int status, Client& client);
+		std::string					_getInterpreterPath(Client& client, std::string suffix);
+		std::string					_getScriptName(std::string suffix, Client& c);
+		char**						_argumentList(Client& client);
+		char**						_metaVariables(Client& client, char** args);
+		void						_terminateChild();
 
-									Cgi(void);
 									Cgi(Cgi const & src);
-		Cgi &				operator=(Cgi const & rhs);
+		Cgi &						operator=(Cgi const & rhs);
 };
 
 #endif
-
