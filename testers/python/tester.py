@@ -131,7 +131,7 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
 		Colors.test_passed()
 	
-	def short_invalid(self):
+	def test_short_invalid(self):
 		TestMyWebServer.print_test_title("Testing short invalid request")
 		response = CustomRequst.short_invalid_request()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
