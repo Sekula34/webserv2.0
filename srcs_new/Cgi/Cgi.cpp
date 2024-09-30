@@ -19,7 +19,7 @@
 Cgi::Cgi ()
 {
 	_tmp = NULL;
-	Logger::info("Cgi constructor called", "");
+	// Logger::info("Cgi constructor called", "");
 }
 
 /******************************************************************************/
@@ -30,7 +30,7 @@ Cgi::Cgi ()
 Cgi::~Cgi (void)
 {
 	_deleteChararr(_tmp);
-	Logger::info("Cgi destructor called", "");
+	// Logger::info("Cgi destructor called", "");
 }
 
 /******************************************************************************/
@@ -490,8 +490,8 @@ void	Cgi::_waitForChild(Client& client)
 	// client.setWaitReturn(waitpid(_pid, &status, 0));
 	client.setWaitReturn(waitpid(client.getChildPid(), &status, WNOHANG));
 
-	if (client.getWaitReturn() != 0)
-		Logger::error("waitpid, caught return ", client.getChildPid());
+	// if (client.getWaitReturn() != 0)
+	// 	Logger::error("waitpid, caught return ", client.getChildPid());
 
 
 	// waitpid fail
@@ -511,15 +511,16 @@ void	Cgi::_waitForChild(Client& client)
 void	Cgi::_stopCgiSetErrorCode(Client& client)
 {
 	Logger::error("stopping CGI with ID: ", client.getId());
-	// Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
-	// if (client.getErrorCode() != 0)
-	// 	Logger::error("overwriting client Error code in CGI to 500 it was:", client.getErrorCode());
 	if (client.getErrorCode() == 0)
 		client.setErrorCode(500);
-	// client.setCgiFlag(false);
-	client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
-	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 	client.setClientState(Client::DO_RESPONSE);
+	if (client.checkTimeout() == true)
+	{
+		client.setCgiFlag(false);
+		return ;
+	}
+	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
+	client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
 }
 
 bool	Cgi::_createSockets(int* socketsToChild, int* socketsFromChild)
@@ -544,7 +545,8 @@ char**	Cgi::_argumentList(Client& client)
 	std::vector<std::string>	argsVec;
 	if (_initArgsList(client, argsVec) == false)
 		return (NULL);
-	_checkScriptAbsPath(client, argsVec);
+	if (!_checkScriptAbsPath(client, argsVec))
+		return (NULL);
 	try
 	{
 		toReturn = _vecToChararr(argsVec);

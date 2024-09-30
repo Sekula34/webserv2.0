@@ -308,7 +308,7 @@ bool ServerManager::_parseCgiURLInfo(const LocationSettings& cgiLocation,Client&
 		scriptName = fileName;
 	if(clientHeader.urlSuffix->setCgiScriptName(scriptName) == false)
 	{
-		Logger::warning("Unsupoorted cgi file type", scriptName);
+		Logger::warning("Unsupported cgi file type", scriptName);
 		client.setErrorCode(502); 
 		return false;
 	}

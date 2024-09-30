@@ -190,7 +190,7 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
     }
     else 
     {
-        Logger::info("Server dont have page for error code ", errorCode);
+        Logger::info("Server doesn't have page for error code ", errorCode);
         errorHtml = _generateErrorPage(errorCode);
         Logger::info("Response body is generated and it is", errorHtml);
     }

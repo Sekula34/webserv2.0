@@ -177,7 +177,8 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 	{
 		client.setSignalSent(2);
 		Logger::error("sending sig KILL to child", "");
-		kill(client.getChildPid(), SIGKILL);
+		if (client.getChildPid() != 0)
+			kill(client.getChildPid(), SIGKILL);
 		// client.setCgiFlag(false);
 		// client.setErrorCode(500);
 		client.setClientState(Client::DO_RESPONSE);
