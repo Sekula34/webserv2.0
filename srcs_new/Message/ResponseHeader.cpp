@@ -1,7 +1,6 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
 #include "../Parsing/ParsingUtils.hpp"
-#include "../Utils/Logger.hpp"
 #include "AHeader.hpp"
 #include <cstddef>
 #include <ostream>
