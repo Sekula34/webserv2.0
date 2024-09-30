@@ -60,6 +60,7 @@ DefaultSettings::DefaultSettings()
 	p_clientMaxBody = 1000000;
 	p_autoindex = false;
 	p_root = "/";
+	p_uploadFolder = "Uploads";//TODO: check if this folder exist
 }
 
 DefaultSettings::DefaultSettings(const DefaultSettings& source)
@@ -79,6 +80,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 	p_index = source.p_index;
 	p_root = source.p_root;
 	p_cgiExtensions = source.p_cgiExtensions;
+	p_uploadFolder = source.p_uploadFolder;
 	return (*this);
 }
 
@@ -141,6 +143,12 @@ void DefaultSettings::setCgiExtensions(std::vector<std::string> extensionVector)
 	p_cgiExtensions = extensionVector;
 }
 
+
+void DefaultSettings::setUploadFolder(const std::string& folderName)
+{
+	p_uploadFolder = folderName;
+}
+
 const int& DefaultSettings::getPort(void) const
 {
 	return(p_listenPort);
@@ -186,6 +194,11 @@ const std::string DefaultSettings::getErrorPagePath(const int errorCode) const
 const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
 {
 	return p_cgiExtensions;
+}
+
+const std::string& DefaultSettings::getUploadFolder(void) const 
+{
+	return p_uploadFolder;
 }
 
 void DefaultSettings::_setDefaultHttpMethods(void)

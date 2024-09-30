@@ -23,12 +23,14 @@ class DefaultSettings
 		void 							setRoot(std::string root);
 		void 							setServerName(std::string serverName);
 		void 							setCgiExtensions(std::vector<std::string> extensionsVector);
+		void 							setUploadFolder(const std::string& folderName);
 		const int&						getPort(void) const;
 		const std::string& 				getRoot(void) const;
 		const std::string& 				getServerName(void) const;
 		const NginnxReturn&				getNginxReturn(void) const;
 		const bool& 					getAutoindexFlag(void) const;
 		const std::vector<std::string>&	getIndexes() const;
+		const std::string&				getUploadFolder(void) const;
 		/**
 		 * @brief Get the Error Page Path
 		 * 
@@ -57,6 +59,7 @@ class DefaultSettings
 		std::vector<std::string>	p_index;
 		std::string					p_root;
 		std::vector<std::string>	p_cgiExtensions;
+		std::string					p_uploadFolder;
 		
 	private :
 		void						_setDefaultHttpMethods(void);
