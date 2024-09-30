@@ -14,16 +14,16 @@
 #include "../Utils/Data.hpp"
 #include "../Utils/FileUtils.hpp"
 
-const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root"};
+const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root", "upload_folder"};
 
 const std::string Directive::_validServerDirectives[] ={"listen", "host", "server_name",
-"error_page", "client_max_body_size", "return", "autoindex", "index", "root"};
+"error_page", "client_max_body_size", "return", "autoindex", "index", "root", "upload_folder"};
 
 const std::string Directive:: _validLocationDirectives[] = {"error_page", "client_max_body_size", "return",
-"autoindex", "index", "limit_except", "root", "extension"};
+"autoindex", "index", "limit_except", "root", "extension", "upload_folder"};
 
 //directive that can be present only once
-const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension"};
+const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension"}; //TODO: add upload_folder here but be carefull with checking Uploads cuzz this is default
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
@@ -125,6 +125,8 @@ void Directive::apply(DefaultSettings& settings)
 		_applyServerName(settings);
 	else if(_directiveName == "extension")
 		_applyCgiExtension(settings);
+	else if(_directiveName == "upload_folder")
+		_applyUploadFolder(settings);
 	else 
 	{
 		Logger::warning("Applying directive: ", _directiveName);;
@@ -456,6 +458,26 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 		}
 	}
 	settings.setCgiExtensions(extensions);
+}
+
+void Directive::_applyUploadFolder(DefaultSettings& settings)
+{
+	(void) settings;
+	Logger::warning("Calling apply upload folder", _directiveName);
+	Logger::info("Directive valus is ", _directiveValue);
+	//TODO chekc if directiveValue is respecting folder name (no .. ~ and stuff like that )
+		//throw exception if it is not valid name 
+	int errorCode = 0;
+	bool exist =  FileUtils::isDirectoryValid(_directiveValue, errorCode);
+	if(exist)
+		Logger::info("Folder exist", _directiveValue);
+	else
+	{
+		Logger::warning("Folder does not exist ", _directiveValue);
+		Logger::warning("Line :", _dirLineNumber);
+		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
+	}
+	settings.setUploadFolder(_directiveValue);
 }
 
 
