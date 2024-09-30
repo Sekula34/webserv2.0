@@ -159,6 +159,11 @@ const int&	Client::getChildPid() const
 	return (_childPid);
 }
 
+const int&	Client::getSignalSent() const
+{
+	return (_signalSent);
+}
+
 void Client::setVirtualServer(const VirtualServer& vs)
 {
 	_virtualServer = &vs;
@@ -207,6 +212,11 @@ void	Client::setClientState(e_clientState state)
 void	Client::setWaitReturn(int num)
 {
 	_waitReturn = num;
+}
+
+void	Client::setSignalSent(int num)
+{
+	_signalSent = num;
 }
 
 // void	Client::setClientFdState(int fd, e_fdState fdState)
@@ -266,6 +276,7 @@ void Client::_initVars(int fd)
 	_cgiFlag = false;
 	_waitReturn = 0;
 	_childPid = 0;
+	_signalSent = 0;
 }
 
 

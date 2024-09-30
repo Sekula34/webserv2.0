@@ -151,10 +151,11 @@ void	Io::_ioClient(Client& client)
 	FdData::e_fdType fdType;
 	Message* message = setFdTypeAndMsg(client, fdType);
 
-	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
-	FdData& fdData = client.getFdDataByType(fdType);
 	if (!message)
 		return ; // TODO: Stop Loop / delete client, panic?
+	
+	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
+	FdData& fdData = client.getFdDataByType(fdType);
 	
 	if ((client.getClientState() == Client::DO_REQUEST
 		|| client.getClientState() == Client::DO_CGIREC)

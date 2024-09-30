@@ -13,7 +13,7 @@
 # include <vector>
 # include <map>
 
-# define MAX_TIMEOUT		3000
+# define MAX_TIMEOUT		10000
 
 class Message;
 class VirtualServer;
@@ -56,6 +56,7 @@ class Client
 		const bool&				getCgiFlag() const;
 		const int&				getWaitReturn() const;
 		const int&				getChildPid() const;
+		const int&				getSignalSent() const;
 		bool					checkTimeout(double maxtime = MAX_TIMEOUT);
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
@@ -69,6 +70,7 @@ class Client
 		void					setCgiFlag(bool b);
 		void					setWaitReturn(int num);
 		void					setChildPid(int pid);
+		void					setSignalSent(int num);
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -90,7 +92,6 @@ class Client
 		int						_errorCode;
 		Message*				_requestMsg;	// client owns so it should delete
 		Message*				_responseMsg;	// client owns so it should delete
-		// Message*				_cgiResponseMsg;
 		struct sockaddr			_clientAddr;
 		std::string				_clientIp;
 		socklen_t				_addrLen;
@@ -99,9 +100,7 @@ class Client
 		bool					_cgiFlag;
 		int						_waitReturn;
 		int						_childPid;
-		// char**					_env;
-		// char**					_args;
-		// double				_clockstop;
+		int						_signalSent; // 0 at start, 1 after sending SIGTERM and 2 after sending SIGKILL
 
 	public:
 						Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);

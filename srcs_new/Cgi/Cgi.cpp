@@ -452,7 +452,6 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 		{
 			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
 			Logger::warning("Child ID:", client.getId());
-			sleep (2);
 			_stopCgiSetErrorCode(client);
 		}
 		if (WIFEXITED(status))

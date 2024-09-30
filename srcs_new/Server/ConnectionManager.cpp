@@ -142,7 +142,7 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 static bool	safeToDelete(Client& client)
 {
 	// CLIENT STATE SAIS DELETE ME
-	if(client.getClientState() == Client::DELETEME)	
+	if(client.getClientState() == Client::DELETEME && client.getCgiFlag() == false)	
 		return (true);
 
 	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
@@ -154,18 +154,24 @@ static bool	safeToDelete(Client& client)
 // Method for _epollLoop() to update Client Fd state (e_fdState)
 void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
-	if ((client.checkTimeout() == false || flag > 0) && client.getWaitReturn() == 0)
+
+	if ((client.checkTimeout() == false || flag > 0)
+		&& client.getWaitReturn() == 0
+		&& client.getSignalSent() == 0)
 	{
-		// Logger::error("sending sig TERM to child", "");
+		client.setSignalSent(1);
+		Logger::error("sending sig TERM to child", "");
 		kill(client.getChildPid(), SIGTERM);
 		if (client.getWaitReturn() != 0)
 			client.setClientState(Client::DO_RESPONSE);
 	}
 
-	// if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
-	if (client.checkTimeout(4000) == false && client.getWaitReturn() == 0)
+	if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false
+		&& client.getWaitReturn() == 0
+		&& client.getSignalSent() == 1)
 	{
-		// Logger::error("sending sig KILL to child", "");
+		client.setSignalSent(2);
+		Logger::error("sending sig KILL to child", "");
 		kill(client.getChildPid(), SIGKILL);
 		// client.setCgiFlag(false);
 		// client.setErrorCode(500);
