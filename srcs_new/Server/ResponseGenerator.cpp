@@ -253,7 +253,8 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	// std::string query = header.urlSuffix->getQueryParameters();
 	// std::string filename = query;
 	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
-	filename  = "html/" + filename;
+	std::string folderName = location.getUploadFolder() + "/";
+	filename  = folderName + filename;
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
