@@ -2,6 +2,7 @@
 // #include "../Client/Client.hpp"
 #include "../Io/Io.hpp"
 #include <sstream>
+#include <iostream>
 
 /******************************************************************************/
 /*                               Constructors                                 */
