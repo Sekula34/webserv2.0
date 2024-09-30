@@ -84,7 +84,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 		const LocationSettings& reponseLocation = *it;
 		if(reponseLocation.isMethodAllowed(clientMethod) == false)
 		{
-			client.setErrorCode(405);
+			client.setErrorCode(405); //TODO: Nginx considers this as 403 forbbiden
 			Logger::warning("Seted 405 method not allowed", 405);
 			return false;
 		}

@@ -32,7 +32,7 @@ class FileUtils
 		 * @brief check if filepath relative to executable is file or folder
 		 * 
 		 * @param serverFilePath 
-		 * @return int 1 File, 2-Folder -1 fail (Internal server), 0 Only God knows
+		 * @return int 1 File, 2-Folder, -1 fail (Internal server), 0 Only God knows
 		 */
 		static int isPathFileOrFolder(const std::string& serverFilePath, int& httpStatusCode);
 

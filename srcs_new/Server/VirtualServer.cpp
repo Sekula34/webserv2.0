@@ -119,7 +119,7 @@ std::vector<LocationSettings> VirtualServer::_setServerLocations()
 	{
 		if(_serverTokens[i].getCurrentTokenContextType() == Token::LOCATION)
 		{
-			LocationSettings location(*this, _serverTokens[i], _serverTokens, *this);
+			LocationSettings location(*this, _serverTokens[i], _serverTokens);
 			serverLocations.push_back(location);
 		}
 	}
@@ -141,7 +141,7 @@ bool VirtualServer::_hasDefaultLocation(const std::vector<LocationSettings>& ser
 
 void VirtualServer::_generateDefaultLocation(std::vector<LocationSettings>& serverLocation)
 {
-	LocationSettings location(*this, _serverTokens, *this);
+	LocationSettings location(*this, _serverTokens);
 	serverLocation.push_back(location);
 }
 
