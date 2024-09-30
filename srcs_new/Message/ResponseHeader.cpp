@@ -101,6 +101,7 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
 		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
+		//FIXME: newHttpCode is http code from CGI, WHAT SHOULD WE DOO if cgi for example provide 600? correct it ? 400 /500/502?
 		toReturn->changeHttpCode(newHttpCode);
 		toReturn->m_headerFields.erase(it);
 
