@@ -12,40 +12,13 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
-Cgi::Cgi ()
-{
-	_tmp = NULL;
-	// Logger::info("Cgi constructor called", "");
-}
-
-Cgi::~Cgi (void)
-{
-	_deleteChararr(_tmp);
-	// Logger::info("Cgi destructor called", "");
-}
-
-Cgi::Cgi(Cgi const & src)
-{
-	//std::cout << "Cgi copy constructor called" << std::endl;
-	*this = src;
-}
-
-Cgi &	Cgi::operator=(Cgi const & rhs)
-{
-	//std::cout << "Cgi Copy assignment operator called" << std::endl;
-	if (this != &rhs)
-	{
-	}
-	return (*this);
-}
-
 extern volatile sig_atomic_t flag;
 
-// Because you won’t call the CGI directly, use the full path as PATH_INFO.
-// if no header or incomplete header, create header
-// finish alls meta-variables
+//==========================================================================//
+// STATIC ATTRIBUTES/METHODS================================================//
+//==========================================================================//
 
-std::string operatingSystem()
+static std::string operatingSystem()
 {
     #ifdef _WIN32
     return "Windows 32-bit";
@@ -63,6 +36,34 @@ std::string operatingSystem()
     return "unknown OS";
     #endif
 }  
+
+static std::string	getScriptLocation(char* str)
+{
+	std::string tmp = str;
+	std::string scriptLocation = "";
+	size_t pos = tmp.rfind("/");
+	if (pos != std::string::npos)
+		scriptLocation = tmp.substr(0, pos);
+	return (scriptLocation);
+}
+
+static void	closeSockets(int* s1, int* s2)
+{
+	if (s1)
+	{
+		close(s1[0]);
+		close(s1[1]);
+	}
+	if (s2)
+	{
+		close(s2[0]);
+		close(s2[1]);
+	}
+}
+
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 std::string	Cgi::_getInterpreterPath(Client& client, std::string suffix)
 {
@@ -165,16 +166,6 @@ bool	Cgi::_checkScriptAbsPath(Client& client, std::vector<std::string>& argsVec)
 		return (false);
 	}
 	return (true);
-}
-
-static std::string	getScriptLocation(char* str)
-{
-	std::string tmp = str;
-	std::string scriptLocation = "";
-	size_t pos = tmp.rfind("/");
-	if (pos != std::string::npos)
-		scriptLocation = tmp.substr(0, pos);
-	return (scriptLocation);
 }
 
 void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, char** args)
@@ -425,10 +416,14 @@ void	Cgi::_stopCgiSetErrorCode(Client& client)
 
 bool	Cgi::_createSockets(int* socketsToChild, int* socketsFromChild)
 {
+	(void)socketsFromChild;
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsToChild) < 0)
 		return (false);
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsFromChild) < 0)
+	{
+		closeSockets(socketsToChild, NULL);
 		return (false);
+	}
 	return (true);
 }
 
@@ -478,19 +473,26 @@ char**	Cgi::_metaVariables(Client& client, char** args)
 	return (toReturn);
 }
 
-void Cgi::_cgiClient(Client& client)
+static bool	isAllowedCgi(Client& client)
 {
-	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
+	// NOT: SEND TO CGI OR RECEIVE FROM CGI OR REACHED TIMEOUT WHILE RUNNING CGI
 	if (!((client.getClientState() == Client::DO_CGIREC
 		|| client.getClientState() == Client::DO_CGISEND)
 		|| (client.checkTimeout() == false && client.getCgiFlag() == true)))
-		// && client.getClientState() != Client::DO_RESPONSE)
 	{
-		return ;
+		return (false);
 	}
-	if (client.getWaitReturn() != 0)
-		return ;
 
+	// CHILD PROCESS HAS FINISHED RUNNING -> NO NEED TO RUN CGI LOOP
+	if (client.getWaitReturn() != 0)
+		return (false);
+	return (true);
+}
+
+void Cgi::_cgiClient(Client& client)
+{
+	if (isAllowedCgi(client) == false)
+		return ;
 	// CREATE CHILD SOCKETS AND FORK ONCE
 	if (client.getClientFds().size() == 1)
 	{
@@ -505,37 +507,36 @@ void Cgi::_cgiClient(Client& client)
 			_deleteChararr(args);
 			return ;
 		}
-
-
-		// creates two socketpairs in order to communicate with child process
+		// CREATES TWO SOCKETPAIRS IN ORDER TO COMMUNICATE WITH CHILD PROCESS
 		if(!_createSockets(socketsToChild, socketsFromChild))
 		{
+			_deleteChararr(args);
+			_deleteChararr(env);
 			_stopCgiSetErrorCode(client);
 			return ;
 		}
-
 		// FORK!!
 		client.setChildPid(fork());
 		if (client.getChildPid() == -1)
 		{
+			closeSockets(socketsToChild, socketsFromChild);
+			_deleteChararr(args);
+			_deleteChararr(env);
 			_stopCgiSetErrorCode(client);
 			return ;
 		}
-
 		// RUN CHILD PROCESS
 		if (client.getChildPid() == CHILD)
 		{
 			signal(SIGINT, SIG_IGN);
 			_execute(args, env, socketsToChild, socketsFromChild);
 		}
-
+		// FREE ALLOCATED CHAR ARRAYS
 		_deleteChararr(args);
 		_deleteChararr(env);
-
-		//closing unused sockets and adding relevant sockets to epoll
+		//CLOSING UNUSED SOCKETS AND ADDING RELEVANT SOCKETS TO EPOLL
 		_prepareSockets(client, socketsToChild, socketsFromChild);
 	}
-
 	// RUN WAIT FOR CHILD
 	_waitForChild(client);
 	return ;
@@ -547,3 +548,42 @@ void Cgi::loop()
 	for (; it != Client::clients.end(); ++it)
 		_cgiClient(*(it->second));
 }
+
+//==========================================================================//
+// Constructor, Destructor and OCF Parts ===================================//
+//==========================================================================//
+
+Cgi::Cgi ()
+{
+	_tmp = NULL;
+	// Logger::info("Cgi constructor called", "");
+}
+
+Cgi::~Cgi (void)
+{
+	_deleteChararr(_tmp);
+	// Logger::info("Cgi destructor called", "");
+}
+
+Cgi::Cgi(Cgi const & src)
+{
+	//std::cout << "Cgi copy constructor called" << std::endl;
+	*this = src;
+}
+
+Cgi &	Cgi::operator=(Cgi const & rhs)
+{
+	//std::cout << "Cgi Copy assignment operator called" << std::endl;
+	if (this != &rhs)
+	{
+	}
+	return (*this);
+}
+
+//==========================================================================//
+// NOTES====================================================================//
+//==========================================================================//
+
+// Because you won’t call the CGI directly, use the full path as PATH_INFO.
+// if no header or incomplete header, create header
+// finish alls meta-variables

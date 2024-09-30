@@ -42,12 +42,6 @@ Message*	Client::getMsg(e_clientMsgType type)
 				_responseMsg = new Message(false, _errorCode);
 			return (_responseMsg);
 		}
-		// if (type == CGIRESP_MSG)
-		// {	
-		// 	if (!_cgiResponseMsg)
-		// 		_cgiResponseMsg = new Message(false, _errorCode);
-		// 	return (_cgiResponseMsg);
-		// }
 	}
 	catch (std::exception& e)
 	{
@@ -70,16 +64,6 @@ unsigned long	Client::getId() const
 {
 	return (_id);
 }
-
-// int	Client::getClientFd() const
-// {
-// 	int ret = 0;
-// 	if (_clientFds.size() > 0)
-// 		ret = _clientFds.begin()->first;
-// 	else
-// 	 	Logger::error("F@ck no fd in client with id ", _id);
-// 	return (ret);
-// }
 
 FdData&		Client::getFdDataByType(FdData::e_fdType type)
 {
@@ -109,27 +93,10 @@ FdData&		Client::getFdDataByFd(int fd)
 	return (*it);
 }
 
-
-
 std::vector<FdData>&	Client::getClientFds()
 {
 	return (_clientFds);
 }
-
-// Message*	Client::getRequestMsg()const
-// {public
-// 	return (_requestMsg);
-// }
-
-// Message*	Client::getResponseMsg()const
-// {
-// 	return (_responseMsg);
-// }
-
-// Message*	Client::getCgiResponseMsg()const
-// {
-// 	return (_cgiResponseMsg);
-// }
 
 int&	Client::getErrorCode()
 {
@@ -196,11 +163,6 @@ void	Client::setResponseMsg(Message* m)
 	_responseMsg = m;
 }
 
-// void	Client::setCgiResponseMsg(Message* m)
-// {
-// 	_cgiResponseMsg = m;
-// }
-
 void	Client::setCgiFlag(bool b)
 {
 	_cgiFlag = b;
@@ -220,16 +182,6 @@ void	Client::setSignalSent(int num)
 {
 	_signalSent = num;
 }
-
-// void	Client::setClientFdState(int fd, e_fdState fdState)
-// {
-// 	fdPairsMap::iterator it = _clientFds.find(fd);
-// 	if (it == _clientFds.end())
-// 		Logger::error("Trying to change the state of a non-existing fd ", fd);
-// 	else
-// 		_clientFds[fd].second = fdState;
-
-// }
 
 void	Client::setChildSocket(int to, int from)
 {
@@ -352,16 +304,6 @@ void	Client::_initClientIp()
 
 void	Client::closeClientFds()
 {
-	// fdPairsMap::iterator it = _clientFds.begin();
-	// for (; it != _clientFds.end(); ++it)
-	// {
-	// 	if (it->second.second != CLOSED)
-	// 	{
-	// 		close(it->first);
-	// 		it->second.second = CLOSED;
-	// 	}
-	// }
-
 	std::vector<FdData>::iterator it = _clientFds.begin();
 	for (; it != _clientFds.end(); ++it)
 	{
