@@ -231,11 +231,14 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 	return;
 }
 
+// Helper function for _postHandler (POST request)
+// it generates a name based in: query_string, or time()
+// and appends counter to avoid duplicate overwrite.
 static std::string	generateFilename(const std::string& queryString)
 {
 	if (queryString.empty() == false)
 		return (queryString);
-	time_t now = time(NULL);
+	time_t now = time(NULL); // seconds since Epoch
 	std::ostringstream filename;
 	filename << "file_" << now << ".bin";
 	struct stat buffer;
@@ -255,15 +258,16 @@ static std::string	generateFilename(const std::string& queryString)
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
 {
 	// Execute POST method.
-	(void)location;	
+	// (void)location;	
 	std::cout << "POST method executed" << std::endl;
 	Message& message = *(_client.getMsg(Client::REQ_MSG));
 	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
 	// std::string query = header.urlSuffix->getQueryParameters();
 	// std::string filename = query;
 	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
-	std::string folderName = location.getUploadFolder() + "/";
-	filename  = folderName + filename;
+	std::string folderName = location.getUploadFolder();
+	filename  = folderName + "/" + filename;
+	// Logger::error("Foldername/filename is: ", filename);
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
@@ -272,7 +276,7 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 		_response = _renderServerErrorPage(_httpStatus);
 		return ;
 	}
-	Logger::warning("getFullMessage() = ", header.getFullMessage());
+	// Logger::warning("getFullMessage() = ", header.getFullMessage());
 	outputFile << message.getBodyString();
 	outputFile.close();
 	_httpStatus = 201;
@@ -282,15 +286,24 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
 {
     // Execute DELETE method.
-	(void)location;
+	// (void)location;
 	std::cout << "DELETE method executed" << std::endl;
+	const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
+	std::string filename = _pathRelativeToExecutable(location, suffix);
 	// std::map<std::string, std::string>& msgHeader = request->getHeader();
 	// std::string filename = msgHeader["uri"];
-    std::string filename = "POST.txt";
+	// std::cout << "Deleting this: " << _pathRelativeToExecutable(location, *(static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix)) << std::endl;
+	// std::string filename = "POST.txt";
+	// std::string filename = _pathRelativeToExecutable(location, *(static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix));
 	if (remove(filename.c_str()) != 0)
-		std::cerr << "Unable to DELETE file!" << std::endl;
-    _httpStatus = 204;
-    _response = "";
+	{
+		Logger::error("Unable to DELETE file!", filename);
+		_httpStatus = 404;
+		_response = _renderServerErrorPage(_httpStatus);
+		return ;
+	}
+	_httpStatus = 204;
+	_response = "";
 }
 
 void ResponseGenerator::_responseMenu()
