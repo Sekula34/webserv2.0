@@ -2,13 +2,10 @@
 # define CGIPROCESSOR_HPP
 
 # include "../Client/Client.hpp"
-# include <iostream>
 # include <fcntl.h>
 # include <unistd.h>
 # include <sys/wait.h>
-# include <string.h>
 # include <vector>
-# include <stdio.h>
 
 # define CHILD 0
 
@@ -58,4 +55,3 @@ class Cgi {
 };
 
 #endif
-
