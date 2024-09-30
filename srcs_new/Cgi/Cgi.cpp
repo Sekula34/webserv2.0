@@ -452,6 +452,7 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 		{
 			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
 			Logger::warning("Child ID:", client.getId());
+			sleep (2);
 			_stopCgiSetErrorCode(client);
 		}
 		if (WIFEXITED(status))
@@ -510,11 +511,14 @@ void	Cgi::_waitForChild(Client& client)
 
 void	Cgi::_stopCgiSetErrorCode(Client& client)
 {
-	Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
-	if (client.getErrorCode() != 0)
-		Logger::error("overwriting client Error code in CGI to 500 it was:", client.getErrorCode());
+	Logger::error("stopping CGI with ID: ", client.getId());
+	// Logger::error("stopping CGI, errorcode 500 in Client with ID: ", client.getId());
+	// if (client.getErrorCode() != 0)
+	// 	Logger::error("overwriting client Error code in CGI to 500 it was:", client.getErrorCode());
+	if (client.getErrorCode() == 0)
+		client.setErrorCode(500);
 	// client.setCgiFlag(false);
-	client.setErrorCode(500);
+	client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
 	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 	client.setClientState(Client::DO_RESPONSE);
 }
@@ -533,12 +537,6 @@ void	Cgi::_prepareSockets(Client& client, int* socketsToChild, int* socketsFromC
 	close(socketsToChild[1]);
 	close(socketsFromChild[1]);
 	client.setChildSocket(socketsToChild[0], socketsFromChild[0]);
-}
-void Cgi::loop()
-{
-	std::map<int, Client*>::iterator it = Client::clients.begin();
-	for (; it != Client::clients.end(); ++it)
-		_cgiClient(*(it->second));
 }
 
 char**	Cgi::_argumentList(Client& client)
@@ -582,12 +580,15 @@ char**	Cgi::_metaVariables(Client& client, char** args)
 void Cgi::_cgiClient(Client& client)
 {
 	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
-	if (client.getClientState() != Client::DO_CGIREC
-		&& client.getClientState() != Client::DO_CGISEND
-		&& client.getClientState() != Client::DO_RESPONSE)
+	if (!((client.getClientState() == Client::DO_CGIREC
+		|| client.getClientState() == Client::DO_CGISEND)
+		|| (client.checkTimeout() == false && client.getCgiFlag() == true)))
+		// && client.getClientState() != Client::DO_RESPONSE)
 	{
 		return ;
 	}
+	if (client.getWaitReturn() != 0)
+		return ;
 
 	// CREATE CHILD SOCKETS AND FORK ONCE
 	if (client.getClientFds().size() == 1)
@@ -639,4 +640,11 @@ void Cgi::_cgiClient(Client& client)
 	// RUN WAIT FOR CHILD
 	_waitForChild(client);
 	return ;
+}
+
+void Cgi::loop()
+{
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for (; it != Client::clients.end(); ++it)
+		_cgiClient(*(it->second));
 }

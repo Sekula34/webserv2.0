@@ -16,7 +16,8 @@
 void ResponseGenerator::generateClientResponse(Client &client)
 {
     if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
-		|| (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
+		|| (client.getCgiFlag() == true && client.getWaitReturn() == 0))
+		// || (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
 	{
         return;
 	}
@@ -31,6 +32,7 @@ void ResponseGenerator::generateClientResponse(Client &client)
         //     delete client.getMsg(Client::RESP_MSG);
         //     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
         // }
+        client.setCgiFlag(false);
         ResponseGenerator oneResponse(client);
         //std::cout << oneResponse.getResponse() << std::endl;
         Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());

@@ -146,27 +146,24 @@ static bool	safeToDelete(Client& client)
 		return (true);
 
 	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
-	if (client.getCgiFlag() == false && client.checkTimeout() == false)
-		return (true);
+	// if (client.getCgiFlag() == false && client.checkTimeout() == false)
+	// 	return (true);
 	return (false);
 }
 
 // Method for _epollLoop() to update Client Fd state (e_fdState)
 void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
-	if (client.checkTimeout() == false || flag > 0)
+	if ((client.checkTimeout() == false || flag > 0) && client.getWaitReturn() == 0)
 	{
 		// Logger::error("sending sig TERM to child", "");
 		kill(client.getChildPid(), SIGTERM);
 		if (client.getWaitReturn() != 0)
-		{
-			// client.setCgiFlag(false);
 			client.setClientState(Client::DO_RESPONSE);
-		}
 	}
 
 	// if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
-	if (client.checkTimeout(4000) == false)
+	if (client.checkTimeout(4000) == false && client.getWaitReturn() == 0)
 	{
 		// Logger::error("sending sig KILL to child", "");
 		kill(client.getChildPid(), SIGKILL);

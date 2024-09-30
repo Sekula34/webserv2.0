@@ -79,7 +79,7 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
  	int sendValue = 0;
 	if (message->getState() != COMPLETE)
 		return ;
-	if (client.getCgiFlag() == true && client.getWaitReturn() == 0 && client.getClientState() == Client::DO_RESPONSE)
+	if (client.getCgiFlag() == true && client.getWaitReturn() != 0 && client.getClientState() == Client::DO_RESPONSE)
 		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
 	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
@@ -124,8 +124,6 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	int 	recValue = 0;
 
 	clearBuffer(_buffer);
-
-	
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE
@@ -135,12 +133,13 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		message->bufferToNodes(_buffer, recValue);
 	}
 
-	// if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
-	// 	return ;
+	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
+		return ;
 
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)
 	{
+		Logger::warning("stopping receiving with recValue: ", recValue);
 		if (recValue < 0)
 			client.setErrorCode(500);
 		setFinishedReceiving(client, fdData, message);
