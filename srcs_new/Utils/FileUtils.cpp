@@ -112,7 +112,10 @@ void FileUtils::_setDirFailStatusCode(int errnoNum, int& httpStatusCode)
 bool	FileUtils::isValidName(const std::string& fileName)
 {
 	if (fileName.empty() == true)
+	{
+		Logger::warning("file folder name is empty!","");
 		return (false);
+	}
 	size_t len = fileName.length(); // This var is used to avoid out-of-bounds access. 
 	if (len == 1 && (fileName[0] == '.' || fileName[0] == '~'))
 		return (false);
