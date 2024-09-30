@@ -30,7 +30,6 @@ Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
 	_state = INCOMPLETE;
 	_header = NULL;
 	_bytesSent = 0;
-	_bytesReceived = 0;
 }
 
 /******************************************************************************/
@@ -76,7 +75,8 @@ AHeader*	Message::getHeader() const
 	return (_header);
 }
 
-const std::list<Node>&	Message::getChain() const
+// const std::list<Node>&	Message::getChain() const
+std::list<Node>&	Message::getChain()
 {
 	return (_chain);
 }
@@ -111,14 +111,6 @@ void	Message::setState(int s)
 const size_t&				Message::getBytesSent() const
 {
 	return (_bytesSent);
-}
-const size_t&				Message::getBytesReceived() const
-{
-	return (_bytesReceived);
-}
-void						Message::setBytesReceived(size_t num)
-{
-	_bytesReceived = num;
 }
 void						Message::setBytesSent(size_t num)
 {
@@ -300,7 +292,7 @@ void	Message::_createHeader()
 
 	if(_header && _header->getHttpStatusCode() != 0)
 	{
-		Logger::warning("Found Error in Client Header", false); std::cout << _header->getHttpStatusCode() << std::endl;
+		Logger::warning("Found Error in Client Header", _header->getHttpStatusCode());
 	}
 }
 

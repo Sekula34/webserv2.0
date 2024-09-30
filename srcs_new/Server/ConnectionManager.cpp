@@ -12,6 +12,8 @@
 #define MAX_WAIT		-1 // 0: epoll runs in nonblocking way but CPU runs at 6,7 % 
 extern volatile sig_atomic_t flag;
 
+int ConnectionManager::_epollFd = epoll_create(1);
+
 //==========================================================================//
 // REGULAR METHODS==========================================================//
 //==========================================================================//
@@ -27,14 +29,21 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = fd;
 
+	Logger::warning("added fd to epoll: ", fd);
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
 	return (ret);
 }
 
+const int& ConnectionManager::getEpollFd()
+{
+	return (_epollFd);
+}
+
 // Helper function to remove fd to epoll
 static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event* events)
 {
+	Logger::warning("removing fd from epoll: ", fd);
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
 		Logger::error("The following FD could not be removed from epoll: ", fd);
@@ -126,12 +135,62 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 		fdData.state = FdData::R_RECEIVE;
 	if (allowedToSend && allowedToReceive)
 		fdData.state = FdData::R_SENDREC;
+	if (!allowedToSend && !allowedToReceive)
+		fdData.state = FdData::NONE;
+}
+
+static bool	safeToDelete(Client& client)
+{
+	// CLIENT STATE SAIS DELETE ME
+	if(client.getClientState() == Client::DELETEME && client.getCgiFlag() == false)	
+		return (true);
+
+	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
+	if (client.getCgiFlag() == false
+		&& client.checkTimeout() == false
+		&& client.getWaitReturn() == 0)
+		return (true);
+	return (false);
 }
 
 // Method for _epollLoop() to update Client Fd state (e_fdState)
 void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
-	if (client.getClientState() == Client::DELETEME)
+
+	if ((client.checkTimeout() == false || flag > 0)
+		&& client.getWaitReturn() == 0
+		&& client.getSignalSent() == 0)
+	{
+		client.setSignalSent(1);
+		if (client.getCgiFlag() == true && client.getChildPid() != 0)
+		{
+			Logger::error("sending sig TERM to child", "");
+			kill(client.getChildPid(), SIGTERM);
+		}
+		if (client.getWaitReturn() != 0 || client.getCgiFlag() == false)
+			client.setClientState(Client::DO_RESPONSE);
+	}
+
+	if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false
+		&& client.getWaitReturn() == 0
+		&& client.getSignalSent() == 1)
+	{
+		client.setSignalSent(2);
+		Logger::error("sending sig KILL to child", "");
+		if (client.getChildPid() != 0)
+			kill(client.getChildPid(), SIGKILL);
+		// client.setCgiFlag(false);
+		// client.setErrorCode(500);
+		client.setClientState(Client::DO_RESPONSE);
+	}
+
+	// Logger::info("Client state", client.getClientState());
+	// Logger::info("Client cgi flag", client.getCgiFlag());
+	// Logger::info("Client error code", client.getErrorCode());
+
+	// TODO: reset Messages and Flags and state in Client if Keep Alive	
+
+	if (safeToDelete(client))
 	{
 		epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
 		delete &client; // delete needs an address
@@ -140,11 +199,31 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 	updateClientFds(client, idx, _events);
 }
 
+void		ConnectionManager::_addChildSocketsToEpoll()
+{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for (; it != _clients.end(); ++it)
+	{
+		Client& currentClient = *(it->second);
+		std::vector<FdData>& fds = currentClient.getClientFds();
+		if (fds.size() == 1)
+			continue ;
+		std::vector<FdData>::iterator itFd = fds.begin();
+		for (; itFd != fds.end(); ++itFd)
+		{
+			if ((itFd->type == FdData::TOCHILD_FD || itFd->type == FdData::FROMCHILD_FD)
+	   			&& itFd->state == FdData::NEW)
+			{
+				epollAddFd(_epollFd, itFd->fd);
+				itFd->state = FdData::NONE;
+			}
+		}
+	}
+}
 
 void		ConnectionManager::_handleCgiFds(const int& idx)
 {
 	int targetFd = _events[idx].data.fd;
-	// std::map<int, Client*>::iterator it = _clients.find(client.getClientFd());
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); ++it)
 	{
@@ -159,22 +238,42 @@ void		ConnectionManager::_handleCgiFds(const int& idx)
 			fdData.state = FdData::CLOSED;
 			return ;
 		}
-		if (fdData.state == FdData::NONE)
-		{
-			epollAddFd(_epollFd, targetFd);
-			return ;
-		}
+		// if (fdData.state == FdData::NEW)
+		// {
+		// 	epollAddFd(_epollFd, targetFd);
+		// 	fdData.state = FdData::NONE;
+		// 	return ;
+		// }
 		updateClientFds(currentClient, idx, _events);
 		return ;
 	}
 	Logger::error("Could not find targetFd in any client (while trying to set cgi socket state): ", targetFd);
 }
 
+void ConnectionManager::closeClientFds()
+{
+	std::map<int, Client*>::iterator it = Client::clients.begin();
+	for(; it != Client::clients.end(); it++)
+	{
+		close(it->second->getFdDataByType(FdData::CLIENT_FD).fd);
+		// if (it->second->socketToChild != DELETED)
+		if (it->second->getClientFds().size() == 1)
+			continue ;
+		if (it->second->getFdDataByType(FdData::TOCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::TOCHILD_FD).fd);
+		// if (it->second->socketFromChild != DELETED)
+		if (it->second->getFdDataByType(FdData::FROMCHILD_FD).state != FdData::CLOSED)
+			close(it->second->getFdDataByType(FdData::FROMCHILD_FD).fd);
+	}
+}
+
+
 void	ConnectionManager::epollLoop()
 {
 	Client* client = NULL;
 
 
+	_addChildSocketsToEpoll();
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
 	if (nfds == -1 && !flag)
 	{
@@ -192,14 +291,17 @@ void	ConnectionManager::epollLoop()
 	}
 }
 
+
 //==========================================================================//
 // Constructor, Destructor and OCF Parts ===================================//
 //==========================================================================//
 
 // Custom Constructor
-ConnectionManager::ConnectionManager(int epollFd) :
-_epollFd(epollFd), _clients(Client::clients)
+ConnectionManager::ConnectionManager() :
+ _clients(Client::clients)
 {
+	if (_epollFd < 0)
+		throw std::runtime_error("epoll create failed");
 	_addServerSocketsToEpoll();
 }
 

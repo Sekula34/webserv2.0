@@ -14,7 +14,6 @@
 # include <map>
 
 # define MAX_TIMEOUT		3000
-# define DELETED			-1 
 
 class Message;
 class VirtualServer;
@@ -27,7 +26,7 @@ class Client
 		{
 			DO_REQUEST,	// Client should or does already read the Client request
 			DO_CGIREC,	// Client should or does already receive from CGI 
-			DO_CGISEND,// Client should or does already send to CGI
+			DO_CGISEND,	// Client should or does already send to CGI
 			DO_RESPONSE,// Client should or does already send response Response
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
 			DELETEME	// Client wants to be deleted
@@ -55,7 +54,10 @@ class Client
 		int&					getErrorCode();
 		const bool&				getIsRequestChecked() const;
 		const bool&				getCgiFlag() const;
-		bool					checkTimeout();
+		const int&				getWaitReturn() const;
+		const int&				getChildPid() const;
+		const int&				getSignalSent() const;
+		bool					checkTimeout(double maxtime = MAX_TIMEOUT);
 		void					setVirtualServer(const VirtualServer& vs);
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);
@@ -66,6 +68,9 @@ class Client
 		void					setChildSocket(int in, int out);
 		void					setIsRequestChecked();
 		void					setCgiFlag(bool b);
+		void					setWaitReturn(int num);
+		void					setChildPid(int pid);
+		void					setSignalSent(int num);
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
@@ -87,14 +92,15 @@ class Client
 		int						_errorCode;
 		Message*				_requestMsg;	// client owns so it should delete
 		Message*				_responseMsg;	// client owns so it should delete
-		// Message*				_cgiResponseMsg;
 		struct sockaddr			_clientAddr;
 		std::string				_clientIp;
 		socklen_t				_addrLen;
 		const VirtualServer*	_virtualServer;
 		bool					_isRequestChecked;
 		bool					_cgiFlag;
-		// double				_clockstop;
+		int						_waitReturn;
+		int						_childPid;
+		int						_signalSent; // 0 at start, 1 after sending SIGTERM and 2 after sending SIGKILL
 
 	public:
 						Client (int const fd, struct sockaddr client_addr, socklen_t addrlen);

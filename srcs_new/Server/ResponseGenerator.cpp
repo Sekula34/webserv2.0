@@ -18,11 +18,16 @@
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)
 {
-    if (client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() != true)
+    if ((client.getMsg(Client::RESP_MSG)->getState() == COMPLETE && client.getCgiFlag() == false)
+		|| (client.getCgiFlag() == true && client.getWaitReturn() == 0))
+		// || (client.getMsg(Client::RESP_MSG)->getState() == INCOMPLETE && client.getCgiFlag() == true))
+	{
         return;
+	}
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
-    if (client.getCgiFlag() == false || client.getErrorCode() != 0)
+    if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
+    // if (client.getCgiFlag() == false || client.getErrorCode() != 0)
     {   
         // if (client.getCgiFlag() == true)
         // {
@@ -30,6 +35,7 @@ void ResponseGenerator::generateClientResponse(Client &client)
         //     delete client.getMsg(Client::RESP_MSG);
         //     client.getMsg(Client::RESP_MSG); // remember this is a dirty getter and allocs a new instance of Messaage Class
         // }
+        client.setCgiFlag(false);
         ResponseGenerator oneResponse(client);
         //std::cout << oneResponse.getResponse() << std::endl;
         Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
@@ -42,7 +48,10 @@ void ResponseGenerator::generateClientResponse(Client &client)
     }
     else // THIS MEANS CGI RAN SUCCESSFULLY
     {
+        ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
         client.setCgiFlag(false);
+		Logger::warning("string in response Header", header->turnResponseHeaderToString());
+		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
         // correct the Header instance in Message from CGI Response state to final state
         // call turnResponseHEaderToString at put it into Header node
   
@@ -362,7 +371,7 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
     }
     else 
     {
-        Logger::info("Server dont have page for error code ", errorCode);
+        Logger::info("Server doesn't have page for error code ", errorCode);
         errorHtml = _generateErrorPage(errorCode);
         Logger::info("Response body is generated and it is", errorHtml);
     }

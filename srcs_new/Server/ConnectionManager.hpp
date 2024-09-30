@@ -15,6 +15,8 @@ class ConnectionManager
 	public:
 		// Methods
 		void		epollLoop(void);
+		static void	closeClientFds();
+		static const int& getEpollFd();
 		// Attributes
 
 	private:
@@ -23,18 +25,18 @@ class ConnectionManager
 		void		_addServerSocketsToEpoll(void); // Make arguments const
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
 		void		_handleCgiFds(const int& idx);
+		void		_addChildSocketsToEpoll();
 
 		// Attributes
-		int							_epollFd;
+		static int					_epollFd;
 		std::map<int, Client*>& 	_clients;
 		struct epoll_event			_events[MAX_EVENTS];
 
 	public:
-		ConnectionManager(int epollFd);
+		ConnectionManager();
 		~ConnectionManager();
 
 	private:
-		ConnectionManager();
 		ConnectionManager(ConnectionManager& source);
 		ConnectionManager& operator=(ConnectionManager& source);
 };

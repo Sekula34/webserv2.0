@@ -101,7 +101,9 @@ FdData&		Client::getFdDataByFd(int fd)
     std::vector<FdData>::iterator it = std::find_if(_clientFds.begin(), _clientFds.end(), functor);
     if(it == _clientFds.end())
 	{
-		Logger::error("F@ck, looking for a Fd type that does not exist in this FdData instance of client with id: ", _id);
+		// sleep (1);
+		// Logger::error("F@ck, looking for a Fd that is not amongst client fds. Client id: ", _id);
+		// Logger::error("fd: ", fd);
 		return (*_clientFds.begin());
 	}
 	return (*it);
@@ -148,6 +150,22 @@ const bool&				Client::getCgiFlag() const
 {
 	return (_cgiFlag);
 }
+
+const int&	Client::getWaitReturn() const
+{
+	return (_waitReturn);
+}
+
+const int&	Client::getChildPid() const
+{
+	return (_childPid);
+}
+
+const int&	Client::getSignalSent() const
+{
+	return (_signalSent);
+}
+
 void Client::setVirtualServer(const VirtualServer& vs)
 {
 	_virtualServer = &vs;
@@ -188,25 +206,19 @@ void	Client::setCgiFlag(bool b)
 	_cgiFlag = b;
 }
 
-bool	Client::checkTimeout()
-{
-	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
-	if (diff > MAX_TIMEOUT)
-	{
-		// Logger::warning("removing Client due to timeout", true);
-		return (false);
-	}
-	// if (diff > _clockstop) 
-	// {
-	// 	std::cout << "id: " << _id << ", " << diff / 1000 << " sec" << std::endl;
-	// 	_clockstop += 1000;
-	// }
-	return (true);
-}
-
 void	Client::setClientState(e_clientState state)
 {
 	_clientState = state;
+}
+
+void	Client::setWaitReturn(int num)
+{
+	_waitReturn = num;
+}
+
+void	Client::setSignalSent(int num)
+{
+	_signalSent = num;
 }
 
 // void	Client::setClientFdState(int fd, e_fdState fdState)
@@ -218,6 +230,35 @@ void	Client::setClientState(e_clientState state)
 // 		_clientFds[fd].second = fdState;
 
 // }
+
+void	Client::setChildSocket(int to, int from)
+{
+	Logger::info("adding socket TOCHILD to client Fds", to);
+	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
+	Logger::info("adding socket FROMCHILD to client Fds", from);
+	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
+}
+
+void	Client::setChildPid(int pid)
+{
+	_childPid = pid;
+}
+
+bool	Client::checkTimeout(double maxtime)
+{
+	double diff = (static_cast<double>(std::clock() - _start) * 1000) / CLOCKS_PER_SEC;
+	if (diff > maxtime)
+	{
+		// Logger::warning("removing Client due to timeout", true);
+		return (false);
+	}
+	// if (diff > _clockstop) 
+	// {
+	// 	std::cout << "id: " << _id << ", " << diff / 1000 << " sec" << std::endl;
+	// 	_clockstop += 1000;
+	// }
+	return (true);
+}
 
 void Client::_initVars(int fd)
 {
@@ -235,15 +276,11 @@ void Client::_initVars(int fd)
 	clients[fd] = this;
 	_isRequestChecked = false;
 	_cgiFlag = false;
+	_waitReturn = 0;
+	_childPid = 0;
+	_signalSent = 0;
 }
 
-void	Client::setChildSocket(int to, int from)
-{
-	_clientFds.push_back(FdData(to, FdData::TOCHILD_FD));
-	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
-	// _clientFds[to] = fdTypeStatePair(TOCHILD_FD, NONE);
-	// _clientFds[from] = fdTypeStatePair(FROMCHILD_FD, NONE);
-}
 
 void	Client::closeSocketToChild()
 {
@@ -385,6 +422,7 @@ _id(++client_cntr),
 // _fd(src._fd),
 _clientFds(src._clientFds),
 _start(std::clock()),
+_errorCode(src._errorCode),
 _virtualServer(NULL)
 {
 	*this = src;
