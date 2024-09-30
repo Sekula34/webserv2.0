@@ -164,7 +164,7 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 		client.setSignalSent(1);
 		if (client.getCgiFlag() == true && client.getChildPid() != 0)
 		{
-			Logger::error("sending sig TERM to child", "");
+			Logger::warning("sending sig TERM to child", "");
 			kill(client.getChildPid(), SIGTERM);
 		}
 		if (client.getWaitReturn() != 0 || client.getCgiFlag() == false)
@@ -176,17 +176,11 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 		&& client.getSignalSent() == 1)
 	{
 		client.setSignalSent(2);
-		Logger::error("sending sig KILL to child", "");
+		Logger::warning("sending sig KILL to child", "");
 		if (client.getChildPid() != 0)
 			kill(client.getChildPid(), SIGKILL);
-		// client.setCgiFlag(false);
-		// client.setErrorCode(500);
 		client.setClientState(Client::DO_RESPONSE);
 	}
-
-	// Logger::info("Client state", client.getClientState());
-	// Logger::info("Client cgi flag", client.getCgiFlag());
-	// Logger::info("Client error code", client.getErrorCode());
 
 	// TODO: reset Messages and Flags and state in Client if Keep Alive	
 

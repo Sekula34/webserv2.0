@@ -410,7 +410,7 @@ void	Cgi::_waitForChild(Client& client)
 
 void	Cgi::_stopCgiSetErrorCode(Client& client)
 {
-	Logger::error("stopping CGI with ID: ", client.getId());
+	Logger::warning("stopping CGI loop for Client with ID: ", client.getId());
 	if (client.getErrorCode() == 0)
 		client.setErrorCode(500);
 	client.setClientState(Client::DO_RESPONSE);

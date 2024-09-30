@@ -395,7 +395,7 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
         Logger::info("Server doesn't have page for error code ", errorCode);
         errorHtml = _generateErrorPage(errorCode);
     }
-    Logger::warning("Http status code ", _httpStatus);
+    // Logger::warning("Http status code ", _httpStatus);
 	return errorHtml;
 }
 
