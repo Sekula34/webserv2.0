@@ -2,7 +2,7 @@
 #ifndef DATA_HPP
 # define DATA_HPP
 
-# include <iostream>
+# include<string> 
 # include <map>
 # include <vector>
 # include <sys/epoll.h>
