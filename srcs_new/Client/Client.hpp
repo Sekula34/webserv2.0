@@ -13,7 +13,7 @@
 # include <vector>
 # include <map>
 
-# define MAX_TIMEOUT		10000
+# define MAX_TIMEOUT		30000
 
 class Message;
 class VirtualServer;

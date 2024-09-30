@@ -146,8 +146,10 @@ static bool	safeToDelete(Client& client)
 		return (true);
 
 	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
-	// if (client.getCgiFlag() == false && client.checkTimeout() == false)
-	// 	return (true);
+	if (client.getCgiFlag() == false
+		&& client.checkTimeout() == false
+		&& client.getWaitReturn() == 0)
+		return (true);
 	return (false);
 }
 
@@ -160,9 +162,12 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 		&& client.getSignalSent() == 0)
 	{
 		client.setSignalSent(1);
-		Logger::error("sending sig TERM to child", "");
-		kill(client.getChildPid(), SIGTERM);
-		if (client.getWaitReturn() != 0)
+		if (client.getCgiFlag() == true && client.getChildPid() != 0)
+		{
+			Logger::error("sending sig TERM to child", "");
+			kill(client.getChildPid(), SIGTERM);
+		}
+		if (client.getWaitReturn() != 0 || client.getCgiFlag() == false)
 			client.setClientState(Client::DO_RESPONSE);
 	}
 

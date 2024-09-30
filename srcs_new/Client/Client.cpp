@@ -101,7 +101,9 @@ FdData&		Client::getFdDataByFd(int fd)
     std::vector<FdData>::iterator it = std::find_if(_clientFds.begin(), _clientFds.end(), functor);
     if(it == _clientFds.end())
 	{
-		Logger::error("F@ck, looking for a Fd type that does not exist in this FdData instance of client with id: ", _id);
+		// sleep (1);
+		// Logger::error("F@ck, looking for a Fd that is not amongst client fds. Client id: ", _id);
+		// Logger::error("fd: ", fd);
 		return (*_clientFds.begin());
 	}
 	return (*it);

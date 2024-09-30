@@ -10,6 +10,9 @@
 //==========================================================================//
 
 
+// select the correct Fd type and the correct message that we want to do io with
+// the selection happens based on the client state
+// if we want to receive the Client request, we need the ClientFd and the request message
 static Message*	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType)
 {
 	Message* message = NULL;
@@ -151,11 +154,15 @@ void	Io::_ioClient(Client& client)
 	FdData::e_fdType fdType;
 	Message* message = setFdTypeAndMsg(client, fdType);
 
+	// if (!message || (fdType == FdData::TOCHILD_FD || fdType == FdData::FROMCHILD_FD)
 	if (!message)
 		return ; // TODO: Stop Loop / delete client, panic?
 	
 	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
 	FdData& fdData = client.getFdDataByType(fdType);
+	// std::cout << "bullshit happening here: clientID: " << client.getId() <<  ", fdType: "<<
+	// 	fdType << ", size of fds: " << client.getClientFds().size() <<
+	// 	", fd: "<< fdData.fd << " fd state: "<< fdData.state <<  std::endl;
 	
 	if ((client.getClientState() == Client::DO_REQUEST
 		|| client.getClientState() == Client::DO_CGIREC)
