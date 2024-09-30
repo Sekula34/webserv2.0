@@ -35,6 +35,7 @@ class FileUtils
 		 * @return int 1 File, 2-Folder, -1 fail (Internal server), 0 Only God knows
 		 */
 		static int isPathFileOrFolder(const std::string& serverFilePath, int& httpStatusCode);
+		static bool	isValidName(const std::string& fileName);
 
 	private:
 		static std::string _configFilePath;
