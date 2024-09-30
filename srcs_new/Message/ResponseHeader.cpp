@@ -155,6 +155,8 @@ bool ResponseHeader::_cgiStatusLine() const
 
 void ResponseHeader::_fillStatusLineElements()
 {
+	if(_httpCode == 0) //if _http code is 0 that means client had no error so far so we turn it into 200 ok
+		_httpCode = 200;
 	_statusLine.HttpVersion = "HTTP/1.1";
 	_statusLine.statusCode = _httpCode;
 	_statusLine.ReasonPhrase =  HttpStatusCode::getReasonPhrase(_httpCode);
