@@ -197,20 +197,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// TODO: Debugging this function:
 	// Handle file deletion using GET request
-	function deleteFile(fileName) {
-		fetch(`/uploads/${encodeURIComponent(fileName)}`, {
-			method: 'DELETE'  // Send DELETE request to the server
-		})
-		.then(response => {
-			if (response.ok) {
-				console.log(`File ${fileName} deleted successfully.`);
-				fetchFiles();  // Refresh the file list after deletion
-			} else {
-				console.error(`Failed to delete ${fileName}.`);
-			}
-		})
-		.catch(error => console.error('Error deleting file:', error));
-	}
+	// function deleteFile(fileName) {
+	// 	fetch(`/uploads/${encodeURIComponent(fileName)}`, {
+	// 		method: 'DELETE'  // Send DELETE request to the server
+	// 	})
+	// 	.then(response => {
+	// 		if (response.ok) {
+	// 			console.log(`File ${fileName} deleted successfully.`);
+	// 			fetchFiles();  // Refresh the file list after deletion
+	// 		} else {
+	// 			console.error(`Failed to delete ${fileName}.`);
+	// 		}
+	// 	})
+	// 	.catch(error => console.error('Error deleting file:', error));
+	// }
 
 	// Attach event listeners to delete buttons
 	function attachDeleteEventListeners() {
