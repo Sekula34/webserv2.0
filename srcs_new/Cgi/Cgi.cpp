@@ -1,3 +1,4 @@
+
 #include "../Server/Socket.hpp"
 #include "../Server/ConnectionManager.hpp"
 #include "../Utils/Data.hpp"
@@ -12,87 +13,13 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
-/******************************************************************************/
-/*                               Constructors                                 */
-/******************************************************************************/
-
-Cgi::Cgi ()
-{
-	_tmp = NULL;
-	// Logger::info("Cgi constructor called", "");
-}
-
-/******************************************************************************/
-/*                                Destructor                                  */
-/******************************************************************************/
-
-
-Cgi::~Cgi (void)
-{
-	_deleteChararr(_tmp);
-	// Logger::info("Cgi destructor called", "");
-}
-
-/******************************************************************************/
-/*                             Copy Constructor                               */
-/******************************************************************************/
-
-Cgi::Cgi(Cgi const & src)
-{
-	//std::cout << "Cgi copy constructor called" << std::endl;
-	*this = src;
-}
-
-/******************************************************************************/
-/*                      Copy Assignment Operator Overload                     */
-/******************************************************************************/
-
-Cgi &	Cgi::operator=(Cgi const & rhs)
-{
-	//std::cout << "Cgi Copy assignment operator called" << std::endl;
-	if (this != &rhs)
-	{
-	}
-	return (*this);
-}
-
 extern volatile sig_atomic_t flag;
 
-// int	Cgi::getPid()
-// {
-// 	return (_pid);
-// }
+//==========================================================================//
+// STATIC ATTRIBUTES/METHODS================================================//
+//==========================================================================//
 
-
-/*
- * RFC 3875 - Common Gateway Protocol
- 
-	* The server receives the request from the client
-	
-	* selects a CGI script to handle the request
-	
-	* converts the client request to a CGI request
-	
-	* executes the script
-	
-	* converts the CGI response into a response for the client
-	
-	* When processing the client request, it is responsible for implementing
-	any protocol or transport level authentication and security. 
-
-	The server MUST perform translations and protocol conversions on the
-	client request data required by this specification.
-
-	* Furthermore, the server retains its responsibility to the client
-	to conform to the relevant network protocol even if the CGI script
-	fails to conform to this specification.
-*/
-
-// Because you won’t call the CGI directly, use the full path as PATH_INFO.
-// if no header or incomplete header, create header
-// finish alls meta-variables
-
-std::string operatingSystem()
+static std::string operatingSystem()
 {
     #ifdef _WIN32
     return "Windows 32-bit";
@@ -110,6 +37,34 @@ std::string operatingSystem()
     return "unknown OS";
     #endif
 }  
+
+static std::string	getScriptLocation(char* str)
+{
+	std::string tmp = str;
+	std::string scriptLocation = "";
+	size_t pos = tmp.rfind("/");
+	if (pos != std::string::npos)
+		scriptLocation = tmp.substr(0, pos);
+	return (scriptLocation);
+}
+
+static void	closeSockets(int* s1, int* s2)
+{
+	if (s1)
+	{
+		close(s1[0]);
+		close(s1[1]);
+	}
+	if (s2)
+	{
+		close(s2[0]);
+		close(s2[1]);
+	}
+}
+
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 std::string	Cgi::_getInterpreterPath(Client& client, std::string suffix)
 {
@@ -214,16 +169,6 @@ bool	Cgi::_checkScriptAbsPath(Client& client, std::vector<std::string>& argsVec)
 	return (true);
 }
 
-static std::string	getScriptLocation(char* str)
-{
-	std::string tmp = str;
-	std::string scriptLocation = "";
-	size_t pos = tmp.rfind("/");
-	if (pos != std::string::npos)
-		scriptLocation = tmp.substr(0, pos);
-	return (scriptLocation);
-}
-
 void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, char** args)
 {
 	RequestHeader* requestHeader = (static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader()));
@@ -304,6 +249,7 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	line += requestHeader->getRequestLine().requestMethod;
 	envVec.push_back(line);
 
+	//TODO: right now this contains the PATH_INFO subfolders
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
 	line = "SCRIPT_NAME="; 
@@ -411,41 +357,6 @@ int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFrom
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
-/*
-void	Cgi::terminateChild()
-{
-	_terminate = true;	
-}
-
-void	Cgi::_timeoutKillChild()
-{
-	if (_sentSigkill)
-		return ;
-	double diff = (static_cast<double>(std::clock() - _shutdownStart) * 1000) / CLOCKS_PER_SEC;
-	if (_shutdownStart && diff > MAX_TIMEOUT / 2) 
-	{	
-		Logger::error("killing child process with PID: ", _pid);
-		kill(_pid, SIGKILL);
-		_sentSigkill = true;
-	}
-}
-
-void	Cgi::_handleChildTimeout(Client& client)
-{
-	// send SIGTERM to child on Timeout OR on Shutdown of Server due to pressing CTRL+C
-	if ((!client.checkTimeout() && !sentSigterm) || _terminate)
-	{
-		_shutdownStart = std::clock();
-		_terminate = false;
-		sentSigterm = true;
-		Logger::warning("calling SIGTERM on child process: ", _pid);
-		kill(_pid, SIGTERM);
-	}
-	// if SIGTERM not successful send SIGKILL after MAX_TIMEOUT / 2
-	_timeoutKillChild();
-}
-*/
-
 void	Cgi::_handleReturnStatus(int status, Client& client)
 {
 		if (WIFSIGNALED(status))
@@ -472,27 +383,8 @@ void	Cgi::_waitForChild(Client& client)
 	if (client.getWaitReturn() > 0)
 		return ;
 
-	// send SIGINT or even SIGKILL to child on timeout or CTRL+C
-	// if (client.checkTimeout() == false || flag > 0)
-	// {
-	// 	Logger::error("sending sig TERM to child", "");
-	// 	kill(client.getChildPid(), SIGTERM);
-	// }
-	//
-	// // if (client.checkTimeout(MAX_TIMEOUT * 1.5) == false)
-	// if (client.checkTimeout(15000) == false)
-	// {
-	// 	Logger::error("sending sig KILL to child", "");
-	// 	kill(client.getChildPid(), SIGKILL);
-	// }
-
 	// WAITPID
-	// client.setWaitReturn(waitpid(_pid, &status, 0));
 	client.setWaitReturn(waitpid(client.getChildPid(), &status, WNOHANG));
-
-	// if (client.getWaitReturn() != 0)
-	// 	Logger::error("waitpid, caught return ", client.getChildPid());
-
 
 	// waitpid fail
 	if (client.getWaitReturn() == -1)
@@ -510,7 +402,7 @@ void	Cgi::_waitForChild(Client& client)
 
 void	Cgi::_stopCgiSetErrorCode(Client& client)
 {
-	Logger::error("stopping CGI with ID: ", client.getId());
+	Logger::warning("stopping CGI loop for Client with ID: ", client.getId());
 	if (client.getErrorCode() == 0)
 		client.setErrorCode(500);
 	client.setClientState(Client::DO_RESPONSE);
@@ -525,10 +417,14 @@ void	Cgi::_stopCgiSetErrorCode(Client& client)
 
 bool	Cgi::_createSockets(int* socketsToChild, int* socketsFromChild)
 {
+	(void)socketsFromChild;
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsToChild) < 0)
 		return (false);
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsFromChild) < 0)
+	{
+		closeSockets(socketsToChild, NULL);
 		return (false);
+	}
 	return (true);
 }
 
@@ -578,19 +474,26 @@ char**	Cgi::_metaVariables(Client& client, char** args)
 	return (toReturn);
 }
 
-void Cgi::_cgiClient(Client& client)
+static bool	isAllowedCgi(Client& client)
 {
-	// RETURN OUT OF THIS FUNCTION IF RUNNING CGI IS NOT NECESSARY
+	// NOT: SEND TO CGI OR RECEIVE FROM CGI OR REACHED TIMEOUT WHILE RUNNING CGI
 	if (!((client.getClientState() == Client::DO_CGIREC
 		|| client.getClientState() == Client::DO_CGISEND)
 		|| (client.checkTimeout() == false && client.getCgiFlag() == true)))
-		// && client.getClientState() != Client::DO_RESPONSE)
 	{
-		return ;
+		return (false);
 	}
-	if (client.getWaitReturn() != 0)
-		return ;
 
+	// CHILD PROCESS HAS FINISHED RUNNING -> NO NEED TO RUN CGI LOOP
+	if (client.getWaitReturn() != 0)
+		return (false);
+	return (true);
+}
+
+void Cgi::_cgiClient(Client& client)
+{
+	if (isAllowedCgi(client) == false)
+		return ;
 	// CREATE CHILD SOCKETS AND FORK ONCE
 	if (client.getClientFds().size() == 1)
 	{
@@ -605,39 +508,36 @@ void Cgi::_cgiClient(Client& client)
 			_deleteChararr(args);
 			return ;
 		}
-
-
-		// creates two socketpairs in order to communicate with child process
+		// CREATES TWO SOCKETPAIRS IN ORDER TO COMMUNICATE WITH CHILD PROCESS
 		if(!_createSockets(socketsToChild, socketsFromChild))
 		{
+			_deleteChararr(args);
+			_deleteChararr(env);
 			_stopCgiSetErrorCode(client);
 			return ;
 		}
-
 		// FORK!!
 		client.setChildPid(fork());
 		if (client.getChildPid() == -1)
 		{
+			closeSockets(socketsToChild, socketsFromChild);
+			_deleteChararr(args);
+			_deleteChararr(env);
 			_stopCgiSetErrorCode(client);
 			return ;
 		}
-
 		// RUN CHILD PROCESS
 		if (client.getChildPid() == CHILD)
 		{
 			signal(SIGINT, SIG_IGN);
 			_execute(args, env, socketsToChild, socketsFromChild);
 		}
-
-		// TODO: take care of deleting this in client
-		// _deleteChararr(_tmp);
+		// FREE ALLOCATED CHAR ARRAYS
 		_deleteChararr(args);
 		_deleteChararr(env);
-
-		//closing unused sockets and adding relevant sockets to epoll
+		//CLOSING UNUSED SOCKETS AND ADDING RELEVANT SOCKETS TO EPOLL
 		_prepareSockets(client, socketsToChild, socketsFromChild);
 	}
-
 	// RUN WAIT FOR CHILD
 	_waitForChild(client);
 	return ;
@@ -649,3 +549,42 @@ void Cgi::loop()
 	for (; it != Client::clients.end(); ++it)
 		_cgiClient(*(it->second));
 }
+
+//==========================================================================//
+// Constructor, Destructor and OCF Parts ===================================//
+//==========================================================================//
+
+Cgi::Cgi ()
+{
+	_tmp = NULL;
+	// Logger::info("Cgi constructor called", "");
+}
+
+Cgi::~Cgi (void)
+{
+	_deleteChararr(_tmp);
+	// Logger::info("Cgi destructor called", "");
+}
+
+Cgi::Cgi(Cgi const & src)
+{
+	//std::cout << "Cgi copy constructor called" << std::endl;
+	*this = src;
+}
+
+Cgi &	Cgi::operator=(Cgi const & rhs)
+{
+	//std::cout << "Cgi Copy assignment operator called" << std::endl;
+	if (this != &rhs)
+	{
+	}
+	return (*this);
+}
+
+//==========================================================================//
+// NOTES====================================================================//
+//==========================================================================//
+
+// Because you won’t call the CGI directly, use the full path as PATH_INFO.
+// if no header or incomplete header, create header
+// finish alls meta-variables
