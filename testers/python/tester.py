@@ -26,6 +26,30 @@ class TestMyWebServer(unittest.TestCase):
 		return response
 	
 	@staticmethod
+	def send_post(url, file_path):
+
+		with open(file_path, 'rb') as pdf_file:
+		# Use the files parameter to send the file
+			files = {
+				'file': (file_path, pdf_file, 'application/pdf')
+			}
+			start = time.time()
+			response = requests.post(url, files=files)
+			end = time.time()
+		miliseconds = round((end - start) * 1000, 3)
+		print("Response took: {0} milliseconds(ms)".format(miliseconds))
+		return response
+	
+	@staticmethod
+	def send_delete(url):
+		start = time.time()
+		response = requests.delete(url)
+		end = time.time()
+		miliseconds = round((end - start) * 1000, 3)
+		print("Response took: {0} milliseconds(ms)".format(miliseconds))
+		return response
+	
+	@staticmethod
 	def cgi_prompt():
 		question = Colors.color_text("Do you want to run cgi tester. Some test cases take 15 seconds because of timeout. \n\t 1 - Yes \n\t 2 - No\nAnswer: ", Colors.BOLD)
 		answer = input(question)
@@ -109,6 +133,15 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("You have been redirected!", response.text)
 		response = TestMyWebServer.send_get("http://localhost:9090/redirectMeWrong/", allow_redirects=True)
 		self.assertEqual(response.status_code, 404)
+		Colors.test_passed()
+
+	def test_post(self):
+		TestMyWebServer.print_test_title("Testing post request")
+		response = TestMyWebServer.send_post("http://localhost:9090/upload/?file.pdf", "subject.pdf")
+		self.assertEqual(response.status_code, 201)
+		TestMyWebServer.print_test_title("Testing delete request")
+		response = TestMyWebServer.send_delete("http://localhost:9090/upload/uploadFolder/file.pdf")
+		self.assertEqual(response.status_code, 204)
 		Colors.test_passed()
 
 	def test_url_decode(self):
