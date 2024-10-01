@@ -16,6 +16,10 @@ function handleFormSubmission() {
 	// Get the text from the input field
 	const text = textInput.value;
 
+	// Clear input field right after the form is submitted and reset char counter
+	textInput.value = '';
+	charCount.textContent = '0';
+
 	// Send the POST request using fetch
 	fetch(`/uploads/`, {  // Update this path to match your server's POST endpoint
 		method: 'POST',
