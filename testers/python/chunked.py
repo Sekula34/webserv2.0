@@ -2,14 +2,14 @@ import http.client
 
 # Define the server and endpoint
 host = "localhost"
-port = 7171
+port = 9090
 endpoint = "/"
 
 # Create the connection with the specified port
 conn = http.client.HTTPConnection(host, port)
 
 # Start the request
-conn.putrequest("POST", endpoint)
+conn.putrequest("GET", endpoint)
 conn.putheader("Host", host)
 conn.putheader("Transfer-Encoding", "chunked")
 conn.putheader("Content-Type", "text/plain")
