@@ -380,7 +380,7 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
     errorPagePath = server.getErrorPagePath(errorCode); //TODO: check extenstion of page path and set it accordingly .css CSS, .html HTML
     if(errorPagePath != "")
     {
-        Logger::info("Server have that page and path to it is ", errorPagePath);
+        Logger::info("Server have that error page and path to it is ", errorPagePath);
         bool success = FileUtils::putFileInString(errorPagePath, errorHtml);
         if(success == true)
             _httpStatus = errorCode;

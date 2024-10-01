@@ -135,7 +135,7 @@ void ServerManager::loop()
 			}
 			else  
 			{
-				Logger::warning("No cgi will be executed ", client.getErrorCode());
+				Logger::warning("No cgi will be executed, client error: ", client.getErrorCode());
 				client.setClientState(Client::DO_RESPONSE);
 			}
 			//change state
