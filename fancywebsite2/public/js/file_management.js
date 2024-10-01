@@ -148,7 +148,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		attachDeleteEventListeners();  // Reattach event listeners to new buttons
 	}
 
-	// TODO: Debugging this function
 	// Handle file upload
 	// uploadForm.addEventListener('submit', function (event) {
 	// 	event.preventDefault();
@@ -190,13 +189,13 @@ document.addEventListener("DOMContentLoaded", function () {
 		.then(response => {
 			if (response.status === 201) {  // Check if the server returned 201 Created
 				console.log(`File ${file.name} uploaded successfully.`);
-				fileInput.value = '';  // Clear the file input field after upload
 				updateFileListClientSide(file.name);  // Update the file list client-side
 			} else {
 				console.error(`Failed to upload file. Server responded with status: ${response.status}`);
 			}
 		})
 		.catch(error => console.error('Error uploading file:', error));
+		fileInput.value = '';  // Clear the file input field after upload
 	});
 
 	function removeFileFromList(fileName) {

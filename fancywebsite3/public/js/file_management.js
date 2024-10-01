@@ -148,30 +148,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		attachDeleteEventListeners();  // Reattach event listeners to new buttons
 	}
 
-	// TODO: Debugging this function
-	// Handle file upload
-	// uploadForm.addEventListener('submit', function (event) {
-	// 	event.preventDefault();
-	// 	const file = fileInput.files[0];
-	// 	if (!file) {
-	// 		console.error('No file selected.');
-	// 		return;
-	// 	}
-	// 	fetch(`/uploads/?${encodeURIComponent(file.name)}`, {  // Send the filename in the query string
-	// 		method: 'POST',
-	// 		body: file,  // Send the file directly as binary data
-	// 		headers: {
-	// 			'Content-Type': 'application/octet-stream'  // Specify that we're sending binary data
-	// 		}
-	// 	})
-	// 	.then(() => {
-	// 		console.log(`File ${file.name} uploaded successfully.`);// alert('File uploaded successfully!');
-	// 		fileInput.value = ''; // Clear the file input field after upload
-	// 		updateFileListClientSide(file.name);  // Update the file list client-side
-	// 	})
-	// 	.catch(error => console.error('Error uploading file:', error));
-	// });
-
 	// Handle file upload
 	uploadForm.addEventListener('submit', function (event) {
 		event.preventDefault();
@@ -187,18 +163,14 @@ document.addEventListener("DOMContentLoaded", function () {
 				'Content-Type': 'application/octet-stream'  // Specify that we're sending binary data
 			}
 		})
-		.then(response => {
-			if (response.status === 201) {  // Check if the server returned 201 Created
-				console.log(`File ${file.name} uploaded successfully.`);
-				fileInput.value = '';  // Clear the file input field after upload
-				updateFileListClientSide(file.name);  // Update the file list client-side
-			} else {
-				console.error(`Failed to upload file. Server responded with status: ${response.status}`);
-			}
+		.then(() => {
+			console.log(`File ${file.name} uploaded successfully.`);// alert('File uploaded successfully!');
+			fileInput.value = ''; // Clear the file input field after upload
+			updateFileListClientSide(file.name);  // Update the file list client-side
 		})
 		.catch(error => console.error('Error uploading file:', error));
 	});
-
+	
 	function removeFileFromList(fileName) {
 		const fileList = document.getElementById('fileList');
 		const fileItem = fileList.querySelector(`[data-file="${fileName}"]`).parentElement;
