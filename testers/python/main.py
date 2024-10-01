@@ -5,7 +5,7 @@ from colors import Colors
 
 
 def tester_intro():
-	text = Colors.color_text("Testers is about to run, make sure webserver is running", Colors.HEADER)
+	text = Colors.color_text("Testers is about to run, make sure webserver is running with correct Config file [configuration_files/valid/pythonTester.conf]", Colors.HEADER)
 	print(text)
 	inputText = Colors.color_text("Press Enter to Continue ", Colors.BOLD)
 	input(inputText)
