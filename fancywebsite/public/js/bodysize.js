@@ -14,13 +14,15 @@ textInput.addEventListener('input', updateCharCount);
 // Function to handle the form submission
 function handleFormSubmission() {
 	// Get the text from the input field
-	const formData = new FormData();
-	formData.append('text', textInput.value);
+	const text = textInput.value;
 
 	// Send the POST request using fetch
-	fetch('../../cgi-bin/save_text.cgi', {
+	fetch(`/uploads/`, {  // Update this path to match your server's POST endpoint
 		method: 'POST',
-		body: formData
+		headers: {
+			'Content-Type': 'text/plain',  // Sending plain text data
+		},
+		body: text  // Send the text data directly as the request body
 	})
 	.then(response => {
 		if (response.ok) {
