@@ -17,9 +17,9 @@ class TestMyWebServer(unittest.TestCase):
 		print(title)
 
 	@staticmethod
-	def send_get(url):
+	def send_get(url, allow_redirects = True):
 		start = time.time()
-		response = requests.get(url)
+		response = requests.get(url, allow_redirects=allow_redirects)
 		end = time.time()
 		miliseconds = round((end - start) * 1000, 3)
 		print("Response took: {0} milliseconds(ms)".format(miliseconds))
@@ -98,6 +98,17 @@ class TestMyWebServer(unittest.TestCase):
 		response = TestMyWebServer.send_get("http://localhost:9090/autoindexBlocked/")
 		self.assertEqual(response.status_code, 404)
 		self.assertIn("404", response.text)
+		Colors.test_passed()
+
+	def test_redirection(self):
+		TestMyWebServer.print_test_title("Testing redirection")
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMe/", allow_redirects=False)
+		self.assertEqual(response.status_code, 302)
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMe/", allow_redirects=True)
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("You have been redirected!", response.text)
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMeWrong/", allow_redirects=True)
+		self.assertEqual(response.status_code, 404)
 		Colors.test_passed()
 
 	def test_url_decode(self):
