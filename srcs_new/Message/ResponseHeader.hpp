@@ -29,6 +29,7 @@ class ResponseHeader : public AHeader
 		std::string turnResponseHeaderToString(void) const;
 		static ResponseHeader* createCgiResponseHeader(std::string cgiResponse, int& clientError, std::string cgiHeaderFieldDelimiter = "\n", std::string cgiHeaderDelimiter = "\n\n");
 		static ResponseHeader* createRgResponseHeader(const ResponseGenerator& rg);
+		static void	cgiToHttpConversion(ResponseHeader* toReturn);
 		
 		void changeHttpCode(int newHttpCode);
 

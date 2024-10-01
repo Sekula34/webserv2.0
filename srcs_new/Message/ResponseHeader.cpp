@@ -1,5 +1,6 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
+#include "../Utils/Logger.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "AHeader.hpp"
 #include <cstddef>
@@ -67,34 +68,26 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 	return fullHeader;
 }
 
-ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
+static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, const std::string& cgiHeaderFieldDelimiter, const std::string& cgiHeaderDelimiter, int& clientError)
 {
-	// Logger::error("client ERR: ", clientError);
-	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
-	std::string aHeaderString = "\r\n\r\n";
-	ResponseHeader* toReturn = NULL;
+	size_t pos = cgiHeaderStr.find(cgiHeaderDelimiter);
 	if (pos != std::string::npos)
 	{
-		cgiResponse.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
+		cgiHeaderStr.replace(pos, cgiHeaderDelimiter.size(), cgiHeaderFieldDelimiter);
 		std::string toReplace = cgiHeaderFieldDelimiter;
 		std::string httpDelimiter = "\r\n";
-		// Logger::error("cgiResponse: ", cgiResponse);
+		// Logger::error("cgiHeaderStr: ", cgiHeaderStr);
 		// Logger::chars(toReplace, true);
 		// Logger::chars(httpDelimiter, true);
-		aHeaderString = ParsingUtils::replaceAllCharsInString(cgiResponse, toReplace, httpDelimiter);
-		toReturn = new ResponseHeader(aHeaderString, clientError);
-		// Logger::chars(aHeaderString, true);
+		std::string aHeaderStr = ParsingUtils::replaceAllCharsInString(cgiHeaderStr, toReplace, httpDelimiter);
+		return (new ResponseHeader(aHeaderStr, clientError));
+		// Logger::chars(aHeaderStr, true);
 	}
-	else
-		toReturn = new ResponseHeader(aHeaderString, clientError);
+	return (NULL);
+}
 
-	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
-	{
-		// if one server gets invalid response for another -> bad getaway 502
-		if (toReturn)
-			toReturn->p_setHttpStatusCode(502);
-		return toReturn;
-	}
+void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
+{
 	if(toReturn->_cgiStatusLine() == true)
 	{
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
@@ -103,8 +96,25 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 		//FIXME: newHttpCode is http code from CGI, WHAT SHOULD WE DOO if cgi for example provide 600? correct it ? 400 /500/502?
 		toReturn->changeHttpCode(newHttpCode);
 		toReturn->m_headerFields.erase(it);
-
 	}
+}
+
+ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiHeaderStr, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
+{	
+	ResponseHeader* toReturn = NULL;
+	// REPLACE CGI HEADER FIELD DELIMITERS AND CGI HEADER DELIMITERS WITH HTTP DELIMITERS
+	toReturn = cgiDelimitersToHttpDelimiters(cgiHeaderStr, cgiHeaderFieldDelimiter, cgiHeaderDelimiter, clientError);
+
+	// IF THE CGI HEADER HAS NO CGI DELIMITER, CREATE AN EMPTY HEADER AND SET THE ERR CODE
+	if (!toReturn)
+		toReturn = new ResponseHeader("\r\n\r\n", clientError);
+
+	// IF ONE SERVER GETS INVALID RESPONSE FROM ANOTHER -> BAD GETAWAY 502
+	if(toReturn->getHttpStatusCode() != 0)
+		toReturn->p_setHttpStatusCode(502);
+
+	// CONVERT CGI'S HEADER FIELDS INTO HTTP HEADER FIELDS
+	cgiToHttpConversion(toReturn);
 	return toReturn;
 }
 

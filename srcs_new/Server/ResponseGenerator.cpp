@@ -34,7 +34,7 @@ void ResponseGenerator::generateClientResponse(Client &client)
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
 
-	// WE ARE GENERATING OUT RESPONSE IF
+	// WE ARE GENERATING OUR RESPONSE IF
 	// WE DID NOT RUN CGI OR THERE WAS AN ERR ALREADY OR THE CLIENT IS PAST THE TIMEOUT
     if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
     {   
