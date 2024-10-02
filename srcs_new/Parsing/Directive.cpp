@@ -13,6 +13,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
 #include "../Utils/FileUtils.hpp"
+#include "Configuration.hpp"
 
 const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root", "upload_folder"};
 
@@ -135,12 +136,13 @@ void Directive::apply(DefaultSettings& settings)
 }
 Directive::Directive()
 {
-
+	
 }
 Directive::Directive(std::string dirName, std::string dirValue)
 {
 	_directiveName = dirName;
 	_directiveValue = dirValue;
+	
 }
 
 Directive::Directive(const Token& token)
@@ -150,6 +152,7 @@ Directive::Directive(const Token& token)
 	_dirLineNumber = token.getTokenLineNumber();
 	_directiveValue = _getValueFromToken(token); 
 	_dirPath = token.getTokenPath();
+
 }
 
 Directive& Directive::operator=(const Directive& source)
@@ -298,10 +301,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 }
 
 
-void Directive::_applyServerName(DefaultSettings& settings)
-{
-	settings.setServerName(_directiveValue);
-}
 
 void Directive::_apllyRoot(DefaultSettings& settings)
 {
@@ -419,16 +418,53 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 	settings.setErrorPage(codeNumber, erorrPagePath);
 }
 
+
+
+void Directive::_applyServerName(DefaultSettings& settings)
+{
+	if(settings.getFirstNameApply() == true)
+	{
+		settings.setNameFlagFalse();
+		settings.removeDefaultName();
+	}
+	if(settings.isContainingName(_directiveValue) == true)
+	{
+		std::ostringstream oss;
+		oss << "[" << getDirectiveName() << "]" << " conflicting server name [" << _directiveValue << "] " << FileUtils::getConfigFilePath() << ":";
+		oss << getDirectiveLineNum() << " ignored";
+		Logger::warning(oss.str(), true);
+		return;
+	}
+	settings.addServerName(_directiveValue);
+}
+
+void Directive::_applyListenFirstTime(DefaultSettings& settings)
+{
+	if(settings.getFirstListenApplyFlag() == false)
+		return;
+	settings.setListenFlagFalse();
+	settings.removeDefaultListen();
+}
+
 //set settings listen port
 void Directive::_applyListen(DefaultSettings& settings)
 {
+	_applyListenFirstTime(settings);
 	int portNumber = _stringToInt(_directiveValue);
 	if(portNumber < 0 || portNumber > 65535)
 	{
 		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
 		throw InvalidDirectiveException();
 	}
-	settings.setListenPort(portNumber);
+	if(settings.isListeningToPort(portNumber) == true)
+	{
+		std::ostringstream oss;
+		oss << "[" << getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
+		oss << getDirectiveLineNum();
+		Logger::error(oss.str(), true);
+		throw Configuration::InvalidConfigFileException();
+	}
+	settings.addListenPort(portNumber);
 }
 
 //set all accepted http methods to false 

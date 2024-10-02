@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include "../Utils/Logger.hpp"
-#include "../Utils/FileUtils.hpp"
 
 
 
@@ -20,29 +19,6 @@ const std::vector<Directive>& LocationSettings::getLocationDirectives(void) cons
 const std::string& LocationSettings::getLocationUri() const 
 {
 	return(_uri);
-}
-
-
-bool LocationSettings::setIndexPagePath(std::string& pathToIndex) const
-{
-	pathToIndex.erase();
-	for(size_t i = 0; i < p_index.size(); i++)
-	{
-		std::string path = this->p_root + "/" + p_index[i];
-		Logger::info("path is ", path);
-		bool found = FileUtils::isPathValid(path);
-		if(found == true)
-		{
-			Logger::info("File found", "");
-			pathToIndex = path;
-			return true;
-		}
-		else
-		{
-			Logger::warning("File is not found", "");
-		}
-	}
-	return false;
 }
 
 bool LocationSettings::isCgiLocation(void) const

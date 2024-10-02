@@ -9,6 +9,8 @@
 #include <ostream>
 #include <vector>
 #include "../Utils/Logger.hpp"
+#include "../Utils/FileUtils.hpp"
+#include "../Parsing/Configuration.hpp"
 
 VirtualServer::VirtualServer()
 {
@@ -22,7 +24,7 @@ VirtualServer::VirtualServer(int serverId, DefaultSettings& setings, std::vector
 	_serverDirectives = Directive::getAllServerDirectives(_serverTokens);
 	checkDuplicateDirectives(_getServerLevelDirectives());
 	_applyAllServerLevelDirectives();
-	_serverLocations = _setServerLocations();
+	_setServerLocations();
 }
 VirtualServer::VirtualServer(const VirtualServer& source)
 : DefaultSettings(source), _serverId(source._serverId)
@@ -99,6 +101,7 @@ std::vector<LocationSettings>::const_iterator VirtualServer::fetchLocationWithUr
 	return (it);
 }
 
+
 const std::vector<Directive> VirtualServer::_getServerLevelDirectives() const
 {
 	std::vector<Directive> serverLevelDirectives;
@@ -112,20 +115,33 @@ const std::vector<Directive> VirtualServer::_getServerLevelDirectives() const
 }
 
 //set and apply all location directives and the same time
-std::vector<LocationSettings> VirtualServer::_setServerLocations()
+void VirtualServer::_setServerLocations()
 {
-	std::vector<LocationSettings> serverLocations;
 	for(size_t i = 0; i < _serverTokens.size(); i++)
 	{
 		if(_serverTokens[i].getCurrentTokenContextType() == Token::LOCATION)
 		{
 			LocationSettings location(*this, _serverTokens[i], _serverTokens);
-			serverLocations.push_back(location);
+			_duplicateLocationCheck(location);
+			_serverLocations.push_back(location);
 		}
 	}
-	if(_hasDefaultLocation(serverLocations) == false)
-		_generateDefaultLocation(serverLocations);
-	return serverLocations;
+	if(_hasDefaultLocation(_serverLocations) == false)
+		_generateDefaultLocation(_serverLocations);
+}
+
+void VirtualServer::_duplicateLocationCheck(const LocationSettings& location) const
+{
+	const std::string& locationUri = location.getLocationUri();
+	bool found = false;
+	fetchLocationWithUri(locationUri, found);
+	if(found == false)
+		return;
+	std::ostringstream oss;
+	oss << "In Server :" << _serverId;
+	oss << " Location [" << locationUri << "] is duplicate in " << FileUtils::getConfigFilePath();
+	Logger::error(oss.str(), "");
+	throw Configuration::InvalidConfigFileException();
 }
 
 bool VirtualServer::_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const
@@ -163,8 +179,8 @@ std::ostream& operator<<(std::ostream& os, const VirtualServer& server)
 	std::string title = Logger::createFancyTitle("Server Settings print");
 	os << title << std::endl;
 	os << "Server id: " << server.getServerId() << std::endl;
-	os << "Server name: " << server.getServerName() << std::endl;
-	os << "Server port: " << server.getPort() << std::endl;
+	os << Logger::logVector(server.getServerName(), "Server names").str();
+	os << Logger::logVector(server.getPorts(), "Server Listen Ports").str();
 	os << Logger::logVector(locationsUri, "Locations Uri").str();
 	os << static_cast<DefaultSettings>(server) << std::endl;
 	os << Logger::getCharSequence(title.size(), '-')<<std::endl;

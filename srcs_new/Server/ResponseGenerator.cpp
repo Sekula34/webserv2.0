@@ -385,7 +385,10 @@ std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
         if(success == true)
             _httpStatus = errorCode;
         else
-            errorHtml = _generateErrorPage(500);
+		{
+            errorHtml = _generateErrorPage(errorCode);
+			_httpStatus = errorCode;
+		}
     }
     else 
     {

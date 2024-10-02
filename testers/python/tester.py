@@ -17,9 +17,33 @@ class TestMyWebServer(unittest.TestCase):
 		print(title)
 
 	@staticmethod
-	def send_get(url):
+	def send_get(url, allow_redirects = True):
 		start = time.time()
-		response = requests.get(url)
+		response = requests.get(url, allow_redirects=allow_redirects)
+		end = time.time()
+		miliseconds = round((end - start) * 1000, 3)
+		print("Response took: {0} milliseconds(ms)".format(miliseconds))
+		return response
+	
+	@staticmethod
+	def send_post(url, file_path):
+
+		with open(file_path, 'rb') as pdf_file:
+		# Use the files parameter to send the file
+			files = {
+				'file': (file_path, pdf_file, 'application/pdf')
+			}
+			start = time.time()
+			response = requests.post(url, files=files)
+			end = time.time()
+		miliseconds = round((end - start) * 1000, 3)
+		print("Response took: {0} milliseconds(ms)".format(miliseconds))
+		return response
+	
+	@staticmethod
+	def send_delete(url):
+		start = time.time()
+		response = requests.delete(url)
 		end = time.time()
 		miliseconds = round((end - start) * 1000, 3)
 		print("Response took: {0} milliseconds(ms)".format(miliseconds))
@@ -64,45 +88,65 @@ class TestMyWebServer(unittest.TestCase):
 	
 	def test_other_file(self):
 		TestMyWebServer.print_test_title("Files that are not part of location")
-		respones = TestMyWebServer.send_get("http://localhost:8080/hej/Socket.cpp")
+		respones = TestMyWebServer.send_get("http://localhost:9090/secondSite.html")
 		self.assertEqual(respones.status_code, 200)
-		self.assertIn("Socket", respones.text)
-		respones = TestMyWebServer.send_get("http://localhost:8080/hej/Socket.hpp")
+		self.assertIn("Second Site", respones.text)
+		respones = TestMyWebServer.send_get("http://localhost:9090/subfolder/thirdSite.html")
 		self.assertEqual(respones.status_code, 200)
-		self.assertIn("Socket", respones.text)
+		self.assertIn("Third Site", respones.text)
 		Colors.test_passed()
 
 	def test_autoindex(self):
 		TestMyWebServer.print_test_title("Testing autoindex")
-		response = TestMyWebServer.send_get("http://localhost:8080/autoindex/")
+		response = TestMyWebServer.send_get("http://localhost:9090/autoindex/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("Auto index of folder:", response.text)
 		Colors.test_passed()
 
 	def test_autoindexSubfolder(self):
 		TestMyWebServer.print_test_title("Testing autoindex subfolder")
-		response = TestMyWebServer.send_get("http://localhost:8080/autoindex/subfolder/")
+		response = TestMyWebServer.send_get("http://localhost:9090/autoindex/subfolder/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("Auto index of folder:", response.text)
 		Colors.test_passed()
 
 	def test_autoindexThatHaveIndex(self):
 		TestMyWebServer.print_test_title("Testing autoindex that have landing page")
-		response = TestMyWebServer.send_get("http://localhost:8080/hej/")
+		response = TestMyWebServer.send_get("http://localhost:9090/autoindexPage/")
 		self.assertEqual(response.status_code, 200)
-		self.assertIn("Socket.hpp", response.text)
+		self.assertIn("No auto index here", response.text)
 		Colors.test_passed()
 
 	def test_autoindexBlocked(self):
 		TestMyWebServer.print_test_title("Testing autoindex that is blocked")
-		response = TestMyWebServer.send_get("http://localhost:8080/autoindexBlocked/")
+		response = TestMyWebServer.send_get("http://localhost:9090/autoindexBlocked/")
 		self.assertEqual(response.status_code, 404)
 		self.assertIn("404", response.text)
 		Colors.test_passed()
 
+	def test_redirection(self):
+		TestMyWebServer.print_test_title("Testing redirection")
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMe/", allow_redirects=False)
+		self.assertEqual(response.status_code, 302)
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMe/", allow_redirects=True)
+		self.assertEqual(response.status_code, 200)
+		self.assertIn("You have been redirected!", response.text)
+		response = TestMyWebServer.send_get("http://localhost:9090/redirectMeWrong/", allow_redirects=True)
+		self.assertEqual(response.status_code, 404)
+		Colors.test_passed()
+
+	def test_post(self):
+		TestMyWebServer.print_test_title("Testing post request")
+		response = TestMyWebServer.send_post("http://localhost:9090/upload/?file.pdf", "subject.pdf")
+		self.assertEqual(response.status_code, 201)
+		TestMyWebServer.print_test_title("Testing delete request")
+		response = TestMyWebServer.send_delete("http://localhost:9090/upload/uploadFolder/file.pdf")
+		self.assertEqual(response.status_code, 204)
+		Colors.test_passed()
+
 	def test_url_decode(self):
 		TestMyWebServer.print_test_title("Testing url decoding")
-		response = TestMyWebServer.send_get("http://localhost:8080/autoindex/subfolder/frontend/fancy%20space%20.html")
+		response = TestMyWebServer.send_get("http://localhost:9090/fancy%20space%20.html")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("space in file name", response.text)
 		Colors.test_passed()
@@ -110,6 +154,12 @@ class TestMyWebServer(unittest.TestCase):
 	def test_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+	
+	def test_disguise_port(self):
+		TestMyWebServer.print_test_title("Testing disguise port")
+		response = CustomRequst.disguise_port()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 	

@@ -1,4 +1,5 @@
 #include "DefaultSettings.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -10,6 +11,44 @@
 #include "../Utils/Logger.hpp"
 #include "../Parsing/Configuration.hpp"
 
+
+const bool& DefaultSettings::getFirstListenApplyFlag() const
+{
+	return (p_firstListenApply);
+}
+
+const bool& DefaultSettings::getFirstNameApply() const 
+{
+	return (p_firstNameApply);
+}
+
+void DefaultSettings::setListenFlagFalse() 
+{
+	p_firstListenApply = false;
+}
+
+void DefaultSettings::setNameFlagFalse()
+{
+	p_firstNameApply = false;
+}
+
+bool DefaultSettings::isListeningToPort(const int& portToCheck) const
+{
+	const std::vector<int>& serverPorts(getPorts());
+	std::vector<int>::const_iterator it = std::find(serverPorts.begin(), serverPorts.end(), portToCheck);
+	if(it == serverPorts.end())
+		return false;
+	return true;
+}
+
+bool DefaultSettings::isContainingName(const std::string& nameToCheck) const 
+{
+	const std::vector<std::string>& serverNames(getServerName());
+	std::vector<std::string>::const_iterator it = std::find(serverNames.begin(), serverNames.end(), nameToCheck);
+	if(it == serverNames.end())
+		return false;
+	return true;
+}
 
 bool DefaultSettings::isMethodAllowed(std::string method) const
 {
@@ -51,15 +90,32 @@ void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dir
 		throw Configuration::InvalidConfigFileException();
 	}
 }
+
+void DefaultSettings::removeDefaultListen()
+{
+	const int listenPort = DEFAULT_LISTEN_PORT;
+	std::vector<int>::iterator it = std::find(p_listenPort.begin(), p_listenPort.end(), listenPort);
+	if(it != p_listenPort.end())
+		p_listenPort.erase(it);
+}
+
+void DefaultSettings::removeDefaultName()
+{
+	const std::string& serverName = DEFAULT_SERVER_NAME;
+	std::vector<std::string>::iterator it = std::find(p_serverName.begin(), p_serverName.end(), serverName);
+	if(it != p_serverName.end())
+		p_serverName.erase(it);
+}
 DefaultSettings::DefaultSettings()
 {
-	p_serverName = "[Default Server Name]";
-	p_listenPort = 8080;
+	p_serverName.push_back(DEFAULT_SERVER_NAME);
+	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
+	p_firstListenApply = true;
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
-	p_clientMaxBody = 1000000;
+	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
 	p_autoindex = false;
-	p_root = "/";
+	p_root = "/"; //TODO fix later
 	p_uploadFolder = "Uploads";//TODO: check if this folder exist
 }
 
@@ -72,6 +128,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 {
 	p_serverName = source.p_serverName;
 	p_listenPort = source.p_listenPort;
+	p_firstListenApply = source.p_firstListenApply;
 	p_errorPages = source.p_errorPages;
 	p_acceptedMethods = source.p_acceptedMethods;
 	p_clientMaxBody = source.p_clientMaxBody;
@@ -90,9 +147,9 @@ DefaultSettings::~DefaultSettings()
 }
 
 
-void DefaultSettings::setListenPort(int listenPort)
+void DefaultSettings::addListenPort(const int& listenPort)
 {
-	p_listenPort = listenPort;
+	p_listenPort.push_back(listenPort);
 }
 
 void DefaultSettings::setErrorPage(int errorCode ,std::string path)
@@ -133,9 +190,9 @@ void DefaultSettings::setRoot(std::string root)
 	p_root = root;
 }
 
-void DefaultSettings::setServerName(std::string serverName)
+void DefaultSettings::addServerName(const std::string& serverName)
 {
-	p_serverName = serverName;
+	p_serverName.push_back(serverName);
 }
 
 void DefaultSettings::setCgiExtensions(std::vector<std::string> extensionVector)
@@ -149,7 +206,7 @@ void DefaultSettings::setUploadFolder(const std::string& folderName)
 	p_uploadFolder = folderName;
 }
 
-const int& DefaultSettings::getPort(void) const
+const std::vector<int>& DefaultSettings::getPorts(void) const
 {
 	return(p_listenPort);
 }
@@ -159,7 +216,7 @@ const std::string& DefaultSettings::getRoot(void) const
 	return(p_root);
 }
 
-const std::string& DefaultSettings::getServerName(void) const
+const std::vector<std::string>& DefaultSettings::getServerName(void) const
 {
 	return(p_serverName);
 }
