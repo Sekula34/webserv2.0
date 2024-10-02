@@ -1,4 +1,5 @@
 #include "DefaultSettings.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -10,6 +11,15 @@
 #include "../Utils/Logger.hpp"
 #include "../Parsing/Configuration.hpp"
 
+
+bool DefaultSettings::isListeningToPort(const int& portToCheck) const
+{
+	const std::vector<int>& serverPorts(getPorts());
+	std::vector<int>::const_iterator it = std::find(serverPorts.begin(), serverPorts.end(), portToCheck);
+	if(it == serverPorts.end())
+		return false;
+	return true;
+}
 
 bool DefaultSettings::isMethodAllowed(std::string method) const
 {
@@ -51,15 +61,23 @@ void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dir
 		throw Configuration::InvalidConfigFileException();
 	}
 }
+
+void DefaultSettings::removeDefaultListen()
+{
+	const int listenPort = DEFAULT_LISTEN_PORT;
+	std::vector<int>::iterator it = std::find(p_listenPort.begin(), p_listenPort.end(), listenPort);
+	if(it != p_listenPort.end())
+		p_listenPort.erase(it);
+}
 DefaultSettings::DefaultSettings()
 {
-	p_serverName = "[Default Server Name]";
-	p_listenPort.push_back(8080);
+	p_serverName = DEFAULT_SERVER_NAME;
+	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
-	p_clientMaxBody = 1000000;
+	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
 	p_autoindex = false;
-	p_root = "/";
+	p_root = "/"; //TODO fix later
 	p_uploadFolder = "Uploads";//TODO: check if this folder exist
 }
 

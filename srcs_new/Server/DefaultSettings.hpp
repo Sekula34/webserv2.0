@@ -7,9 +7,14 @@
 #include <vector>
 #include "../Parsing/Directive.hpp"
 
+#define DEFAULT_LISTEN_PORT 8080
+#define DEFAULT_SERVER_NAME "localhost"
+#define DEFAULT_MAX_BODY_SIZE 1000000
+
 class DefaultSettings 
 {
 	public :
+		bool							isListeningToPort(const int& portToCheck) const;
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
 		void 							addListenPort(const int& listenPort);
@@ -25,6 +30,7 @@ class DefaultSettings
 		void 							setCgiExtensions(std::vector<std::string> extensionsVector);
 		void 							setUploadFolder(const std::string& folderName);
 		const std::vector<int>&			getPorts(void) const;
+		void							removeDefaultListen();
 		const std::string& 				getRoot(void) const;
 		const std::string& 				getServerName(void) const;
 		const NginnxReturn&				getNginxReturn(void) const;
