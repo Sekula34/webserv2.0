@@ -99,14 +99,6 @@ std::vector<LocationSettings>::const_iterator VirtualServer::fetchLocationWithUr
 	return (it);
 }
 
-bool VirtualServer::isListeningToPort(const int& portToCheck) const
-{
-	const std::vector<int>& serverPorts(getPorts());
-	std::vector<int>::const_iterator it = std::find(serverPorts.begin(), serverPorts.end(), portToCheck);
-	if(it == serverPorts.end())
-		return false;
-	return true;
-}
 
 const std::vector<Directive> VirtualServer::_getServerLevelDirectives() const
 {
