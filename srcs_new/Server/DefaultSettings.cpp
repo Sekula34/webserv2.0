@@ -17,9 +17,19 @@ const bool& DefaultSettings::getFirstListenApplyFlag() const
 	return (p_firstListenApply);
 }
 
+const bool& DefaultSettings::getFirstNameApply() const 
+{
+	return (p_firstNameApply);
+}
+
 void DefaultSettings::setListenFlagFalse() 
 {
 	p_firstListenApply = false;
+}
+
+void DefaultSettings::setNameFlagFalse()
+{
+	p_firstNameApply = false;
 }
 
 bool DefaultSettings::isListeningToPort(const int& portToCheck) const
@@ -27,6 +37,15 @@ bool DefaultSettings::isListeningToPort(const int& portToCheck) const
 	const std::vector<int>& serverPorts(getPorts());
 	std::vector<int>::const_iterator it = std::find(serverPorts.begin(), serverPorts.end(), portToCheck);
 	if(it == serverPorts.end())
+		return false;
+	return true;
+}
+
+bool DefaultSettings::isContainingName(const std::string& nameToCheck) const 
+{
+	const std::vector<std::string>& serverNames(getServerName());
+	std::vector<std::string>::const_iterator it = std::find(serverNames.begin(), serverNames.end(), nameToCheck);
+	if(it == serverNames.end())
 		return false;
 	return true;
 }
@@ -79,9 +98,17 @@ void DefaultSettings::removeDefaultListen()
 	if(it != p_listenPort.end())
 		p_listenPort.erase(it);
 }
+
+void DefaultSettings::removeDefaultName()
+{
+	const std::string& serverName = DEFAULT_SERVER_NAME;
+	std::vector<std::string>::iterator it = std::find(p_serverName.begin(), p_serverName.end(), serverName);
+	if(it != p_serverName.end())
+		p_serverName.erase(it);
+}
 DefaultSettings::DefaultSettings()
 {
-	p_serverName = DEFAULT_SERVER_NAME;
+	p_serverName.push_back(DEFAULT_SERVER_NAME);
 	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
 	p_firstListenApply = true;
 	_setDefaultHttpMethods();
@@ -163,9 +190,9 @@ void DefaultSettings::setRoot(std::string root)
 	p_root = root;
 }
 
-void DefaultSettings::setServerName(std::string serverName)
+void DefaultSettings::addServerName(const std::string& serverName)
 {
-	p_serverName = serverName;
+	p_serverName.push_back(serverName);
 }
 
 void DefaultSettings::setCgiExtensions(std::vector<std::string> extensionVector)
@@ -189,7 +216,7 @@ const std::string& DefaultSettings::getRoot(void) const
 	return(p_root);
 }
 
-const std::string& DefaultSettings::getServerName(void) const
+const std::vector<std::string>& DefaultSettings::getServerName(void) const
 {
 	return(p_serverName);
 }

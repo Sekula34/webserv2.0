@@ -16,7 +16,9 @@ class DefaultSettings
 	public :
 		const bool&						getFirstListenApplyFlag() const;
 		void							setListenFlagFalse();
-
+		const bool&						getFirstNameApply() const;
+		void 							setNameFlagFalse();
+		bool 							isContainingName(const std::string& nameToCheck) const;
 		bool							isListeningToPort(const int& portToCheck) const;
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
@@ -29,13 +31,14 @@ class DefaultSettings
 		void 							setNginxReturn(int statusCode, std::string redirectPath, bool flag = 1);
 		void 							setIndexes(std::vector<std::string> indexes);
 		void 							setRoot(std::string root);
-		void 							setServerName(std::string serverName);
+		void 							addServerName(const std::string& serverName);
 		void 							setCgiExtensions(std::vector<std::string> extensionsVector);
 		void 							setUploadFolder(const std::string& folderName);
 		const std::vector<int>&			getPorts(void) const;
 		void							removeDefaultListen();
+		void							removeDefaultName();
 		const std::string& 				getRoot(void) const;
-		const std::string& 				getServerName(void) const;
+		const std::vector<std::string>&	getServerName(void) const;
 		const NginnxReturn&				getNginxReturn(void) const;
 		const bool& 					getAutoindexFlag(void) const;
 		const std::vector<std::string>&	getIndexes() const;
@@ -56,7 +59,8 @@ class DefaultSettings
 
 	protected :
 		//server stuff 
-		std::string					p_serverName; // This is host
+		std::vector<std::string>	p_serverName; // This is host
+		bool						p_firstNameApply;
 		std::vector<int> 			p_listenPort;
 		bool						p_firstListenApply;
 
