@@ -222,7 +222,7 @@ const VirtualServer* ServerManager::getServerByPort(int portNumber, std::string 
 	for(size_t i = 0; i< ServersId.size(); i++)
 	{
 		VirtualServer& oneServer(ServersId[i]);
-		if(oneServer.getServerName() == serverName)
+		if(oneServer.isContainingName(serverName) == true)
 		{
 			serverId = oneServer.getServerId();
 			return &getServerById(serverId);

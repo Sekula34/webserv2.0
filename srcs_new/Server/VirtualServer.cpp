@@ -164,7 +164,7 @@ std::ostream& operator<<(std::ostream& os, const VirtualServer& server)
 	std::string title = Logger::createFancyTitle("Server Settings print");
 	os << title << std::endl;
 	os << "Server id: " << server.getServerId() << std::endl;
-	os << "Server name: " << server.getServerName() << std::endl;
+	os << Logger::logVector(server.getServerName(), "Server names").str();
 	os << Logger::logVector(server.getPorts(), "Server Listen Ports").str();
 	os << Logger::logVector(locationsUri, "Locations Uri").str();
 	os << static_cast<DefaultSettings>(server) << std::endl;
