@@ -402,7 +402,7 @@ void Directive::_applyListen(DefaultSettings& settings)
 		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
 		throw InvalidDirectiveException();
 	}
-	settings.setListenPort(portNumber);
+	settings.addListenPort(portNumber);
 }
 
 //set all accepted http methods to false 
