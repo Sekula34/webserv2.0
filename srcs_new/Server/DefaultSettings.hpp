@@ -12,7 +12,7 @@ class DefaultSettings
 	public :
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
-		void 							setListenPort(int listenPort);
+		void 							addListenPort(const int& listenPort);
 		void 							setErrorPage(int errorCode, std::string path);
 		void 							setAllAcceptedMethodsToFalse(void);
 		void 							setAcceptedMethodToTrue(std::string methodName);
@@ -24,7 +24,7 @@ class DefaultSettings
 		void 							setServerName(std::string serverName);
 		void 							setCgiExtensions(std::vector<std::string> extensionsVector);
 		void 							setUploadFolder(const std::string& folderName);
-		const int&						getPort(void) const;
+		const std::vector<int>&			getPorts(void) const;
 		const std::string& 				getRoot(void) const;
 		const std::string& 				getServerName(void) const;
 		const NginnxReturn&				getNginxReturn(void) const;
@@ -48,7 +48,7 @@ class DefaultSettings
 	protected :
 		//server stuff 
 		std::string					p_serverName; // This is host
-		int 						p_listenPort;
+		std::vector<int> 			p_listenPort;
 
 		//location stuff
 		std::map<int, std::string>	p_errorPages;

@@ -54,7 +54,7 @@ void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dir
 DefaultSettings::DefaultSettings()
 {
 	p_serverName = "[Default Server Name]";
-	p_listenPort = 8080;
+	p_listenPort.push_back(8080);
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	p_clientMaxBody = 1000000;
@@ -90,9 +90,9 @@ DefaultSettings::~DefaultSettings()
 }
 
 
-void DefaultSettings::setListenPort(int listenPort)
+void DefaultSettings::addListenPort(const int& listenPort)
 {
-	p_listenPort = listenPort;
+	p_listenPort.push_back(listenPort);
 }
 
 void DefaultSettings::setErrorPage(int errorCode ,std::string path)
@@ -149,7 +149,7 @@ void DefaultSettings::setUploadFolder(const std::string& folderName)
 	p_uploadFolder = folderName;
 }
 
-const int& DefaultSettings::getPort(void) const
+const std::vector<int>& DefaultSettings::getPorts(void) const
 {
 	return(p_listenPort);
 }
