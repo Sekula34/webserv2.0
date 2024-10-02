@@ -12,6 +12,16 @@
 #include "../Parsing/Configuration.hpp"
 
 
+const bool& DefaultSettings::getFirstListenApplyFlag() const
+{
+	return (p_firstListenApply);
+}
+
+void DefaultSettings::setListenFlagFalse() 
+{
+	p_firstListenApply = false;
+}
+
 bool DefaultSettings::isListeningToPort(const int& portToCheck) const
 {
 	const std::vector<int>& serverPorts(getPorts());
@@ -73,6 +83,7 @@ DefaultSettings::DefaultSettings()
 {
 	p_serverName = DEFAULT_SERVER_NAME;
 	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
+	p_firstListenApply = true;
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
@@ -90,6 +101,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 {
 	p_serverName = source.p_serverName;
 	p_listenPort = source.p_listenPort;
+	p_firstListenApply = source.p_firstListenApply;
 	p_errorPages = source.p_errorPages;
 	p_acceptedMethods = source.p_acceptedMethods;
 	p_clientMaxBody = source.p_clientMaxBody;

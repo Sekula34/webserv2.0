@@ -47,7 +47,6 @@ class Directive
 		static const std::string	_validLocationDirectives[];
 		static const std::string	_validHttpMethods[];
 		static const std::string	_uniqueDirectives[];
-		bool						_firstListenApply;
 		std::string 				_directiveName;
 		std::string 				_directiveValue;
 		std::vector<Token> 			_dirPath;

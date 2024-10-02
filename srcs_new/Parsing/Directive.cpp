@@ -136,13 +136,13 @@ void Directive::apply(DefaultSettings& settings)
 }
 Directive::Directive()
 {
-	_firstListenApply = true;
+	
 }
 Directive::Directive(std::string dirName, std::string dirValue)
 {
 	_directiveName = dirName;
 	_directiveValue = dirValue;
-	_firstListenApply = true;
+	
 }
 
 Directive::Directive(const Token& token)
@@ -152,7 +152,7 @@ Directive::Directive(const Token& token)
 	_dirLineNumber = token.getTokenLineNumber();
 	_directiveValue = _getValueFromToken(token); 
 	_dirPath = token.getTokenPath();
-	_firstListenApply = true;
+
 }
 
 Directive& Directive::operator=(const Directive& source)
@@ -161,7 +161,6 @@ Directive& Directive::operator=(const Directive& source)
 	_directiveName = source._directiveName;
 	_directiveValue = source._directiveValue;
 	_dirLineNumber = source._dirLineNumber;
-	_firstListenApply = source._firstListenApply;
 	return (*this);
 }
 
@@ -400,17 +399,16 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 
 void Directive::_applyListenFirstTime(DefaultSettings& settings)
 {
-	if(_firstListenApply == false)
+	if(settings.getFirstListenApplyFlag() == false)
 		return;
-	_firstListenApply = false;
+	settings.setListenFlagFalse();
 	settings.removeDefaultListen();
 }
 
 //set settings listen port
 void Directive::_applyListen(DefaultSettings& settings)
 {
-	if(_firstListenApply == true)
-		_applyListenFirstTime(settings);
+	_applyListenFirstTime(settings);
 	int portNumber = _stringToInt(_directiveValue);
 	if(portNumber < 0 || portNumber > 65535)
 	{

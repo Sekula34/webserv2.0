@@ -14,6 +14,9 @@
 class DefaultSettings 
 {
 	public :
+		const bool&						getFirstListenApplyFlag() const;
+		void							setListenFlagFalse();
+
 		bool							isListeningToPort(const int& portToCheck) const;
 		static void						checkDuplicateDirectives(const std::vector<Directive>& dirVec);
 		bool							isMethodAllowed(std::string method) const;
@@ -55,6 +58,8 @@ class DefaultSettings
 		//server stuff 
 		std::string					p_serverName; // This is host
 		std::vector<int> 			p_listenPort;
+		bool						p_firstListenApply;
+
 
 		//location stuff
 		std::map<int, std::string>	p_errorPages;
