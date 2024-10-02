@@ -47,6 +47,7 @@ class Directive
 		static const std::string	_validLocationDirectives[];
 		static const std::string	_validHttpMethods[];
 		static const std::string	_uniqueDirectives[];
+		bool						_firstListenApply;
 		std::string 				_directiveName;
 		std::string 				_directiveValue;
 		std::vector<Token> 			_dirPath;
@@ -57,6 +58,7 @@ class Directive
 		bool		_isNameValid(const std::string& name, const std::string validList[], Token::ContextType context) const;
 		int			_stringToInt(std::string stringValue) const;
 		void		_applyErrorPage(DefaultSettings& settings);
+		void 		_applyListenFirstTime(DefaultSettings& settings);
 		void 		_applyListen(DefaultSettings& settings);
 		void 		_applyLimitExcept(DefaultSettings& settings);
 		void 		_applyClientMaxBodySize(DefaultSettings& settings);

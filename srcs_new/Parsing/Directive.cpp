@@ -13,6 +13,7 @@
 #include "../Utils/Logger.hpp"
 #include "../Utils/Data.hpp"
 #include "../Utils/FileUtils.hpp"
+#include "Configuration.hpp"
 
 const std::string Directive::_validHttpDirectives[] = {"client_max_body_size", "autoindex", "index", "error_page", "root", "upload_folder"};
 
@@ -135,12 +136,13 @@ void Directive::apply(DefaultSettings& settings)
 }
 Directive::Directive()
 {
-
+	_firstListenApply = true;
 }
 Directive::Directive(std::string dirName, std::string dirValue)
 {
 	_directiveName = dirName;
 	_directiveValue = dirValue;
+	_firstListenApply = true;
 }
 
 Directive::Directive(const Token& token)
@@ -150,6 +152,7 @@ Directive::Directive(const Token& token)
 	_dirLineNumber = token.getTokenLineNumber();
 	_directiveValue = _getValueFromToken(token); 
 	_dirPath = token.getTokenPath();
+	_firstListenApply = true;
 }
 
 Directive& Directive::operator=(const Directive& source)
@@ -158,6 +161,7 @@ Directive& Directive::operator=(const Directive& source)
 	_directiveName = source._directiveName;
 	_directiveValue = source._directiveValue;
 	_dirLineNumber = source._dirLineNumber;
+	_firstListenApply = source._firstListenApply;
 	return (*this);
 }
 
@@ -393,14 +397,33 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 	settings.setErrorPage(codeNumber, erorrPagePath);
 }
 
+
+void Directive::_applyListenFirstTime(DefaultSettings& settings)
+{
+	if(_firstListenApply == false)
+		return;
+	_firstListenApply = false;
+	settings.removeDefaultListen();
+}
+
 //set settings listen port
 void Directive::_applyListen(DefaultSettings& settings)
 {
+	if(_firstListenApply == true)
+		_applyListenFirstTime(settings);
 	int portNumber = _stringToInt(_directiveValue);
 	if(portNumber < 0 || portNumber > 65535)
 	{
 		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
 		throw InvalidDirectiveException();
+	}
+	if(settings.isListeningToPort(portNumber) == true)
+	{
+		std::ostringstream oss;
+		oss << "[" << getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
+		oss << getDirectiveLineNum();
+		Logger::error(oss.str(), true);
+		throw Configuration::InvalidConfigFileException();
 	}
 	settings.addListenPort(portNumber);
 }
