@@ -7,6 +7,8 @@
 #include <vector>
 #include "../Parsing/Directive.hpp"
 
+#define ROOT_FOLDER "www/"
+
 class DefaultSettings 
 {
 	public :

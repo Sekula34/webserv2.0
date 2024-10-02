@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-#define ROOT_FOLDER "WWW/"
-
 class DirectiveTester;
 class DefaultSettings;
 
