@@ -43,7 +43,7 @@ void ServerManager::_assignVirtualServer(Client& client)
 		client.setVirtualServer(getServerById(1)); 
 		return;
 	}
-	if(server->getPort() != client.getClientPort()) 
+	if(server->isListeningToPort(client.getClientPort()) == false) 
 	{
 		client.setErrorCode(400);
 		client.setVirtualServer(getServerById(1)); 
@@ -268,15 +268,20 @@ const std::vector<int> ServerManager::getUniquePorts() const
 	std::vector<int> uniquePorts;
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
-		const int serverPort = _servers[i].getPort();
-		std::vector<int>::iterator it;
-		it = std::find(uniquePorts.begin(), uniquePorts.end(), serverPort);
-		if(it == uniquePorts.end())
-		{
-			uniquePorts.push_back(serverPort);
-		}
+		const std::vector<int>& serverPorts = _servers[i].getPorts();
+		std::vector<int>::const_iterator it = serverPorts.begin();
+		for(; it != serverPorts.end(); it++)
+			_addOnePort(uniquePorts, *it);
 	}
 	return uniquePorts;
+}
+
+void ServerManager::_addOnePort(std::vector<int>& uniquePorts, const int serverPort) const
+{
+	std::vector<int>::iterator it;
+	it = std::find(uniquePorts.begin(), uniquePorts.end(), serverPort);
+	if(it == uniquePorts.end())
+		uniquePorts.push_back(serverPort);
 }
 
 std::vector<LocationSettings>::const_iterator ServerManager::_setCgiLocation(Client& client, bool& foundLoc)
@@ -382,7 +387,7 @@ std::vector<VirtualServer> ServerManager::_getAllServersIdWithPort(int port) con
 	for(size_t i = 0; i < _servers.size(); i++)
 	{
 		const VirtualServer& oneServer(_servers[i]);
-		if(oneServer.getPort() == port)
+		if(oneServer.isListeningToPort(port) == true)
 			serversPort.push_back(oneServer);
 	}
 	return serversPort;
