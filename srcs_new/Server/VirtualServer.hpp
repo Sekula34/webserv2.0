@@ -29,6 +29,7 @@ class VirtualServer : public DefaultSettings
 		std::vector<LocationSettings>::const_iterator	fetchLocationWithUri(const std::string uri, bool& found) const;
 		const int&										getServerId() const;
 		void											addDirectiveToServer(Directive directive);
+		bool											isListeningToPort(const int& portToCheck) const;
 
 														VirtualServer();
 														VirtualServer(int serverId, DefaultSettings& settings, std::vector<Token>& allTokens);

@@ -99,6 +99,15 @@ std::vector<LocationSettings>::const_iterator VirtualServer::fetchLocationWithUr
 	return (it);
 }
 
+bool VirtualServer::isListeningToPort(const int& portToCheck) const
+{
+	const std::vector<int>& serverPorts(getPorts());
+	std::vector<int>::const_iterator it = std::find(serverPorts.begin(), serverPorts.end(), portToCheck);
+	if(it == serverPorts.end())
+		return false;
+	return true;
+}
+
 const std::vector<Directive> VirtualServer::_getServerLevelDirectives() const
 {
 	std::vector<Directive> serverLevelDirectives;
@@ -164,7 +173,7 @@ std::ostream& operator<<(std::ostream& os, const VirtualServer& server)
 	os << title << std::endl;
 	os << "Server id: " << server.getServerId() << std::endl;
 	os << "Server name: " << server.getServerName() << std::endl;
-	os << "Server port: " << server.getPort() << std::endl;
+	os << Logger::logVector(server.getPorts(), "Server Listen Ports").str();
 	os << Logger::logVector(locationsUri, "Locations Uri").str();
 	os << static_cast<DefaultSettings>(server) << std::endl;
 	os << Logger::getCharSequence(title.size(), '-')<<std::endl;
