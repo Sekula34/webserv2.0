@@ -36,10 +36,10 @@ class ResponseHeader : public AHeader
 	private:
 		int _httpCode;
 		StatusLineElements _statusLine;
-		void _fillStatusLineElements();
+		void _fillStatusLineElements(int num = 200);
 		std::string _getStatusLineAsString() const;
 
-		bool _cgiStatusLine() const;
+		bool _isHeaderField(const std::string& field) const;
 		static bool _setStatusLine(StatusLineElements& elem, std::string line);
 
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);

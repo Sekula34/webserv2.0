@@ -34,7 +34,7 @@ void ResponseGenerator::generateClientResponse(Client &client)
     Message* message = client.getMsg(Client::RESP_MSG);
     message->resetIterator();
 
-	// WE ARE GENERATING OUR RESPONSE IF
+	// WE DO GENERATE OUR RESPONSE IF
 	// WE DID NOT RUN CGI OR THERE WAS AN ERR ALREADY OR THE CLIENT IS PAST THE TIMEOUT
     if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
     {   
@@ -59,19 +59,6 @@ void ResponseGenerator::generateClientResponse(Client &client)
     }
 
     client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
-
-//if(client.g)
-
-	// client.setErrorCode(0);
-	// Message responseMsg(false, client.getErrorCode());
-	// Logger::warning("Message object is generated", "");
-	// std::string cRes = oneResponse.getResponse().c_str();
-	// char * nonConst = const_cast<char*>(cRes.c_str()); 
-	// responseMsg.bufferToNodes(nonConst, oneResponse.getResponse().size());
-	//std::cout << "[" <<responseMsg.getBodyString() << "]" << std::endl;
-	//Response message 
-	//generate message
-	//store message in client
 }
 
 const std::string& ResponseGenerator::getResponse() const
@@ -295,7 +282,7 @@ void ResponseGenerator::_responseMenu()
 {
 	if(_client.getErrorCode() != 0)
 	{
-		Logger::info("Generating error response", _client.getErrorCode());
+		Logger::info("Generating error response: ", _client.getErrorCode());
 		_response = _renderServerErrorPage(_client.getErrorCode());
 		//Generate Error
 	}

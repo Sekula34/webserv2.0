@@ -88,7 +88,8 @@ static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, 
 
 void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
 {
-	if(toReturn->_cgiStatusLine() == true)
+	// CREATES VALID HTTP STATUS LINE OUT OF CGI STATUS HEADER FIELD
+	if(toReturn->_isHeaderField("Status") == true)
 	{
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
@@ -96,7 +97,12 @@ void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
 		//FIXME: newHttpCode is http code from CGI, WHAT SHOULD WE DOO if cgi for example provide 600? correct it ? 400 /500/502?
 		toReturn->changeHttpCode(newHttpCode);
 		toReturn->m_headerFields.erase(it);
+		return ;
 	}
+
+	// CREATES VALID HTTP STATUS LINE WHEN LOCATION HEADER FIELD IS FOUND
+	if(toReturn->_isHeaderField("Location") == true)
+		toReturn->changeHttpCode(302);
 }
 
 ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiHeaderStr, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
@@ -109,11 +115,11 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiHeaderStr
 	if (!toReturn)
 		toReturn = new ResponseHeader("\r\n\r\n", clientError);
 
-	// IF ONE SERVER GETS INVALID RESPONSE FROM ANOTHER -> BAD GETAWAY 502
+	// IF ONE SERVER GETS INVALID RESPONSE FROM ANOTHER -> BAD GATEWAY 502
 	if(toReturn->getHttpStatusCode() != 0)
 		toReturn->p_setHttpStatusCode(502);
 
-	// CONVERT CGI'S HEADER FIELDS INTO HTTP HEADER FIELDS
+	// CONVERT CGI'S HEADER FIELDS INTO VALID HTTP HEADER FIELDS
 	cgiToHttpConversion(toReturn);
 	return toReturn;
 }
@@ -155,18 +161,18 @@ bool ResponseHeader::_setStatusLine(StatusLineElements& elem, std::string line)
 	return true;
 }
 
-bool ResponseHeader::_cgiStatusLine() const
+bool ResponseHeader::_isHeaderField(const std::string& field) const
 {
-	std::map<std::string, std::string>::const_iterator it = m_headerFields.find("Status");
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find(field);
 	if(it != m_headerFields.end())
 		return true;
 	return false;
 }
 
-void ResponseHeader::_fillStatusLineElements()
+void ResponseHeader::_fillStatusLineElements(int code)
 {
 	if(_httpCode == 0) //if _http code is 0 that means client had no error so far so we turn it into 200 ok
-		_httpCode = 200;
+		_httpCode = code;
 	_statusLine.HttpVersion = "HTTP/1.1";
 	_statusLine.statusCode = _httpCode;
 	_statusLine.ReasonPhrase =  HttpStatusCode::getReasonPhrase(_httpCode);
