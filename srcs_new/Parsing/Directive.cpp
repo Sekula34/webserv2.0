@@ -301,10 +301,6 @@ std::string Directive:: _getValueFromToken(const Token& token) const
 }
 
 
-void Directive::_applyServerName(DefaultSettings& settings)
-{
-	settings.setServerName(_directiveValue);
-}
 
 void Directive::_apllyRoot(DefaultSettings& settings)
 {
@@ -396,6 +392,25 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 	settings.setErrorPage(codeNumber, erorrPagePath);
 }
 
+
+
+void Directive::_applyServerName(DefaultSettings& settings)
+{
+	if(settings.getFirstNameApply() == true)
+	{
+		settings.setNameFlagFalse();
+		settings.removeDefaultName();
+	}
+	if(settings.isContainingName(_directiveValue) == true)
+	{
+		std::ostringstream oss;
+		oss << "[" << getDirectiveName() << "]" << " conflicting server name [" << _directiveValue << "] " << FileUtils::getConfigFilePath() << ":";
+		oss << getDirectiveLineNum() << " ignored";
+		Logger::warning(oss.str(), true);
+		return;
+	}
+	settings.addServerName(_directiveValue);
+}
 
 void Directive::_applyListenFirstTime(DefaultSettings& settings)
 {
