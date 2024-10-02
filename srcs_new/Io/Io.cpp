@@ -85,22 +85,14 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	if (client.getCgiFlag() == true && client.getWaitReturn() != 0 && client.getClientState() == Client::DO_RESPONSE)
 		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
-	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nConnection: close\r\n\r\n<p>hello there</p>";
-	// std::string messageStr = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
-	// if (message->getBytesSent() == 0 && it != message->getChain().begin())
-	// {
-		// Logger::info("String Response created: ", "\n" + messageStr);
-	// 	message->resetIterator();
-	// }
 
 	sendValue = send(fdData.fd, it->getString().c_str() + message->getBytesSent(), it->getString().size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
-	// sleep(1);
 
 	if (sendValue > 0)
 	{
-		Logger::info("Succesfully sent bytes:", sendValue);
-		Logger:: chars(it->getString(), true);
+		// Logger::info("Succesfully sent bytes:", sendValue);
+		// Logger::chars(it->getString(), true);
 		message->setBytesSent(message->getBytesSent() + sendValue);
 		if (message->getBytesSent() == it->getString().size())
 		{
@@ -113,7 +105,7 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	if (it != message->getChain().end() && message->getBytesSent() < it->getString().size() && sendValue > 0)
 		return ;
 
-	// if unable to send full message, log error and set error Code
+	// IF UNABLE TO SEND FULL MESSAGE, LOG ERR AND SET ERR CODE
 	if (sendValue < 0 || (it != message->getChain().end() && sendValue == 0))
 	{
 		Logger::error("failed to send message String in Client with ID:", client.getId());
@@ -132,7 +124,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
-		Logger::info("Successfully received bytes: ", recValue);
+		// Logger::info("Successfully received bytes: ", recValue);
 		message->bufferToNodes(_buffer, recValue);
 	}
 
@@ -142,7 +134,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)
 	{
-		Logger::warning("stopping receiving with recValue: ", recValue);
+		// Logger::warning("stopping receiving with recValue: ", recValue);
 		if (recValue < 0)
 			client.setErrorCode(500);
 		setFinishedReceiving(client, fdData, message);

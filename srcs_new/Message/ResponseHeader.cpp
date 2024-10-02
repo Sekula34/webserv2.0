@@ -69,7 +69,7 @@ std::string ResponseHeader::turnResponseHeaderToString(void) const
 
 ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse, int& clientError, const std::string cgiHeaderFieldDelimiter, const std::string cgiHeaderDelimiter)
 {
-	// Logger::error("client ERROR: ", clientError);
+	// Logger::error("client ERR: ", clientError);
 	size_t pos = cgiResponse.find(cgiHeaderDelimiter);
 	std::string aHeaderString = "\r\n\r\n";
 	ResponseHeader* toReturn = NULL;
@@ -90,14 +90,13 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiResponse,
 
 	if(toReturn == NULL || toReturn->getHttpStatusCode() != 0)
 	{
-		// if one server gets invalid response for anothe -> bad getaway 502
+		// if one server gets invalid response for another -> bad getaway 502
 		if (toReturn)
 			toReturn->p_setHttpStatusCode(502);
 		return toReturn;
 	}
 	if(toReturn->_cgiStatusLine() == true)
 	{
-		std::cout << "I have status line " << std::endl;
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
 		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
