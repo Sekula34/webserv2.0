@@ -1,0 +1,80 @@
+body {
+	font-family: Lucida Handwriting, serif;
+	background-color: #ffffff;
+	color: #333;
+	margin: 0;
+	padding: 20px;
+}
+
+h1 {
+	color: #6dd60a;
+}
+
+nav ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+nav ul li {
+	display: inline;
+	margin-right: 10px;
+}
+
+nav ul li a {
+	text-decoration: none;
+	color: #437811;
+	font-weight: bold;
+}
+
+nav ul li a:hover {
+	/* text-decoration: underline; */
+	background-color: #c5c5c5;
+}
+
+/* .comment {
+	font-style: italic;
+	color: gray;
+} */
+
+/* Tooltip container */
+.tooltip {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/* Tooltip text */
+.tooltiptext {
+	visibility: hidden;
+	width: 220px;
+	background-color: #555;
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px;
+	position: absolute;
+	z-index: 1;
+	bottom: 125%; /* Position above the text */
+	left: 50%;
+	margin-left: -110px;
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltiptext::after {
+	content: '';
+	position: absolute;
+	top: 100%; /* At the bottom of the tooltip */
+	left: 50%;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when hovering */
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+	opacity: 1;
+}
