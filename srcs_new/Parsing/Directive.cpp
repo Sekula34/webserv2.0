@@ -496,6 +496,13 @@ void Directive::_applyClientMaxBodySize(DefaultSettings& settings)
 	try
 	{
 		clientMaxBodySize = ParsingUtils::stringToSizeT(_directiveValue);
+		if(clientMaxBodySize > DEFAULT_MAX_BODY_SIZE)
+		{
+			Logger::warning("Trying to set client max body size bigger than we support. Config value:",clientMaxBodySize);
+			Logger::warning("Too big client max body size in " + FileUtils::getConfigFilePath() + ":", _dirLineNumber);
+			Logger::info("It is lowered to MACRO MAX which is :", DEFAULT_MAX_BODY_SIZE);
+			clientMaxBodySize = DEFAULT_MAX_BODY_SIZE;
+		}
 	}
 	catch(ParsingUtils::InvalidConversion &e)
 	{
@@ -532,15 +539,9 @@ void Directive::_applyUploadFolder(DefaultSettings& settings)
 		Logger::warning("Line :", _dirLineNumber);
 		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
 	}
-	Logger::warning("Calling apply upload folder", _directiveName);
-	Logger::info("Directive valus is ", _directiveValue);
-	//TODO chekc if directiveValue is respecting folder name (no .. ~ and stuff like that )
-		//throw exception if it is not valid name 
 	int errorCode = 0;
 	bool exist =  FileUtils::isDirectoryValid(_directiveValue, errorCode);
-	if(exist)
-		Logger::info("Folder exist", _directiveValue);
-	else
+	if(exist == false)
 	{
 		Logger::warning("Folder does not exist ", _directiveValue);
 		Logger::warning("Line :", _dirLineNumber);

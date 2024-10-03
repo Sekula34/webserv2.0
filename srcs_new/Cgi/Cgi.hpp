@@ -37,7 +37,7 @@ class Cgi {
 		void		_prepareSockets(Client& client, int* socketsToChild, int* socketsFromChild);
 		bool		_isRegularFile(std::string file);
 		bool		_checkInterpreterScript();
-		bool		_checkScriptAbsPath(Client& client, std::vector<std::string>& argsVec);
+		bool		_checkScriptAbsPath(std::vector<std::string>& argsVec);
 		std::string	_getInterpreterPath(Client& client, std::string suffix);
 		std::string	_getScriptName(std::string suffix, Client& c);
 	
