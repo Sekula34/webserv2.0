@@ -88,7 +88,7 @@ void Configuration::_checkFileAccessType() const
 		std::cerr<<"File at location:[" << _filePath << "] is not regular file." << std::endl;
 		throw InvalidConfigFileException();
 	}
-	Logger::info("Configuration file is regular file that can be opened", true);
+	Logger::info("Configuration file is regular file that can be opened", "");
 }
 
 

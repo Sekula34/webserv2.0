@@ -539,15 +539,9 @@ void Directive::_applyUploadFolder(DefaultSettings& settings)
 		Logger::warning("Line :", _dirLineNumber);
 		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
 	}
-	Logger::warning("Calling apply upload folder", _directiveName);
-	Logger::info("Directive valus is ", _directiveValue);
-	//TODO chekc if directiveValue is respecting folder name (no .. ~ and stuff like that )
-		//throw exception if it is not valid name 
 	int errorCode = 0;
 	bool exist =  FileUtils::isDirectoryValid(_directiveValue, errorCode);
-	if(exist)
-		Logger::info("Folder exist", _directiveValue);
-	else
+	if(exist == false)
 	{
 		Logger::warning("Folder does not exist ", _directiveValue);
 		Logger::warning("Line :", _dirLineNumber);

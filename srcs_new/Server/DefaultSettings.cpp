@@ -1,5 +1,6 @@
 #include "DefaultSettings.hpp"
 #include <algorithm>
+#include <cerrno>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -258,6 +259,16 @@ const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
 const std::string& DefaultSettings::getUploadFolder(void) const 
 {
 	return p_uploadFolder;
+}
+
+void DefaultSettings::checkDefaultFolderAcces() const
+{
+	int status(0);
+	if(FileUtils::isDirectoryValid(ROOT_FOLDER, status) == false)
+		Logger::warning("Default Root Folder cannot be opened or does not exist: ", ROOT_FOLDER);
+	if(FileUtils::isDirectoryValid(p_uploadFolder, status) == false)
+		Logger::warning("Default Upload folder cannot be opened or does not exist: ", p_uploadFolder + "/");
+	errno = 0;
 }
 
 void DefaultSettings::_setDefaultHttpMethods(void)
