@@ -11,6 +11,7 @@
 #define DEFAULT_LISTEN_PORT 8080
 #define DEFAULT_SERVER_NAME "localhost"
 #define DEFAULT_MAX_BODY_SIZE 1000000
+#define DEFAULT_UPLOAD "uploads"
 
 class DefaultSettings 
 {
