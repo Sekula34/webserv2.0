@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include "../Utils/Logger.hpp"
@@ -74,7 +75,12 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
 	const VirtualServer& server = *client.getVirtualServer();
 
-	std::string clientMethod = header.getRequestLine().requestMethod;
+	// std::string clientMethod = header.getRequestLine().requestMethod;
+
+	// const std::map<std::string, std::string>& headerFieldMap = header.getHeaderFieldMap();
+	// std::map<std::string, std::string>::const_iterator itHeader = headerFieldMap.find("Content-Length");
+	// if (itHeader != headerFieldMap.end() && itHeader->second <= "123456");
+
 	const std::string& clientUriPath = header.urlSuffix->getPath();
 	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
 	bool found = false;
@@ -82,12 +88,34 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	if(found == true)
 	{
 		const LocationSettings& reponseLocation = *it;
+		std::string clientMethod = header.getRequestLine().requestMethod;
 		if(reponseLocation.isMethodAllowed(clientMethod) == false)
 		{
 			client.setErrorCode(405); //TODO: Nginx considers this as 403 forbbiden
 			Logger::warning("Seted 405 method not allowed", 405);
 			return false;
 		}
+		const std::map<std::string, std::string>& headerFieldMap = header.getHeaderFieldMap();
+		std::map<std::string, std::string>::const_iterator itHeader = headerFieldMap.find("Content-Length");
+		if (itHeader != headerFieldMap.end())
+		{
+			errno = 0;
+			char*	end;
+			long bodySize = strtol(itHeader->second.c_str(), &end, 10);
+			if (end == itHeader->second.c_str() || *end != '\0' || errno == ERANGE || bodySize < 0)
+			{
+				client.setErrorCode(400);
+				Logger::warning("Seted 400 Bad request", 400);
+				return false;
+			}
+			if (reponseLocation.getClientMaxBody() < bodySize)
+			{
+				client.setErrorCode(413);
+				Logger::warning("Seted 413 Content Too Large", 413);
+				return false;
+			}
+		}
+		return (true);
 	}
 	else
 	{
@@ -96,7 +124,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 		return false;
 	}
 	// Logger::warning("Client can access this", serverLocationUri);
-	return true;
+	// return true;
 }
 
 void ServerManager::loop()

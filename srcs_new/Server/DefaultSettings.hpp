@@ -44,6 +44,7 @@ class DefaultSettings
 		const bool& 					getAutoindexFlag(void) const;
 		const std::vector<std::string>&	getIndexes() const;
 		const std::string&				getUploadFolder(void) const;
+		const size_t&					getClientMaxBody(void) const;
 		/**
 		 * @brief Get the Error Page Path
 		 * 

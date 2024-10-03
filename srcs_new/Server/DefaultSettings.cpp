@@ -265,6 +265,11 @@ void DefaultSettings::_setDefaultHttpMethods(void)
 	p_acceptedMethods["DELETE"] = true;
 }
 
+const size_t&		DefaultSettings::getClientMaxBody(void) const
+{
+	return (p_clientMaxBody);
+}
+
 void DefaultSettings::_setDefaultIndexes(void)
 {
 	p_index.push_back("index");
