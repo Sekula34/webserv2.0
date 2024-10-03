@@ -311,8 +311,15 @@ void Directive::_apllyRoot(DefaultSettings& settings)
 		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
 	}
+	_directiveValue = ROOT_FOLDER + _directiveValue; // MR_NOTE: Here we append the root folder (WWW)
+	// MR_NOTE: Here we check for path traversal sequences (../ ~/) in the name.
+	if (FileUtils::isValidName(_directiveValue) == false)
+	{
+		Logger::warning("Root name contains path traversal sequences: ", _directiveValue);
+		Logger::warning("Line :", _dirLineNumber);
+		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
+	}
 	settings.setRoot(_directiveValue);
-
 }
 
 void Directive::_applyIndex(DefaultSettings& settings)
@@ -324,6 +331,17 @@ void Directive::_applyIndex(DefaultSettings& settings)
 		oss << "Index value is empty  in line " << _dirLineNumber;
 		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
+	}
+	// MR_NOTE: Here we check for path traversal sequences (../ ~/) in the name.
+	std::vector<std::string>::const_iterator it = indexes.begin();
+	for (; it != indexes.end(); ++it)
+	{
+		if (FileUtils::isValidName(*it) == false)
+		{
+			Logger::warning("Index name contains path traversal sequences: ", *it);
+			Logger::warning("Line :", _dirLineNumber);
+			throw InvalidDirectiveException(); // Maybe rem,ove this or not_
+		}
 	}
 	settings.setIndexes(indexes);
 }
@@ -388,6 +406,14 @@ void Directive::_applyErrorPage(DefaultSettings& settings)
 		oss << _dirLineNumber << "' for direcetive error_page";
 		Logger::error(oss.str(), "");
 		throw InvalidDirectiveException();
+	}
+	erorrPagePath = ROOT_FOLDER + erorrPagePath; // MR_NOTE: Here we append the root folder (WWW)
+	// MR_NOTE: Here we check for path traversal sequences (../ ~/) in the name.
+	if (FileUtils::isValidName(erorrPagePath) == false)
+	{
+		Logger::warning("Root name contains path traversal sequences: ", erorrPagePath);
+		Logger::warning("Line :", _dirLineNumber);
+		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
 	}
 	settings.setErrorPage(codeNumber, erorrPagePath);
 }
@@ -498,7 +524,14 @@ void Directive::_applyCgiExtension(DefaultSettings& settings)
 
 void Directive::_applyUploadFolder(DefaultSettings& settings)
 {
-	(void) settings;
+	_directiveValue = ROOT_FOLDER + _directiveValue; // MR_NOTE: Here we append the root folder (WWW)
+	// MR_NOTE: Here we check for path traversal sequences (../ ~/) in the name.
+	if (FileUtils::isValidName(_directiveValue) == false)
+	{
+		Logger::warning("Folder name contains path traversal sequences: ", _directiveValue);
+		Logger::warning("Line :", _dirLineNumber);
+		throw InvalidDirectiveException(); // Maybe rem,ove this or not_
+	}
 	Logger::warning("Calling apply upload folder", _directiveName);
 	Logger::info("Directive valus is ", _directiveValue);
 	//TODO chekc if directiveValue is respecting folder name (no .. ~ and stuff like that )
