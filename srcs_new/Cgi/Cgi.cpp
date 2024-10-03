@@ -133,10 +133,7 @@ bool	Cgi::_initArgsList(Client& client, std::vector<std::string>& argsVec)
 	// if not installed stops Cgi sets 500 error
 	std::string interpreterAbsPath = _getInterpreterPath(client, suffix);
 	if (interpreterAbsPath.empty())
-	{
-		_stopCgiSetErrorCode(client);
 		return (false);
-	}
 
 	std::string scriptName = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptName();
 	if (scriptName.empty())
@@ -151,20 +148,15 @@ bool	Cgi::_initArgsList(Client& client, std::vector<std::string>& argsVec)
 	return (true);
 }
 
-bool	Cgi::_checkScriptAbsPath(Client& client, std::vector<std::string>& argsVec)
+bool	Cgi::_checkScriptAbsPath(std::vector<std::string>& argsVec)
 {
-	// Logger::info(_scriptAbsPath, true);
 	if (access(argsVec[1].c_str(), X_OK) != 0)	
 	{
 		Logger::warning("CGI script not executable: ", argsVec[1]);
-		_stopCgiSetErrorCode(client);
 		return (false);
 	}
 	if (!_isRegularFile(argsVec[1]))
-	{
-		_stopCgiSetErrorCode(client);
 		return (false);
-	}
 	return (true);
 }
 
@@ -417,8 +409,13 @@ void	Cgi::_stopCgiSetErrorCode(Client& client, int code)
 		else
 			client.setErrorCode(code);
 	}
-	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
-	client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
+	if (client.getClientFds().size() > 1)
+	{
+		client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
+		client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
+	}
+	else
+		client.setCgiFlag(false);
 }
 
 bool	Cgi::_createSockets(int* socketsToChild, int* socketsFromChild)
@@ -447,7 +444,7 @@ char**	Cgi::_argumentList(Client& client)
 	std::vector<std::string>	argsVec;
 	if (_initArgsList(client, argsVec) == false)
 		return (NULL);
-	if (!_checkScriptAbsPath(client, argsVec))
+	if (!_checkScriptAbsPath(argsVec))
 		return (NULL);
 	try
 	{
@@ -507,10 +504,14 @@ void Cgi::_cgiClient(Client& client)
 		int	socketsFromChild[2];
 		char** args = _argumentList(client);
 		if (!args)
+		{
+			_stopCgiSetErrorCode(client);
 			return ;
+		}
 		char** env = _metaVariables(client, args); 
 		if (!env)
 		{
+			_stopCgiSetErrorCode(client);
 			_deleteChararr(args);
 			return ;
 		}
