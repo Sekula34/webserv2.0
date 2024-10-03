@@ -14,14 +14,6 @@ class LocationSettings : public DefaultSettings
 	public :
 		const std::vector<Directive>&	getLocationDirectives(void) const;
 		const std::string& 				getLocationUri(void) const;
-		/**
-		 * @brief Set the Index Page Path object
-		 * 
-		 * @param pathToIndex where the path will be setted
-		 * @return true if file exist and put path to index in param
-		 * @return false if file dont exist, path to index will be ""
-		 */
-		bool							setIndexPagePath(std::string& pathToIndex) const;
 		bool							isCgiLocation(void) const;
 		bool							isCgiExtensionSet(const std::string& scriptExtension) const;
 
