@@ -40,7 +40,8 @@ class VirtualServer : public DefaultSettings
 		void 							_generateDefaultLocation(std::vector<LocationSettings>& serverLocation);
 		bool							_hasDefaultLocation(const std::vector<LocationSettings>& serverLocation) const;
 		const std::vector<Directive>    _getServerLevelDirectives() const;
-		std::vector<LocationSettings>	_setServerLocations();
+		void							_setServerLocations();
+		void 							_duplicateLocationCheck(const LocationSettings& location) const;
 
 		int 							_serverId;
 		std::vector<Directive>			_serverDirectives;
