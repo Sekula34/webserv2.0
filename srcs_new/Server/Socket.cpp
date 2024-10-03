@@ -76,7 +76,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 		throw std::runtime_error("System call listen failed");
 	}
 	_allSockets.push_back(*this); // Adding socket to _allsockets vector.
-	Logger::info("Socket is listening on port:", _port);
+	Logger::info("Socket is listening on port: ", _port);
 }
 
 // Default Constructor

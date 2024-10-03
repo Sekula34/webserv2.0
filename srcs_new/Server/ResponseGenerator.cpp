@@ -109,7 +109,7 @@ void ResponseGenerator::_redirectHandler(const LocationSettings& location)
 	_redirect = location.getNginxReturn();
 	_httpStatus = _redirect.getStatus();
 	//_response = _generateErrorPage(302);
-	_response = _renderServerErrorPage(_httpStatus); //FIXME: check what if user provide you error page that does not exist in config file 
+	_response = _renderLocationErrorPage(location,_httpStatus);
 }
 
 static std::string _pathRelativeToExecutable(const LocationSettings& location, const UrlSuffix& suffix)
@@ -126,7 +126,7 @@ static std::string _pathRelativeToExecutable(const LocationSettings& location, c
 
 void ResponseGenerator::_getHandler(const LocationSettings& location)
 {
-	Logger::info("Resposible location is", location.getLocationUri());
+	Logger::info("Responsible location is", location.getLocationUri());
 	_generateHtml(location);
 	//g
 	// bool result = FileUtils::putFileInString("html/first.html", _response);
@@ -179,13 +179,13 @@ void ResponseGenerator::_autoindexHtml(const std::string& relativePath, const Lo
 		_response = autoindex.getAutoIndexHtml();
 		if(_httpStatus != 0)
 		{
-			_response = _renderServerErrorPage(_httpStatus);
+			_response = _renderLocationErrorPage(location,_httpStatus); 
 			return;
 		}
 		_httpStatus = 200;
 	}
 	else 
-		_response = _renderServerErrorPage(404);
+		_response = _renderLocationErrorPage(location, 404);
 }
 
 void ResponseGenerator::_generateHtml(const LocationSettings& location)
@@ -195,7 +195,7 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 	int result = FileUtils::isPathFileOrFolder(relativePath, _httpStatus);
 	if(result == -1)
 	{
-		_response = _renderServerErrorPage(_httpStatus);
+		_response = _renderLocationErrorPage(location,_httpStatus);
 		return;
 	}
 	if(result == 1)
@@ -203,7 +203,7 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 		if (_fileHtml(relativePath, _response) == true)
 			_httpStatus = 200;
 		else 
-			_response = _renderServerErrorPage(404);
+			_response = _renderLocationErrorPage(location,404);
 		return;
 	}
 	else
@@ -253,13 +253,13 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	{
 		std::cerr << "Unable to create POST file!" << std::endl;
 		_httpStatus = 500;
-		_response = _renderServerErrorPage(_httpStatus);
+		_response = _renderLocationErrorPage(location,_httpStatus);
 		return ;
 	}
 	outputFile << message.getBodyString();
 	outputFile.close();
 	_httpStatus = 201;
-	_response = _renderServerErrorPage(_httpStatus);
+	_response = _renderLocationErrorPage(location,_httpStatus);
 }
 
 void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
@@ -271,7 +271,7 @@ void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
 	{
 		Logger::error("Unable to DELETE file!", filename);
 		_httpStatus = 404;
-		_response = _renderServerErrorPage(_httpStatus);
+		_response = _renderLocationErrorPage(location,_httpStatus);
 		return ;
 	}
 	_httpStatus = 204;
@@ -284,7 +284,6 @@ void ResponseGenerator::_responseMenu()
 	{
 		Logger::info("Generating error response: ", _client.getErrorCode());
 		_response = _renderServerErrorPage(_client.getErrorCode());
-		//Generate Error
 	}
 	else
 	{
@@ -313,7 +312,7 @@ void ResponseGenerator::_responseMenu()
 		else
 		{
 			Logger::warning("Method not implemneted", requestMethod);
-			_response = _renderServerErrorPage(405);
+			_response = _renderLocationErrorPage(requestLocation,_httpStatus);
 		}
 	}
 }
@@ -361,30 +360,42 @@ std::string ResponseGenerator::_generateErrorPage(const int httpErrorCode)
 */
 std::string ResponseGenerator::_renderServerErrorPage(int errorCode)
 {
-	std::string errorHtml;
 	const VirtualServer& server = *(_client.getVirtualServer());
-    std::string errorPagePath = "";
-    errorPagePath = server.getErrorPagePath(errorCode); //TODO: check extenstion of page path and set it accordingly .css CSS, .html HTML
-    if(errorPagePath != "")
+    const std::string &errorPagePath = server.getErrorPagePath(errorCode);
+	return(_renderErrorPage(errorPagePath, errorCode));
+}
+
+std::string ResponseGenerator::_renderLocationErrorPage(const LocationSettings& location, const int& errorCode)
+{
+	std::string locationErrorHtml;
+	const std::string& errorPagePath = location.getErrorPagePath(errorCode);
+	return (_renderErrorPage(errorPagePath, errorCode));
+}
+
+std::string ResponseGenerator::_renderErrorPage(const std::string& errorPagePath, const int& errorCode)
+{
+	std::string html;
+	if(errorPagePath != "")
     {
-        Logger::info("Server have that error page and path to it is ", errorPagePath);
-        bool success = FileUtils::putFileInString(errorPagePath, errorHtml);
+        Logger::info("Server/Location have that error page and path to it is ", errorPagePath);
+        bool success = FileUtils::putFileInString(errorPagePath, html);
         if(success == true)
             _httpStatus = errorCode;
         else
 		{
-            errorHtml = _generateErrorPage(errorCode);
+            html = _generateErrorPage(errorCode);
 			_httpStatus = errorCode;
 		}
     }
-    else 
+	else
     {
-        Logger::info("Server doesn't have page for error code ", errorCode);
-        errorHtml = _generateErrorPage(errorCode);
+        Logger::info("Server/location doesn't have page for error code ", errorCode);
+        html = _generateErrorPage(errorCode);
     }
-    // Logger::warning("Http status code ", _httpStatus);
-	return errorHtml;
+	return html;
 }
+
+
 
 void ResponseGenerator::_setFileType(fileType type)
 {

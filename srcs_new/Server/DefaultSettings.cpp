@@ -1,5 +1,6 @@
 #include "DefaultSettings.hpp"
 #include <algorithm>
+#include <cerrno>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -111,12 +112,13 @@ DefaultSettings::DefaultSettings()
 	p_serverName.push_back(DEFAULT_SERVER_NAME);
 	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
 	p_firstListenApply = true;
+	p_firstNameApply = true;
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
 	p_autoindex = false;
-	p_root = "/"; //TODO fix later
-	p_uploadFolder = "Uploads";//TODO: check if this folder exist
+	p_root = ROOT_FOLDER;
+	p_uploadFolder = p_root + DEFAULT_UPLOAD;//TODO: check if this folder exist
 }
 
 DefaultSettings::DefaultSettings(const DefaultSettings& source)
@@ -129,6 +131,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 	p_serverName = source.p_serverName;
 	p_listenPort = source.p_listenPort;
 	p_firstListenApply = source.p_firstListenApply;
+	p_firstNameApply = source.p_firstNameApply;
 	p_errorPages = source.p_errorPages;
 	p_acceptedMethods = source.p_acceptedMethods;
 	p_clientMaxBody = source.p_clientMaxBody;
@@ -256,6 +259,16 @@ const std::vector<std::string>& DefaultSettings::getCgiExtensions(void) const
 const std::string& DefaultSettings::getUploadFolder(void) const 
 {
 	return p_uploadFolder;
+}
+
+void DefaultSettings::checkDefaultFolderAcces() const
+{
+	int status(0);
+	if(FileUtils::isDirectoryValid(ROOT_FOLDER, status) == false)
+		Logger::warning("Default Root Folder cannot be opened or does not exist: ", ROOT_FOLDER);
+	if(FileUtils::isDirectoryValid(p_uploadFolder, status) == false)
+		Logger::warning("Default Upload folder cannot be opened or does not exist: ", p_uploadFolder + "/");
+	errno = 0;
 }
 
 void DefaultSettings::_setDefaultHttpMethods(void)
