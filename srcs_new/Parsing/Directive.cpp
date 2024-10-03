@@ -495,7 +495,8 @@ void Directive::_applyClientMaxBodySize(DefaultSettings& settings)
 	size_t clientMaxBodySize;
 	try
 	{
-		clientMaxBodySize = ParsingUtils::stringToSizeT(_directiveValue);
+		clientMaxBodySize = ParsingUtils::stringToSizeT(_directiveValue); //FIXME give max macro if value is more than 10000
+		//clientMaxBodySize > MACRO_OUR_MAX; clientMaxBodySize = Macro with warning
 	}
 	catch(ParsingUtils::InvalidConversion &e)
 	{
