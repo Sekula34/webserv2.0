@@ -111,6 +111,7 @@ DefaultSettings::DefaultSettings()
 	p_serverName.push_back(DEFAULT_SERVER_NAME);
 	p_listenPort.push_back(DEFAULT_LISTEN_PORT);
 	p_firstListenApply = true;
+	p_firstNameApply = true;
 	_setDefaultHttpMethods();
 	_setDefaultIndexes();
 	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
@@ -129,6 +130,7 @@ DefaultSettings& DefaultSettings::operator=(const DefaultSettings& source)
 	p_serverName = source.p_serverName;
 	p_listenPort = source.p_listenPort;
 	p_firstListenApply = source.p_firstListenApply;
+	p_firstNameApply = source.p_firstNameApply;
 	p_errorPages = source.p_errorPages;
 	p_acceptedMethods = source.p_acceptedMethods;
 	p_clientMaxBody = source.p_clientMaxBody;
