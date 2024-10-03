@@ -121,11 +121,20 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	clearBuffer(_buffer);
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
+	
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
-		// Logger::info("Successfully received bytes: ", recValue);
-		message->bufferToNodes(_buffer, recValue);
+		try
+		{
+			// Logger::info("Successfully received bytes: ", recValue);
+			message->bufferToNodes(_buffer, recValue);
+		}
+		catch(std::bad_alloc& a)
+		{
+			Logger::error("in create Cgi Header: ", a.what());
+			client.setClientState(Client::DELETEME);
+		}
 	}
 
 	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)

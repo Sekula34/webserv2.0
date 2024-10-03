@@ -43,7 +43,7 @@ class Logger
 			oss.clear();
 			oss << _colorMap[color];
 			oss << _printCurrentTime().str();
-			oss << type << " " << title << " " << _colorMap[RESET];
+			oss << type << " " << title << "" << _colorMap[RESET];
 			oss << value << std::endl;
 			return oss;
 		}
