@@ -78,3 +78,46 @@ is supported and if not send text instead.
 - status 200 'OK' is assumed if the status header field is omitted
 - The server MUST make any modifications to the scripts outpus to make sure that 
 the response to the Client complies with HTTP protocol
+
+### LOCAL REDIRECT RESPONSE
+
+The CGI script can return a ***LOCAL*** URI path and a query string in the
+Location Header field.
+
+- the script MUST NOT return any other header fiels or a message-body
+- and the server MUST generate a response, that it would have, had it gotten
+the request in the Location header field.
+
+### CLIENT REDIRECT RESPONSE
+
+Unlike in the local redirect response, the client can return an absolute URI path,
+that usually is outside the server, but does not have to be.
+
+The URI is again in a location header field.
+
+- The script MUST not provide any other header fields than the location one,
+except for server-defined CGI extensions 
+- The server must turn this single Location Header field into a proper
+302 redirect response message
+
+### CLIENT REDIRECT RESPONSE WITH DOCUMENT
+
+Just like in the client redirect response the header contains a location field
+with an ABSOLUTE PATH (that points to another website usually)
+
+The difference is that here a document is attached. Meaning the CGI response
+contains a body. (usually this is a message like: "if your browser does not
+support atomatic redirection click this link")
+
+- The location header field MUST be supplied
+- the status header field MUST be supplied
+- the status header field MUST contain a 302 found or similar extension code
+- the content-type header field MUST be supplied
+- a body MUST exist
+- the server MUST apply any changes to the Header necessary to make it HTTP valid
+- 
+
+
+
+
+

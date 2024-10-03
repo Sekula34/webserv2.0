@@ -24,7 +24,7 @@ class Cgi {
 		int			_execute(char** args, char** env, int* socketsToChild, int* socketsFromChild);
 		void		_handleReturnStatus(int status, Client& client);
 		void		_waitForChild(Client& client);
-		void		_stopCgiSetErrorCode(Client& c);
+		void		_stopCgiSetErrorCode(Client& c, int code = 500);
 		char**		_argumentList(Client& client);
 		char**		_metaVariables(Client& client, char** args);
 		char**		_create_env();

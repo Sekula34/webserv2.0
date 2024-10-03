@@ -1,4 +1,3 @@
-
 #include "../Server/Socket.hpp"
 #include "../Server/ConnectionManager.hpp"
 #include "../Utils/Data.hpp"
@@ -362,16 +361,16 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 		if (WIFSIGNALED(status))
 		{
 			Logger::warning("child exited due to SIGNAL: ", WTERMSIG(status));
-			Logger::warning("Child ID:", client.getId());
+			Logger::warning("Child ID: ", client.getId());
 			_stopCgiSetErrorCode(client);
 		}
 		if (WIFEXITED(status))
 		{
 			int exitstatus = WEXITSTATUS(status);
 			Logger::warning("child exited with code: ", exitstatus);
-			Logger::warning("Child ID:", client.getId());
+			Logger::warning("Child ID: ", client.getId());
 			if (exitstatus != 0)
-				_stopCgiSetErrorCode(client);
+				_stopCgiSetErrorCode(client, 502);
 		}
 }
 
@@ -400,16 +399,23 @@ void	Cgi::_waitForChild(Client& client)
 	return ;
 }
 
-void	Cgi::_stopCgiSetErrorCode(Client& client)
+void	Cgi::_stopCgiSetErrorCode(Client& client, int code)
 {
 	Logger::warning("stopping CGI loop for Client with ID: ", client.getId());
-	if (client.getErrorCode() == 0)
-		client.setErrorCode(500);
 	client.setClientState(Client::DO_RESPONSE);
-	if (client.checkTimeout() == true)
+	// if (client.checkTimeout() == true)
+	// {
+	// 	std::cout << "setting error code to 504" << std::endl;
+	// 	client.setErrorCode(504);
+	// 	client.setCgiFlag(false);
+	// 	return ;
+	// }
+	if (client.getErrorCode() == 0)
 	{
-		client.setCgiFlag(false);
-		return ;
+		if (client.checkTimeout() == false)
+			client.setErrorCode(504);
+		else
+			client.setErrorCode(code);
 	}
 	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 	client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;

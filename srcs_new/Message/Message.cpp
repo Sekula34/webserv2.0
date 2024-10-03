@@ -285,6 +285,9 @@ void	Message::_createHeader()
 {
 	if(_header != NULL)
 		return;
+
+	// throw std::bad_alloc(); 
+	//
 	if (_request)
 		_header = new RequestHeader(_chain.begin()->getStringUnchunked(), _errorCode);
 	else

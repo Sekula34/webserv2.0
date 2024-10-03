@@ -116,10 +116,6 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 		io.ioLoop();
 		serverInfo.loop();
 		cgi.loop();
-		
-		// THIS WILL BE REPLACED BY REAL VIRTUAL SERVER FUNCTION
-		//debugFakeVirtualServer();	
-
 		if (shutdownServer())
 			break;
 	}

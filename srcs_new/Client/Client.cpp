@@ -142,8 +142,8 @@ void	Client::setErrorCode(int c)
 {
 	if(_errorCode != 0)
 	{
-		Logger::error("You are overwriting client error code, old code is", _errorCode);
-		Logger::info("New error code is ", c);
+		Logger::error("You are overwriting client error code, old code is: ", _errorCode);
+		Logger::info("New error code is: ", c);
 	}
 	_errorCode = c;
 }
