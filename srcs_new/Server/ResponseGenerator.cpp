@@ -251,7 +251,8 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
-		std::cerr << "Unable to create POST file!" << std::endl;
+		// std::cerr << "Unable to create POST file!" << std::endl;
+		Logger::error("Unable to create POST file!: ", filename);
 		_httpStatus = 500;
 		_response = _renderServerErrorPage(_httpStatus);
 		return ;
