@@ -248,17 +248,9 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
 	std::string folderName = location.getUploadFolder();
 	filename  = folderName + "/" + filename;
-	//  ------------- START TESTING ------------- This block can be be deleted now
-	Logger::warning("filename: ", filename);
-	Logger::warning("=============== HEADER ===============\n", header.getFullMessage());
-	Logger::warning("=============== BODY ===============\n", message.getBodyString_fixme());
-	Logger::warning("=============== CHUNKED MSG ===============\n", "");
-	message.printChain();
-	//  ------------- END TESTING  -------------
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
-		// std::cerr << "Unable to create POST file!" << std::endl;
 		Logger::error("Unable to create POST file!: ", filename);
 		_httpStatus = 500;
 		_response = _renderLocationErrorPage(location,_httpStatus);

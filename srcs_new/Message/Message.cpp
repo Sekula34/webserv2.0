@@ -139,7 +139,8 @@ void	Message::printChain()
 	}
 }
 
-//==========================================================================//
+
+//===================== START OF THE PROPOSED CHANGES ======================//
 // FIXME: Gabriel, please check if this is what you intended when you coded
 // getBodyString() and _findBody()
 const std::string	Message::getBodyString_fixme() 
@@ -174,8 +175,8 @@ void	Message::_findBody_fixme(std::list<Node>::iterator& it)
 	}
 	it = _chain.begin();
 }
+//====================== END OF THE PROPOSED CHANGES =======================//
 
-//==========================================================================//
 
 void	Message::_findBody(std::list<Node>::iterator& it)
 {
