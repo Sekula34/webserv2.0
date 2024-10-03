@@ -1,6 +1,5 @@
 #include "ResponseHeader.hpp"
 #include "../Utils/HttpStatusCode.hpp"
-#include "../Utils/Logger.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "AHeader.hpp"
 #include <cstddef>
@@ -117,7 +116,10 @@ ResponseHeader* ResponseHeader::createCgiResponseHeader(std::string cgiHeaderStr
 
 	// IF ONE SERVER GETS INVALID RESPONSE FROM ANOTHER -> BAD GATEWAY 502
 	if(toReturn->getHttpStatusCode() != 0)
+	{
 		toReturn->p_setHttpStatusCode(502);
+		return toReturn;
+	}
 
 	// CONVERT CGI'S HEADER FIELDS INTO VALID HTTP HEADER FIELDS
 	cgiToHttpConversion(toReturn);
