@@ -25,6 +25,7 @@ class ResponseGenerator
 		void 		_responseMenu();
 		std::string _renderServerErrorPage(int errorCode);
 		std::string _renderLocationErrorPage(const LocationSettings& location, const int& errorCode);
+		std::string _renderErrorPage(const std::string& errorPagePath, const int& errorCode);
 		std::string _generateErrorPage(const int httpErrorCode);
 		void 		_setFileType(fileType type);
 		void 		_redirectHandler(const LocationSettings& location);
