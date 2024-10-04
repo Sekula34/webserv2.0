@@ -121,7 +121,7 @@ std::string getConfigFilePath(int argc, char** argv)
 		throw std::runtime_error("Program has to take a configuration file as argument, or use a default path [" + configFilePath + "]");
 	if(argc == 2)
 		configFilePath = argv[1];
-	Logger::info("Config file path is :[" + configFilePath + "]", true);
+	Logger::info("Config file path is: ", configFilePath);
 	return configFilePath;
 }
 

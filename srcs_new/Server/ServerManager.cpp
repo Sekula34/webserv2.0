@@ -165,6 +165,7 @@ ServerManager::ServerManager(std::string configPath)
 
 	DefaultSettings defSettings;
 	_setHttpDirectives();
+	defSettings.checkDefaultFolderAcces();
 	DefaultSettings::checkDuplicateDirectives(_httpDirectives);
 	Directive::applyAllDirectives(_httpDirectives, defSettings);
 	for(int i = 1; i <= _numberOfServers; i++)
