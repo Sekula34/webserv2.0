@@ -62,9 +62,17 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 		fdData.state = FdData::CLOSE;
 	}
 
+	// CLIENT CLOSES CONNECTION WITHOUT SENDING ANYTHING. USUALLY BROWSER
+	if (fdData.type == FdData::CLIENT_FD && message->getChain().begin()->getStringUnchunked().empty())
+	{
+		client.setClientState(Client::DELETEME);
+		return ;
+	}
+
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
 		message->_createHeader(); // TODO: Check _header because it uses new.
+	message->getChain().begin()->setState(COMPLETE);
 	message->setState(COMPLETE);
 	message->resetIterator();
 }
@@ -125,6 +133,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
+	std::cout << "read " << recValue << "bytes: " << _buffer <<  std::endl;
 		try
 		{
 			// Logger::info("Successfully received bytes: ", recValue);
