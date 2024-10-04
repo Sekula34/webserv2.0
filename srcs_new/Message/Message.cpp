@@ -8,6 +8,7 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include <sstream>
 #include <cmath>
+#include <string>
 
 
 
@@ -139,12 +140,50 @@ void	Message::printChain()
 }
 
 
+//===================== START OF THE PROPOSED CHANGES ======================//
+// FIXME: Gabriel, please check if this is what you intended when you coded
+// getBodyString() and _findBody()
+const std::string	Message::getBodyString_fixme() 
+{
+	std::list<Node>::iterator it;
+
+	// if (_chunked)
+	// {
+	// 	_chunksToBody();
+	// 	_chunked = false;
+	// 	_trailer = false;
+	// }
+	_findBody_fixme(it);
+	if (it == _chain.begin())
+		return ("");
+	std::string body;
+	for (; it != _chain.end(); ++it)
+		body += it->getStringUnchunked();
+	return (body);
+	// getStringUnchunked() ONLY return the string content of the body or a chunk.
+	// If it's a chunk, it only removes the chunk header, and return the chunk content.
+	// But it DOES NOT return a concatenated string of the content of all chunks.
+}
+
+void	Message::_findBody_fixme(std::list<Node>::iterator& it)
+{
+	it = _chain.begin();
+	for (; it != _chain.end(); it++)
+	{
+		if(it->getType() == BODY || it->getType() == CHUNK) // BF: it only checked if BODY. Now it checks also if CHUNK.
+			return;
+	}
+	it = _chain.begin();
+}
+//====================== END OF THE PROPOSED CHANGES =======================//
+
+
 void	Message::_findBody(std::list<Node>::iterator& it)
 {
 	it = _chain.begin();
 	for (; it != _chain.end(); it++)
 	{
-		if(it->getType() == BODY) 
+		if(it->getType() == BODY)
 			return;
 	}
 	it = _chain.begin();

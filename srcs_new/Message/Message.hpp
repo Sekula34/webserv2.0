@@ -32,6 +32,7 @@ class Message {
 		// const std::list<Node>&		getChain() const;
 		std::list<Node>&		getChain();
 		const std::string			getBodyString();
+		const std::string			getBodyString_fixme(); // FIXME: Gabriel, please check if this is what you intended
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
 		void						_createHeader();
 		void						_headerInfoToNode();
@@ -60,6 +61,7 @@ class Message {
 		void						_addNewNode();
 		size_t						_calcChunkSize(std::string s);
 		void						_findBody(std::list<Node>::iterator& it);
+		void						_findBody_fixme(std::list<Node>::iterator& it); // FIXME: Gabriel, please check if this is what you intended
 		// size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
 		size_t						_calcOptimalChunkSize(const std::string& body);
 		Node						_newChunkNode(size_t size);

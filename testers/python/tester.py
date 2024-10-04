@@ -137,11 +137,26 @@ class TestMyWebServer(unittest.TestCase):
 
 	def test_post(self):
 		TestMyWebServer.print_test_title("Testing post request")
-		response = TestMyWebServer.send_post("http://localhost:9090/upload/?file.pdf", "subject.pdf")
+		response = TestMyWebServer.send_post("http://localhost:9090/upload/?file.pdf", "pdfexample.pdf")
 		self.assertEqual(response.status_code, 201)
 		TestMyWebServer.print_test_title("Testing delete request")
 		response = TestMyWebServer.send_delete("http://localhost:9090/upload/uploadFolder/file.pdf")
 		self.assertEqual(response.status_code, 204)
+		Colors.test_passed()
+
+	def test_body_size_limit(self):
+		TestMyWebServer.print_test_title("Testing body size limit")
+		url = "http://localhost:9090/uploadLimit/?100chars.txt"
+		# Data to send: 100 characters
+		data = "a" * 100  # You can modify this with whatever content you want
+		# Send POST request
+		response = requests.post(url, data=data)
+		self.assertEqual(response.status_code, 201)
+		Colors.test_passed()
+		response = TestMyWebServer.send_delete("http://localhost:9090/uploadFolder/100chars.txt")
+		data = "a" * 101
+		response = requests.post(url, data=data)
+		self.assertEqual(response.status_code, 413)
 		Colors.test_passed()
 
 	def test_url_decode(self):

@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include "../Utils/Logger.hpp"
@@ -18,6 +19,8 @@
 #include "../Client/Client.hpp"
 #include "../Parsing/ParsingUtils.hpp"
 #include "ResponseGenerator.hpp"
+#include <cstdlib> // For strtol
+#include <cerrno> // For errno.
 
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
@@ -65,16 +68,14 @@ bool ServerManager::_isCgi(Client& client)
 	return false;
 }
 
-//false is error
-//true is good
+// Method to check header against the Virtual Server Config (allowed methods and bodySioze limit)
+//false is error. true is good.
 bool	ServerManager::_checkIfRequestAllowed(Client& client)
 {
 	if(client.getErrorCode() != 0)
 		return false;
 	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
 	const VirtualServer& server = *client.getVirtualServer();
-
-	std::string clientMethod = header.getRequestLine().requestMethod;
 	const std::string& clientUriPath = header.urlSuffix->getPath();
 	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
 	bool found = false;
@@ -82,21 +83,40 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	if(found == true)
 	{
 		const LocationSettings& reponseLocation = *it;
+		// Check if the method is allowed
+		std::string clientMethod = header.getRequestLine().requestMethod;
 		if(reponseLocation.isMethodAllowed(clientMethod) == false)
 		{
 			client.setErrorCode(405); //TODO: Nginx considers this as 403 forbbiden
 			Logger::warning("Seted 405 method not allowed", 405);
 			return false;
 		}
+		// Check if bodySize is within boundary
+		const std::map<std::string, std::string>& headerFieldMap = header.getHeaderFieldMap();
+		std::map<std::string, std::string>::const_iterator itHeader = headerFieldMap.find("Content-Length");
+		if (itHeader != headerFieldMap.end())
+		{
+			errno = 0;
+			char*	end;
+			long bodySize = strtol(itHeader->second.c_str(), &end, 10);
+			if (end == itHeader->second.c_str() || *end != '\0' || errno == ERANGE || bodySize < 0)
+			{
+				client.setErrorCode(400);
+				Logger::warning("Seted 400 Bad request", 400);
+				return false;
+			}
+			if (reponseLocation.getClientMaxBody() < static_cast<size_t>(bodySize))
+			{
+				client.setErrorCode(413);
+				Logger::warning("Seted 413 Content Too Large", 413);
+				return false;
+			}
+		}
+		return (true);
 	}
-	else
-	{
-		Logger::warning("Client requested location that is not in this server ", clientUriPath);
-		client.setErrorCode(404);
-		return false;
-	}
-	// Logger::warning("Client can access this", serverLocationUri);
-	return true;
+	Logger::warning("Client requested location that is not in this server ", clientUriPath);
+	client.setErrorCode(404);
+	return false;
 }
 
 void ServerManager::loop()
