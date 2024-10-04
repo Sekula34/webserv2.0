@@ -1,7 +1,8 @@
 import socket
 
 # Define the server address and port
-server_address = ('localhost', 9090)
+# server_address = ('localhost', 9090)
+server_address = ('localhost', 80)
 
 # Create a TCP socket
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
