@@ -256,7 +256,7 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 		_response = _renderLocationErrorPage(location,_httpStatus);
 		return ;
 	}
-	outputFile << message.getBodyString_fixme();
+	outputFile << message.getBodyString();
 	outputFile.close();
 	_httpStatus = 201;
 	_response = _renderLocationErrorPage(location,_httpStatus);
