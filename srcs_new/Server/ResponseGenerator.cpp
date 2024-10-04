@@ -31,34 +31,34 @@ void ResponseGenerator::generateClientResponse(Client &client)
 	}
 
 	// SELECT THE CORRECT MESSAGE IN CLIENT AND RESET THE ITERATOR TO THE HEADER IN MESSAGE
-    Message* message = client.getMsg(Client::RESP_MSG);
-    message->resetIterator();
+	Message* message = client.getMsg(Client::RESP_MSG);
+	message->resetIterator();
 
 	// WE DO GENERATE OUR RESPONSE IF
 	// WE DID NOT RUN CGI OR THERE WAS AN ERR ALREADY OR THE CLIENT IS PAST THE TIMEOUT
-    if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
-    {   
-        client.setCgiFlag(false);
-        ResponseGenerator oneResponse(client);
-        // Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
-        ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
+	if (client.getCgiFlag() == false || client.getErrorCode() != 0 || client.checkTimeout() == false)
+	{
+		client.setCgiFlag(false);
+		ResponseGenerator oneResponse(client);
+		// Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
+		ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
 		Logger::info("Response header:\n", header->turnResponseHeaderToString());
 		Logger::info("Response body (generated):\n", oneResponse.getResponse());
 
 		// CREATES RESPONSE MESSAGE AND CHUNKS THE BODY IF NECESSARY
-        message->stringsToChain(header, oneResponse.getResponse());
-    }
+		message->stringsToChain(header, oneResponse.getResponse());
+	}
 
-    else // THIS MEANS CGI RAN SUCCESSFULLY
-    {
-        // TODO: correct the Header instance in Message from CGI Response state to final state
-        ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
-        client.setCgiFlag(false);
+	else // THIS MEANS CGI RAN SUCCESSFULLY
+	{
+		// TODO: correct the Header instance in Message from CGI Response state to final state
+		ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
+		client.setCgiFlag(false);
 		Logger::info("string in response Header:\n", header->turnResponseHeaderToString());
 		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
-    }
+	}
 
-    client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
+	client.getMsg(Client::RESP_MSG)->setState(COMPLETE);
 }
 
 const std::string& ResponseGenerator::getResponse() const
@@ -251,12 +251,12 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
 	if (!outputFile.is_open())
 	{
-		std::cerr << "Unable to create POST file!" << std::endl;
+		Logger::error("Unable to create POST file!: ", filename);
 		_httpStatus = 500;
 		_response = _renderLocationErrorPage(location,_httpStatus);
 		return ;
 	}
-	outputFile << message.getBodyString();
+	outputFile << message.getBodyString_fixme();
 	outputFile.close();
 	_httpStatus = 201;
 	_response = _renderLocationErrorPage(location,_httpStatus);
