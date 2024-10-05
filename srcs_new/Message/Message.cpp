@@ -151,6 +151,10 @@ const std::string	Message::getBodyString()
 		body += it->getStringUnchunked();
 	return (body);
 }
+int&	Message::getErrorCode() const
+{
+	return (_errorCode);
+}
 
 void	Message::_findBody(std::list<Node>::iterator& it)
 {

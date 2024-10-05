@@ -34,6 +34,7 @@ class Message {
 		const std::string			getBodyString();
 		// const std::string			getBodyString_fixme(); // FIXME: Gabriel, please check if this is what you intended
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
+		int&					getErrorCode() const;
 		void						_createHeader();
 		void						_headerInfoToNode();
 		const size_t&				getBytesSent() const;

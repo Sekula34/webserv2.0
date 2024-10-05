@@ -39,6 +39,7 @@ class RequestHeader : public AHeader
 		RequestHeader(const RequestHeader& source);
 		RequestHeader& operator=(const RequestHeader& source);
 		~RequestHeader();
+		static bool	checkHeaderByLine(const std::string str);
 
 		UrlSuffix* urlSuffix; // this class is resposible for this 
 		
