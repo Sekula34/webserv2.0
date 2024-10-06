@@ -427,9 +427,7 @@ void	Message::_setNodeComplete()
 	// is BODY complete?
 	if (_it->getType() == BODY)
 	{
-		// START testing
-		_bodySize = _it->getBodySize(); // TODO: This is new
-		// END testing
+		_bodySize = _it->getBodySize(); // MR: Update body size.
 		if (_it->getBodySize() == _it->getStringUnchunked().size())	
 			_it->setState(COMPLETE);
 	}
@@ -447,9 +445,8 @@ void	Message::_parseNode()
 
 		// save the size of the expected chunk body (save the hex number from first line)
 		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
-		// START testing
-		_bodySize += _calcChunkSize(_it->getStringChunked()); // TODO: This is new
-		// END testing
+		// MR: Accumulate chunk body size.
+		_bodySize += _calcChunkSize(_it->getStringChunked()); // FIXME: Better to have a local var and not call _calkChunk.. twice.
 
 		if (_it->getChunkSize() == 0)
 		{
@@ -539,8 +536,9 @@ void	Message::advanceIterator()
 		_it++;
 }
 
-// TODO: This is new
-size_t		Message::getBodySize() const
+// MR: Method to retrieve message's total body size. Doesnt matter if chunked or normal.
+// because its an accumulator.
+const size_t&		Message::getBodySize() const
 {
 	return (_bodySize);
 }

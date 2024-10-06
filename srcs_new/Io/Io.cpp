@@ -135,21 +135,6 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 			Logger::error("in create Cgi Header: ", a.what());
 			client.setClientState(Client::DELETEME);
 		}
-		// START testing
-		// if (client.getClientState() == Client::DO_REQUEST && (message->getIterator()->getType() == BODY || message->getIterator()->getType() == CHUNK))
-		if (client.getClientState() == Client::DO_REQUEST)
-		{
-			// Logger::warning("------------------- THIS IS A TEST -------------------", "");
-			message->setBytesSent(message->getBytesSent() + recValue);
-			Logger::warning("-------------------  BytesSent: ", message->getBytesSent());
-			// if (message->getBytesSent() > 1000000) // DEFAULT_MAX_BODY_SIZE
-			// {
-			// 	client.setErrorCode(413);
-			// 	Logger::warning("Seted 413 Content Too Large", 413);
-				// client.setClientState(Client::DO_RESPONSE);
-			// }
-		}
-		// END testing
 	}
 
 	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)

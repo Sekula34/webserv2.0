@@ -119,7 +119,8 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	return false;
 }
 
-// TODO: This is new
+// MR: Method for checking if bodysize is withing the boundaries of Directive client_max_body_size
+// FIXME: Mabe its good to code function for get client's responseLocation. (repeated here and _checkIfRequestAllowed).
 bool	ServerManager::_checkBodySizeLimit(Client& client)
 {
 	if(client.getErrorCode() != 0)
@@ -133,16 +134,7 @@ bool	ServerManager::_checkBodySizeLimit(Client& client)
 	if(found == true)
 	{
 		const LocationSettings& reponseLocation = *it;
-		// Check if max body size is exceeded
-		size_t bytesReceived = client.getMsg(Client::REQ_MSG)->getBytesSent();
-		// Message* message = client.getMsg(Client::REQ_MSG);
-		size_t headerLength = header.getFullMessage().length();
-		Logger::warning("---------------------------- bytesReceived: ", bytesReceived);
-		Logger::warning("---------------------------- headerLength: ", headerLength);
-		Logger::warning("---------------------------- diff: ", bytesReceived - headerLength);
-		Logger::warning("---------------------------- bodySize: ", client.getMsg(Client::REQ_MSG)->getBodySize());
-		// if(reponseLocation.getClientMaxBody() < bytesReceived)
-		// if(reponseLocation.getClientMaxBody() < bytesReceived - headerLength)
+		// Check if clien_max_body_size is exceeded
 		if (reponseLocation.getClientMaxBody() < client.getMsg(Client::REQ_MSG)->getBodySize())
 		{
 			client.setErrorCode(413);
@@ -169,19 +161,19 @@ void ServerManager::loop()
 		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODOD: check if header is complete not full req
 			continue;
 		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
+		// MR: Check message header against Directives (method and content-length)
 		if(client.getIsRequestChecked() == false)
 		{
 			if(_checkIfRequestAllowed(client) == false)
 				client.setClientState(Client::DO_RESPONSE);
 			client.setIsRequestChecked();
 		}
-		// START testing
+		// MR: Check message bodySize against Directives (client_max_body_size)
 		if (client.getClientState() == Client::DO_REQUEST)
 		{
 			if (_checkBodySizeLimit(client) == false)
 				client.setClientState(Client::DO_RESPONSE);
 		}
-		// END testing
 		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODOD: check if header is complete not full req
 		// 	continue;
 		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
