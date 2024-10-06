@@ -2,6 +2,7 @@
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
+#include <cstddef>
 # include <list>
 # include <sstream>
 #include <string>
@@ -40,6 +41,7 @@ class Message {
 		void						setBytesSent(size_t num);
 		void						resetIterator();
 		void						advanceIterator();
+		size_t						getBodySize() const; // TODO: This is new
 
 									//Message specific functions
 	private:
@@ -53,6 +55,7 @@ class Message {
 		AHeader*					_header;
 		int&						_errorCode;
 		size_t						_bytesSent;
+		size_t						_bodySize;
 
 		void						_bodyToChunks(const std::string& body);
 		// void						_bodyToChunks();

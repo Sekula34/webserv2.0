@@ -31,6 +31,7 @@ Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
 	_state = INCOMPLETE;
 	_header = NULL;
 	_bytesSent = 0;
+	_bodySize = 0; // TODO: This is new
 }
 
 /******************************************************************************/
@@ -426,6 +427,9 @@ void	Message::_setNodeComplete()
 	// is BODY complete?
 	if (_it->getType() == BODY)
 	{
+		// START testing
+		_bodySize = _it->getBodySize(); // TODO: This is new
+		// END testing
 		if (_it->getBodySize() == _it->getStringUnchunked().size())	
 			_it->setState(COMPLETE);
 	}
@@ -443,6 +447,9 @@ void	Message::_parseNode()
 
 		// save the size of the expected chunk body (save the hex number from first line)
 		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
+		// START testing
+		_bodySize += _calcChunkSize(_it->getStringChunked()); // TODO: This is new
+		// END testing
 
 		if (_it->getChunkSize() == 0)
 		{
@@ -530,4 +537,10 @@ void	Message::advanceIterator()
 {
 	if (_it != _chain.end())
 		_it++;
+}
+
+// TODO: This is new
+size_t		Message::getBodySize() const
+{
+	return (_bodySize);
 }

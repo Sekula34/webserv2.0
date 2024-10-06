@@ -119,6 +119,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	return false;
 }
 
+// TODO: This is new
 bool	ServerManager::_checkBodySizeLimit(Client& client)
 {
 	if(client.getErrorCode() != 0)
@@ -139,8 +140,10 @@ bool	ServerManager::_checkBodySizeLimit(Client& client)
 		Logger::warning("---------------------------- bytesReceived: ", bytesReceived);
 		Logger::warning("---------------------------- headerLength: ", headerLength);
 		Logger::warning("---------------------------- diff: ", bytesReceived - headerLength);
+		Logger::warning("---------------------------- bodySize: ", client.getMsg(Client::REQ_MSG)->getBodySize());
 		// if(reponseLocation.getClientMaxBody() < bytesReceived)
-		if(reponseLocation.getClientMaxBody() < bytesReceived - headerLength)
+		// if(reponseLocation.getClientMaxBody() < bytesReceived - headerLength)
+		if (reponseLocation.getClientMaxBody() < client.getMsg(Client::REQ_MSG)->getBodySize())
 		{
 			client.setErrorCode(413);
 			Logger::warning("Seted 413 Content Too Large", 413);
