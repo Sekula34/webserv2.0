@@ -75,6 +75,7 @@ class ServerManager
 		bool 						_isCgiPathInfoValid(std::string pathInfo);
 		bool						_isSupportedScriptExtenstion(const LocationSettings& location, Client& client);
 		bool 						_checkIfRequestAllowed(Client& client);
+		bool 						_checkBodySizeLimit(Client& client);
 };
 
 #endif

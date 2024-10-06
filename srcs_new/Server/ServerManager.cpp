@@ -119,6 +119,35 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	return false;
 }
 
+bool	ServerManager::_checkBodySizeLimit(Client& client)
+{
+	if(client.getErrorCode() != 0)
+		return false;
+	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	const VirtualServer& server = *client.getVirtualServer();
+	const std::string& clientUriPath = header.urlSuffix->getPath();
+	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+	bool found = false;
+	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	if(found == true)
+	{
+		const LocationSettings& reponseLocation = *it;
+		// Check if max body size is exceeded
+		size_t bytesReceived = client.getMsg(Client::REQ_MSG)->getBytesSent();
+		Logger::warning("---------------------------- bytesReceived: ", bytesReceived);
+		if(reponseLocation.getClientMaxBody() < bytesReceived)
+		{
+			client.setErrorCode(413);
+			Logger::warning("Seted 413 Content Too Large", 413);
+			return false;
+		}
+		return (true);
+	}
+	Logger::warning("Client requested location that is not in this server ", clientUriPath);
+	client.setErrorCode(404);
+	return false;
+}
+
 void ServerManager::loop()
 {
 	std::map<int, Client*>::iterator it = Client::clients.begin();
@@ -138,6 +167,13 @@ void ServerManager::loop()
 				client.setClientState(Client::DO_RESPONSE);
 			client.setIsRequestChecked();
 		}
+		// START testing
+		if (client.getClientState() == Client::DO_REQUEST)
+		{
+			if (_checkBodySizeLimit(client) == false)
+				client.setClientState(Client::DO_RESPONSE);
+		}
+		// END testing
 		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODOD: check if header is complete not full req
 		// 	continue;
 		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
