@@ -158,7 +158,7 @@ void ServerManager::loop()
 			continue;
 		if(client.getErrorCode() != 0)
 			client.setClientState(Client::DO_RESPONSE);
-		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODOD: check if header is complete not full req
+		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODO: check if header is complete not full req
 			continue;
 		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
 		// MR: Check message header against Directives (method and content-length)
@@ -174,7 +174,7 @@ void ServerManager::loop()
 			if (_checkBodySizeLimit(client) == false)
 				client.setClientState(Client::DO_RESPONSE);
 		}
-		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODOD: check if header is complete not full req
+		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODO: check if header is complete not full req
 		// 	continue;
 		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
 		{

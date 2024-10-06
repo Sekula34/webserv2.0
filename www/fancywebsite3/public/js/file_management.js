@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		return fileName;
 	}
 
-	//TODO: Debugging this function:
 	function fetchFiles() {
 		fetch('/uploads/')  // This path should point to your uploads folder
 			.then(response => response.text())  // Get the HTML as plain text
@@ -73,6 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		attachDeleteEventListeners();  // Reattach event listeners to new buttons
 	}
 
+	// Get reference to the submit button
+	const submitButton = document.getElementById('submitButton');
+
 	// Handle file upload
 	uploadForm.addEventListener('submit', function (event) {
 		event.preventDefault();
@@ -81,6 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			console.error('No file selected.');
 			return;
 		}
+		 // Disable the submit button
+		 submitButton.disabled = true;
 		fetch(`/uploads/?${encodeURIComponent(file.name)}`, {  // Send the filename in the query string
 			method: 'POST',
 			body: file,  // Send the file directly as binary data
@@ -95,8 +99,14 @@ document.addEventListener("DOMContentLoaded", function () {
 			} else {
 				console.error(`Failed to upload file. Server responded with status: ${response.status}`);
 			}
+			// Re-enable the submit button after response
+			submitButton.disabled = false;
 		})
-		.catch(error => console.error('Error uploading file:', error));
+		.catch(error => {
+			console.error('Error uploading file:', error);
+			// Re-enable the submit button after error
+			submitButton.disabled = false;
+		});
 		fileInput.value = '';  // Clear the file input field after upload
 	});
 
