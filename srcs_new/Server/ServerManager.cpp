@@ -134,8 +134,13 @@ bool	ServerManager::_checkBodySizeLimit(Client& client)
 		const LocationSettings& reponseLocation = *it;
 		// Check if max body size is exceeded
 		size_t bytesReceived = client.getMsg(Client::REQ_MSG)->getBytesSent();
+		// Message* message = client.getMsg(Client::REQ_MSG);
+		size_t headerLength = header.getFullMessage().length();
 		Logger::warning("---------------------------- bytesReceived: ", bytesReceived);
-		if(reponseLocation.getClientMaxBody() < bytesReceived)
+		Logger::warning("---------------------------- headerLength: ", headerLength);
+		Logger::warning("---------------------------- diff: ", bytesReceived - headerLength);
+		// if(reponseLocation.getClientMaxBody() < bytesReceived)
+		if(reponseLocation.getClientMaxBody() < bytesReceived - headerLength)
 		{
 			client.setErrorCode(413);
 			Logger::warning("Seted 413 Content Too Large", 413);

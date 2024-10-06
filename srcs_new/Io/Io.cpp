@@ -136,8 +136,8 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 			client.setClientState(Client::DELETEME);
 		}
 		// START testing
-		// if (client.getClientState() == Client::DO_REQUEST)
-		if (client.getClientState() == Client::DO_REQUEST && (message->getIterator()->getType() == BODY || message->getIterator()->getType() == CHUNK))
+		// if (client.getClientState() == Client::DO_REQUEST && (message->getIterator()->getType() == BODY || message->getIterator()->getType() == CHUNK))
+		if (client.getClientState() == Client::DO_REQUEST)
 		{
 			// Logger::warning("------------------- THIS IS A TEST -------------------", "");
 			message->setBytesSent(message->getBytesSent() + recValue);
