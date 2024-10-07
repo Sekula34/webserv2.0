@@ -88,7 +88,7 @@ static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, 
 void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
 {
 	// CREATES VALID HTTP STATUS LINE OUT OF CGI STATUS HEADER FIELD
-	if(toReturn->_isHeaderField("Status") == true)
+	if(toReturn->p_isHeaderField("Status") == true)
 	{
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
 		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
@@ -100,7 +100,7 @@ void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
 	}
 
 	// CREATES VALID HTTP STATUS LINE WHEN LOCATION HEADER FIELD IS FOUND
-	if(toReturn->_isHeaderField("Location") == true)
+	if(toReturn->p_isHeaderField("Location") == true)
 		toReturn->changeHttpCode(302);
 }
 
@@ -163,13 +163,6 @@ bool ResponseHeader::_setStatusLine(StatusLineElements& elem, std::string line)
 	return true;
 }
 
-bool ResponseHeader::_isHeaderField(const std::string& field) const
-{
-	std::map<std::string, std::string>::const_iterator it = m_headerFields.find(field);
-	if(it != m_headerFields.end())
-		return true;
-	return false;
-}
 
 void ResponseHeader::_fillStatusLineElements(int code)
 {
