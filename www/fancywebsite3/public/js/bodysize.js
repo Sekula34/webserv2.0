@@ -13,6 +13,8 @@ textInput.addEventListener('input', updateCharCount);
 
 // Function to handle the form submission
 function handleFormSubmission() {
+	// Disable the submit button
+	sendButton.disabled = true;
 	// Get the text from the input field
 	const text = textInput.value;
 
@@ -34,9 +36,13 @@ function handleFormSubmission() {
 		} else {
 			alert('Error submitting form: ' + response.statusText);
 		}
+		// Re-enable the button after response
+		sendButton.disabled = false;
 	})
 	.catch(error => {
 		alert('An error occurred: ' + error.message);
+		// Re-enable the button after response
+		sendButton.disabled = false;
 	});
 }
 

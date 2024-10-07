@@ -119,6 +119,35 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 	return false;
 }
 
+// MR: Method for checking if bodysize is withing the boundaries of Directive client_max_body_size
+// FIXME: Mabe its good to code function for get client's responseLocation. (repeated here and _checkIfRequestAllowed).
+bool	ServerManager::_checkBodySizeLimit(Client& client)
+{
+	if(client.getErrorCode() != 0)
+		return false;
+	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	const VirtualServer& server = *client.getVirtualServer();
+	const std::string& clientUriPath = header.urlSuffix->getPath();
+	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+	bool found = false;
+	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	if(found == true)
+	{
+		const LocationSettings& reponseLocation = *it;
+		// Check if clien_max_body_size is exceeded
+		if (reponseLocation.getClientMaxBody() < client.getMsg(Client::REQ_MSG)->getBodySize())
+		{
+			client.setErrorCode(413);
+			Logger::warning("Seted 413 Content Too Large", 413);
+			return false;
+		}
+		return (true);
+	}
+	Logger::warning("Client requested location that is not in this server ", clientUriPath);
+	client.setErrorCode(404);
+	return false;
+}
+
 void ServerManager::loop()
 {
 	std::map<int, Client*>::iterator it = Client::clients.begin();
@@ -129,16 +158,23 @@ void ServerManager::loop()
 			continue;
 		if(client.getErrorCode() != 0)
 			client.setClientState(Client::DO_RESPONSE);
-		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODOD: check if header is complete not full req
+		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODO: check if header is complete not full req
 			continue;
 		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
+		// MR: Check message header against Directives (method and content-length)
 		if(client.getIsRequestChecked() == false)
 		{
 			if(_checkIfRequestAllowed(client) == false)
 				client.setClientState(Client::DO_RESPONSE);
 			client.setIsRequestChecked();
 		}
-		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODOD: check if header is complete not full req
+		// MR: Check message bodySize against Directives (client_max_body_size)
+		if (client.getClientState() == Client::DO_REQUEST)
+		{
+			if (_checkBodySizeLimit(client) == false)
+				client.setClientState(Client::DO_RESPONSE);
+		}
+		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODO: check if header is complete not full req
 		// 	continue;
 		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
 		{
