@@ -4,6 +4,7 @@ from colors import Colors
 import CustomRequst
 import time
 import utils
+import chunkrequest
 
 class TestMyWebServer(unittest.TestCase):
 	def setUp(self):
@@ -142,6 +143,16 @@ class TestMyWebServer(unittest.TestCase):
 		TestMyWebServer.print_test_title("Testing delete request")
 		response = TestMyWebServer.send_delete("http://localhost:9090/upload/uploadFolder/file.pdf")
 		self.assertEqual(response.status_code, 204)
+		Colors.test_passed()
+
+	def test_chunk_post(self):
+		TestMyWebServer.print_test_title("Testing chunk post valid")
+		response = chunkrequest.send_chunked_post(path = "/upload/?temp.png")
+		self.assertEqual(response.status, 201)
+		TestMyWebServer.send_delete("http://localhost:9090/upload/uploadFolder/temp.png")
+		TestMyWebServer.print_test_title("Testing chunk limit invalid")
+		response = chunkrequest.send_chunked_post(path = "/uploadLimit/")
+		self.assertEqual(response.status, 413)
 		Colors.test_passed()
 
 	def test_body_size_limit(self):
