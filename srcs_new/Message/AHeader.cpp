@@ -25,7 +25,7 @@ m_errorCode(erorCode)
 	}
 	if(_checkHeaderFields() == false)
 	{
-		Logger::error("checking header fields failed", true);
+		Logger::error("checking header fields failed", "");
 		return;
 	}
 }
@@ -36,12 +36,12 @@ m_errorCode(source.m_errorCode)
 {
 	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
-		Logger::error("Error while filling header field map", true);
+		Logger::error("Error while filling header field map", "");
 		return;
 	}
 	if(_checkHeaderFields() == false)
 	{
-		Logger::error("checking header fields failed", true);
+		Logger::error("checking header fields failed", "");
 		return;
 	}
 	std::stringstream ss;
@@ -91,6 +91,14 @@ std::string AHeader::p_getAllHeaderFieldsAsString() const
 	return headerFields;
 }
 
+bool AHeader::p_isHeaderField(const std::string& field) const
+{
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find(field);
+	if(it != m_headerFields.end())
+		return true;
+	return false;
+}
+
 
 const int& AHeader::getHttpStatusCode(void) const
 {
@@ -100,7 +108,7 @@ const int& AHeader::getHttpStatusCode(void) const
 
 bool AHeader::isBodyExpected() const
 {
-	std::string s = "chunked";
+	std::string s = "chunked"; //FIXME: what is this s used for?
 	if(m_headerFields.find("Content-Length") != m_headerFields.end()
 	|| (m_headerFields.find("Transfer-Encoding") != m_headerFields.end()
 		&& m_headerFields.at("Transfer-Encoding") == "chunked"))
@@ -164,12 +172,16 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 bool AHeader::_checkHeaderFields(void)
 {
 	//check if there is authorization
-	std::string authorizationKey = "Authorization";
-	std::map<std::string, std::string>::const_iterator it = m_headerFields.find((authorizationKey));
-	if(it != m_headerFields.end())
+	if(p_isHeaderField("Authorization") == true)
 	{
 		Logger::error("Authorization is not supported", true);
 		p_setHttpStatusCode(403);
+		return false;
+	}
+	if(p_isHeaderField("Transfer-Encoding") == true && p_isHeaderField("Content-Length") == true)
+	{
+		Logger::error("Header contains both Content-Length and Transfer-Encoding which is contradiction", "");
+		p_setHttpStatusCode(400);
 		return false;
 	}
 	return true;
