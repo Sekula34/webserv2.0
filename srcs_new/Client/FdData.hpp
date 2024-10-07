@@ -10,7 +10,8 @@ class FdData
 		{
 			CLIENT_FD = 0,
 			TOCHILD_FD = 1,
-			FROMCHILD_FD = 2
+			FROMCHILD_FD = 2,
+			TOFILE = 3
 		};
 
 		enum	e_fdState

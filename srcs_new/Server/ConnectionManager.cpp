@@ -122,6 +122,18 @@ static Client*		isClient(int fd, std::map<int, Client*>& clients)
 	return (it->second);
 }
 
+// bool			ConnectionManager::_isFile(const int& idx)
+// {
+// 	int targetFd = _events[idx].data.fd;
+// 	std::map<int, Client*>::iterator it = _clients.begin();
+// 	for (; it != _clients.end(); ++it)
+// 	{
+// 		Client& currentClient = *(it->second);
+// 		FdData& fdData = currentClient.getFdDataByFd(targetFd);
+// 		if(fdData.type == FdData::CLIENT_FD)
+// 			continue ;
+// }
+
 // TODO: Declare an enum to be more verbose for idx of clientFds
 static void	updateClientFds(Client& client, const int& epollIdx, const struct epoll_event* events)
 {
@@ -206,8 +218,32 @@ void		ConnectionManager::_addChildSocketsToEpoll()
 		for (; itFd != fds.end(); ++itFd)
 		{
 			if ((itFd->type == FdData::TOCHILD_FD || itFd->type == FdData::FROMCHILD_FD)
-	   			&& itFd->state == FdData::NEW)
+				&& itFd->state == FdData::NEW)
 			{
+				epollAddFd(_epollFd, itFd->fd);
+				itFd->state = FdData::NONE;
+			}
+		}
+	}
+}
+
+void		ConnectionManager::_addFilesFdToEpoll()
+{
+	std::map<int, Client*>::iterator it = _clients.begin();
+	for (; it != _clients.end(); ++it)
+	{
+		Client& currentClient = *(it->second);
+		std::vector<FdData>& fds = currentClient.getClientFds();
+		// if (fds.size() == 1 || (fds.size() == 2 && fds.back().type != FdData::TOFILE))
+		if (fds.size() == 1)
+			continue ;
+		std::vector<FdData>::iterator itFd = fds.begin();
+		for (; itFd != fds.end(); ++itFd)
+		{
+			if ((itFd->type == FdData::TOFILE)
+				&& itFd->state == FdData::NEW)
+			{
+				Logger::warning("------- _addFilesFdToEpoll got executed for client ID: ", currentClient.getId());
 				epollAddFd(_epollFd, itFd->fd);
 				itFd->state = FdData::NONE;
 			}
@@ -268,6 +304,7 @@ void	ConnectionManager::epollLoop()
 
 
 	_addChildSocketsToEpoll();
+	_addFilesFdToEpoll();
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
 	if (nfds == -1 && !flag)
 	{
@@ -280,6 +317,8 @@ void	ConnectionManager::epollLoop()
 			_acceptNewClient(_events[idx].data.fd);
 		else if ((client = isClient(_events[idx].data.fd, _clients)) != NULL)
 			_handleClient(*client, idx); // BF:_updateClientFd
+		// else if (_isFile(idx))
+		// 	_handleFileWrite();
 		else
 			_handleCgiFds(idx);
 	}

@@ -21,6 +21,7 @@ class Io
 		void	_ioClient(Client& client);	
 		void	_sendMsg(Client& client, FdData& fdData, Message* message);
 		void	_receiveMsg(Client& client, FdData& fdData, Message* message);
+		void	_writeToFile(Client& client, FdData& fdData, Message* message);
 
 		// Attributes
 		char*	_buffer;

@@ -28,6 +28,7 @@ class Client
 			DO_CGIREC,	// Client should or does already receive from CGI 
 			DO_CGISEND,	// Client should or does already send to CGI
 			DO_RESPONSE,// Client should or does already send response Response
+			DO_FILEWRITE,//
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
 			DELETEME	// Client wants to be deleted
 		};
@@ -74,6 +75,7 @@ class Client
 		void					closeSocketToChild();
 		void					closeSocketFromChild();
 		void					closeClientFds();
+		void					setFileFd(int fd);
 
 		// Attributes
 		static size_t					client_cntr;

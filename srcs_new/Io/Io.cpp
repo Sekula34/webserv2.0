@@ -4,7 +4,7 @@
 # include "../Message/Node.hpp"
 # include "../Utils/Logger.hpp"
 
-
+# include <unistd.h>
 //==========================================================================//
 // STATIC METHODS===========================================================//
 //==========================================================================//
@@ -31,6 +31,11 @@ static Message*	setFdTypeAndMsg(Client& client, FdData::e_fdType& fdType)
 		fdType = FdData::FROMCHILD_FD;
 		// message = client.getMsg(Client::CGIRESP_MSG);
 		message = client.getMsg(Client::RESP_MSG);
+	}
+	else if (client.getClientState() == Client::DO_FILEWRITE)
+	{
+		fdType = FdData::TOFILE;
+		message = client.getMsg(Client::REQ_MSG);
 	}
 	else if (client.getClientState() == Client::DO_RESPONSE)
 	{
@@ -75,6 +80,28 @@ void	clearBuffer(char* buffer)
 		return ;
 	for (size_t i = 0; i < MAXLINE; ++i)
 		buffer[i] = 0;
+}
+
+static void	setFinishedWriting(Client& client, FdData& fdData, Message* message)
+{
+	(void)message;
+	fdData.state = FdData::CLOSE;
+	client.setClientState(Client::DO_RESPONSE);
+	// MR: Maybe set a flag to tell that file got created and written into.
+}
+
+void	Io::_writeToFile(Client& client, FdData& fdData, Message* message)
+{
+	int writeValue = 0;
+	if (message->getState() != COMPLETE)
+		return ;
+
+	writeValue = write(fdData.fd, message->getBodyString_fixme().c_str(), message->getBodySize());
+	if (writeValue < 0)
+		Logger::error("Failed to write to File in Client with ID: ", client.getId());
+	// else if (writeValue != message->getBodySize())
+	// 	Logger::error("Failed to completely write to File in Client with ID: ", client.getId());
+	setFinishedWriting(client, fdData, message);
 }
 
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
@@ -173,6 +200,13 @@ void	Io::_ioClient(Client& client)
 			if (message->getChain().begin()->getState() == COMPLETE && client.getIsRequestChecked() != true)
 				return ;
 			_receiveMsg(client, fdData, message);
+	}
+
+	else if (client.getClientState() == Client::DO_FILEWRITE
+		&&(fdData.state  == FdData::R_SEND
+		|| fdData.state  == FdData::R_SENDREC))
+	{
+		_writeToFile(client, fdData, message);
 	}
 
 	else if ((client.getClientState() == Client::DO_RESPONSE

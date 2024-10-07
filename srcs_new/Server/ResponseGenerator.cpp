@@ -240,6 +240,13 @@ static std::string	generateFilename(const std::string& queryString)
 	return (filename.str());
 }
 
+void		ResponseGenerator::_fakePostHandler(const LocationSettings& location)
+{
+	Logger::warning("------ Fake Post Handler ran ---------", "");
+	_httpStatus = 201;
+	_response = _renderLocationErrorPage(location,_httpStatus);
+}
+
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
 {
 	std::cout << "POST method executed" << std::endl;
@@ -303,7 +310,8 @@ void ResponseGenerator::_responseMenu()
 		}
 		else if (requestMethod == "POST")
 		{
-		_postHandler(requestLocation);
+			// _postHandler(requestLocation);
+			_fakePostHandler(requestLocation);
 		}
 		else if(requestMethod == "DELETE")
 		{

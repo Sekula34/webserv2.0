@@ -6,6 +6,7 @@
 #include "VirtualServer.hpp"
 #include "../Parsing/Token.hpp"
 #include <cstddef>
+#include <fcntl.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -55,7 +56,7 @@ void ServerManager::_assignVirtualServer(Client& client)
 	client.setVirtualServer(*server);
 }
 
-bool ServerManager::_isCgi(Client& client)
+bool	ServerManager::_isCgi(Client& client)
 {
 	bool locFound = false;
 	std::vector<LocationSettings>::const_iterator location = _setCgiLocation(client, locFound);
@@ -66,6 +67,27 @@ bool ServerManager::_isCgi(Client& client)
 			return (ServerManager::_isSupportedScriptExtenstion(*location, client));
 	}
 	return false;
+}
+
+bool	ServerManager::_isPostRequest(Client& client)
+{
+	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	std::string clientMethod = header.getRequestLine().requestMethod;
+	if (clientMethod == "POST")
+	{
+		// Logger::warning("The method is POST: ", clientMethod);
+		int fd = open("test.bin", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+		if (fd == -1)
+		{
+			Logger::error("----- Testing: Unable to create file", "");
+			client.setErrorCode(500);
+			return (false);
+		}
+		client.setFileFd(fd);
+		return (true);
+	}
+	// Logger::warning("The Method is this one: ", clientMethod);
+	return (false);
 }
 
 // Method to check header against the Virtual Server Config (allowed methods and bodySioze limit)
@@ -189,7 +211,12 @@ void ServerManager::loop()
 				// TODO: this is fake set state, just to make webserve work without cgi
 				// client.setClientState(Client::DO_RESPONSE);
 			}
-			else  
+			else if (_isPostRequest(client))
+			{
+				Logger::warning("Client made valid POST request, ID: ", client.getId());
+				client.setClientState(Client::DO_FILEWRITE);
+			}
+			else
 			{
 				Logger::warning("No cgi will be executed, client error: ", client.getErrorCode());
 				client.setClientState(Client::DO_RESPONSE);

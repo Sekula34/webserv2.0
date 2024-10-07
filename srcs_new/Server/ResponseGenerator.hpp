@@ -35,6 +35,7 @@ class ResponseGenerator
 		void		_generateHtml(const LocationSettings& location);
 		void 		_autoindexHtml(const std::string& serverFilePath, const LocationSettings& location);
 		//void		_dirHtml(const std::string& file, const LocationSettings& location);
+		void		_fakePostHandler(const LocationSettings& location);
 
 
 		Client&		_client;

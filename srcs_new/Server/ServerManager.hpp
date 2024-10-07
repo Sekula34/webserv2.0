@@ -64,6 +64,7 @@ class ServerManager
 
 		void						_addOnePort(std::vector<int>& uniquePorts, const int serverPort) const;
 		bool 						_isCgi(Client& client);
+		bool 						_isPostRequest(Client& client);
 		void 						_assignVirtualServer(Client& client);
 		void 						_setHttpDirectives(void);
 		bool 						_isTokenHttpDirective(const Token& toCheck) const;

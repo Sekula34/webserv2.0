@@ -191,6 +191,12 @@ void	Client::setChildSocket(int to, int from)
 	_clientFds.push_back(FdData(from, FdData::FROMCHILD_FD));
 }
 
+void	Client::setFileFd(int fd)
+{
+	// Logger::info("adding socket TOCHILD to client Fds", to);
+	_clientFds.push_back(FdData(fd, FdData::TOFILE));
+}
+
 void	Client::setChildPid(int pid)
 {
 	_childPid = pid;
