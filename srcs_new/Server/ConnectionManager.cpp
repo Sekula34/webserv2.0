@@ -3,6 +3,8 @@
 #include "Socket.hpp"
 #include "../Client/Client.hpp"
 // #include <csignal>
+#include <cerrno>
+#include <cstdio>
 #include <map>
 #include <sys/epoll.h>
 #include <unistd.h> // FIXME. Used by Logger for getpid()
@@ -234,6 +236,8 @@ void		ConnectionManager::_addChildSocketsToEpoll()
 
 void		ConnectionManager::_addFilesFdToEpoll()
 {
+	errno = 0;
+
 	std::map<int, Client*>::iterator it = _clients.begin();
 	for (; it != _clients.end(); ++it)
 	{
@@ -250,8 +254,14 @@ void		ConnectionManager::_addFilesFdToEpoll()
 			{
 				Logger::warning("------- _addFilesFdToEpoll got executed for client ID: ", currentClient.getId());
 				Logger::warning("------- _adding this fd to epoll: ", itFd->fd);
-				epollAddFd(_epollFd, itFd->fd);
+				int ret = epollAddFd(_epollFd, itFd->fd);
 				itFd->state = FdData::NONE;
+				if (ret != 0)
+				{
+					Logger::error("epoll_ctl (add) failed. Return value is: ", ret);
+					Logger::error("errno value is: ", errno);
+					perror("error while adding File fd to epoll: ");
+				}
 			}
 		}
 	}
@@ -312,7 +322,7 @@ void	ConnectionManager::epollLoop()
 	_addChildSocketsToEpoll();
 	_addFilesFdToEpoll();
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
-	Logger::warning("Number of nfds returned by epoll: ", nfds); // Testing
+	// Logger::warning("Number of nfds returned by epoll: ", nfds); // Testing
 	if (nfds == -1 && !flag)
 	{
 		Logger::error("epoll_wait failed", "");
