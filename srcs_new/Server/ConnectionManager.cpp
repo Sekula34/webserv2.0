@@ -141,6 +141,11 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 	FdData& fdData = client.getFdDataByFd(fd); 
 	bool allowedToSend = events[epollIdx].events & EPOLLOUT;
 	bool allowedToReceive = events[epollIdx].events & EPOLLIN;
+	// START TESTING
+	// Logger::warning("-----------Fd to check", fd);
+	// Logger::warning("---is allowedToSend?: ", allowedToSend);
+	// Logger::warning("is allowedToReceive?: ", allowedToSend);
+	// END TESTING
 	if (allowedToSend && !allowedToReceive)
 		fdData.state = FdData::R_SEND;
 	if (!allowedToSend && allowedToReceive)
@@ -244,6 +249,7 @@ void		ConnectionManager::_addFilesFdToEpoll()
 				&& itFd->state == FdData::NEW)
 			{
 				Logger::warning("------- _addFilesFdToEpoll got executed for client ID: ", currentClient.getId());
+				Logger::warning("------- _adding this fd to epoll: ", itFd->fd);
 				epollAddFd(_epollFd, itFd->fd);
 				itFd->state = FdData::NONE;
 			}
@@ -306,6 +312,7 @@ void	ConnectionManager::epollLoop()
 	_addChildSocketsToEpoll();
 	_addFilesFdToEpoll();
 	int nfds = epoll_wait(_epollFd, _events, MAX_EVENTS, MAX_WAIT);
+	Logger::warning("Number of nfds returned by epoll: ", nfds); // Testing
 	if (nfds == -1 && !flag)
 	{
 		Logger::error("epoll_wait failed", "");

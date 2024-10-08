@@ -191,7 +191,12 @@ void	Io::_ioClient(Client& client)
 	// std::cout << "bullshit happening here: clientID: " << client.getId() <<  ", fdType: "<<
 	// 	fdType << ", size of fds: " << client.getClientFds().size() <<
 	// 	", fd: "<< fdData.fd << " fd state: "<< fdData.state <<  std::endl;
-	
+
+	// Logger::warning("------- Client ID: ", client.getId());
+	// Logger::warning("------- Client State: ", client.getClientState());
+	// Logger::warning("------- FD Type: ", fdData.type);
+	// Logger::warning("------- FD State: ", fdData.state);
+
 	if ((client.getClientState() == Client::DO_REQUEST
 		|| client.getClientState() == Client::DO_CGIREC)
 		&&(fdData.state  == FdData::R_RECEIVE
@@ -206,6 +211,7 @@ void	Io::_ioClient(Client& client)
 		&&(fdData.state  == FdData::R_SEND
 		|| fdData.state  == FdData::R_SENDREC))
 	{
+		Logger::warning("------- Goint to call _writeToFile", "");
 		_writeToFile(client, fdData, message);
 	}
 
