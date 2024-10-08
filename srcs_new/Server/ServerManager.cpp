@@ -23,6 +23,8 @@
 #include <cstdlib> // For strtol
 #include <cerrno> // For errno.
 
+#include <sys/stat.h> // Testing. For stat.
+
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
 // #include "../Message/Message.hpp"
@@ -69,6 +71,71 @@ bool	ServerManager::_isCgi(Client& client)
 	return false;
 }
 
+// START TESTING
+static std::string	generateFilename(const std::string& queryString)
+{
+	if (queryString.empty() == false)
+		return (queryString);
+	time_t now = time(NULL); // seconds since Epoch
+	std::ostringstream filename;
+	filename << "file_" << now << ".bin";
+	struct stat buffer;
+	bool exist = (stat(filename.str().c_str(), &buffer) == 0);
+	size_t counter = 1;
+	while (exist)
+	{
+		filename.clear();
+		filename.str("");
+		filename << "file_" << now << "_" << counter << ".bin";
+		exist = (stat(filename.str().c_str(), &buffer) == 0);
+		++counter;
+	}
+	return (filename.str());
+}
+
+static const LocationSettings& getClientRequestedLocation(Client& client) 
+{
+	const VirtualServer& server = * (client.getVirtualServer());
+	const RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
+	const std::string& clientUriPath = header.urlSuffix->getPath();
+	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+	bool found = false;
+	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	if(found == true)
+	{
+		const LocationSettings& reponseLocation = *it;
+		return reponseLocation;
+	}
+	Logger::error("THIS SHOULD NEVER HAPPEND, requested location is not found", serverLocationUri);
+	return server.getServerLocations()[0];
+} 
+
+static std::string	getFileName(Client& client)
+{
+	std::cout << "POST method executed" << std::endl;
+		Message& message = *(client.getMsg(Client::REQ_MSG));
+		const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
+		const LocationSettings& requestLocation = getClientRequestedLocation(client);
+		std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
+		std::string folderName = requestLocation.getUploadFolder();
+		filename  = folderName + "/" + filename;
+		// std::ofstream outputFile(filename.c_str(), std::ios::binary);
+		// if (!outputFile.is_open())
+		// {
+		// 	Logger::error("Unable to create POST file!: ", filename);
+		// 	_httpStatus = 500;
+		// 	_response = _renderLocationErrorPage(location,_httpStatus);
+		// 	return ;
+		// }
+		// outputFile << message.getBodyString_fixme();
+		// outputFile.close();
+		// _httpStatus = 201;
+		// _response = _renderLocationErrorPage(location,_httpStatus);
+		return (filename);
+}
+	
+// END TESTING
+
 bool	ServerManager::_isPostRequest(Client& client)
 {
 	RequestHeader& header = *static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
@@ -76,7 +143,8 @@ bool	ServerManager::_isPostRequest(Client& client)
 	if (clientMethod == "POST")
 	{
 		// Logger::warning("The method is POST: ", clientMethod);
-		int fd = open("test.bin", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+		// int fd = open("test.bin", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+		int fd = open(getFileName(client).c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (fd == -1)
 		{
 			Logger::error("----- Testing: Unable to create file", "");

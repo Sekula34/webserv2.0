@@ -23,6 +23,7 @@ int ConnectionManager::_epollFd = epoll_create(1);
 // Helper function to add fd to epoll
 static int		epollAddFd(const int& epollFd, const int& fd)
 {
+	errno = 0; // Testing
 	int ret;
 	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
 	struct epoll_event	ev;
@@ -34,6 +35,14 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	// Logger::warning("adding fd to epoll: ", fd);
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
+	// START TESTING
+	if (ret != 0)
+	{
+		Logger::error("The following FD could not be added to epoll: ", fd);
+		Logger::error("errno value is: ", errno);
+		perror("error while adding File fd to epoll: ");
+	}
+	// END TESTING
 	return (ret);
 }
 
@@ -47,9 +56,19 @@ static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event*
 {
 	// Logger::warning("removing fd from epoll: ", fd);
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
-	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
-		Logger::error("The following FD could not be removed from epoll: ", fd);
+	/* if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
+		Logger::error("The following FD could not be removed from epoll: ", fd); */
 		// throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
+
+	// START TESTING
+	errno = 0; // Testing
+	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
+	{
+		Logger::error("The following FD could not be removed from epoll: ", fd);
+		Logger::error("errno value is: ", errno);
+		perror("error while removing File fd to epoll: ");
+	}
+	// END TESTING
 }
 
 // Method for _epollLoop() to accept new client and add it to epoll
@@ -205,6 +224,12 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 
 	if (safeToDelete(client))
 	{
+		// START TESTING
+		// if (client.getClientFds().size() == 2)
+		// 	epollRemoveFd(_epollFd, client.getFdDataByType(FdData::TOFILE).fd, _events);
+		if (client.getFdDataByType(FdData::TOFILE).type != FdData::CLIENT_FD)
+			epollRemoveFd(_epollFd, client.getFdDataByType(FdData::TOFILE).fd, _events);
+		// END TESTING
 		epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
 		delete &client; // delete needs an address
 		return ;
@@ -254,15 +279,16 @@ void		ConnectionManager::_addFilesFdToEpoll()
 			{
 				Logger::warning("------- _addFilesFdToEpoll got executed for client ID: ", currentClient.getId());
 				Logger::warning("------- _adding this fd to epoll: ", itFd->fd);
-				int ret = epollAddFd(_epollFd, itFd->fd);
+				// int ret = epollAddFd(_epollFd, itFd->fd);
+				epollAddFd(_epollFd, itFd->fd);
 				// itFd->state = FdData::NONE;
 				itFd->state = FdData::R_SEND;
-				if (ret != 0)
-				{
-					Logger::error("epoll_ctl (add) failed. Return value is: ", ret);
-					Logger::error("errno value is: ", errno);
-					perror("error while adding File fd to epoll: ");
-				}
+				// if (ret != 0)
+				// {
+				// 	Logger::error("epoll_ctl (add) failed. Return value is: ", ret);
+				// 	Logger::error("errno value is: ", errno);
+				// 	perror("error while adding File fd to epoll: ");
+				// }
 			}
 		}
 	}
@@ -302,6 +328,10 @@ void ConnectionManager::closeClientFds()
 	std::map<int, Client*>::iterator it = Client::clients.begin();
 	for(; it != Client::clients.end(); it++)
 	{
+		// START TESTING
+		if (it->second->getClientFds().size() == 2 && it->second->getFdDataByType(FdData::TOFILE).type != FdData::CLIENT_FD)
+			close(it->second->getFdDataByType(FdData::CLIENT_FD).fd);
+		// END TESTING
 		close(it->second->getFdDataByType(FdData::CLIENT_FD).fd);
 		// if (it->second->socketToChild != DELETED)
 		if (it->second->getClientFds().size() == 1)
