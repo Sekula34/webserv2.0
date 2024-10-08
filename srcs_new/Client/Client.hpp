@@ -13,7 +13,7 @@
 # include <vector>
 # include <map>
 
-# define MAX_TIMEOUT		30000
+# define MAX_TIMEOUT		3000
 
 class Message;
 class VirtualServer;
@@ -36,7 +36,6 @@ class Client
 		{
 			REQ_MSG,
 			RESP_MSG
-			// CGIRESP_MSG
 		};
 
 	public:
@@ -62,7 +61,6 @@ class Client
 		void					setClientState(e_clientState state);
 		void					setRequestMsg(Message* m);
 		void					setResponseMsg(Message* m);
-		// void					setCgiResponseMsg(Message* m);
 		void					setErrorCode(int e);
 		void					setAddrlen(socklen_t addrlen);
 		void					setChildSocket(int in, int out);

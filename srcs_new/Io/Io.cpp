@@ -72,7 +72,7 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
-		message->_createHeader(); // TODO: Check _header because it uses new.
+		message->createHeader(); // TODO: Check _header because it uses new.
 	message->getChain().begin()->setState(COMPLETE);
 	message->setState(COMPLETE);
 	message->resetIterator();
@@ -163,8 +163,10 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 static void	checkHeaderBeforeComplete(Client& client, FdData& fdData, Message* message)
 {
 	std::list<Node>::iterator it = message->getIterator();
+	// if (client.getClientState() != Client::DO_REQUEST || it->getType() != HEADER
+	// 	|| it->getState() != INCOMPLETE || client.getClientState() == Client::DELETEME)
 	if (client.getClientState() != Client::DO_REQUEST || it->getType() != HEADER
-		|| it->getState() != INCOMPLETE || client.getClientState() == Client::DELETEME)
+		|| it->getState() != INCOMPLETE)
 		return ;
 	const std::string& fullStr = it->getStringUnchunked();
 	std::string newLineStr = "";
@@ -181,6 +183,22 @@ static void	checkHeaderBeforeComplete(Client& client, FdData& fdData, Message* m
 		}
 	}
 }
+
+// static void aggressiveReceiveCheck(Client& client, FdData& fdData, Message* message)
+// {
+// 	std::list<Node>::iterator it = message->getIterator();
+// 	if (client.getClientState() == Client::DO_REQUEST
+// 		&& it->getType() == HEADER
+// 		&& it->getState() == INCOMPLETE
+// 		&& !it->getStringUnchunked().empty()
+// 		&& fdData.type == FdData::CLIENT_FD
+// 		&& !(fdData.state == FdData::R_RECEIVE || fdData.state == FdData::R_SENDREC))
+// 	{
+// 		client.setClientState(Client::DO_RESPONSE);
+// 		client.setErrorCode(400);
+// 		setFinishedReceiving(client, fdData, message);
+// 	}
+// }
 
 void	Io::_ioClient(Client& client)
 {
@@ -218,7 +236,11 @@ void	Io::_ioClient(Client& client)
 
 	// CHECK THE HEADER OF CLIENT BEFORE IT IS COMPLETE FOR ERRORS (catch invalid short header)
 	checkHeaderBeforeComplete(client, fdData, message);
-}	
+
+	// IF AFTER FIRST SUCCESSFUL RECEIVING OF THE REQUEST MESSAGE THERE IS A TIME WHEN WE CAN'T READ FROME
+	// CLIENT AND THE MESSAGE HEADER IS INCOMPLETE, THERE IS AN ERR.
+	// aggressiveReceiveCheck(client, fdData, message);
+}
 
 void	Io::ioLoop()
 {

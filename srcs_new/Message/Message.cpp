@@ -10,61 +10,9 @@
 #include <cmath>
 #include <string>
 
-
-
-
-
-/******************************************************************************/
-/*                               Constructors                                 */
-/******************************************************************************/
-
-Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
-{
-	if (_errorCode)
-		Logger::error("F@ck message constructor WITH error code", _errorCode);
-	// std::cout << "Message default constructor called" << std::endl;
-	_request = request;
-	_chain.push_back(Node("", HEADER, _request));
-	_it = _chain.begin();
-	_chunked = false;
-	_trailer = false;
-	_state = INCOMPLETE;
-	_header = NULL;
-	_bytesSent = 0;
-}
-
-/******************************************************************************/
-/*                                Destructor                                  */
-/******************************************************************************/
-
-Message::~Message (void)
-{
-	delete _header;
-	// std::cout << "Message destructor called" << std::endl;
-}
-
-/******************************************************************************/
-/*                             Copy Constructor                               */
-/******************************************************************************/
-
-Message::Message(Message const & src) : _errorCode(src._errorCode)
-{
-	//std::cout << "Message copy constructor called" << std::endl;
-	*this = src;
-}
-
-/******************************************************************************/
-/*                      Copy Assignment Operator Overload                     */
-/******************************************************************************/
-
-Message &	Message::operator=(Message const & rhs)
-{
-	//std::cout << "Message Copy assignment operator called" << std::endl;
-	if (this != &rhs)
-	{
-	}
-	return (*this);
-}
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 int	Message::getState() const
 {
@@ -87,16 +35,16 @@ const std::list<Node>::iterator& 	Message::getIterator()
 	return (_it);
 }
 
-
-
 void	Message::setState(int s)
 {
 	_state = s;
 }
+
 const size_t&				Message::getBytesSent() const
 {
 	return (_bytesSent);
 }
+
 void						Message::setBytesSent(size_t num)
 {
 	_bytesSent = num;
@@ -151,6 +99,7 @@ const std::string	Message::getBodyString()
 		body += it->getStringUnchunked();
 	return (body);
 }
+
 int&	Message::getErrorCode() const
 {
 	return (_errorCode);
@@ -255,7 +204,7 @@ std::string	Message::_createCgiHeaderDel()
 	return ("\n\n");
 }
 
-void	Message::_createHeader()
+void	Message::createHeader()
 {
 	if(_header != NULL)
 		return;
@@ -324,7 +273,6 @@ size_t	Message::_calcChunkSize(std::string s)
 		_state = ERROR;
 	return (x);	
 }
-
 
 void	Message::_setNodeComplete()
 {
@@ -398,7 +346,7 @@ void	Message::_parseNode()
 	if (_it->getType() == HEADER)
 	{
 		Logger::info("Header Complete:", "\n" + _it->getStringUnchunked());
-		_createHeader();
+		createHeader();
 		_headerInfoToNode();
 
 		// if body size is 0 and message not chunked and message is a request then Message is complete
@@ -435,6 +383,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_parseNode();
 	}
 }
+
 void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 {
 	delete _header;
@@ -465,4 +414,45 @@ void	Message::advanceIterator()
 {
 	if (_it != _chain.end())
 		_it++;
+}
+
+
+//==========================================================================//
+// Constructor, Destructor and OCF Parts ===================================//
+//==========================================================================//
+
+Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
+{
+	if (_errorCode)
+		Logger::error("F@ck message constructor WITH error code", _errorCode);
+	// std::cout << "Message default constructor called" << std::endl;
+	_request = request;
+	_chain.push_back(Node("", HEADER, _request));
+	_it = _chain.begin();
+	_chunked = false;
+	_trailer = false;
+	_state = INCOMPLETE;
+	_header = NULL;
+	_bytesSent = 0;
+}
+
+Message::~Message (void)
+{
+	delete _header;
+	// std::cout << "Message destructor called" << std::endl;
+}
+
+Message::Message(Message const & src) : _errorCode(src._errorCode)
+{
+	//std::cout << "Message copy constructor called" << std::endl;
+	*this = src;
+}
+
+Message &	Message::operator=(Message const & rhs)
+{
+	//std::cout << "Message Copy assignment operator called" << std::endl;
+	if (this != &rhs)
+	{
+	}
+	return (*this);
 }
