@@ -2,6 +2,7 @@
 #ifndef MESSAGE_HPP
 # define MESSAGE_HPP
 
+#include <cstddef>
 # include <list>
 # include <sstream>
 # include <string>
@@ -33,6 +34,7 @@ class Message {
 		void						setState(int s);
 		void						setBytesSent(size_t num);
 		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
+		const size_t&				getBodySize() const;
 
 									//Message specific functions
 	private:
@@ -60,6 +62,7 @@ class Message {
 		AHeader*					_header;
 		int&						_errorCode;
 		size_t						_bytesSent;
+		size_t						_bodySize; // MR_NOTE: message total bodysize (chunked or normal)
 
 
 	public:
