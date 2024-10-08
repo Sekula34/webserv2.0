@@ -255,7 +255,8 @@ void		ConnectionManager::_addFilesFdToEpoll()
 				Logger::warning("------- _addFilesFdToEpoll got executed for client ID: ", currentClient.getId());
 				Logger::warning("------- _adding this fd to epoll: ", itFd->fd);
 				int ret = epollAddFd(_epollFd, itFd->fd);
-				itFd->state = FdData::NONE;
+				// itFd->state = FdData::NONE;
+				itFd->state = FdData::R_SEND;
 				if (ret != 0)
 				{
 					Logger::error("epoll_ctl (add) failed. Return value is: ", ret);
