@@ -201,6 +201,12 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
 		Colors.test_passed()
 	
+	def test_contradict_content_length_transfer_encoding(self):
+		TestMyWebServer.print_test_title("Testing contradict Content-Length and Transfer-Encoding")
+		response = CustomRequst.transfer_encoding_and_content_length()
+		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
+		Colors.test_passed()
+	
 	def test_short_invalid(self):
 		TestMyWebServer.print_test_title("Testing short invalid request")
 		response = CustomRequst.short_invalid_request()

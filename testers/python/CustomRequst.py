@@ -80,6 +80,15 @@ User-Agent: CustomClient\r\n\r\n"
 		req = CustomRequest("Authorization", curl_request, 403)
 		return(req.send())
 
+def transfer_encoding_and_content_length():
+		curl_request = "GET / HTTP/1.1\r\n\
+Host:localhost:9090\r\n\
+Content-Length: 50\r\n\
+Transfer-Encoding: chunked\r\n\
+User-Agent: CustomClient\r\n\r\n"
+		req = CustomRequest("Transfer encoding and content Length", curl_request, 400)
+		return(req.send())
+
 def main():
 	response = authorization_not_supported()
 	print("Authorization reposne is {0}".format(response))
@@ -91,5 +100,6 @@ def main():
 
 if __name__ == "__main__":
 	#main()
-	message = disguise_port()
+	message = transfer_encoding_and_content_length()
+	#message = disguise_port()
 	print(message)

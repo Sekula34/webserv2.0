@@ -39,7 +39,6 @@ class ResponseHeader : public AHeader
 		void _fillStatusLineElements(int num = 200);
 		std::string _getStatusLineAsString() const;
 
-		bool _isHeaderField(const std::string& field) const;
 		static bool _setStatusLine(StatusLineElements& elem, std::string line);
 
 		friend std::ostream& operator<<(std::ostream& os, const ResponseHeader& obj);
