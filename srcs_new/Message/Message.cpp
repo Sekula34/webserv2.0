@@ -10,62 +10,9 @@
 #include <cmath>
 #include <string>
 
-
-
-
-
-/******************************************************************************/
-/*                               Constructors                                 */
-/******************************************************************************/
-
-Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
-{
-	if (_errorCode)
-		Logger::error("F@ck message constructor WITH error code", _errorCode);
-	// std::cout << "Message default constructor called" << std::endl;
-	_request = request;
-	_chain.push_back(Node("", HEADER, _request));
-	_it = _chain.begin();
-	_chunked = false;
-	_trailer = false;
-	_state = INCOMPLETE;
-	_header = NULL;
-	_bytesSent = 0;
-	_bodySize = 0; // TODO: This is new
-}
-
-/******************************************************************************/
-/*                                Destructor                                  */
-/******************************************************************************/
-
-Message::~Message (void)
-{
-	delete _header;
-	// std::cout << "Message destructor called" << std::endl;
-}
-
-/******************************************************************************/
-/*                             Copy Constructor                               */
-/******************************************************************************/
-
-Message::Message(Message const & src) : _errorCode(src._errorCode)
-{
-	//std::cout << "Message copy constructor called" << std::endl;
-	*this = src;
-}
-
-/******************************************************************************/
-/*                      Copy Assignment Operator Overload                     */
-/******************************************************************************/
-
-Message &	Message::operator=(Message const & rhs)
-{
-	//std::cout << "Message Copy assignment operator called" << std::endl;
-	if (this != &rhs)
-	{
-	}
-	return (*this);
-}
+//==========================================================================//
+// REGULAR METHODS==========================================================//
+//==========================================================================//
 
 int	Message::getState() const
 {
@@ -83,37 +30,21 @@ std::list<Node>&	Message::getChain()
 	return (_chain);
 }
 
-const std::string	Message::getBodyString() 
-{
-	std::list<Node>::iterator it;
-
-	// if (_chunked)
-	// {
-	// 	_chunksToBody();
-	// 	_chunked = false;
-	// 	_trailer = false;
-	// }
-	_findBody(it);
-	if (it == _chain.begin())
-		return ("");
-	return (it->getStringUnchunked());
-}
-
 const std::list<Node>::iterator& 	Message::getIterator()
 {
 	return (_it);
 }
 
-
-
 void	Message::setState(int s)
 {
 	_state = s;
 }
+
 const size_t&				Message::getBytesSent() const
 {
 	return (_bytesSent);
 }
+
 void						Message::setBytesSent(size_t num)
 {
 	_bytesSent = num;
@@ -140,33 +71,41 @@ void	Message::printChain()
 	}
 }
 
+// const std::string	Message::getBodyString() 
+// {
+// 	std::list<Node>::iterator it;
+//
+// 	// if (_chunked)
+// 	// {
+// 	// 	_chunksToBody();
+// 	// 	_chunked = false;
+// 	// 	_trailer = false;
+// 	// }
+// 	_findBody(it);
+// 	if (it == _chain.begin())
+// 		return ("");
+// 	return (it->getStringUnchunked());
+// }
 
-//===================== START OF THE PROPOSED CHANGES ======================//
-// FIXME: Gabriel, please check if this is what you intended when you coded
-// getBodyString() and _findBody()
-const std::string	Message::getBodyString_fixme() 
+const std::string	Message::getBodyString() 
 {
 	std::list<Node>::iterator it;
 
-	// if (_chunked)
-	// {
-	// 	_chunksToBody();
-	// 	_chunked = false;
-	// 	_trailer = false;
-	// }
-	_findBody_fixme(it);
+	_findBody(it);
 	if (it == _chain.begin())
 		return ("");
 	std::string body;
-	for (; it != _chain.end(); ++it)
+	for (; it != _chain.end() && it->getType() != TRAILER; ++it)
 		body += it->getStringUnchunked();
 	return (body);
-	// getStringUnchunked() ONLY return the string content of the body or a chunk.
-	// If it's a chunk, it only removes the chunk header, and return the chunk content.
-	// But it DOES NOT return a concatenated string of the content of all chunks.
 }
 
-void	Message::_findBody_fixme(std::list<Node>::iterator& it)
+int&	Message::getErrorCode() const
+{
+	return (_errorCode);
+}
+
+void	Message::_findBody(std::list<Node>::iterator& it)
 {
 	it = _chain.begin();
 	for (; it != _chain.end(); it++)
@@ -176,31 +115,6 @@ void	Message::_findBody_fixme(std::list<Node>::iterator& it)
 	}
 	it = _chain.begin();
 }
-//====================== END OF THE PROPOSED CHANGES =======================//
-
-
-void	Message::_findBody(std::list<Node>::iterator& it)
-{
-	it = _chain.begin();
-	for (; it != _chain.end(); it++)
-	{
-		if(it->getType() == BODY)
-			return;
-	}
-	it = _chain.begin();
-}
-
-// size_t	Message::_calcOptimalChunkSize(std::list<Node>::iterator& it)
-// {
-// 	if (it == _chain.begin() || MAX_CHUNKSIZE <= 0)
-// 	{
-// 		std::cout << "Can not calculate maximum chunk size!" << std::endl;
-// 		return (0);
-// 	}
-// 	int ceiling = std::ceil(static_cast<double>(it->getBodySize()) / static_cast<double>(MAX_CHUNKSIZE));
-// 	int result = std::ceil(static_cast<double>(it->getBodySize()) / ceiling);
-// 	return (result);
-// }
 
 size_t	Message::_calcOptimalChunkSize(const std::string& body)
 {
@@ -224,37 +138,6 @@ Node	Message::_newChunkNode(size_t size)
 
 	return (node);
 }
-
-// void	Message::_bodyToChunks()
-// {
-// 	std::list<Node>::iterator it;
-// 	_findBody(it);
-// 	std::list<Node>::iterator currentNode;
-// 	size_t	optimalSize = _calcOptimalChunkSize(it);
-// 	size_t	remainSize = it->getBodySize();
-// 	std::string str = it->getStringUnchunked();	
-// 	size_t	sizeInNode = 0;
-// 	size_t	strPos = 0;
-	
-// 	currentNode = _chain.begin();
-
-// 	_chain.pop_back();
-// 	while (remainSize)
-// 	{
-// 		if (remainSize > optimalSize)
-// 			sizeInNode = optimalSize;
-// 		else
-// 			sizeInNode = remainSize;
-// 		remainSize -= sizeInNode;
-// 		_chain.push_back((_newChunkNode(sizeInNode)));
-// 		currentNode++;
-// 		currentNode->setStringChunked(str.substr(strPos, sizeInNode));	
-// 		strPos +=sizeInNode;
-// 	}
-// 	_chain.push_back(_newChunkNode(0));
-// 	_chain.back().setType(LCHUNK);
-// 	_chain.back().setString("0\r\n\r\n");
-// }
 
 void	Message::_bodyToChunks(const std::string& body)
 {
@@ -321,7 +204,7 @@ std::string	Message::_createCgiHeaderDel()
 	return ("\n\n");
 }
 
-void	Message::_createHeader()
+void	Message::createHeader()
 {
 	if(_header != NULL)
 		return;
@@ -390,7 +273,6 @@ size_t	Message::_calcChunkSize(std::string s)
 		_state = ERROR;
 	return (x);	
 }
-
 
 void	Message::_setNodeComplete()
 {
@@ -467,7 +349,7 @@ void	Message::_parseNode()
 	if (_it->getType() == HEADER)
 	{
 		Logger::info("Header Complete:", "\n" + _it->getStringUnchunked());
-		_createHeader();
+		createHeader();
 		_headerInfoToNode();
 
 		// if body size is 0 and message not chunked and message is a request then Message is complete
@@ -504,6 +386,7 @@ void	Message::bufferToNodes(char* buffer, size_t num)
 		_parseNode();
 	}
 }
+
 void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 {
 	delete _header;
@@ -534,6 +417,48 @@ void	Message::advanceIterator()
 {
 	if (_it != _chain.end())
 		_it++;
+}
+
+
+//==========================================================================//
+// Constructor, Destructor and OCF Parts ===================================//
+//==========================================================================//
+
+Message::Message (bool request, int& errorCode) : _errorCode(errorCode)
+{
+	if (_errorCode)
+		Logger::error("F@ck message constructor WITH error code", _errorCode);
+	// std::cout << "Message default constructor called" << std::endl;
+	_request = request;
+	_chain.push_back(Node("", HEADER, _request));
+	_it = _chain.begin();
+	_chunked = false;
+	_trailer = false;
+	_state = INCOMPLETE;
+	_header = NULL;
+	_bytesSent = 0;
+	_bodySize = 0;
+}
+
+Message::~Message (void)
+{
+	delete _header;
+	// std::cout << "Message destructor called" << std::endl;
+}
+
+Message::Message(Message const & src) : _errorCode(src._errorCode)
+{
+	//std::cout << "Message copy constructor called" << std::endl;
+	*this = src;
+}
+
+Message &	Message::operator=(Message const & rhs)
+{
+	//std::cout << "Message Copy assignment operator called" << std::endl;
+	if (this != &rhs)
+	{
+	}
+	return (*this);
 }
 
 // MR: Method to retrieve message's total body size. Doesnt matter if chunked or normal.

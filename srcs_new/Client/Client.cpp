@@ -170,6 +170,7 @@ void	Client::setCgiFlag(bool b)
 
 void	Client::setClientState(e_clientState state)
 {
+	// std::cout << "setting client state to: " << state << std::endl;
 	_clientState = state;
 }
 

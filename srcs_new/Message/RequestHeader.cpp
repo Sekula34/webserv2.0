@@ -28,6 +28,41 @@ std::string RequestHeader::getHeaderSectionString(const std::string& message)
 	return headerSection;
 }
 
+static bool	isValidRequestLine(const std::string& str)
+{
+	std::vector<std::string> values = ParsingUtils::splitString(str, " ");
+	if (values.size() < 3)
+		return (false);
+	if (values[0] != "GET" && values[0] != "POST" && values[0] != "DELETE")
+		return (false);
+	if (values[2] != "HTTP/1.1")
+		return (false);
+	return (true);
+}
+
+bool	RequestHeader::checkHeaderByLine(const std::string str)
+{
+	std::vector<std::string> lines = ParsingUtils::splitString(str, "\r\n");
+	lines.pop_back();
+	std::vector<std::string>::const_iterator it = lines.begin();
+	if (isValidRequestLine(*it) == false)
+		return (false);
+	it++;
+	while(it != lines.end())
+	{
+		std::string key = ParsingUtils::extractUntilDelim(*it, ":");
+		if(key != "")
+			key.erase(key.end() - 1);
+		std::string plainKey = ParsingUtils::getHttpPlainValue(key);
+		std::string value = ParsingUtils::extractAfterDelim(*it, ":");
+		value = ParsingUtils::getHttpPlainValue(value);
+		if(key == "" || value == "")
+			return (false);
+		it++;
+	}
+	return (true);
+}
+
 RequestHeader::RequestHeader(const std::string message, int& errorCode)
 :AHeader(getHeaderSectionString(message), errorCode),
 _fullRequest(getFullRequest(message))

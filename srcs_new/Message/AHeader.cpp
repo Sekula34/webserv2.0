@@ -18,6 +18,7 @@ AHeader::AHeader(const std::string& headerSection, int& erorCode)
 : m_headerSection(headerSection),
 m_errorCode(erorCode)
 {
+	// std::cout << "#### header section: " << headerSection << std::endl;
 	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
 		Logger::error("Error while filling header field map", true);

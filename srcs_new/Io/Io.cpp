@@ -3,6 +3,7 @@
 # include "../Message/Message.hpp"
 # include "../Message/Node.hpp"
 # include "../Utils/Logger.hpp"
+# include "../Message/RequestHeader.hpp"
 
 
 //==========================================================================//
@@ -62,9 +63,17 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 		fdData.state = FdData::CLOSE;
 	}
 
+	// CLIENT CLOSES CONNECTION WITHOUT SENDING ANYTHING. USUALLY BROWSER
+	if (fdData.type == FdData::CLIENT_FD && message->getChain().begin()->getStringUnchunked().empty())
+	{
+		client.setClientState(Client::DELETEME);
+		return ;
+	}
+
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
-		message->_createHeader(); // TODO: Check _header because it uses new.
+		message->createHeader(); // TODO: Check _header because it uses new.
+	message->getChain().begin()->setState(COMPLETE);
 	message->setState(COMPLETE);
 	message->resetIterator();
 }
@@ -125,6 +134,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
+		// std::cout << "read " << recValue << "bytes: " << _buffer <<  std::endl;
 		try
 		{
 			// Logger::info("Successfully received bytes: ", recValue);
@@ -150,8 +160,50 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	}
 }
 
+static void	checkHeaderBeforeComplete(Client& client, FdData& fdData, Message* message)
+{
+	std::list<Node>::iterator it = message->getIterator();
+	// if (client.getClientState() != Client::DO_REQUEST || it->getType() != HEADER
+	// 	|| it->getState() != INCOMPLETE || client.getClientState() == Client::DELETEME)
+	if (client.getClientState() != Client::DO_REQUEST || it->getType() != HEADER
+		|| it->getState() != INCOMPLETE)
+		return ;
+	const std::string& fullStr = it->getStringUnchunked();
+	std::string newLineStr = "";
+		size_t pos = fullStr.rfind("\r\n");
+	if ( pos != std::string::npos)
+	{
+		newLineStr = fullStr.substr(0, pos + 2);
+		// RequestHeader requestHeader(newLineStr + "\r\n", errorCode);
+		if (RequestHeader::checkHeaderByLine(newLineStr) == false)
+		{
+			client.setClientState(Client::DO_RESPONSE);
+			client.setErrorCode(400);
+			setFinishedReceiving(client, fdData, message);
+		}
+	}
+}
+
+// static void aggressiveReceiveCheck(Client& client, FdData& fdData, Message* message)
+// {
+// 	std::list<Node>::iterator it = message->getIterator();
+// 	if (client.getClientState() == Client::DO_REQUEST
+// 		&& it->getType() == HEADER
+// 		&& it->getState() == INCOMPLETE
+// 		&& !it->getStringUnchunked().empty()
+// 		&& fdData.type == FdData::CLIENT_FD
+// 		&& !(fdData.state == FdData::R_RECEIVE || fdData.state == FdData::R_SENDREC))
+// 	{
+// 		client.setClientState(Client::DO_RESPONSE);
+// 		client.setErrorCode(400);
+// 		setFinishedReceiving(client, fdData, message);
+// 	}
+// }
+
 void	Io::_ioClient(Client& client)
 {
+	if (client.getClientState() == Client::DELETEME)
+		return ;
 	FdData::e_fdType fdType;
 	Message* message = setFdTypeAndMsg(client, fdType);
 
@@ -161,7 +213,6 @@ void	Io::_ioClient(Client& client)
 	
 	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
 	FdData& fdData = client.getFdDataByType(fdType);
-	// std::cout << "bullshit happening here: clientID: " << client.getId() <<  ", fdType: "<<
 	// 	fdType << ", size of fds: " << client.getClientFds().size() <<
 	// 	", fd: "<< fdData.fd << " fd state: "<< fdData.state <<  std::endl;
 	
@@ -182,7 +233,14 @@ void	Io::_ioClient(Client& client)
 	{
 		_sendMsg(client, fdData, message);
 	}
-}	
+
+	// CHECK THE HEADER OF CLIENT BEFORE IT IS COMPLETE FOR ERRORS (catch invalid short header)
+	checkHeaderBeforeComplete(client, fdData, message);
+
+	// IF AFTER FIRST SUCCESSFUL RECEIVING OF THE REQUEST MESSAGE THERE IS A TIME WHEN WE CAN'T READ FROME
+	// CLIENT AND THE MESSAGE HEADER IS INCOMPLETE, THERE IS AN ERR.
+	// aggressiveReceiveCheck(client, fdData, message);
+}
 
 void	Io::ioLoop()
 {

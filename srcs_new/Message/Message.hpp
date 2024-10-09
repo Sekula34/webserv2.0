@@ -5,7 +5,7 @@
 #include <cstddef>
 # include <list>
 # include <sstream>
-#include <string>
+# include <string>
 # include "AHeader.hpp"
 
 # define MAX_BODY_SIZE	20
@@ -18,38 +18,45 @@ class ResponseHeader;
 class Message {
 
 	public:
-									// canonical
-									Message(bool request, int& errorCode);
-		virtual						~Message(void);
+		// Methods
 		void						bufferToNodes(char* buffer, size_t num);
 		void						printChain();
-		void						_chunksToBody();
 		void						stringsToChain(ResponseHeader* header, const std::string& body);
-
-									// set and get
-		int							getState() const;
-		void						setState(int s);
-		AHeader*					getHeader() const;
-		// const std::list<Node>&		getChain() const;
-		std::list<Node>&		getChain();
-		const std::string			getBodyString();
-		const std::string			getBodyString_fixme(); // FIXME: Gabriel, please check if this is what you intended
-		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
-		void						_createHeader();
-		void						_headerInfoToNode();
-		const size_t&				getBytesSent() const;
-		void						setBytesSent(size_t num);
-		void						resetIterator();
+		void						createHeader();
 		void						advanceIterator();
+		void						resetIterator();
+		int							getState() const;
+		AHeader*					getHeader() const;
+		std::list<Node>&			getChain();
+		const std::string			getBodyString();
+		int&						getErrorCode() const;
+		const size_t&				getBytesSent() const;
+		void						setState(int s);
+		void						setBytesSent(size_t num);
+		const std::list<Node>::iterator& 		getIterator();	 // linked list of nodes
 		const size_t&				getBodySize() const;
 
 									//Message specific functions
 	private:
-		std::list<Node> 			_chain;	 // linked list of nodes
-		std::list<Node>::iterator	_it;	// pointing to current node in chain
-		bool						_chunked; // this is a chunked request
-		bool						_trailer; // we are expecting a trailer as last node
-		int							_state; // message can be: COMPLETE, INCOMPLETE, ERROR
+		// Methods
+		void						_headerInfoToNode();
+		void						_chunksToBody();
+		void						_bodyToChunks(const std::string& body);
+		void						_setNodeComplete();
+		void						_parseNode();
+		void						_addNewNode();
+		size_t						_calcChunkSize(std::string s);
+		void						_findBody(std::list<Node>::iterator& it);
+		size_t						_calcOptimalChunkSize(const std::string& body);
+		Node						_newChunkNode(size_t size);
+		std::string					_createCgiHeaderDel();
+
+		// Attributes
+		std::list<Node> 			_chain;		// linked list of nodes
+		std::list<Node>::iterator	_it;		// pointing to current node in chain
+		bool						_chunked;	// this is a chunked request
+		bool						_trailer;	// we are expecting a trailer as last node
+		int							_state;		// message can be: COMPLETE, INCOMPLETE, ERROR
 		bool						_request;
 		std::stringstream 			_ss;
 		AHeader*					_header;
@@ -57,22 +64,12 @@ class Message {
 		size_t						_bytesSent;
 		size_t						_bodySize; // MR_NOTE: message total bodysize (chunked or normal)
 
-		void						_bodyToChunks(const std::string& body);
-		// void						_bodyToChunks();
-		void						_setNodeComplete();
-		void						_parseNode();
-		void						_addNewNode();
-		size_t						_calcChunkSize(std::string s);
-		void						_findBody(std::list<Node>::iterator& it);
-		void						_findBody_fixme(std::list<Node>::iterator& it); // FIXME: Gabriel, please check if this is what you intended
-		// size_t						_calcOptimalChunkSize(std::list<Node>::iterator& it);
-		size_t						_calcOptimalChunkSize(const std::string& body);
-		Node						_newChunkNode(size_t size);
-		std::string					_createCgiHeaderDel();
-		// void						_createHeader();
-		// void						_headerInfoToNode();
 
-									//Message(void);
+	public:
+									Message(bool request, int& errorCode);
+									~Message(void);
+
+	private:
 									Message(Message const & src);
 		Message &					operator=(Message const & rhs);
 };

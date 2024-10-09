@@ -48,25 +48,18 @@ void handle_sigint(int sig)
 	Logger::warning("CTRL + C caught, Server is starting shutdown procedure ...", "");
 }
 
-// static void	debugFakeVirtualServer()
-// {
-// 	std::map<int, Client*>::iterator it = Client::clients.begin();
-// 	for (; it != Client::clients.end(); ++it)
-// 	{
-// 		if(it->second->getMsg(Client::REQ_MSG)->getState() == COMPLETE
-// 			&& it->second->getClientState() != Client::DELETEME)
-// 	  		it->second->setClientState(Client::DO_RESPONSE);	
-// 	}
-// }
-
 bool	shutdownServer()
 {
 	// SETS THE STATE OF ALL CLIENTS TO DELETEME
 	if (flag == 1)
 	{
+		Logger::info("Number of active clients: ", Client::clients.size());
 		std::map<int, Client*>::iterator it = Client::clients.begin();
 		for (; it != Client::clients.end(); ++it)
+		{
+			Logger::info("Trying to shut down Client: ", it->second->getId());
 			it->second->setClientState(Client::DELETEME);
+		}
 		flag = 2;
 	}
 

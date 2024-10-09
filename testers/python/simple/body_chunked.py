@@ -10,7 +10,7 @@ headers = {
 }
 
 # Start the request without sending the body yet
-conn.putrequest("POST", "/cgi-bin/hello.py")
+conn.putrequest("POST", "/cgi-bin/print_body.py")
 for header, value in headers.items():
     conn.putheader(header, value)
 conn.endheaders()

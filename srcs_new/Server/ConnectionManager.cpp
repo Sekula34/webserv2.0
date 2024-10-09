@@ -167,7 +167,8 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 			Logger::warning("sending sig TERM to child", "");
 			kill(client.getChildPid(), SIGTERM);
 		}
-		if (client.getWaitReturn() != 0 || client.getCgiFlag() == false)
+		if ((client.getWaitReturn() != 0 || client.getCgiFlag() == false)
+			&& client.getClientState() != Client::DELETEME)
 			client.setClientState(Client::DO_RESPONSE);
 	}
 
