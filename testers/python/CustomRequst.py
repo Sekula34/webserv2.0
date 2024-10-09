@@ -54,7 +54,7 @@ def no_host_request():
 
 
 def short_invalid_request():
-	req = CustomRequest("Short Invalid Request", "get", 400)
+	req = CustomRequest("Short Invalid Request", "GET\r\n", 400)
 	return(req.send())
 
 def phantom_port():
