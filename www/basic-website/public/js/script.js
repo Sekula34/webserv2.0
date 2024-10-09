@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const name = nameInput.value;
 		const email = emailInput.value;
 		if (name && email) {
-			fetch(`../../cgi-bin/register_name.cgi`, {
+			fetch(`../../cgi-bin/register_name.py`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		clearOutput(); // Clear output area before showing search result
 		const name = nameInput.value;
 		if (name) {
-			fetch(`../../cgi-bin/search_name.cgi?name=${encodeURIComponent(name)}`)
+			fetch(`../../cgi-bin/search_name.py?name=${encodeURIComponent(name)}`)
 				.then(response => response.text())
 				.then(data => {
 					const cleanData = stripHtmlTags(data); // Strip HTML tags from the response

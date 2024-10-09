@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Fetch and display the list of files
 	function fetchFiles() {
-		fetch('../../cgi-bin/list_files.cgi')
+		fetch('../../cgi-bin/list_files.py')
 			.then(response => response.json())
 			.then(files => {
 				updateFileList(files); // Use the common function to format and display files
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const formData = new FormData();
 		formData.append('file', fileInput.files[0]);
 
-		fetch('../../cgi-bin/upload_file.cgi', {
+		fetch('../../cgi-bin/upload_file.py', {
 			method: 'POST',
 			body: formData,
 		})
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Handle file deletion using GET request
 	function deleteFile(fileName) {
-		fetch(`../../cgi-bin/delete_file.cgi?file=${encodeURIComponent(fileName)}`, {
+		fetch(`../../cgi-bin/delete_file.py?file=${encodeURIComponent(fileName)}`, {
 			method: 'GET', // Use GET instead of DELETE
 		})
 		.then(response => response.json())
