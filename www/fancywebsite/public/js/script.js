@@ -36,39 +36,43 @@ document.addEventListener("DOMContentLoaded", function () {
 		return str.replace(/<\/?[^>]+(>|$)/g, ""); // Basic regex to remove HTML tags
 	}
 
-	// Handle Register button click (POST request)
-	registerButton.addEventListener("click", function () {
-		clearOutput(); // Clear output area before action
-		const name = nameInput.value;
-		const email = emailInput.value;
-		if (name && email) {
-			fetch(`../../cgi-bin/register_name.cgi`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-				body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`
+// Handle Register button click (POST request)
+registerButton.addEventListener("click", function () {
+	clearOutput(); // Clear output area before action
+	const name = nameInput.value;
+	const email = emailInput.value;
+	if (name && email) {
+		const body = `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+		console.log(`Sending data: ${body}`);  // Log the data being sent
+
+		fetch(`../../cgi-bin/register_name.py`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: body
+		})
+			.then(response => response.text())
+			.then(data => {
+				alert('Name and email registered successfully!');
+				resetPage(); 
 			})
-				.then(response => response.text())
-				.then(data => {
-					alert('Name and email registered successfully!');
-					resetPage(); 
-				})
-				.catch(error => {
-					console.error('Error registering name:', error);
-				});
-		} else {
-			nameInput.reportValidity();
-			emailInput.reportValidity();
-		}
-	});
+			.catch(error => {
+				console.error('Error registering name:', error);
+			});
+	} else {
+		nameInput.reportValidity();
+		emailInput.reportValidity();
+	}
+});
+
 
 	// Handle Search button click (GET request)
 	searchButton.addEventListener("click", function () {
 		clearOutput(); // Clear output area before showing search result
 		const name = nameInput.value;
 		if (name) {
-			fetch(`../../cgi-bin/search_name.cgi?name=${encodeURIComponent(name)}`)
+			fetch(`../../cgi-bin/search_name.py?name=${encodeURIComponent(name)}`)
 				.then(response => response.text())
 				.then(data => {
 					const cleanData = stripHtmlTags(data); // Strip HTML tags from the response

@@ -87,19 +87,20 @@ void	clearBuffer(char* buffer)
 		buffer[i] = 0;
 }
 
-// static void		skipHeader(Message* message, std::list<Node>::iterator& it)
+// Helper function for _sendMsg
 static void		skipHeader(Message* message)
 {
 	RequestHeader& header = *static_cast<RequestHeader*>(message->getHeader());
 	std::string method = header.getRequestLine().requestMethod;
 	if (method == "POST")
 	{
-		// [...] here is the const cast logic to remove the constness of it
+		// skip the header since we need to send the body.
 		message->advanceIterator();
 	}
 }
 
-// TODO: Check if message can be NULL
+// Method to send messages.
+// This function doesnt differentiate if its a Browser or if it's a cgi script.
 void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 {
  	int sendValue = 0;
@@ -108,15 +109,9 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	if (client.getCgiFlag() == true && client.getWaitReturn() != 0 && client.getClientState() == Client::DO_RESPONSE)
 		return ;
 	const std::list<Node>::iterator& it = message->getIterator();
-	// START TESTING
-	// std::list<Node>::iterator it = message->getIterator();
-	// if (fdData.type == FdData::TOCHILD_FD && message->getBodyString().empty() == false)
-	// 	++it;
-	// if (fdData.type == FdData::TOCHILD_FD && it->getType() == HEADER && message->getBodyString().empty() == false)
-	// 	++it;
+	// Skipp message header if its post request to cgi
 	if (fdData.type == FdData::TOCHILD_FD && it->getType() == HEADER)
 		skipHeader(message);
-	//END TESTING
 
 	sendValue = send(fdData.fd, it->getString().c_str() + message->getBytesSent(), it->getString().size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
