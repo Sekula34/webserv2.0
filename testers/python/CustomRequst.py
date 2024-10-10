@@ -73,21 +73,21 @@ def no_host():
 	return(req.send())
 
 def authorization_not_supported():
-		curl_request = "GET / HTTP/1.1\r\n\
+	curl_request = "GET / HTTP/1.1\r\n\
 Host:localhost:9090\r\n\
 Authorization: SomeAuthorization\r\n\
 User-Agent: CustomClient\r\n\r\n"
-		req = CustomRequest("Authorization", curl_request, 403)
-		return(req.send())
+	req = CustomRequest("Authorization", curl_request, 403)
+	return(req.send())
 
 def transfer_encoding_and_content_length():
-		curl_request = "GET / HTTP/1.1\r\n\
+	curl_request = "GET / HTTP/1.1\r\n\
 Host:localhost:9090\r\n\
 Content-Length: 50\r\n\
 Transfer-Encoding: chunked\r\n\
 User-Agent: CustomClient\r\n\r\n"
-		req = CustomRequest("Transfer encoding and content Length", curl_request, 400)
-		return(req.send())
+	req = CustomRequest("Transfer encoding and content Length", curl_request, 400)
+	return(req.send())
 
 def main():
 	response = authorization_not_supported()

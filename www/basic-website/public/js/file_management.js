@@ -5,10 +5,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Fetch and display the list of files
 	function fetchFiles() {
-		fetch('../../cgi-bin/list_files.py')
-			.then(response => response.json())
-			.then(files => {
-				updateFileList(files); // Use the common function to format and display files
+		fetch(`../../cgi-bin/list_files.py`)
+			.then(response => response.text()) // Read the response as plain text first
+			.then(text => {
+				console.log("Raw response:", text); // Log the raw response for inspection
+				const json = JSON.parse(text); // Attempt to parse it as JSON
+				updateFileList(json); // Use the common function to format and display files
 			})
 			.catch(error => console.error('Error fetching files:', error));
 	}

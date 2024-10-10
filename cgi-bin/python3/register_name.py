@@ -1,5 +1,108 @@
 #!/usr/bin/env python3
 
+import cgi
+import cgitb
+import html
+import os
+
+cgitb.enable()  # Enable debugging
+
+# Set the content-type header for HTTP response
+print("Content-Type: text/html\n")
+
+# Parse the form data for both GET and POST
+form = cgi.FieldStorage()
+name = form.getvalue("name")
+email = form.getvalue("email")
+
+# Safely escape the input to avoid HTML injection
+if name and email:
+	safe_name = html.escape(name)
+	safe_email = html.escape(email)
+
+	# File path to the database HTML file
+	database_file = "../../www/basic-website/public/pages/database.html"
+
+	# Check if the script can access the file
+	# if not os.access(database_file, os.R_OK | os.W_OK):
+	# 	print(f"<p>Error: Script does not have read/write access to {database_file}</p>")
+	# else:
+	# 	print(f"<p>Script has read/write access to {database_file}</p>")
+
+	try:
+		# Append the new name to the HTML file inside the <ul> element
+		with open(database_file, "r+") as file:
+			lines = file.readlines()
+			ul_found = False
+			
+			# Find the line where the <ul id="namesList"> tag is located
+			for i, line in enumerate(lines):
+				if '<ul id="namesList">' in line:
+					ul_found = True
+					# Insert the new name just after the <ul> opening tag
+					# print(f"<p>Inserting at line {i + 1} in database.html</p>")
+					lines.insert(i + 1, f"        <li>Name: {safe_name}, Email: {safe_email}</li>\n")
+					break
+			
+			if not ul_found:
+				print("") # print("<p>Error: <ul id=\"namesList\"> not found in database.html</p>")
+			else:
+				# Move the file pointer to the beginning and write updated content
+				file.seek(0)
+				file.writelines(lines)
+				print("<p>Name and email registered successfully!</p>")
+
+	except Exception as e:
+		# Output error message
+		print(f"<p>Error registering name and email: {str(e)}</p>")
+else:
+	print("<p>Invalid data submitted.</p>")
+
+# ==========================================================================
+
+""" #!/usr/bin/env python3
+
+import os
+import cgi
+import cgitb
+
+cgitb.enable()
+
+# Define the path to your log file
+log_file = "/tmp/cgi_debug.log"
+
+# Function to log messages to a file
+def log_message(message):
+    with open(log_file, "a") as log:
+        log.write(f"{message}\n")
+
+log_message("Script started")
+
+# Print the Content-Type header for HTTP response
+print("Content-Type: text/html\n")
+
+# Log environment variables
+content_length = os.environ.get('CONTENT_LENGTH', '0')
+log_message(f"CONTENT_TYPE: {os.environ.get('CONTENT_TYPE')}")
+log_message(f"CONTENT_LENGTH: {content_length}")
+log_message(f"REQUEST_METHOD: {os.environ.get('REQUEST_METHOD')}")
+
+# Initialize the FieldStorage object
+form = cgi.FieldStorage()
+
+# Inspect the keys and values parsed by FieldStorage
+log_message(f"FieldStorage keys: {list(form.keys())}")
+name = form.getvalue("name")
+email = form.getvalue("email")
+log_message(f"Extracted name: {name}, email: {email}")
+
+# Output a simple message to the browser
+print("<p>Check the server logs for details.</p>") """
+
+# ==========================================================================
+
+""" #!/usr/bin/env python3
+
 import os
 import sys
 import cgitb
@@ -35,7 +138,7 @@ log_message(f"Extracted name: {name}, email: {email}")
 
 # Output a simple response
 print("Content-Type: text/html\n")
-print("<p>Check the server logs for details.</p>")
+print("<p>Check the server logs for details.</p>") """
 
 # ==========================================================================
 
