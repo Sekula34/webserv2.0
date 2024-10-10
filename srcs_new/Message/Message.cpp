@@ -343,7 +343,10 @@ void	Message::_parseNode()
 
 	if ((_it->getType() == LCHUNK && !_trailer)
 		|| _it->getType() == BODY || _it->getType() == TRAILER)
+	{
 		_state = COMPLETE;
+		Logger::info("Body Complete:", "\n" + this->getBodyString()); // FIXME: This is new
+	}
 
 	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
