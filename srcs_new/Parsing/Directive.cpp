@@ -24,7 +24,7 @@ const std::string Directive:: _validLocationDirectives[] = {"error_page", "clien
 "autoindex", "index", "limit_except", "root", "extension", "upload_folder"};
 
 //directive that can be present only once
-const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension"}; //TODO: add upload_folder here but be carefull with checking Uploads cuzz this is default
+const std::string Directive::_uniqueDirectives[] = {"client_max_body_size", "autoindex", "root", "limit_except", "extension", "upload_folder"};
 
 const std::string Directive:: _validHttpMethods[] = {"GET", "POST", "DELETE"};
 
@@ -461,7 +461,7 @@ void Directive::_applyListen(DefaultSettings& settings)
 		std::ostringstream oss;
 		oss << "[" << getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
 		oss << getDirectiveLineNum();
-		Logger::error(oss.str(), true);
+		Logger::error(oss.str(), "");
 		throw Configuration::InvalidConfigFileException();
 	}
 	settings.addListenPort(portNumber);
