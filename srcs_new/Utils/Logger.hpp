@@ -141,7 +141,8 @@ class Logger
 			oss << std::endl << getCharSequence(fancyTitle.size(), '=') << std::endl;
 			return oss;
 		}
-		static void chars(std::string message, bool newline);
+		// static void chars(std::string message, bool newline); // FIXME: MR: Maybe We also like to "make" newline while also printing its value (se function below)
+		static void chars(std::string message, int mode); // MR: Proposed change
 		static std::string 						createFancyTitle(const std::string title, char c = '-', size_t numberOfChars = 10);
 		static std::string 						getCharSequence(const size_t numberOfChars = 10, char c = '-');
 
