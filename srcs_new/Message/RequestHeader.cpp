@@ -5,6 +5,7 @@
 #include "../Parsing/ParsingUtils.hpp"
 #include "../Utils/Logger.hpp"
 #include "AHeader.hpp"
+#include "../Utils/FileUtils.hpp"
 
 std::string RequestHeader::getFullRequest(const std::string& message)
 {
@@ -228,6 +229,12 @@ bool RequestHeader::_checkRequestStruct(void)
 	{
 		Logger::warning("Not valid protocol", true);
 		p_setHttpStatusCode(505);
+		return false;
+	}
+	if(FileUtils::isValidName(_requestLineElements.requestTarget) == false)
+	{
+		Logger::error("Requested location contain path traversal or is empty ", _requestLineElements.requestTarget);
+		p_setHttpStatusCode(400);
 		return false;
 	}
 	return true;

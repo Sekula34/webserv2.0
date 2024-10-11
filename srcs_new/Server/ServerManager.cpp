@@ -21,6 +21,7 @@
 #include "ResponseGenerator.hpp"
 #include <cstdlib> // For strtol
 #include <cerrno> // For errno.
+#include <new> // For std::bad_alloc
 
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
@@ -198,7 +199,16 @@ void ServerManager::loop()
 		}
 		if(client.getClientState() == Client::DO_RESPONSE)
 		{
-			ResponseGenerator::generateClientResponse(client);
+			try 
+			{
+				ResponseGenerator::generateClientResponse(client);
+
+			}
+			catch(std::bad_alloc& a)
+			{
+				Logger::error("Bad alloc from genereting Client Response Catched",a.what());
+				client.setClientState(Client::DELETEME);
+			}
 			//client.setClientState(Client::DELETEME);
 			//_createResponse(client);
 			// CREATE RESPONSE
