@@ -1,6 +1,7 @@
 #include "FileUtils.hpp"
 #include <asm-generic/errno.h>
 #include <cerrno>
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -14,6 +15,25 @@
 
 
 std::string FileUtils::_configFilePath;
+
+
+const std::string FileUtils::getFileExtension(const std::string &fullFileName)
+{
+	size_t extensionPos = fullFileName.rfind('.');
+	if(extensionPos == std::string::npos)
+		return ("");
+	const std::string& fileExtension = fullFileName.substr(extensionPos);
+	Logger::warning("file extension is", fileExtension);
+	return fileExtension;
+}
+const std::string FileUtils::getFileName(const std::string& fullFileName)
+{
+	const std::string& fileExtension = getFileExtension(fullFileName);
+	if(fileExtension == "")
+		return fullFileName;
+	const std::string& fileName = fullFileName.substr(0, fullFileName.size() - fileExtension.size());
+	return fileName;
+}
 
 void FileUtils::setConfigFilePath(const std::string &configFilePath)
 {

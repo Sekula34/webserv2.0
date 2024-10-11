@@ -12,7 +12,9 @@ class FileUtils
 			TXT,
 			UNKOWN 
 		};
-
+		
+		static const std::string getFileExtension(const std::string& fullFileName);
+		static const std::string getFileName(const std::string& fullFileName);
 		static void setConfigFilePath(const std::string &configFilePath);
 		static const std::string& getConfigFilePath(); 
 		static bool isPathValid(const std::string relativeFilePath);
