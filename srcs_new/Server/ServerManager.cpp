@@ -6,7 +6,6 @@
 #include "VirtualServer.hpp"
 #include "../Parsing/Token.hpp"
 #include <cstddef>
-#include <new>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -22,6 +21,7 @@
 #include "ResponseGenerator.hpp"
 #include <cstdlib> // For strtol
 #include <cerrno> // For errno.
+#include <new> // For std::bad_alloc
 
 // #include "../Utils/Logger.hpp"
 // #include "../Utils/HttpStatusCode.hpp"
