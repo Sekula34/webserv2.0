@@ -144,7 +144,7 @@ void	Message::_bodyToChunks(const std::string& body)
 
 	std::list<Node>::iterator currentNode;
 	size_t	optimalSize = _calcOptimalChunkSize(body);
-	size_t	remainSize = body.size();	
+	size_t	remainSize = body.size();
 	size_t	sizeInNode = 0;
 	size_t	strPos = 0;
 	
@@ -397,6 +397,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 
 	if (body.size() < MAX_BODY_SIZE)
 	{
+		Logger::error("------ TADA!! ERROR FOUND ------","");
 		header->setOneHeaderField("Content-Length", ParsingUtils::toString(body.size()));
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		// Logger::chars(header->turnResponseHeaderToString(), true);
@@ -407,6 +408,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 	}
 	else
 	{
+		Logger::error("------ VOILA!! ERROR NOT FOUND ------","");
 		header->setOneHeaderField("Transfer-Encoding", "chunked");
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		_bodyToChunks(body);

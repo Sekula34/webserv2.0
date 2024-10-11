@@ -116,6 +116,17 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	sendValue = send(fdData.fd, it->getString().c_str() + message->getBytesSent(), it->getString().size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
 
+	// START TESTING
+	std::string whichFd;
+	if (fdData.type == FdData::CLIENT_FD)
+		whichFd = "Sent to Client";
+	else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
+		whichFd = "Sent to Child";
+	whichFd += ": ---------------- This is what is being sent ---------------- Bytes: ";
+	Logger::warning(whichFd, sendValue);
+	Logger::chars(it->getString().substr(message->getBytesSent(), sendValue), 3);
+	// END TESTING
+
 	if (sendValue > 0)
 	{
 		// Logger::info("Succesfully sent bytes:", sendValue);
@@ -148,7 +159,17 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	clearBuffer(_buffer);
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
-	
+	// START TESTING
+	std::string whichFd;
+	if (fdData.type == FdData::CLIENT_FD)
+		whichFd = "Recv from Client";
+	else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
+		whichFd = "Recv from Child";
+	whichFd += ": -------------- This is what is being received -------------- Bytes: ";
+	Logger::warning(whichFd, recValue);
+	Logger::chars(_buffer, 3);
+	// END TESTING
+
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{

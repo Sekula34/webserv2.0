@@ -47,6 +47,13 @@ void ResponseGenerator::generateClientResponse(Client &client)
 
 		// CREATES RESPONSE MESSAGE AND CHUNKS THE BODY IF NECESSARY
 		message->stringsToChain(header, oneResponse.getResponse());
+		// START TESTING
+		if (message->getErrorCode() == 502)
+		{
+			Logger::error("Printing whole message for client with error code 502", "");
+			message->printChain();
+		}
+		// END TESTING
 	}
 
 	else // THIS MEANS CGI RAN SUCCESSFULLY
