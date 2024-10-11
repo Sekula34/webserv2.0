@@ -143,7 +143,9 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		catch(std::bad_alloc& a)
 		{
 			Logger::error("in create Cgi Header: ", a.what());
-			client.setClientState(Client::DELETEME);
+			client.setErrorCode(500);
+			client.setClientState(Client::DO_RESPONSE);
+			//TODO: before it was only setClinetState(Client::DELETEME)
 		}
 	}
 
