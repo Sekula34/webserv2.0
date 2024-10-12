@@ -28,22 +28,6 @@ std::ostringstream&	Logger::log(std::string title, std::string type, e_color col
 	return Logger::log(title, "", type, color);
 }
 
-void printEscapeCharacters(const std::string& str) {
-	for (std::string::size_type i = 0; i < str.size(); ++i) {
-		char c = str[i];
-		switch (c) {
-			case '\n': std::cout << "\\n"; break;
-			case '\r': std::cout << "\\r"; break;
-			case '\t': std::cout << "\\t"; break;
-			case '\\': std::cout << "\\\\"; break;
-			case '\"': std::cout << "\\\""; break;
-			default:
-				std::cout << c;
-				break;
-		}
-	}
-}
-
 std::string Logger::createFancyTitle(const std::string title, char c, size_t numberOfChars)
 {
 	std::ostringstream oss;
@@ -52,7 +36,35 @@ std::string Logger::createFancyTitle(const std::string title, char c, size_t num
 	oss << getCharSequence(numberOfChars, c);
 	return oss.str();
 }
-void Logger::chars(std::string message, bool newline)
+
+// void printEscapeCharacters(const std::string& str) // MR: Old function prototype
+void printEscapeCharacters(const std::string& str, int mode)
+{
+	char previous = '\0';
+	for (std::string::size_type i = 0; i < str.size(); ++i)
+	{
+		char c = str[i];
+		switch (c)
+		{
+			case '\n': std::cout << "\\n"; break;
+			case '\r': std::cout << "\\r"; break;
+			case '\t': std::cout << "\\t"; break;
+			case '\\': std::cout << "\\\\"; break;
+			case '\"': std::cout << "\\\""; break;
+			default: std::cout << c; break;
+		}
+		// MR: START Proposed changes
+		if (mode == 2 && c == '\n')
+			std::cout << std::endl;
+		else if (mode == 3 && c == '\n' && (previous == '\r' || i == str.size() - 1))
+			std::cout << std::endl;
+		previous = c;
+		// MR: END Proposed changes
+	}
+}
+
+// void Logger::chars(std::string message, bool newline) // MR: Old function prototype
+void Logger::chars(std::string message, int mode)
 {
 	if(_isPrintingAllowed() == false)
 	{
@@ -61,10 +73,13 @@ void Logger::chars(std::string message, bool newline)
 	std::cout << _colorMap[PURPLE];
 	std::cout << _printCurrentTime().str();
 	std::cout <<"CHARS: " << _colorMap[RESET];
-	printEscapeCharacters(message);
-	if(newline == true)
+	// printEscapeCharacters(message,);
+	// if(newline == true)
+	printEscapeCharacters(message, mode); // MR: Proposed change
+	if(mode == true)
 		std::cout << std::endl;
 }
+
 std::string  Logger::getCharSequence(const size_t numberOfChars, char c)
 {
 	std::ostringstream oss;

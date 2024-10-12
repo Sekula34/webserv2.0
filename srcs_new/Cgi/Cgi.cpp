@@ -406,13 +406,6 @@ void	Cgi::_stopCgiSetErrorCode(Client& client, int code)
 {
 	Logger::warning("stopping CGI loop for Client with ID: ", client.getId());
 	client.setClientState(Client::DO_RESPONSE);
-	// if (client.checkTimeout() == true)
-	// {
-	// 	std::cout << "setting error code to 504" << std::endl;
-	// 	client.setErrorCode(504);
-	// 	client.setCgiFlag(false);
-	// 	return ;
-	// }
 	if (client.getErrorCode() == 0)
 	{
 		if (client.checkTimeout() == false)
