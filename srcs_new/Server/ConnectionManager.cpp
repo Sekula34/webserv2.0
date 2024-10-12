@@ -159,6 +159,10 @@ static bool	safeToDelete(Client& client)
 		&& client.checkTimeout() == false
 		&& client.getWaitReturn() == 0)
 		return (true);
+
+	if (client.checkTimeout(MAX_TIMEOUT * 2) == false)
+		return (true);
+	
 	return (false);
 }
 
