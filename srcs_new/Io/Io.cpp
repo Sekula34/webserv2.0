@@ -4,7 +4,7 @@
 # include "../Message/Node.hpp"
 # include "../Utils/Logger.hpp"
 # include "../Message/RequestHeader.hpp"
-#include <unistd.h>
+# include <unistd.h>
 
 
 //==========================================================================//
@@ -121,14 +121,14 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// START TESTING
-	std::string whichFd;
-	if (fdData.type == FdData::CLIENT_FD)
-		whichFd = "Sent to Client";
-	else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
-		whichFd = "Sent to Child";
-	whichFd += ": ---------------- This is what is being sent ---------------- Bytes: ";
-	Logger::warning(whichFd, sendValue);
-	Logger::chars(it->getString().substr(message->getBytesSent(), sendValue), 3);
+	// std::string whichFd;
+	// if (fdData.type == FdData::CLIENT_FD)
+	// 	whichFd = "Sent to Client";
+	// else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
+	// 	whichFd = "Sent to Child";
+	// whichFd += ": ---------------- This is what is being sent ---------------- Bytes: ";
+	// Logger::warning(whichFd, sendValue);
+	// Logger::chars(it->getString().substr(message->getBytesSent(), sendValue), 3);
 	// END TESTING
 
 	if (sendValue > 0)
@@ -186,14 +186,25 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		catch(std::bad_alloc& a)
 		{
 			Logger::error("in create Cgi Header: ", a.what());
-			client.setErrorCode(500);
-			client.setClientState(Client::DO_RESPONSE);
+			// client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
+			client.setClientState(Client::CRITICAL_ERROR);
+			// recValue = -1;
+			// client.setClientState(Client::DELETEME);
+			// client.setClientState(Client::RESETME);
+			// client.setCgiFlag(false);
+			// return ;
 			//TODO: before it was only setClinetState(Client::DELETEME)
 		}
 	}
 
 	if (client.getCgiFlag() == true && client.getWaitReturn() == 0)
 		return ;
+
+	// if (client.getWaitReturn() != 0 && client.getClientState() == Client::RESETME)
+	// {
+	// 	client.setClientState(Client::DELETEME);
+	// 	return ;
+	// }
 
 	// FINISHED READING because either complete message, or connection was shutdown
 	if (recValue <= 0 || message->getState() == COMPLETE)

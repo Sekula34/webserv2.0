@@ -372,6 +372,13 @@ void	Cgi::_handleReturnStatus(int status, Client& client)
 			int exitstatus = WEXITSTATUS(status);
 			Logger::warning("child exited with code: ", exitstatus);
 			Logger::warning("Child ID: ", client.getId());
+
+			if (client.getClientState() == Client::CRITICAL_ERROR)
+			{
+				client.setClientState(Client::DELETEME);
+				client.setCgiFlag(false);
+				return ;
+			}
 			if (exitstatus != 0)
 				_stopCgiSetErrorCode(client, 502);
 		}
@@ -405,6 +412,7 @@ void	Cgi::_waitForChild(Client& client)
 void	Cgi::_stopCgiSetErrorCode(Client& client, int code)
 {
 	Logger::warning("stopping CGI loop for Client with ID: ", client.getId());
+
 	client.setClientState(Client::DO_RESPONSE);
 	if (client.getErrorCode() == 0)
 	{
@@ -486,7 +494,8 @@ static bool	isAllowedCgi(Client& client)
 	// NOT: SEND TO CGI OR RECEIVE FROM CGI OR REACHED TIMEOUT WHILE RUNNING CGI
 	if (!((client.getClientState() == Client::DO_CGIREC
 		|| client.getClientState() == Client::DO_CGISEND)
-		|| (client.checkTimeout() == false && client.getCgiFlag() == true)))
+		|| (client.checkTimeout() == false && client.getCgiFlag() == true)
+		|| client.getClientState() == Client::CRITICAL_ERROR))
 	{
 		return (false);
 	}

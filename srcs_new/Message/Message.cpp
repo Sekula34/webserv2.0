@@ -462,6 +462,7 @@ Message &	Message::operator=(Message const & rhs)
 	//std::cout << "Message Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
+		// _bytesSent = rhs._bytesSent;
 	}
 	return (*this);
 }

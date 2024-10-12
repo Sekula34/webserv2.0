@@ -43,7 +43,7 @@ const int& ConnectionManager::getEpollFd()
 // Helper function to remove fd to epoll
 static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event* events)
 {
-	// Logger::warning("removing fd from epoll: ", fd);
+	Logger::warning("removing fd from epoll: ", fd);
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
 		Logger::error("The following FD could not be removed from epoll: ", fd);
@@ -142,7 +142,8 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 static bool	safeToDelete(Client& client)
 {
 	// CLIENT STATE SAIS DELETE ME
-	if(client.getClientState() == Client::DELETEME && client.getCgiFlag() == false)	
+	if((client.getClientState() == Client::DELETEME && client.getCgiFlag() == false)
+	|| (client.getClientState() == Client::DELETEME && client.getWaitReturn() != 0))	
 		return (true);
 
 	// NO CGI PROCESS RUNNING AND CLIENT HAS TIMED OUT
@@ -151,6 +152,22 @@ static bool	safeToDelete(Client& client)
 		&& client.getWaitReturn() == 0)
 		return (true);
 	return (false);
+}
+
+void	ConnectionManager::_removeFromEpollUnclosedFds(Client& client)
+{
+	std::vector<FdData>& fds = client.getClientFds();
+	std::vector<FdData>::iterator it = fds.begin();
+
+	for (; it != fds.end(); it++)
+	{
+		if (it->state != FdData::CLOSED)
+		{
+			it->state = FdData::CLOSED;
+			epollRemoveFd(_epollFd, it->fd, _events);
+			close(it->fd);
+		}
+	}
 }
 
 // Method for _epollLoop() to update Client Fd state (e_fdState)
@@ -187,7 +204,9 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 
 	if (safeToDelete(client))
 	{
-		epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
+		// epollRemoveFd(_epollFd, client.getFdDataByType(FdData::CLIENT_FD).fd, _events);
+		_removeFromEpollUnclosedFds(client);
+
 		delete &client; // delete needs an address
 		return ;
 	}
@@ -215,6 +234,7 @@ void		ConnectionManager::_addChildSocketsToEpoll()
 		}
 	}
 }
+
 
 void		ConnectionManager::_handleCgiFds(const int& idx)
 {

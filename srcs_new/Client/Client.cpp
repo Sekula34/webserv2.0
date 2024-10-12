@@ -168,8 +168,33 @@ void	Client::setCgiFlag(bool b)
 	_cgiFlag = b;
 }
 
+static std::string	clientState(int num)
+{
+	switch(num)
+	{
+		case 0:
+			return ("DO REQUEST");
+		case 1:
+			return ("DO CGI RECEIVE");
+		case 2:
+			return ("DO CGI SEND");
+		case 3:
+			return ("DO RESPONSE");
+		case 4:
+			return ("RESETME");
+		case 5:
+			return ("DELETEME");
+		case 6:
+			return ("CRITICAL_ERROR");
+		default:
+			return ("unknown state");
+	}
+}
+
 void	Client::setClientState(e_clientState state)
 {
+
+	std::cout << "changing Client state from: " << clientState(_clientState) << " to: " << clientState(state) <<  std::endl;
 	// std::cout << "setting client state to: " << state << std::endl;
 	_clientState = state;
 }
@@ -308,10 +333,10 @@ void	Client::closeClientFds()
 	std::vector<FdData>::iterator it = _clientFds.begin();
 	for (; it != _clientFds.end(); ++it)
 	{
-	
 		if (it->state != FdData::CLOSED)
 		{
 			close(it->fd);
+			Logger::info("Closing Fd: ", it->fd);
 			it->state = FdData::CLOSED;
 		}
 	}
@@ -344,6 +369,8 @@ _start(std::clock()),
 _virtualServer(NULL)
 {}
 
+
+
 // Destructor
 Client::~Client()
 {
@@ -353,7 +380,6 @@ Client::~Client()
 	_responseMsg = NULL;
 	// delete _cgiResponseMsg;
 	// _cgiResponseMsg = NULL;
-	Logger::info("Closing Fd: ", getFdDataByType(FdData::CLIENT_FD).fd);
 	closeClientFds();
 	clients.erase(getFdDataByType(FdData::CLIENT_FD).fd);
 	Logger::info("Client destructed, unique ID: ", _id);
