@@ -5,10 +5,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Fetch and display the list of files
 	function fetchFiles() {
-		fetch('../../cgi-bin/list_files.cgi')
-			.then(response => response.json())
-			.then(files => {
-				updateFileList(files); // Use the common function to format and display files
+		fetch(`../../cgi-bin/list_files.py`)
+			.then(response => response.text()) // Read the response as plain text first
+			.then(text => {
+				console.log("Raw response:", text); // Log the raw response for inspection
+				const json = JSON.parse(text); // Attempt to parse it as JSON
+				updateFileList(json); // Use the common function to format and display files
 			})
 			.catch(error => console.error('Error fetching files:', error));
 	}
@@ -47,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const formData = new FormData();
 		formData.append('file', fileInput.files[0]);
 
-		fetch('../../cgi-bin/upload_file.cgi', {
+		fetch('../../cgi-bin/upload_file.py', {
 			method: 'POST',
 			body: formData,
 		})
@@ -62,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Handle file deletion using GET request
 	function deleteFile(fileName) {
-		fetch(`../../cgi-bin/delete_file.cgi?file=${encodeURIComponent(fileName)}`, {
+		fetch(`../../cgi-bin/delete_file.py?file=${encodeURIComponent(fileName)}`, {
 			method: 'GET', // Use GET instead of DELETE
 		})
 		.then(response => response.json())

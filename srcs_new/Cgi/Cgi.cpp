@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
+#include "../Server/VirtualServer.hpp" // For constructing DOCUMENT_ROOT
+
 extern volatile sig_atomic_t flag;
 
 //==========================================================================//
@@ -271,8 +273,17 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	envVec.push_back(line);
 
 	// root of document
-	line = "DOCUMENT_ROOT="; 
-	line += scriptLocation;
+	line = "DOCUMENT_ROOT=";
+	// line += scriptLocation;
+	// FIXME: MR: START OF PROPOSED CHANGES (instead of: line += scriptLocation)
+	const VirtualServer& server = *client.getVirtualServer();
+	const std::string& clientUriPath = requestHeader->urlSuffix->getPath();
+	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
+	bool found = false;
+	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	if(found == true)
+		line += it->getRoot();
+	// MR: END OF PROPOSED CHANGES
 	envVec.push_back(line);
 }
 

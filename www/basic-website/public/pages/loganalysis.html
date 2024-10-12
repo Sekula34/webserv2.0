@@ -22,7 +22,7 @@
 <!-- Form for Searching a Name (GET Request) -->
 <div class="form-group">
 	<h2>Search Name</h2>
-	<form action="/cgi-bin/log_request.cgi" method="get">
+	<form action="/cgi-bin/log_request.py" method="get">
 		<label for="searchName">Enter a name to search:</label>
 		<input type="text" id="searchName" name="searchName" required>
 		<button type="submit">Search</button>
@@ -32,7 +32,7 @@
 <!-- Form for Registering a Name and Email (POST Request) -->
 <div class="form-group">
 	<h2>Register Name and Email</h2>
-	<form action="/cgi-bin/log_request.cgi" method="post">
+	<form action="/cgi-bin/log_request.py" method="post">
 		<label for="name">Name:</label>
 		<input type="text" id="name" name="name" required>
 
@@ -46,7 +46,7 @@
 <!-- Form for Uploading a File (POST Request) -->
 <div class="form-group">
 	<h2>Upload a File</h2>
-	<form action="/cgi-bin/log_request.cgi" method="post" enctype="multipart/form-data">
+	<form action="/cgi-bin/log_request.py" method="post" enctype="multipart/form-data">
 		<label for="fileUpload">Choose a file to upload:</label>
 		<input type="file" id="fileUpload" name="fileUpload" required>
 		<button type="submit">Upload</button>

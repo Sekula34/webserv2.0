@@ -18,7 +18,7 @@ function handleFormSubmission() {
 	formData.append('text', textInput.value);
 
 	// Send the POST request using fetch
-	fetch('../../cgi-bin/save_text.cgi', {
+	fetch('../../cgi-bin/save_text.py', {
 		method: 'POST',
 		body: formData
 	})
