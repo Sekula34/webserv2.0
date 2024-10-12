@@ -19,7 +19,7 @@ int ConnectionManager::_epollFd = epoll_create(1);
 //==========================================================================//
 
 // Helper function to add fd to epoll
-static int		epollAddFd(const int& epollFd, const int& fd)
+static int		epollAddFd(Client* client, const int& epollFd, const int& fd)
 {
 	int ret;
 	// STRUCT NEEDED FOR EPOLL TO SAVE FLAGS INTO (SETTINGS)
@@ -29,7 +29,9 @@ static int		epollAddFd(const int& epollFd, const int& fd)
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = fd;
 
-	// Logger::warning("adding fd to epoll: ", fd);
+	Logger::warning("adding fd to epoll: ", fd);
+	if (client)
+		Logger::warning("in Client with ID: ", client->getId());
 	// ADDING LISTEN_SOCKET TO EPOLL WITH THE EV 'SETTINGS' STRUCT
 	ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
 	return (ret);
@@ -41,12 +43,16 @@ const int& ConnectionManager::getEpollFd()
 }
 
 // Helper function to remove fd to epoll
-static void	epollRemoveFd(const int& epollFd, const int& fd, struct epoll_event* events)
+static void	epollRemoveFd(Client& client, const int& epollFd, const int& fd, struct epoll_event* events)
 {
 	Logger::warning("removing fd from epoll: ", fd);
+	Logger::warning("In Client with ID: ", client.getId());
 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
 	if (epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, events) == -1)
+	{
 		Logger::error("The following FD could not be removed from epoll: ", fd);
+		Logger::error("In Client with ID: ", client.getId());
+	}
 		// throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
 }
 
@@ -79,7 +85,7 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 	}
 
 	// ADD CLIENT FD TO THE LIST OF FDS THAT EPOLL IS WATCHING FOR ACTIVITY
-	int ret = epollAddFd(_epollFd, clientFd);
+	int ret = epollAddFd(newClient, _epollFd, clientFd);
 	if (ret == -1)
 		delete newClient;
 }
@@ -94,7 +100,7 @@ void		ConnectionManager::_addServerSocketsToEpoll()
 	{
 		int fd = it->getSocketFd();
 		Logger::info("Adding to epoll the following server socket: ", fd);
-		ret = epollAddFd(_epollFd, fd);
+		ret = epollAddFd(NULL, _epollFd, fd);
 		if (ret == -1)
 			throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
 	}
@@ -164,7 +170,7 @@ void	ConnectionManager::_removeFromEpollUnclosedFds(Client& client)
 		if (it->state != FdData::CLOSED)
 		{
 			it->state = FdData::CLOSED;
-			epollRemoveFd(_epollFd, it->fd, _events);
+			epollRemoveFd(client, _epollFd, it->fd, _events);
 			close(it->fd);
 		}
 	}
@@ -228,7 +234,7 @@ void		ConnectionManager::_addChildSocketsToEpoll()
 			if ((itFd->type == FdData::TOCHILD_FD || itFd->type == FdData::FROMCHILD_FD)
 	   			&& itFd->state == FdData::NEW)
 			{
-				epollAddFd(_epollFd, itFd->fd);
+				epollAddFd(&currentClient, _epollFd, itFd->fd);
 				itFd->state = FdData::NONE;
 			}
 		}
@@ -248,7 +254,7 @@ void		ConnectionManager::_handleCgiFds(const int& idx)
 			continue ;
 		if (fdData.state == FdData::CLOSE)
 		{
-			epollRemoveFd(_epollFd, targetFd, _events);
+			epollRemoveFd(currentClient, _epollFd, targetFd, _events);
 			close(targetFd);
 			fdData.state = FdData::CLOSED;
 			return ;

@@ -164,14 +164,14 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// START TESTING
-	std::string whichFd;
-	if (fdData.type == FdData::CLIENT_FD)
-		whichFd = "Recv from Client";
-	else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
-		whichFd = "Recv from Child";
-	whichFd += ": -------------- This is what is being received -------------- Bytes: ";
-	Logger::warning(whichFd, recValue);
-	Logger::chars(_buffer, 3);
+	// std::string whichFd;
+	// if (fdData.type == FdData::CLIENT_FD)
+	// 	whichFd = "Recv from Client";
+	// else if (fdData.type == FdData::TOCHILD_FD || fdData.type == FdData::FROMCHILD_FD)
+	// 	whichFd = "Recv from Child";
+	// whichFd += ": -------------- This is what is being received -------------- Bytes: ";
+	// Logger::warning(whichFd, recValue);
+	// Logger::chars(_buffer, 3);
 	// END TESTING
 
 	// SUCCESSFUL READ -> CONCAT MESSAGE

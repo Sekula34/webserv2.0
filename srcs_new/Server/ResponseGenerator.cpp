@@ -69,7 +69,7 @@ void ResponseGenerator::generateClientResponse(Client &client)
 		// TODO: correct the Header instance in Message from CGI Response state to final state
 		ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
 		client.setCgiFlag(false);
-		Logger::info("string in response Header:\n", header->turnResponseHeaderToString());
+		// Logger::info("string in response Header:\n", header->turnResponseHeaderToString());
 		message->getChain().begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 	}
 
