@@ -194,8 +194,7 @@ static std::string	clientState(int num)
 void	Client::setClientState(e_clientState state)
 {
 
-	std::cout << "changing Client state from: " << clientState(_clientState) << " to: " << clientState(state) <<  std::endl;
-	// std::cout << "setting client state to: " << state << std::endl;
+	Logger::info("changing Client state to: ", clientState(state));
 	_clientState = state;
 }
 
