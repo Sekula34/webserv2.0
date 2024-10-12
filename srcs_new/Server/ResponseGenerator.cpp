@@ -242,7 +242,7 @@ static std::string	generateFilename(const std::string& queryString, const std::s
 		file.clear();
 		file.str("");
 		file << fileName << "_" << counter << fileExtension;
-		fullPath = uploadFolder + "/"+ file.str();
+		fullPath = uploadFolder + "/" + file.str();
 		exist = (stat(fullPath.c_str(), &buffer) == 0);
 		++counter;
 	}
