@@ -219,25 +219,34 @@ void ResponseGenerator::_generateHtml(const LocationSettings& location)
 // Helper function for _postHandler (POST request)
 // it generates a name based in: query_string, or time()
 // and appends counter to avoid duplicate overwrite.
-static std::string	generateFilename(const std::string& queryString)
+static std::string	generateFilename(const std::string& queryString, const std::string& uploadFolder)
 {
-	if (queryString.empty() == false)
-		return (queryString);
-	time_t now = time(NULL); // seconds since Epoch
-	std::ostringstream filename;
-	filename << "file_" << now << ".bin";
+	const time_t now = time(NULL);
+	std::string fileName = "file_" + ParsingUtils::toString(now);
+	std::string fileExtension(".bin");
+	if(queryString.empty() == false)
+	{
+		fileExtension = FileUtils::getFileExtension(queryString);
+		if(fileExtension == "")
+			fileExtension = ".bin";
+		fileName = FileUtils::getFileName(queryString);
+	}
+	std::ostringstream file;
+	file << fileName << fileExtension;
+	std::string fullPath = uploadFolder + "/" + file.str();
 	struct stat buffer;
-	bool exist = (stat(filename.str().c_str(), &buffer) == 0);
+	bool exist = (stat(fullPath.c_str(), &buffer) == 0);
 	size_t counter = 1;
 	while (exist)
 	{
-		filename.clear();
-		filename.str("");
-		filename << "file_" << now << "_" << counter << ".bin";
-		exist = (stat(filename.str().c_str(), &buffer) == 0);
+		file.clear();
+		file.str("");
+		file << fileName << "_" << counter << fileExtension;
+		fullPath = uploadFolder + "/" + file.str();
+		exist = (stat(fullPath.c_str(), &buffer) == 0);
 		++counter;
 	}
-	return (filename.str());
+	return (file.str());
 }
 
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
@@ -245,7 +254,7 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 	std::cout << "POST method executed" << std::endl;
 	Message& message = *(_client.getMsg(Client::REQ_MSG));
 	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
-	std::string filename = generateFilename(header.urlSuffix->getQueryParameters());
+	std::string filename = generateFilename(header.urlSuffix->getQueryParameters(), location.getUploadFolder());
 	std::string folderName = location.getUploadFolder();
 	filename  = folderName + "/" + filename;
 	std::ofstream outputFile(filename.c_str(), std::ios::binary);
