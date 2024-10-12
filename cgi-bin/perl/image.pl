@@ -1,6 +1,6 @@
 
 # Access the 'DOCUMENT_ROOT' environment variable
-my $document_root = $ENV{'DOCUMENT_ROOT'};
+my $document_root = $ENV{'PATH_INFO'};
 
 # Combine "/" + document_root + "/image.png"
 my $gif_image = $document_root . "/rainbow.png";

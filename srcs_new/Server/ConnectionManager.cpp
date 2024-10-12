@@ -133,6 +133,8 @@ static void	updateClientFds(Client& client, const int& epollIdx, const struct ep
 {
 	const int fd = events[epollIdx].data.fd;
 	FdData& fdData = client.getFdDataByFd(fd); 
+	if (fdData.state == FdData::CLOSED || fdData.state == FdData::CLOSE)
+		return ;
 	bool allowedToSend = events[epollIdx].events & EPOLLOUT;
 	bool allowedToReceive = events[epollIdx].events & EPOLLIN;
 	if (allowedToSend && !allowedToReceive)

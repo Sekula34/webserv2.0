@@ -21,7 +21,7 @@ sub encode_chunked {
 }
 
 # Access the 'DOCUMENT_ROOT' environment variable
-my $document_root = $ENV{'DOCUMENT_ROOT'} || ".";  # Default to current directory if not set
+my $document_root = $ENV{'PATH_INFO'} || ".";  # Default to current directory if not set
 
 # Specify the path to the image
 my $image_path = "$document_root/chunks.png";
