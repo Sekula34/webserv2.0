@@ -45,6 +45,14 @@ void ResponseGenerator::generateClientResponse(Client &client)
 		Logger::info("Response header:\n", header->turnResponseHeaderToString());
 		Logger::info("Response body (generated):\n", oneResponse.getResponse());
 
+		if (client.getErrorCode() != 0)
+		{
+			message->getChain().clear();
+			message->getChain().push_back(Node("", HEADER, false));
+			message->resetIterator();
+		}
+
+
 		// CREATES RESPONSE MESSAGE AND CHUNKS THE BODY IF NECESSARY
 		message->stringsToChain(header, oneResponse.getResponse());
 		// START TESTING

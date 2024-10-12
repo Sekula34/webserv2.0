@@ -88,16 +88,16 @@ void	clearBuffer(char* buffer)
 }
 
 // Helper function for _sendMsg
-static void		skipHeader(Message* message)
-{
-	RequestHeader& header = *static_cast<RequestHeader*>(message->getHeader());
-	std::string method = header.getRequestLine().requestMethod;
-	if (method == "POST")
-	{
-		// skip the header since we need to send the body.
-		message->advanceIterator();
-	}
-}
+// static void		skipHeader(Message* message)
+// {
+// 	RequestHeader& header = *static_cast<RequestHeader*>(message->getHeader());
+// 	std::string method = header.getRequestLine().requestMethod;
+// 	if (method == "POST")
+// 	{
+// 		// skip the header since we need to send the body.
+// 		message->advanceIterator();
+// 	}
+// }
 
 // Method to send messages.
 // This function doesnt differentiate if its a Browser or if it's a cgi script.
@@ -111,9 +111,13 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	const std::list<Node>::iterator& it = message->getIterator();
 	// Skipp message header if its post request to cgi
 	if (fdData.type == FdData::TOCHILD_FD && it->getType() == HEADER)
-		skipHeader(message);
+	{
+ 		message->advanceIterator();
+		// skipHeader(message);
+	}
 
-	sendValue = send(fdData.fd, it->getString().c_str() + message->getBytesSent(), it->getString().size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
+	if (it != message->getChain().end())
+		sendValue = send(fdData.fd, it->getString().c_str() + message->getBytesSent(), it->getString().size() - message->getBytesSent(), MSG_DONTWAIT | MSG_NOSIGNAL);
 	// sendValue = send(fdData.fd, messageStr.c_str() + message->getBytesSent(), 1, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// START TESTING
