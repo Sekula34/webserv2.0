@@ -56,44 +56,44 @@ class TestMyWebServer(unittest.TestCase):
 		answer = input(question)
 		return answer
 
-	def test_home_page(self):
+	def test_01_home_page(self):
 		TestMyWebServer.print_test_title("Home page")
 		response = TestMyWebServer.send_get("http://localhost:9090/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("Welcome to Server 9090", response.text)
 		Colors.test_passed()
 	
-	def test_404_page(self):
+	def test_02_404_page(self):
 		TestMyWebServer.print_test_title("Error 404")
 		response = TestMyWebServer.send_get("http://localhost:9090/idondtexist/")
 		self.assertEqual(response.status_code, 404)
 		Colors.test_passed()
 	
-	def test_405_page(self):
+	def test_03_405_page(self):
 		TestMyWebServer.print_test_title("Error 405")
 		response = requests.put("http://localhost:9090/")
 		self.assertEqual(response.status_code, 405)
 		Colors.test_passed()
 
-	def test_limit_except(self):
+	def test_04_limit_except(self):
 		TestMyWebServer.print_test_title("Limit except, Post request and only get is allowed")
 		response = requests.post("http://localhost:9090/onlyGet/")
 		self.assertEqual(response.status_code, 403)
 		Colors.test_passed()
 
-	def test_server_no_location(self):
+	def test_05_server_no_location(self):
 		TestMyWebServer.print_test_title("Server no location")
 		response = TestMyWebServer.send_get("http://localhost:8989/")
 		self.assertEqual(response.status_code, 200)
 		Colors.test_passed()
 
-	def test_server_no_location(self):
+	def test_06_server_no_location(self):
 		TestMyWebServer.print_test_title("Server no location test 2")
 		response = TestMyWebServer.send_get("http://localhost:8989/amanemoj/")
 		self.assertEqual(response.status_code, 404)
 		Colors.test_passed()
 	
-	def test_other_file(self):
+	def test_07_other_file(self):
 		TestMyWebServer.print_test_title("Files that are not part of location")
 		respones = TestMyWebServer.send_get("http://localhost:9090/secondSite.html")
 		self.assertEqual(respones.status_code, 200)
@@ -103,35 +103,35 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertIn("Third Site", respones.text)
 		Colors.test_passed()
 
-	def test_autoindex(self):
+	def test_08_autoindex(self):
 		TestMyWebServer.print_test_title("Testing autoindex")
 		response = TestMyWebServer.send_get("http://localhost:9090/autoindex/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("Auto index of folder:", response.text)
 		Colors.test_passed()
 
-	def test_autoindexSubfolder(self):
+	def test_09_autoindexSubfolder(self):
 		TestMyWebServer.print_test_title("Testing autoindex subfolder")
 		response = TestMyWebServer.send_get("http://localhost:9090/autoindex/subfolder/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("Auto index of folder:", response.text)
 		Colors.test_passed()
 
-	def test_autoindexThatHaveIndex(self):
+	def test_10_autoindexThatHaveIndex(self):
 		TestMyWebServer.print_test_title("Testing autoindex that have landing page")
 		response = TestMyWebServer.send_get("http://localhost:9090/autoindexPage/")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("No auto index here", response.text)
 		Colors.test_passed()
 
-	def test_autoindexBlocked(self):
+	def test_11_autoindexBlocked(self):
 		TestMyWebServer.print_test_title("Testing autoindex that is blocked")
 		response = TestMyWebServer.send_get("http://localhost:9090/autoindexBlocked/")
 		self.assertEqual(response.status_code, 404)
 		self.assertIn("404", response.text)
 		Colors.test_passed()
 
-	def test_redirection(self):
+	def test_12_redirection(self):
 		TestMyWebServer.print_test_title("Testing redirection")
 		response = TestMyWebServer.send_get("http://localhost:9090/redirectMe/", allow_redirects=False)
 		self.assertEqual(response.status_code, 302)
@@ -142,7 +142,7 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(response.status_code, 404)
 		Colors.test_passed()
 
-	def test_post(self):
+	def test_13_post(self):
 		TestMyWebServer.print_test_title("Testing post request")
 		response = TestMyWebServer.send_post("http://localhost:9090/upload/?file.pdf", "pdfexample.pdf")
 		self.assertEqual(response.status_code, 201)
@@ -151,7 +151,7 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(response.status_code, 204)
 		Colors.test_passed()
 
-	def test_chunk_post(self):
+	def test_14_chunk_post(self):
 		TestMyWebServer.print_test_title("Testing chunk post valid")
 		response = chunkrequest.send_chunked_post(path = "/upload/?temp.png")
 		self.assertEqual(response.status, 201)
@@ -161,7 +161,7 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(response.status, 413)
 		Colors.test_passed()
 
-	def test_body_size_limit(self):
+	def test_15_body_size_limit(self):
 		TestMyWebServer.print_test_title("Testing body size limit")
 		url = "http://localhost:9090/uploadLimit/?100chars.txt"
 		# Data to send: 100 characters
@@ -176,50 +176,50 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(response.status_code, 413)
 		Colors.test_passed()
 
-	def test_url_decode(self):
+	def test_16_url_decode(self):
 		TestMyWebServer.print_test_title("Testing url decoding")
 		response = TestMyWebServer.send_get("http://localhost:9090/fancy%20space%20.html")
 		self.assertEqual(response.status_code, 200)
 		self.assertIn("space in file name", response.text)
 		Colors.test_passed()
 
-	def test_phantom_port(self):
+	def test_17_phantom_port(self):
 		TestMyWebServer.print_test_title("Testing phantom port")
 		response = CustomRequst.phantom_port()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 	
-	def test_disguise_port(self):
+	def test_18_disguise_port(self):
 		TestMyWebServer.print_test_title("Testing disguise port")
 		response = CustomRequst.disguise_port()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 	
-	def test_no_host(self):
+	def test_19_no_host(self):
 		TestMyWebServer.print_test_title("Testing no host")
 		response = CustomRequst.no_host()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 
-	def test_authorization(self):
+	def test_20_authorization(self):
 		TestMyWebServer.print_test_title("Testing authorization in header")
 		response = CustomRequst.authorization_not_supported()
 		self.assertTrue(response.startswith("HTTP/1.1 403 Forbidden"))
 		Colors.test_passed()
 	
-	def test_contradict_content_length_transfer_encoding(self):
+	def test_21_contradict_content_length_transfer_encoding(self):
 		TestMyWebServer.print_test_title("Testing contradict Content-Length and Transfer-Encoding")
 		response = CustomRequst.transfer_encoding_and_content_length()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 	
-	def test_short_invalid(self):
+	def test_22_short_invalid(self):
 		TestMyWebServer.print_test_title("Testing short invalid request")
 		response = CustomRequst.short_invalid_request()
 		self.assertTrue(response.startswith("HTTP/1.1 400 Bad Request"))
 		Colors.test_passed()
 
-	def test_all_cgi_scripts(self):
+	def test_23_all_cgi_scripts(self):
 		TestMyWebServer.print_test_title("Testing cgi")
 		if(TestMyWebServer.cgi_prompt() == "2"):
 			Colors.print_warning("Cgi testing is skipped")
