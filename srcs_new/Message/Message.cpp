@@ -397,7 +397,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 
 	if (body.size() < MAX_BODY_SIZE)
 	{
-		Logger::error("------ TADA!! ERROR FOUND ------","");
+		// Logger::error("------ TADA!! ERROR FOUND ------","");
 		header->setOneHeaderField("Content-Length", ParsingUtils::toString(body.size()));
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		// Logger::chars(header->turnResponseHeaderToString(), true);
