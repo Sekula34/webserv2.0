@@ -5,7 +5,7 @@ conn = http.client.HTTPConnection("localhost", 9090)
 
 # Headers for the POST request
 headers = {
-    'Content-type': 'text/plain',
+    'Content-Type': 'text/plain',
 }
 
 # Body of the POST request

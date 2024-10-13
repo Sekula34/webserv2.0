@@ -284,6 +284,7 @@ void	Message::_setNodeComplete()
 			if (_it->getStringUnchunked().find("\r\n\r\n") != std::string::npos)	
 				_it->setState(COMPLETE);
 		}
+		// Logger::chars(_it->getStringUnchunked(), true);
 		// else if (_it->getHasCgiDel())
 		// 	_it->setState(COMPLETE);
 	}
@@ -345,7 +346,8 @@ void	Message::_parseNode()
 		|| _it->getType() == BODY || _it->getType() == TRAILER)
 	{
 		_state = COMPLETE;
-		Logger::info("Body Complete:", "\n" + this->getBodyString()); // FIXME: This is new
+		// Logger::info("Body Complete:", "\n" + this->getBodyString()); // FIXME: This is new
+		// printChain();
 	}
 
 	// if header, create new RequestHeader
@@ -412,6 +414,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 		header->setOneHeaderField("Transfer-Encoding", "chunked");
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		_bodyToChunks(body);
+		printChain();
 	}
 }
 void	Message::resetIterator()

@@ -5,7 +5,7 @@ import sys
 
 def main():
 	# Path to the image file
-	image_path = "image.jpg"
+	image_path = "image.png"
 
 	try:
 		# Open the image file in binary mode
