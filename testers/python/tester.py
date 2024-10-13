@@ -75,6 +75,12 @@ class TestMyWebServer(unittest.TestCase):
 		self.assertEqual(response.status_code, 405)
 		Colors.test_passed()
 
+	def test_limit_except(self):
+		TestMyWebServer.print_test_title("Limit except, Post request and only get is allowed")
+		response = requests.post("http://localhost:9090/onlyGet/")
+		self.assertEqual(response.status_code, 403)
+		Colors.test_passed()
+
 	def test_server_no_location(self):
 		TestMyWebServer.print_test_title("Server no location")
 		response = TestMyWebServer.send_get("http://localhost:8989/")
