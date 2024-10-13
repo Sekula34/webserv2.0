@@ -6,7 +6,7 @@
 # include <map>
 # include <vector>
 # include <sys/epoll.h>
-# define MAX_EVENTS		40 // what happens if we exceed this?
+// # define MAX_EVENTS		40 // what happens if we exceed this?
 
 class Client;
 class Socket;
@@ -42,7 +42,7 @@ class Data {
 		static int								_epollfd;
 		static std::map<int, Client*> &			_clients;
 		static std::vector<Socket> *			_serverSockets;
-		static struct epoll_event				_events[MAX_EVENTS];
+		// static struct epoll_event				_events[MAX_EVENTS];
 		static int								_nfds;
 		static std::map<std::string, std::string>	_cgiLang; //this is map to fill it .py python3 before parsing in constructor of cgi. Config file wil check this 
 
