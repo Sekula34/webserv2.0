@@ -222,7 +222,7 @@ bool RequestHeader::_checkRequestStruct(void)
 	if(valid == false)
 	{
 		Logger::warning("Not valid method found: ", _requestLineElements.requestMethod);
-		p_setHttpStatusCode(405);
+		p_setHttpStatusCode(405); //TODO: Ngingx uses 400 here, I still think 405 is better. To discuss
 		return false;
 	}
 	if(_requestLineElements.protocolVersion != "HTTP/1.1")
