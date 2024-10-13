@@ -26,6 +26,7 @@ class ConnectionManager
 		void 		_acceptNewClient(int listen_socket); // Make arguments const
 		void		_handleCgiFds(const int& idx);
 		void		_addChildSocketsToEpoll();
+		void		_removeFromEpollUnclosedFds(Client& client);
 
 		// Attributes
 		static int					_epollFd;

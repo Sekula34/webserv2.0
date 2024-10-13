@@ -351,7 +351,7 @@ void	Message::_parseNode()
 	// if header, create new RequestHeader
 	if (_it->getType() == HEADER)
 	{
-		Logger::info("Header Complete:", "\n" + _it->getStringUnchunked());
+		// Logger::info("Header Complete:", "\n" + _it->getStringUnchunked());
 		createHeader();
 		_headerInfoToNode();
 
@@ -397,7 +397,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 
 	if (body.size() < MAX_BODY_SIZE)
 	{
-		Logger::error("------ TADA!! ERROR FOUND ------","");
+		// Logger::error("------ TADA!! ERROR FOUND ------","");
 		header->setOneHeaderField("Content-Length", ParsingUtils::toString(body.size()));
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		// Logger::chars(header->turnResponseHeaderToString(), true);
@@ -462,6 +462,7 @@ Message &	Message::operator=(Message const & rhs)
 	//std::cout << "Message Copy assignment operator called" << std::endl;
 	if (this != &rhs)
 	{
+		// _bytesSent = rhs._bytesSent;
 	}
 	return (*this);
 }

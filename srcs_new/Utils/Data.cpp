@@ -54,7 +54,7 @@ int Data::_epollfd = 0;
 std::map<int, Client*> emptyClients;
 std::map<int, Client*>&	Data::_clients = emptyClients;
 std::vector<Socket> *	Data::_serverSockets = NULL;
-struct epoll_event	Data::_events[MAX_EVENTS];
+// struct epoll_event	Data::_events[MAX_EVENTS];
 std::map<std::string, std::string> emptyLanguages;
 std::map<std::string, std::string> Data::_cgiLang = emptyLanguages;
 
@@ -135,11 +135,11 @@ std::string	Data::findStringInEnvp(std::string str)
 		substr = tmp.substr(found + 1);
 	return (substr);
 }
-
-struct epoll_event*		Data::setEvents() 
-{
-	return (_events);
-}
+//
+// struct epoll_event*		Data::setEvents() 
+// {
+// 	return (_events);
+// }
 
 void	Data::closeAllFds()
 {
@@ -180,12 +180,12 @@ void	Data::epollAddFd(int fd)
 		throw std::runtime_error("epoll_ctl error: adding file descriptor to epoll failed");
 }
 
-void	Data::epollRemoveFd(int fd)
-{
-	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
-	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
-		throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
-}
+// void	Data::epollRemoveFd(int fd)
+// {
+// 	// REMOVE THE FD OF THIS CLIENT INSTANCE FROM EPOLLS WATCH LIST
+// 	if (epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, _events) == -1)
+// 		throw std::runtime_error("epoll_ctl error: removing file descriptor from epoll failed");
+// }
 
 const std::map<std::string, std::string>&	Data::getCgiLang()
 {

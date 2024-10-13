@@ -14,6 +14,7 @@
 # include <map>
 
 # define MAX_TIMEOUT		3000
+// # define MAX_TIMEOUT		30000
 
 class Message;
 class VirtualServer;
@@ -29,7 +30,8 @@ class Client
 			DO_CGISEND,	// Client should or does already send to CGI
 			DO_RESPONSE,// Client should or does already send response Response
 			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
-			DELETEME	// Client wants to be deleted
+			DELETEME,	// Client wants to be deleted
+			CRITICAL_ERROR	// critical error happened -> no response
 		};
 
 		enum	e_clientMsgType
