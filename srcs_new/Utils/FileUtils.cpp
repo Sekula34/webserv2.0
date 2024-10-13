@@ -183,7 +183,7 @@ int FileUtils::isPathFileOrFolder(const std::string &serverFilePath, int& httpSt
 
 void FileUtils::_setFileOrFolderStatusCode(int errnoNum, int& httpStatusCode)
 {
-	perror("File or Folder fail: ");
+	perror("File or Folder fail: "); //FIXME: delete for eval
 	if(errnoNum == EACCES)
 		httpStatusCode = 403;
 	else if(errnoNum == EBADF || errnoNum == ENONET || errnoNum == 2)
