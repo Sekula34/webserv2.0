@@ -38,6 +38,7 @@ class AHeader
 		bool								_setOneHeaderField(std::string keyAndValue);
 		bool								_checkHeaderFields(void);
 		std::string							_getOneHeaderFieldAsString(std::string key, std::string value) const;
+		bool								_isKeyInMap(const std::string& key) const;
 		friend class Message;
 
 	public :
