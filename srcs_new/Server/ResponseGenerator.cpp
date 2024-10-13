@@ -245,7 +245,7 @@ static std::string	generateFilename(const std::string& queryString, const std::s
 		if(fileExtension == "")
 			fileExtension = ".bin";
 		fileName = FileUtils::getFileName(queryString);
-		fileName = ParsingUtils::uriDecode(false, fileName);
+		fileName = ParsingUtils::uriDecode(false, fileName); //FIXME: this Line was added by Filip when marco was on vacation. Filip thinks it is bulletproof but maybe it is not Marcoproof
 	}
 	std::ostringstream file;
 	file << fileName << fileExtension;
