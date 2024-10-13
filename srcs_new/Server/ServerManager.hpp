@@ -3,6 +3,7 @@
 #include "../Parsing/Directive.hpp"
 # include "VirtualServer.hpp"
 #include <vector>
+#define MAX_NUMBER_OF_TOKENS 500
 // #include "../Client/Client.hpp"
 
 

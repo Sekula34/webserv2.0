@@ -222,6 +222,12 @@ ServerManager::ServerManager(std::string configPath)
 {
 	Configuration serversConf(configPath);
 	_allTokens = serversConf.getAllTokens();
+	if(_allTokens.size() > MAX_NUMBER_OF_TOKENS)
+	{
+		Logger::error("Configuration file contains too many Tokens, lower it by: ", _allTokens.size() - MAX_NUMBER_OF_TOKENS);
+		throw Configuration::InvalidConfigFileException();
+	}
+	Logger::warning("Number of all tokens is ", _allTokens.size());
 	_numberOfServers = serversConf.getNumberOfServers();
 	if(_numberOfServers < 1)
 	{
