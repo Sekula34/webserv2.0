@@ -1,3 +1,4 @@
+#include "Parsing/Configuration.hpp"
 #include "Server/ServerManager.hpp"
 #include "Server/ConnectionManager.hpp"
 #include "Io/Io.hpp"
@@ -13,6 +14,7 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
+#define MAX_UNIQUE_PORTS 20
 // #include <map>
 // #include <list>
 //
@@ -92,6 +94,11 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 
 	// Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
+	if(serverSockets.size() > MAX_UNIQUE_PORTS)
+	{
+		Logger::error("Configuration contains more than MAX_UNIQUE_PORTS listen ports, lower it by: ", serverSockets.size() - MAX_UNIQUE_PORTS);
+		throw Configuration::InvalidConfigFileException();
+	}
 	for (std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
 		Socket currSocket(*it);
 
@@ -136,7 +143,7 @@ int main(int argc, char** argv, char** envp)
 	}
 	catch(std::exception& e)
 	{
-		Logger::error("Exception Happened", true);
+		Logger::error("Exception Happened", "");
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
