@@ -168,24 +168,24 @@ void	Client::setCgiFlag(bool b)
 	_cgiFlag = b;
 }
 
-static std::string	clientState(int num)
+static std::string	clientState(Client::e_clientState state)
 {
-	switch(num)
+	switch(state)
 	{
-		case 0:
+		case Client::DO_REQUEST:
 			return ("DO REQUEST");
-		case 1:
+		case Client::DO_CGIREC:
 			return ("DO CGI RECEIVE");
-		case 2:
+		case Client::DO_CGISEND:
 			return ("DO CGI SEND");
-		case 3:
+		case Client::DO_RESPONSE:
 			return ("DO RESPONSE");
-		case 4:
-			return ("RESETME");
-		case 5:
-			return ("DELETEME");
-		case 6:
+		case Client::CRITICAL_ERROR:
 			return ("CRITICAL_ERROR");
+		case Client::DELETEME:
+			return ("DELETEME");
+		case Client::RESETME:
+			return ("RESETME");
 		default:
 			return ("unknown state");
 	}
@@ -193,7 +193,8 @@ static std::string	clientState(int num)
 
 void	Client::setClientState(e_clientState state)
 {
-
+	if (state <= _clientState)
+		return ;
 	Logger::info("changing Client state to: ", clientState(state));
 	_clientState = state;
 }

@@ -200,7 +200,6 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	// PATH_INFO usually is the part in the url that comes after
 	// the executable name and before the query string e.g.:
 	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
-	// actual PATH_INFO part is missing!!
 	line = "PATH_INFO="; 
 	line += scriptLocation;
 	line += pathInfo;
@@ -211,8 +210,6 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	envVec.push_back(line);
 
 	// PATH_TRANSLATED 
-	// this should include PATH_INFO (the way RFC defines PATH_INFO)
-	// actual PATH_INFO part is missing!!
 	if (!pathInfo.empty())
 	{
 		line = "PATH_TRANSLATED="; 
@@ -242,11 +239,13 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	line += requestHeader->getRequestLine().requestMethod;
 	envVec.push_back(line);
 
-	//TODO: right now this contains the PATH_INFO subfolders
 	//SCRIPT_NAME
 	// should be "cgi-bin/hello.py"
+	std::string scriptName = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptName();
 	line = "SCRIPT_NAME="; 
-	line += requestHeader->urlSuffix->getPath();
+	// TODO: replace hardcode cgi-bin with string based on config file
+	line += "/" + scriptLocation.substr(scriptLocation.find("cgi-bin"));
+	line += "/" + scriptName;
 	envVec.push_back(line);
 	
 	//SERVER_NAME
@@ -267,9 +266,19 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	envVec.push_back(line);
 	
 	//SERVER_SOFTWARE
-	line = "SERVER_SOFTWARE=webserv2.0 ("; 
+	line = "SERVER_SOFTWARE=webserv/2.0 ("; 
 	line += operatingSystem();
 	line += ")"; 
+	envVec.push_back(line);
+
+	line = "HTTP_USER_AGENT="; 		
+	if (requestHeader->getHeaderFieldMap().find("User-Agent") != requestHeader->getHeaderFieldMap().end())
+		line += requestHeader->getHeaderFieldMap().find("User-Agent")->second;
+	envVec.push_back(line);
+
+	line = "HTTP_ACCEPT="; 		
+	if (requestHeader->getHeaderFieldMap().find("Accept") != requestHeader->getHeaderFieldMap().end())
+		line += requestHeader->getHeaderFieldMap().find("Accept")->second;
 	envVec.push_back(line);
 
 	// root of document
@@ -492,17 +501,22 @@ char**	Cgi::_metaVariables(Client& client, char** args)
 static bool	isAllowedCgi(Client& client)
 {
 	// NOT: SEND TO CGI OR RECEIVE FROM CGI OR REACHED TIMEOUT WHILE RUNNING CGI
-	if (!((client.getClientState() == Client::DO_CGIREC
-		|| client.getClientState() == Client::DO_CGISEND)
-		|| (client.checkTimeout() == false && client.getCgiFlag() == true)
-		|| client.getClientState() == Client::CRITICAL_ERROR))
-	{
+	// if (!((client.getClientState() == Client::DO_CGIREC
+	// 	|| client.getClientState() == Client::DO_CGISEND)
+	// 	|| (client.checkTimeout() == false && client.getCgiFlag() == true)
+	// 	|| client.getClientState() == Client::CRITICAL_ERROR))
+	// {
+	// 	return (false);
+	// }
+	
+	// TODO: check if above code is really not necessary. If so this simple condition replaces it
+	if (client.getCgiFlag() == false)
 		return (false);
-	}
 
 	// CHILD PROCESS HAS FINISHED RUNNING -> NO NEED TO RUN CGI LOOP
 	if (client.getWaitReturn() != 0)
 		return (false);
+
 	return (true);
 }
 

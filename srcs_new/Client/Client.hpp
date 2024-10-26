@@ -13,7 +13,7 @@
 # include <vector>
 # include <map>
 
-# define MAX_TIMEOUT		3000
+# define MAX_TIMEOUT		30000
 // # define MAX_TIMEOUT		30000
 
 class Message;
@@ -26,12 +26,12 @@ class Client
 		enum	e_clientState
 		{
 			DO_REQUEST,	// Client should or does already read the Client request
-			DO_CGIREC,	// Client should or does already receive from CGI 
 			DO_CGISEND,	// Client should or does already send to CGI
+			DO_CGIREC,	// Client should or does already receive from CGI 
 			DO_RESPONSE,// Client should or does already send response Response
-			RESETME,	// reserved for keep alive option. This should trigger deleting of Messages
+			CRITICAL_ERROR,	// critical error happened -> no response
 			DELETEME,	// Client wants to be deleted
-			CRITICAL_ERROR	// critical error happened -> no response
+			RESETME	// reserved for keep alive option. This should trigger deleting of Messages
 		};
 
 		enum	e_clientMsgType

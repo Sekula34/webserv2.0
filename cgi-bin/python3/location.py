@@ -15,7 +15,7 @@ def build_path(relative_path):
 # resource = "pages/about.html"
 
 server = os.environ['SERVER_NAME']
-port = os.environ['PORT']
+port = os.environ['SERVER_PORT']
 
 print("Status: 302 Found")
 print(f"Location: http://{server}:{port}/pages/about.html")

@@ -177,6 +177,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	// SUCCESSFUL READ -> CONCAT MESSAGE
 	if (recValue > 0)
 	{
+
 		// std::cout << "read " << recValue << "bytes: " << _buffer <<  std::endl;
 		try
 		{
