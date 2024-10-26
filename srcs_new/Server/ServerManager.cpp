@@ -88,7 +88,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 		std::string clientMethod = header.getRequestLine().requestMethod;
 		if(reponseLocation.isMethodAllowed(clientMethod) == false)
 		{
-			client.setErrorCode(403); //TODO: Nginx considers this as 403 forbbiden-> CHANGGED FROM 405 to 403
+			client.setErrorCode(405); //TODO: Nginx considers this as 403 forbbiden-> CHANGGED FROM 405 to 403
 			Logger::warning("Seted *405 method not allowed, actually it is limited so 403", 403);
 			return false;
 		}
