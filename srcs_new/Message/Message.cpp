@@ -218,7 +218,7 @@ void	Message::createHeader()
 
 	if(_header && _header->getHttpStatusCode() != 0)
 	{
-		Logger::warning("Found Error in Client Header", _header->getHttpStatusCode());
+		Logger::warning("Found Error in Client Header, error code: ", _header->getHttpStatusCode());
 	}
 }
 

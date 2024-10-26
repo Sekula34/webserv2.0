@@ -21,7 +21,7 @@ m_errorCode(erorCode)
 	// std::cout << "#### header section: " << headerSection << std::endl;
 	if(_fillHeaderFieldMap(_getHeaderFields(m_headerSection)) == false)
 	{
-		Logger::error("Error while filling header field map", true);
+		Logger::error("Error while filling header field map, code: ", m_errorCode);
 		return;
 	}
 	if(_checkHeaderFields() == false)
@@ -150,6 +150,14 @@ std::string AHeader::_getOneHeaderFieldAsString(std::string key, std::string val
 	return oneHeaderField;
 }
 
+bool AHeader::_isKeyInMap(const std::string &key) const 
+{
+	std::map<std::string, std::string>::const_iterator it = m_headerFields.find(key);
+	if(it != m_headerFields.end())
+		return true;
+	return false;
+}
+
 bool AHeader::_setOneHeaderField(std::string keyAndValue)
 {
 	std::string key = ParsingUtils::extractUntilDelim(keyAndValue, ":");
@@ -164,8 +172,12 @@ bool AHeader::_setOneHeaderField(std::string keyAndValue)
 		Logger::warning("Something is off", "");
 		return false;
 	}
-		//std::string key = connected[0];
-		//std::string value = ParsingUtils::getHttpPlainValue(connected[1]);
+	if(_isKeyInMap(key) == true)
+	{
+		p_setHttpStatusCode(400);
+		Logger::error("Duplicated key in AHeader, status code is 400 key: ", key);
+		return false;
+	}
 	m_headerFields[key] = value;
 	return true;
 }

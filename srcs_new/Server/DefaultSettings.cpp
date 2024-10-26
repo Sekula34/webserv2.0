@@ -86,7 +86,7 @@ void DefaultSettings::checkDuplicateDirectives(const std::vector<Directive>& dir
 			std::ostringstream oss;
 			oss << "[" << duplicate->getDirectiveName() << "]" << " is duplicate in " << FileUtils::getConfigFilePath() << ":";
 			oss << duplicate->getDirectiveLineNum();
-			Logger::error(oss.str(), true);
+			Logger::error(oss.str(), "");
 		}
 		throw Configuration::InvalidConfigFileException();
 	}
