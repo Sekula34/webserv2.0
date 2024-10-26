@@ -32,6 +32,10 @@ std::string RequestHeader::getHeaderSectionString(const std::string& message)
 static bool	isValidRequestLine(const std::string& str)
 {
 	std::vector<std::string> values = ParsingUtils::splitString(str, " ");
+	if(values[0] == "PUT")
+		values[0] = "POST";
+	if(values[0] == "HEAD")
+		values[0] = "GET";
 	if (values.size() < 3)
 		return (false);
 	if (values[0] != "GET" && values[0] != "POST" && values[0] != "DELETE")
@@ -217,7 +221,7 @@ bool RequestHeader::_setHost(void)
 
 bool RequestHeader::_checkRequestStruct(void)
 {
-	const std::string validMethods[] = {"GET", "POST", "DELETE"};
+	const std::string validMethods[] = {"GET", "POST", "DELETE", "PUT", "HEAD"};
 	bool valid = ParsingUtils::isStringValid(_requestLineElements.requestMethod, validMethods, 3);
 	if(valid == false)
 	{
