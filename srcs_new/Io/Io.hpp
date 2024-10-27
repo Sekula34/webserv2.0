@@ -3,7 +3,7 @@
 
 # include "../Client/Client.hpp"
 
-// # define MAXLINE 2
+// # define MAXLINE 1
 # define MAXLINE 4096
 
 

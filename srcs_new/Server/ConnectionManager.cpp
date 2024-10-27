@@ -186,7 +186,8 @@ void	ConnectionManager::_removeFromEpollUnclosedFds(Client& client)
 void	ConnectionManager::_handleClient(Client& client, const int& idx)
 {
 
-	if ((client.checkTimeout() == false || flag > 0)
+	// if ((client.checkTimeout() == false || flag > 0)
+	if ((client.checkTimeout() == false || flag > 0 || (client.getErrorCode() != 0 ))
 		&& client.getWaitReturn() == 0
 		&& client.getSignalSent() == 0)
 	{
