@@ -67,7 +67,10 @@ void	Message::printChain()
 		if (it->getType() == CHUNK || it->getType() == LCHUNK)
 			Logger::chars(it->getStringChunked(), true);
 		else
-			Logger::chars(it->getStringUnchunked(), true);
+		{
+			// Logger::chars(it->getStringUnchunked(), true);
+			Logger::info("string:\n", it->getStringUnchunked()); // FIXME: This is new
+		}
 	}
 }
 
@@ -410,11 +413,11 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 	}
 	else
 	{
-		Logger::error("------ VOILA!! ERROR NOT FOUND ------","");
+		// Logger::error("------ VOILA!! ERROR NOT FOUND ------","");
 		header->setOneHeaderField("Transfer-Encoding", "chunked");
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		_bodyToChunks(body);
-		printChain();
+		// printChain();
 	}
 }
 void	Message::resetIterator()
