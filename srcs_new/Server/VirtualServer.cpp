@@ -55,7 +55,15 @@ bool VirtualServer::amIServerLocation(const std::string& path) const
 
 std::string VirtualServer::getLocationURIfromPath(const std::string& fullPath) const
 {
+	if(fullPath.size() < 1)
+	{
+		Logger::error("Get location Uri from path error: full path is wrong", "");
+		return "/";
+	}
 	std::string toTry(fullPath);
+	const char lastChar = toTry[toTry.size() - 1];
+	if(lastChar != '/')
+		toTry += "/";
 	while (true)
 	{
 		if(amIServerLocation(toTry) == true)

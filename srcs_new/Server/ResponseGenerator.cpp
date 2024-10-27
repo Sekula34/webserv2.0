@@ -166,7 +166,10 @@ static bool _constructIndex(const std::string& file, const LocationSettings& loc
 {
 	for(size_t i = 0; i < location.getIndexes().size(); i++)
 	{
-		std::string fileName = file + (location.getIndexes()[i]);
+		std::string fileName = file;
+		if(fileName[fileName.size() - 1] != '/')
+			fileName += "/";
+		fileName += (location.getIndexes()[i]);
 		if(_fileHtml(fileName, response) == true)
 			return true;
 	}
