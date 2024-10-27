@@ -354,7 +354,11 @@ int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFrom
 	close(socketsFromChild[1]);
 
  	// execve(_args[0], _args, _env);
- 	execve(args[0], args, env);
+	std::string tmp = args[0];
+	if (tmp == "cpp")
+ 		execve(args[1], args + 1, env);
+	else
+ 		execve(args[0], args, env);
 	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }

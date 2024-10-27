@@ -8,8 +8,8 @@
 # include <string>
 # include "AHeader.hpp"
 
-# define MAX_BODY_SIZE	20
-# define MAX_CHUNKSIZE	30
+# define MAX_BODY_SIZE	10000000000
+# define MAX_CHUNKSIZE	300000
 
 class Node;
 class RequestHeader;

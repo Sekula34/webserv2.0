@@ -204,6 +204,7 @@ void	Data::setAllCgiLang()
 	Data::setCgiLang(".sh", "bash");
 	Data::setCgiLang(".php", "php");
 	Data::setCgiLang(".pl", "perl");
+	Data::setCgiLang(".bla", "cpp");
 }
 
 void	Data::setEpollFd(int fd)
