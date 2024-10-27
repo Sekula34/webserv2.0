@@ -6,8 +6,6 @@ tests/__pycache__/
 .vscode/
 *.out
 *.o
-ubuntu_tester
-ubuntu_cgi_tester
 unittest
 testers/ConfigFileTest/TestFiles/noPermission
 testers/NoPermisionFolder
