@@ -7,6 +7,7 @@
 #include "../Message/Node.hpp"
 #include "../Message/RequestHeader.hpp"
 #include "Cgi.hpp"
+#include <exception>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -337,12 +338,14 @@ void	Cgi::_deleteChararr(char** lines)
 static void	fackinPanic()
 {
 	Logger::info("Panic! ", true);
-	std::map<int, Client*>::iterator it = Client::clients.begin();
-	for (; it != Client::clients.end(); ++it)
-	{
-		// it->second->setClientState(Client::DELETEME);
-		delete it->second;
-	}
+	// std::map<int, Client*>::iterator it = Client::clients.begin();
+	// for (; it != Client::clients.end(); ++it)
+	// {
+	// 	// it->second->setClientState(Client::DELETEME);
+	// 	delete it->second;
+	// }
+	while (Client::clients.size() > 0)
+		delete Client::clients.begin()->second;
 	// exit(1);
 }
 
@@ -589,8 +592,11 @@ void Cgi::_cgiClient(Client& client)
 			catch(std::exception &e)
 			{
 				fackinPanic();
-				client.setCgiFlag(false);
-				_stopCgiSetErrorCode(client);
+				_deleteChararr(args);
+				_deleteChararr(env);
+				throw (e);
+				// client.setCgiFlag(false);
+				// _stopCgiSetErrorCode(client);
 			}
 		}
 		// FREE ALLOCATED CHAR ARRAYS
