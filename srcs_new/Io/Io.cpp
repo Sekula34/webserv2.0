@@ -58,6 +58,9 @@ static void	setFinishedSending(Client& client, FdData& fdData, int error)
 
 static void	setFinishedReceiving(Client& client, FdData& fdData, Message* message)
 {
+	// PRINT THE MESSAGE THAT WE ARE RECEIVING TO THE CLIENT
+	message->printChain();	
+
 	if (fdData.type == FdData::FROMCHILD_FD)
 	{
 		client.setClientState(Client::DO_RESPONSE);
@@ -153,6 +156,9 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 		Logger::error("failed to send message String in Client with ID:", client.getId());
 		client.setErrorCode(500);
 	}
+	// PRINT THE MESSAGE THAT WE ARE SENDING TO THE CLIENT
+	message->printChain();	
+
 	setFinishedSending(client, fdData, client.getErrorCode());
 }
 
