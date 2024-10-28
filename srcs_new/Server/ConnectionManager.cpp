@@ -339,6 +339,6 @@ ConnectionManager::ConnectionManager() :
 // Destructor
 ConnectionManager::~ConnectionManager()
 {
-	close (_epollFd);
-	Socket::closeSockets();
+	// close (_epollFd);
+	// Socket::closeSockets();
 }
