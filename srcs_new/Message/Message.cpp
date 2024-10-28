@@ -52,25 +52,24 @@ void						Message::setBytesSent(size_t num)
 
 void	Message::printChain()
 {
+	std::string type = "";
+	
 	for(std::list<Node>::iterator it = _chain.begin(); it != _chain.end(); it++)
 	{
 		if (it->getType() == HEADER)
-			std::cout << "Node Type: HEADER, string: " << std::endl;
+			type =  "Node Type: HEADER, string: ";
 		if (it->getType() == BODY)
-			std::cout << "Node Type: BODY, string: " << std::endl;
+			type =  "Node Type: BODY, string: ";
 		if (it->getType() == CHUNK)
-			std::cout << "Node Type: CHUNK, string: " << std::endl;
+			type =  "Node Type: CHUNK, string: ";
 		if (it->getType() == LCHUNK)
-			std::cout << "Node Type: LAST CHUNK, string: " << std::endl;
+			type =  "Node Type: LCHUNK, string: ";
 		if (it->getType() == TRAILER)
-			std::cout << "Node Type: TRAILER, string: " << std::endl;
+			type =  "Node Type: TRAILER, string: ";
 		if (it->getType() == CHUNK || it->getType() == LCHUNK)
-			Logger::chars(it->getStringChunked(), true);
+			Logger::info(type + "\n", it->getStringChunked());
 		else
-		{
-			// Logger::chars(it->getStringUnchunked(), true);
-			Logger::info("string:\n", it->getStringUnchunked()); // FIXME: This is new
-		}
+			Logger::info(type + "\n", it->getStringUnchunked());
 	}
 }
 

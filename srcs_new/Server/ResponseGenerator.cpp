@@ -42,8 +42,8 @@ void ResponseGenerator::generateClientResponse(Client &client)
 		ResponseGenerator oneResponse(client);
 		// Logger::warning("One response http status code is",oneResponse.getResponseHttpStatus());
 		ResponseHeader* header =  ResponseHeader::createRgResponseHeader(oneResponse);
-		Logger::info("Response header:\n", header->turnResponseHeaderToString());
-		Logger::info("Response body (generated):\n", oneResponse.getResponse());
+		// Logger::info("Response header:\n", header->turnResponseHeaderToString());
+		// Logger::info("Response body (generated):\n", oneResponse.getResponse());
 
 		if (client.getErrorCode() != 0)
 		{
