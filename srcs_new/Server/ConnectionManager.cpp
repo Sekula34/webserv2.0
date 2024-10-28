@@ -63,6 +63,9 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 	socklen_t addrlen = sizeof(client_addr);
 	int	clientFd;
 
+	if (flag != 0)
+		return ;
+
 	// ACCEPT RETURNS CLIENT FD
 	clientFd = accept(listen_socket, &client_addr, &addrlen);
 	if (clientFd == -1)
