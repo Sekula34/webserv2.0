@@ -235,7 +235,7 @@ class TestMyWebServer(unittest.TestCase):
 			Colors.print_warning("Cgi testing is skipped")
 			return
 		utils.create_python_test_files()
-		cgi_scripts = {"hard.py" : 500, "io_test.py" : 200, "kill.py" : 504, "link_dummy.py" : 500, "loop.py" : 504, "soft.py" : 500}
+		cgi_scripts = {"hard.py" : 500, "io_test.py" : 200, "kill.py" : 504, "link_dummy.py" : 500, "loop.py" : 504, "soft.py" : 500, "error.py" : 502, , "error2.py" : 502}
 		for script_name, status_code in cgi_scripts.items():
 			self.__cgiTest("http://localhost:9090/cgi-bin/" + script_name, status_code, "")
 		utils.delete_python_test_files()
