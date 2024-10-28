@@ -1,6 +1,7 @@
 import tester
 import unittest
 from colors import Colors
+import configTester
 
 
 
@@ -9,6 +10,13 @@ def tester_intro():
 	print(text)
 	inputText = Colors.color_text("Press Enter to Continue ", Colors.BOLD)
 	input(inputText)
+
+def config_tester():
+	inputText = Colors.color_text("Do you want to test config files?\n 0 - NO\n 1 - YES", Colors.BOLD)
+	if input(inputText) == "1":
+		return True
+	return False
+
 
 def spammer(testInstance):
 	question = Colors.color_text("Do you want to run spammer?\n\t1 - Yes\n\t0 - NO\nAnswer: ", Colors.BOLD)
@@ -42,6 +50,8 @@ def big_main():
 
 	testInstance = tester.TestMyWebServer()
 	spammer(testInstance=testInstance)
+	if(config_tester() == True):
+		configTester.test_multiple_folder()
 
 if __name__ == "__main__":
 	big_main()
