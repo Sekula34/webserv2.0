@@ -14,13 +14,13 @@ Autoindex::Autoindex(const std::string folderPath, int& statusCode, const std::s
 {
 	if(_statusCode != 0)
 	{
-		Logger::error("Trying to create Auto index but status code is not 0", true);
+		Logger::error("Trying to create Auto index but status code is not 0", "");
 		return;
 	}
 	if(FileUtils::isDirectoryValid(folderPath, statusCode) == false)
 	{
 		perror("Checking directory failed");
-		Logger::error("Directory is not valid", true);
+		Logger::error("Directory is not valid", "");
 		return;
 	}
 	_createHtmlMenu();
