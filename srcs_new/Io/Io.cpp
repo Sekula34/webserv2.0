@@ -80,6 +80,7 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 	message->getChain().begin()->setState(COMPLETE);
 	message->setState(COMPLETE);
 	message->resetIterator();
+	message->printChain(); // FIXME: testing
 }
 
 void	clearBuffer(char* buffer)

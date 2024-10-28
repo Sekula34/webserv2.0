@@ -413,7 +413,7 @@ void	Message::stringsToChain(ResponseHeader* header, const std::string& body)
 	else
 	{
 		// Logger::error("------ VOILA!! ERROR NOT FOUND ------","");
-		// header->setOneHeaderField("Transfer-Encoding", "chunked");
+		header->setOneHeaderField("Transfer-Encoding", "chunked");
 		_chain.begin()->setString(header->turnResponseHeaderToString() + "\r\n");
 		_bodyToChunks(body);
 		// printChain();

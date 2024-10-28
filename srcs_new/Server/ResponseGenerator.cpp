@@ -166,7 +166,10 @@ static bool _constructIndex(const std::string& file, const LocationSettings& loc
 {
 	for(size_t i = 0; i < location.getIndexes().size(); i++)
 	{
-		std::string fileName = file + (location.getIndexes()[i]);
+		std::string fileName = file;
+		if(fileName[fileName.size() - 1] != '/')
+			fileName += "/";
+		fileName += (location.getIndexes()[i]);
 		if(_fileHtml(fileName, response) == true)
 			return true;
 	}
@@ -245,7 +248,7 @@ static std::string	generateFilename(const std::string& queryString, const std::s
 		if(fileExtension == "")
 			fileExtension = ".bin";
 		fileName = FileUtils::getFileName(queryString);
-		fileName = ParsingUtils::uriDecode(false, fileName); //FIXME: this Line was added by Filip when marco was on vacation. Filip thinks it is bulletproof but maybe it is not Marcoproof
+		fileName = ParsingUtils::uriDecode(true, fileName); //FIXME: this Line was added by Filip when marco was on vacation. Filip thinks it is bulletproof but maybe it is not Marcoproof
 	}
 	std::ostringstream file;
 	file << fileName << fileExtension;

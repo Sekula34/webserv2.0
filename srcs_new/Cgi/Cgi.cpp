@@ -7,6 +7,7 @@
 #include "../Message/Node.hpp"
 #include "../Message/RequestHeader.hpp"
 #include "Cgi.hpp"
+#include <exception>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -334,6 +335,20 @@ void	Cgi::_deleteChararr(char** lines)
 	delete [] lines;
 }
 
+static void	fackinPanic()
+{
+	Logger::info("Panic! ", true);
+	// std::map<int, Client*>::iterator it = Client::clients.begin();
+	// for (; it != Client::clients.end(); ++it)
+	// {
+	// 	// it->second->setClientState(Client::DELETEME);
+	// 	delete it->second;
+	// }
+	while (Client::clients.size() > 0)
+		delete Client::clients.begin()->second;
+	// exit(1);
+}
+
 int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFromChild)
 {
 	signal(SIGINT, SIG_IGN);
@@ -342,11 +357,17 @@ int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFrom
 	close(socketsFromChild[0]);
 	ConnectionManager::closeClientFds();
 	Socket::closeSockets();
+	// if (1)
 	if (chdir(getScriptLocation(args[1]).c_str()) == -1)
 	{
 		close(socketsFromChild[1]);
 		close(socketsToChild[1]);
+		// fackinPanic();
+		// client.setCgiFlag(false);
 		throw std::runtime_error("chdir failed in CGI child process");
+
+		// return (1);
+		// execve("",args + 2,env);
 	}
  	if (dup2(socketsToChild[1], STDIN_FILENO) == -1)
 	{
@@ -564,7 +585,19 @@ void Cgi::_cgiClient(Client& client)
 		if (client.getChildPid() == CHILD)
 		{
 			signal(SIGINT, SIG_IGN);
-			_execute(args, env, socketsToChild, socketsFromChild);
+			try
+			{
+				_execute(args, env, socketsToChild, socketsFromChild);
+			}
+			catch(std::exception &e)
+			{
+				fackinPanic();
+				_deleteChararr(args);
+				_deleteChararr(env);
+				throw (e);
+				// client.setCgiFlag(false);
+				// _stopCgiSetErrorCode(client);
+			}
 		}
 		// FREE ALLOCATED CHAR ARRAYS
 		_deleteChararr(args);
