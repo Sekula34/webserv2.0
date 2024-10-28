@@ -29,7 +29,7 @@ class Autoindex
 		void _createDirectoryLinks(DIR* directory);
 		void _createAndStoreOneFileLink(const std::string fileEntry);
 		void _generateHtmlPage(const std::string pageTitle);
-	friend AutoindexTest;
+	// friend AutoindexTest;
 };
 
 #endif

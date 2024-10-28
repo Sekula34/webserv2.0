@@ -2,7 +2,7 @@
 NAME =		webserv
 
 #--------------------------------- COMPILER -----------------------------------#
-CXX = g++
+CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98
 # CC = clang-12
 # CFLAGS = -Wall -Wextra -Werror -gdwarf-4 -g3

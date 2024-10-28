@@ -243,6 +243,13 @@ bool RequestHeader::_checkRequestStruct(void)
 std::ostream& operator<<(std::ostream& os, const RequestHeader& obj)
 {
 	os << obj.getStartLine() << std::endl;
-	os << obj;
+	const AHeader& base = obj;
+	os << base;
+	// os << dynamic_cast<AHeader>(obj);
+	// std::map<std::string, std::string>::const_iterator it = obj.m_headerFields.begin();
+	// for(;it != obj.m_headerFields.end(); it++)
+	// {
+	// 	os << it->first << ": " << it->second << std::endl;
+	// }
 	return os;
 }
