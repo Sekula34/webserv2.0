@@ -26,9 +26,10 @@ log_message("search_name.py script started")
 def build_path(relative_path):
 	# Constructs a full path based on the server's root directory.
 	# If I want a fallback document, I can use: root_dir = os.environ.get('DOCUMENT_ROOT', '../../www/basic-website/public')
-	relative_prefix = "../../" # Path traversal so the script can access www folder.
+	# relative_prefix = "../../" # Path traversal so the script can access www folder.
 	root_dir = os.environ['DOCUMENT_ROOT']
-	return os.path.join(relative_prefix, root_dir, relative_path)
+	# return os.path.join(relative_prefix, root_dir, relative_path)
+	return os.path.join(root_dir, relative_path)
 
 # Print the Content-Type header for HTTP response
 print("Content-Type: text/html\n")

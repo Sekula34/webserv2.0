@@ -194,29 +194,7 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	line = "GATEWAY_INTERFACE=CGI/1.1"; 
 	envVec.push_back(line);
 
-	// PATH_INFO 
-	// Because you won’t call the CGI directly, use the full path as PATH_INFO.
-	// I DON'T UNDERSTAND the subject here
-	// PATH_INFO usually is the part in the url that comes after
-	// the executable name and before the query string e.g.:
-	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
-	line = "PATH_INFO="; 
-	line += scriptLocation;
-	line += pathInfo;
-	envVec.push_back(line);
 
-	line = "RFC_PATH_INFO="; 
-	line += pathInfo;
-	envVec.push_back(line);
-
-	// PATH_TRANSLATED 
-	if (!pathInfo.empty())
-	{
-		line = "PATH_TRANSLATED="; 
-		line += scriptLocation;
-		line += pathInfo;
-		envVec.push_back(line);
-	}
 
 	// QUERY_STRING
 	line = "QUERY_STRING="; 
@@ -281,8 +259,12 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 		line += requestHeader->getHeaderFieldMap().find("Accept")->second;
 	envVec.push_back(line);
 
+
 	// root of document
 	line = "DOCUMENT_ROOT=";
+
+	std::string root = Data::findStringInEnvp("PWD=") + "/";
+	line += root;
 	// line += scriptLocation;
 	// FIXME: MR: START OF PROPOSED CHANGES (instead of: line += scriptLocation)
 	const VirtualServer& server = *client.getVirtualServer();
@@ -290,10 +272,38 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
 	bool found = false;
 	std::vector<LocationSettings>::const_iterator it = server.fetchLocationWithUri(serverLocationUri, found);
+	std::string locationRoot;
 	if(found == true)
-		line += it->getRoot();
+		locationRoot = it->getRoot();
 	// MR: END OF PROPOSED CHANGES
+	line += locationRoot;
 	envVec.push_back(line);
+
+	// PATH_INFO 
+	// Because you won’t call the CGI directly, use the full path as PATH_INFO.
+	// I DON'T UNDERSTAND the subject here
+	// PATH_INFO usually is the part in the url that comes after
+	// the executable name and before the query string e.g.:
+	// localhost:9090/cgi-bin/hello.py/[PATH_INFO_stuff]?name=user
+	std::string absolutePathInfo = "";
+	if (!pathInfo.empty())
+	{
+		absolutePathInfo = root;
+		absolutePathInfo += locationRoot;
+		absolutePathInfo += pathInfo;
+	}
+	line = "PATH_INFO="; 
+	envVec.push_back(line + absolutePathInfo);
+
+	// PATH INFO ACCORDING TO THE RFC
+	line = "RFC_PATH_INFO="; 
+	line += pathInfo;
+	envVec.push_back(line);
+
+	// PATH_TRANSLATED 
+	line = "PATH_TRANSLATED="; 
+	envVec.push_back(line + absolutePathInfo);
+
 }
 
 char**	Cgi::_vecToChararr(std::vector<std::string> list)
