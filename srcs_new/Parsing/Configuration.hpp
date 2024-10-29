@@ -36,6 +36,7 @@ class Configuration
 		 * @throw  InvalidConfig file if token info is http and size of _tokens vector is not 0 which means there is one http too much
 		 */
 		void					_checkDoubleHttp(const Token& oneToken);
+		void					_checkNonAscii(const std::string& lineToCheck, const size_t& lineNumber) const;
 		void					_copyFileInVector(void);
 		void					_createOneToken(std::string& tokeInfo, size_t lineNumber);
 		bool					_isCharDelimiter(char c) const;
