@@ -270,7 +270,7 @@ static std::string	generateFilename(const std::string& queryString, const std::s
 
 void		ResponseGenerator::_postHandler(const LocationSettings& location)
 {
-	std::cout << "POST method executed" << std::endl;
+	Logger::info("POST method executed", "");
 	Message& message = *(_client.getMsg(Client::REQ_MSG));
 	const RequestHeader& header = *static_cast<RequestHeader*>(message.getHeader());
 	std::string filename = generateFilename(header.urlSuffix->getQueryParameters(), location.getUploadFolder());
@@ -292,7 +292,7 @@ void		ResponseGenerator::_postHandler(const LocationSettings& location)
 
 void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
 {
-	std::cout << "DELETE method executed" << std::endl;
+	Logger::info("DELETE method executed", "");
 	const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
 	std::string filename = _pathRelativeToExecutable(location, suffix);
 	if (remove(filename.c_str()) != 0)

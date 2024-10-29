@@ -5,6 +5,7 @@
 #include <sys/epoll.h>
 #include <vector>
 // #include <iostream>
+#include <stdexcept>
 
 /******************************************************************************/
 /*                               Constructors                                 */
