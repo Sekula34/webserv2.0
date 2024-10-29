@@ -118,7 +118,7 @@ DefaultSettings::DefaultSettings()
 	p_clientMaxBody = DEFAULT_MAX_BODY_SIZE;
 	p_autoindex = false;
 	p_root = ROOT_FOLDER;
-	p_uploadFolder = p_root + DEFAULT_UPLOAD;//TODO: check if this folder exist
+	p_uploadFolder = p_root + DEFAULT_UPLOAD;
 }
 
 DefaultSettings::DefaultSettings(const DefaultSettings& source)

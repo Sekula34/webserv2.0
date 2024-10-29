@@ -222,7 +222,6 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	// should be "cgi-bin/hello.py"
 	std::string scriptName = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix->getCgiScriptName();
 	line = "SCRIPT_NAME="; 
-	// TODO: replace hardcode cgi-bin with string based on config file
 	line += "/" + scriptLocation.substr(scriptLocation.find("cgi-bin"));
 	line += "/" + scriptName;
 	envVec.push_back(line);
@@ -266,8 +265,6 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 
 	std::string root = Data::findStringInEnvp("PWD=") + "/";
 	line += root;
-	// line += scriptLocation;
-	// FIXME: MR: START OF PROPOSED CHANGES (instead of: line += scriptLocation)
 	const VirtualServer& server = *client.getVirtualServer();
 	const std::string& clientUriPath = requestHeader->urlSuffix->getPath();
 	const std::string& serverLocationUri = server.getLocationURIfromPath(clientUriPath);
@@ -276,7 +273,6 @@ void	Cgi::_createEnvVector(Client& client, std::vector<std::string>& envVec, cha
 	std::string locationRoot;
 	if(found == true)
 		locationRoot = it->getRoot();
-	// MR: END OF PROPOSED CHANGES
 	line += locationRoot;
 	envVec.push_back(line);
 
@@ -395,7 +391,6 @@ int	Cgi::_execute(char** args, char** env, int* socketsToChild, int* socketsFrom
 
  	// execve(_args[0], _args, _env);
  	execve(args[0], args, env);
-	// TODO: should this be a runtime_error?
 	throw std::runtime_error("execve failed in CGI child process");
 }
 
@@ -531,16 +526,6 @@ char**	Cgi::_metaVariables(Client& client, char** args)
 
 static bool	isAllowedCgi(Client& client)
 {
-	// NOT: SEND TO CGI OR RECEIVE FROM CGI OR REACHED TIMEOUT WHILE RUNNING CGI
-	// if (!((client.getClientState() == Client::DO_CGIREC
-	// 	|| client.getClientState() == Client::DO_CGISEND)
-	// 	|| (client.checkTimeout() == false && client.getCgiFlag() == true)
-	// 	|| client.getClientState() == Client::CRITICAL_ERROR))
-	// {
-	// 	return (false);
-	// }
-	
-	// TODO: check if above code is really not necessary. If so this simple condition replaces it
 	if (client.getCgiFlag() == false)
 		return (false);
 

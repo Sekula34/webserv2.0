@@ -4,7 +4,7 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <sys/time.h>
+// #include <sys/time.h>
 #include <ctime>
 #include <iomanip>
 
@@ -87,28 +87,53 @@ std::string  Logger::getCharSequence(const size_t numberOfChars, char c)
 		oss << c;
 	return  oss.str();
 }
-std::ostringstream&  Logger::_printCurrentTime() {
-	timeval curTime;
-	gettimeofday(&curTime, NULL);
-	static std::ostringstream oss;
-    oss.str(""); // Clear the stream
+
+std::ostringstream&    Logger::_printCurrentTime()
+{
+    static std::ostringstream oss;
+    oss.str(""); // Clear the stream to reuse it
     oss.clear(); // Clear any error flags
 
-	// Get the current time in seconds
-	time_t now = curTime.tv_sec;
-	tm* localTime = localtime(&now);
+    // Get the current time in seconds
+    time_t now = time(0);
+    tm* localTime = localtime(&now);
 
-	// Extract minutes, seconds, and milliseconds
-	int minutes = localTime->tm_min;
-	int seconds = localTime->tm_sec;
-	int milliseconds = curTime.tv_usec / 1000;
+    // Extract minutes and seconds
+    int minutes = localTime->tm_min;
+    int seconds = localTime->tm_sec;
 
-	// Print the time in the desired format
-	oss << std::setw(2) << std::setfill('0') << minutes << ":"
-			<< std::setw(2) << std::setfill('0') << seconds << ":"
-			<< std::setw(3) << std::setfill('0') << milliseconds << " ";
-	return  oss;
+    // Approximate milliseconds using clock ticks since the program started
+    int milliseconds = static_cast<int>((clock() % CLOCKS_PER_SEC) * 1000 / CLOCKS_PER_SEC);
+
+    // Print time in the desired format
+    oss << std::setw(2) << std::setfill('0') << minutes << ":"
+        << std::setw(2) << std::setfill('0') << seconds << ":"
+        << std::setw(3) << std::setfill('0') << milliseconds << " ";
+    return (oss);
 }
+
+// std::ostringstream&  Logger::_printCurrentTime() {
+// 	timeval curTime;
+// 	gettimeofday(&curTime, NULL);
+// 	static std::ostringstream oss;
+//     oss.str(""); // Clear the stream
+//     oss.clear(); // Clear any error flags
+//
+// 	// Get the current time in seconds
+// 	time_t now = curTime.tv_sec;
+// 	tm* localTime = localtime(&now);
+//
+// 	// Extract minutes, seconds, and milliseconds
+// 	int minutes = localTime->tm_min;
+// 	int seconds = localTime->tm_sec;
+// 	int milliseconds = curTime.tv_usec / 1000;
+//
+// 	// Print the time in the desired format
+// 	oss << std::setw(2) << std::setfill('0') << minutes << ":"
+// 			<< std::setw(2) << std::setfill('0') << seconds << ":"
+// 			<< std::setw(3) << std::setfill('0') << milliseconds << " ";
+// 	return  oss;
+// }
 
 bool Logger::_isPrintingAllowed()
 {

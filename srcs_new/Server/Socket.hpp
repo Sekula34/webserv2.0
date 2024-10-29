@@ -37,7 +37,6 @@ class Socket
 	private:
 		Socket();
 
-	// FIXME: FUNTIONS FOR TESTING OR NOT BEING USED
 	public:
 		void printSocketInfo(void);
 };

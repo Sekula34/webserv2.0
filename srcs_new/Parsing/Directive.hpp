@@ -13,7 +13,6 @@ class DefaultSettings;
 
 class Directive 
 {
-	// friend DirectiveTester;//FIXME: no one needs friends before eval so get rid of them
 	public:
 		/**
 		 * @brief Function that goes through vector of directives and check if list contains duplicates that are not allowed.

@@ -332,7 +332,7 @@ void	Message::_parseNode()
 		// save the size of the expected chunk body (save the hex number from first line)
 		_it->setChunkSize(_calcChunkSize(_it->getStringChunked()));
 		// MR: Accumulate chunk body size.
-		_bodySize += _calcChunkSize(_it->getStringChunked()); // FIXME: Better to have a local var and not call _calkChunk.. twice.
+		_bodySize += _calcChunkSize(_it->getStringChunked());
 
 		if (_it->getChunkSize() == 0)
 		{
@@ -349,8 +349,6 @@ void	Message::_parseNode()
 		|| _it->getType() == BODY || _it->getType() == TRAILER)
 	{
 		_state = COMPLETE;
-		// Logger::info("Body Complete:", "\n" + this->getBodyString()); // FIXME: This is new
-		// printChain();
 	}
 
 	// if header, create new RequestHeader

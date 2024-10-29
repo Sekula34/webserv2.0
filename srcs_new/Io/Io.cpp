@@ -76,11 +76,10 @@ static void	setFinishedReceiving(Client& client, FdData& fdData, Message* messag
 
 	// IF MESSAGE OR ITS HEADER IS NOT COMPLETE, FINISH HEADER, SET MESSAGE AS COMPLETE
 	if (!message->getHeader())
-		message->createHeader(); // TODO: Check _header because it uses new.
+		message->createHeader();
 	message->getChain().begin()->setState(COMPLETE);
 	message->setState(COMPLETE);
 	message->resetIterator();
-	// message->printChain(); // FIXME: testing
 }
 
 void	clearBuffer(char* buffer)
@@ -194,14 +193,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 		catch(std::bad_alloc& a)
 		{
 			Logger::error("in create Cgi Header: ", a.what());
-			// client.getFdDataByType(FdData::FROMCHILD_FD).state = FdData::CLOSE;
 			client.setClientState(Client::CRITICAL_ERROR);
-			// recValue = -1;
-			// client.setClientState(Client::DELETEME);
-			// client.setClientState(Client::RESETME);
-			// client.setCgiFlag(false);
-			// return ;
-			//TODO: before it was only setClinetState(Client::DELETEME)
 		}
 	}
 

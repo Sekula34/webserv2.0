@@ -56,6 +56,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 
 	int opt(1);
 	int retVal;
+
 	// TODO: check if this is ok with subject. Reuseaddr is to make bind not fail if restart is quick.
 	retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
 	if(retVal == -1)
@@ -87,8 +88,6 @@ Socket::Socket(const Socket& source) :
 _port(source._port), _socketFD(source._socketFD),
 _adress(source._adress), _addrlen(source._addrlen)
 {}
-
-// TODO: Copy Assigment Operator
 
 // Destructor
 Socket::~Socket() {}

@@ -285,7 +285,6 @@ void	Client::closeSocketFromChild()
 	}
 }
 
-// TODO: Long discussion with Filip about this function.
 unsigned short	Client::getClientPort()
 {
 	struct sockaddr_in local_addr;

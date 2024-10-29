@@ -80,7 +80,7 @@ static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, 
 		// Logger::chars(httpDelimiter, true);
 		std::string aHeaderStr = ParsingUtils::replaceAllCharsInString(cgiHeaderStr, toReplace, httpDelimiter);
 		// throw std::bad_alloc();
-		return (new ResponseHeader(aHeaderStr, clientError));//FIXME: this is the one that i cause a lot of problems when throwing bad alloc and setting it to NULL
+		return (new ResponseHeader(aHeaderStr, clientError));
 		// Logger::chars(aHeaderStr, true);
 	}
 	return (NULL);
@@ -92,10 +92,32 @@ void	ResponseHeader::cgiToHttpConversion(ResponseHeader* toReturn)
 	if(toReturn->p_isHeaderField("Status") == true)
 	{
 		std::map<std::string, std::string>::iterator it = toReturn->m_headerFields.find("Status");
-		std::string cgiStatus = ParsingUtils::extractUntilDelim(it->second, " ", false);
-		int newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
-		//FIXME: newHttpCode is http code from CGI, WHAT SHOULD WE DOO if cgi for example provide 600? correct it ? 400 /500/502?
-		toReturn->changeHttpCode(newHttpCode);
+		std::string codeAndReasonphrase = it->second;
+		std::string cgiStatus;
+		int newHttpCode;
+
+		if (codeAndReasonphrase.find(" ") == std::string::npos)
+			cgiStatus = codeAndReasonphrase;
+		else
+			cgiStatus = ParsingUtils::extractUntilDelim(codeAndReasonphrase, " ", false);
+
+		// Logger::info("cgiStatus: ", cgiStatus);
+		if (ParsingUtils::isStringNumber(cgiStatus) == true)
+			 newHttpCode = ParsingUtils::stringToSizeT(cgiStatus);
+		else
+		{
+			newHttpCode = 502;
+			toReturn->p_setHttpStatusCode(502);
+		}
+
+		try {
+			toReturn->changeHttpCode(newHttpCode); 
+		}
+		catch (HttpStatusCode::UnkownCodeException& u)
+		{
+			toReturn->changeHttpCode(502);
+			toReturn->p_setHttpStatusCode(502);
+		}
 		toReturn->m_headerFields.erase(it);
 		return ;
 	}
@@ -136,15 +158,8 @@ ResponseHeader* ResponseHeader::createRgResponseHeader(const ResponseGenerator &
 	{
 		rgHeader->setOneHeaderField("Location", rg.getRedirect().getRedirectPath());
 	}
-	//rgHeader->setOneHeaderField("Connection", "close");
-	//rgHeader->setOneHeaderField("Content-Type", "text/html; charset=utf-8");//TODO: either left it out or decide based on file extension
-	//rgHeader->setOneHeaderField("Content-Type", std::string value)
-	//Content-Type: text/html; charset=ISO-8859-1
-
-
-
+	rgHeader->setOneHeaderField("Connection", "close");
 	return rgHeader;
-	//rgHeader->setOneHeaderField(std::string key, std::string value)
 }
 
 void ResponseHeader::changeHttpCode(int newHttpCode)

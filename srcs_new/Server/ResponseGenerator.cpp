@@ -16,6 +16,7 @@
 #include "../Utils/Autoindex.hpp"
 #include <fstream>
 #include <sys/stat.h>
+#include <cstdio>
 // #include <iostream>
 
 // Static function
@@ -66,7 +67,6 @@ void ResponseGenerator::generateClientResponse(Client &client)
 
 	else // THIS MEANS CGI RAN SUCCESSFULLY
 	{
-		// TODO: correct the Header instance in Message from CGI Response state to final state
 		ResponseHeader* header = static_cast<ResponseHeader*>(message->getHeader());
 		client.setCgiFlag(false);
 		// Logger::info("string in response Header:\n", header->turnResponseHeaderToString());
@@ -248,7 +248,7 @@ static std::string	generateFilename(const std::string& queryString, const std::s
 		if(fileExtension == "")
 			fileExtension = ".bin";
 		fileName = FileUtils::getFileName(queryString);
-		fileName = ParsingUtils::uriDecode(true, fileName); //FIXME: this Line was added by Filip when marco was on vacation. Filip thinks it is bulletproof but maybe it is not Marcoproof
+		fileName = ParsingUtils::uriDecode(true, fileName);
 	}
 	std::ostringstream file;
 	file << fileName << fileExtension;
@@ -295,7 +295,7 @@ void		ResponseGenerator::_deleteHandler(const LocationSettings& location)
 	Logger::info("DELETE method executed", "");
 	const UrlSuffix& suffix = * (static_cast<RequestHeader*>(_client.getMsg(Client::REQ_MSG)->getHeader())->urlSuffix);
 	std::string filename = _pathRelativeToExecutable(location, suffix);
-	if (remove(filename.c_str()) != 0)
+	if (std::remove(filename.c_str()) != 0)
 	{
 		Logger::error("Unable to DELETE file!", filename);
 		_httpStatus = 404;

@@ -13,7 +13,6 @@ struct StatusLineElements
 	std::string ReasonPhrase;
 };
 
-//FIXME: there could be problem with http code 
 class ResponseHeader : public AHeader
 {
 

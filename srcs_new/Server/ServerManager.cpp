@@ -88,7 +88,7 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 		std::string clientMethod = header.getRequestLine().requestMethod;
 		if(reponseLocation.isMethodAllowed(clientMethod) == false)
 		{
-			client.setErrorCode(403); //TODO: Nginx considers this as 403 forbbiden-> CHANGGED FROM 405 to 403
+			client.setErrorCode(403);
 			Logger::warning("Seted *405 method not allowed, actually it is limited so 403", 403);
 			return false;
 		}
@@ -121,7 +121,6 @@ bool	ServerManager::_checkIfRequestAllowed(Client& client)
 }
 
 // MR: Method for checking if bodysize is withing the boundaries of Directive client_max_body_size
-// FIXME: Mabe its good to code function for get client's responseLocation. (repeated here and _checkIfRequestAllowed).
 bool	ServerManager::_checkBodySizeLimit(Client& client)
 {
 	if(client.getErrorCode() != 0)
@@ -159,9 +158,9 @@ void ServerManager::loop()
 			continue;
 		if(client.getErrorCode() != 0)
 			client.setClientState(Client::DO_RESPONSE);
-		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE) //TODO: check if header is complete not full req
+		if (client.getMsg(Client::REQ_MSG)->getChain().begin()->getState() != COMPLETE)
 			continue;
-		_assignVirtualServer(client); //TODO:  check if VS assignment with incomplete header could segfault
+		_assignVirtualServer(client);
 		// MR: Check message header against Directives (method and content-length)
 		if(client.getIsRequestChecked() == false)
 		{
@@ -175,7 +174,6 @@ void ServerManager::loop()
 			if (_checkBodySizeLimit(client) == false)
 				client.setClientState(Client::DO_RESPONSE);
 		}
-		// if (client.getMsg(Client::REQ_MSG)->getState() != COMPLETE) //TODO: check if header is complete not full req
 		// 	continue;
 		if(client.getClientState() == Client::DO_REQUEST && client.getMsg(Client::REQ_MSG)->getState() == COMPLETE)
 		{
@@ -186,9 +184,6 @@ void ServerManager::loop()
 				client.setCgiFlag(true);
 				Logger::warning("Client Requested valid cgi, ID: ", client.getId());
 				client.setClientState(Client::DO_CGISEND);
-
-				// TODO: this is fake set state, just to make webserve work without cgi
-				// client.setClientState(Client::DO_RESPONSE);
 			}
 			else  
 			{
@@ -303,34 +298,6 @@ const VirtualServer* ServerManager::getServerByPort(int portNumber, std::string 
 	serverId = ServersId[0].getServerId();
 	return &getServerById(serverId);
 }
-
-// TODO:
-// bool ServerManager::_validateRequestHeader(const RequestHeader* header) const
-// {
-// 	if(header == NULL)
-// 	{
-// 		Logger::warning("Trying to get Client Server with client that have no header", "");
-// 		return false;
-// 	}
-// 	if(header->getHttpStatusCode() == 400) // or check if code is 400 
-// 	{
-// 		const std::string reason = HttpStatusCode::getReasonPhrase(header->getHttpStatusCode());
-// 		Logger::warning("Client send " + reason, true);
-// 		Logger::warning("There is no filled info in header for finding server", true);
-// 		return false;
-// 	}
-// 	return true;
-// }
-
-// TODO: Important
-// const VirtualServer* ServerManager::getClientServer(const Client& client) const
-// {
-// 	if(_validateRequestHeader(static_cast<RequestHeader*>(client.getClientMsg()->getHeader())) == false)
-// 		return NULL;
-// 	int portNumber = static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostPort();
-// 	const VirtualServer* toReturn = getServerByPort(portNumber, static_cast<RequestHeader*>(client.getClientMsg()->getHeader())->getHostName());
-// 	return toReturn;
-// }
 
 //goes through vector of servers
 //get server Port, check if port is in unique vector if not add it
