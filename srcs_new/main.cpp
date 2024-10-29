@@ -83,7 +83,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	Data::setEnvp(envp);
 	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
-	Data::setEnvp(envp);
+	// Data::setEnvp(envp);
 	// SocketManager sockets(serverInfo.getUniquePorts());
 	
 	// Initialize epoll
@@ -143,9 +143,15 @@ int main(int argc, char** argv, char** envp)
 	}
 	catch(std::exception& e)
 	{
+		// while (Client::clients.size() > 0)
+		// 	delete Client::clients.begin()->second;
+		close (ConnectionManager::getEpollFd());
+		Socket::closeSockets();
 		Logger::error("Exception Happened", "");
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
+	Socket::closeSockets();
+	close (ConnectionManager::getEpollFd());
 	return 0;
 }

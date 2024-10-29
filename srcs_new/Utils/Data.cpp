@@ -4,7 +4,8 @@
 #include "../Server/Socket.hpp"	
 #include <sys/epoll.h>
 #include <vector>
-#include <iostream>
+// #include <iostream>
+#include <stdexcept>
 
 /******************************************************************************/
 /*                               Constructors                                 */
@@ -12,7 +13,7 @@
 
 Data::Data (void)
 {
-	std::cout << "Data default constructor called" << std::endl;
+	// std::cout << "Data default constructor called" << std::endl;
 }
 
 /******************************************************************************/
@@ -21,7 +22,7 @@ Data::Data (void)
 
 Data::~Data (void)
 {
-	std::cout << "Data destructor called" << std::endl;
+	// std::cout << "Data destructor called" << std::endl;
 }
 
 /******************************************************************************/
