@@ -45,7 +45,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 	_socketFD = socket(AF_INET, SOCK_STREAM, 0);
 	if(_socketFD == -1)
 	{
-		perror("socket function in socket Default constructor failed");
+		Logger::error("socket function in socket Default constructor failed", "");
 		throw std::runtime_error("System call socket failed");
 	}
 
@@ -60,19 +60,19 @@ Socket::Socket(int portNumber) : _port(portNumber)
 	retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
 	if(retVal == -1)
 	{
-		perror("setsockopt systemcall in socket constructor failed");
+		Logger::error("setsockopt systemcall in socket constructor failed", "");
 		throw std::runtime_error("System call setsockopt failed");
 	}
 	retVal = bind(_socketFD, (struct sockaddr*) &_adress, _addrlen);
 	if(retVal == -1)
 	{
-		perror("Bind function in Socket constructor failed ");
+		Logger::error("Bind function in Socket constructor failed ", "");
 		throw std::runtime_error("System call bind failed");
 	}
 	retVal = listen(_socketFD, backlog);
 	if(retVal == -1)
 	{
-		perror("listen systemcall failed");
+		Logger::error("listen systemcall failed", "");
 		throw std::runtime_error("System call listen failed");
 	}
 	_allSockets.push_back(*this); // Adding socket to _allsockets vector.

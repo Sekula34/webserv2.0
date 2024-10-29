@@ -1,9 +1,9 @@
 #ifndef PARSINGUTILS_HPP
 #define PARSINGUTILS_HPP
+#include "../Utils/Logger.hpp"
 #include <cstddef>
 #include <exception>
 #include <string>
-#include <iostream>
 #include <vector>
 #include <sstream>
 
@@ -20,13 +20,13 @@ class ParsingUtils
 			ss << number;
 			if(ss.fail())
 			{
-				std::cerr << "StringStreamFailed" << std::endl;
+				Logger::error("StringStreamFailed", "");
 				throw std::runtime_error("StringStreamfailed");
 			}
 			stringValue = ss.str();
 			if(ss.fail())
 			{
-				std::cerr << "StringStreamFailed2" << std::endl;
+				Logger::error("StringStreamFailed2", "");
 				throw std::runtime_error("StringStreamfailed2");
 			}
 			return stringValue;

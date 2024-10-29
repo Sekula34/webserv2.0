@@ -122,7 +122,8 @@ size_t	Message::_calcOptimalChunkSize(const std::string& body)
 {
 	if (MAX_CHUNKSIZE <= 0)
 	{
-		std::cout << "Can not calculate maximum chunk size!" << std::endl;
+		Logger::error("Can not calculate maximum chunk size!", "");
+		// std::cout << "Can not calculate maximum chunk size!" << std::endl;
 		return (0);
 	}
 	int ceiling = std::ceil(static_cast<double>(body.size()) / static_cast<double>(MAX_CHUNKSIZE));
@@ -374,8 +375,8 @@ void	Message::_parseNode()
 		_chain.pop_back();
 		_trailer = false;
 
-		Logger::warning("Request Header:", true);
-		std::cout << *_header << std::endl;
+		// Logger::warning("Request Header:", true);
+		// std::cout << *_header << std::endl;
 	}
 }
 

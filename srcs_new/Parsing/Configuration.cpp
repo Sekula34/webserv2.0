@@ -70,13 +70,15 @@ void Configuration::_checkFileAccessType() const
 {
 	if(_filePath.empty() == true)
 	{
-		std::cerr << "Provided path to file is empty.";
+		Logger::error("Provided path to file is empty.", "");
 		throw InvalidConfigFileException();
 	}
 	std::ifstream file(_filePath.c_str());
 	if(file.good() == false)
 	{
-		std::cerr << "Opening file [" << _filePath <<"] failed. Check if file exist (maybe typo) and if you have reading permmision." << std::endl;
+		std::ostringstream oss;
+		oss << "Opening file [" << _filePath <<"] failed. Check if file exist (maybe typo) and if you have reading permmision.";
+		Logger::error("Configuration: ", oss.str());
 		throw InvalidConfigFileException();
 	}
 	struct stat fileStat;
@@ -86,7 +88,9 @@ void Configuration::_checkFileAccessType() const
 	}
 	if(S_ISREG(fileStat.st_mode) == 0)
 	{
-		std::cerr<<"File at location:[" << _filePath << "] is not regular file." << std::endl;
+		std::ostringstream oss;
+		oss <<"File at location:[" << _filePath << "] is not regular file.";
+		Logger::error("Configuration: ", oss.str());
 		throw InvalidConfigFileException();
 	}
 	Logger::info("Configuration file is regular file that can be opened", "");

@@ -19,7 +19,7 @@ Autoindex::Autoindex(const std::string folderPath, int& statusCode, const std::s
 	}
 	if(FileUtils::isDirectoryValid(folderPath, statusCode) == false)
 	{
-		perror("Checking directory failed");
+		// perror("Checking directory failed");
 		Logger::error("Directory is not valid", "");
 		return;
 	}
@@ -67,7 +67,8 @@ void Autoindex::_createHtmlMenu()
 	closedir(directory);
 	if(errno)
 	{
-		perror("Reading dir");
+		Logger::error("Reading dir", "");
+		// perror("Reading dir");
 		_statusCode = 500;
 	}
 	_generateHtmlPage("Auto index of folder: " +_folderPath);

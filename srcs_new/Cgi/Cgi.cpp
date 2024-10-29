@@ -82,8 +82,8 @@ std::string	Cgi::_getInterpreterPath(Client& client, std::string suffix)
 			return (tmp);
 	}
 	_stopCgiSetErrorCode(client);
-	Logger::warning("CGI interpreter not installed:", "");
-	std::cout << Data::getCgiLang().at(suffix) << std::endl;
+	Logger::warning("CGI interpreter not installed:", Data::getCgiLang().at(suffix));
+	// std::cout << Data::getCgiLang().at(suffix) << std::endl;
 	return (tmp = "");
 }
 

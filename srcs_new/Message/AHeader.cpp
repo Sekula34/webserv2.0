@@ -114,7 +114,7 @@ bool AHeader::isBodyExpected() const
 	|| (m_headerFields.find("Transfer-Encoding") != m_headerFields.end()
 		&& m_headerFields.at("Transfer-Encoding") == "chunked"))
 	{
-		std::cout << "body should be read!" << std::endl;
+		// std::cout << "body should be read!" << std::endl;
 		return true;
 	}
 	return false;

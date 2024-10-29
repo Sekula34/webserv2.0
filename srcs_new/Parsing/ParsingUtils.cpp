@@ -91,14 +91,14 @@ size_t ParsingUtils::stringToSizeT(std::string string)
 {
 	if(isStringNumber(string) == false)
 	{
-		std::cerr << "Cannot convert string: " << string << " to number" << std::endl; 
+		Logger::error("Cannot convert string to number: ", string);
 		throw InvalidConversion();
 	}
 	std::istringstream iss(string);
 	size_t sizeTValue;
 	if(!(iss >> sizeTValue))
 	{
-		std::cerr << "Cannot convert string: " << string << " to number" << std::endl; 
+		Logger::error("Cannot convert string to number:", string);
 		throw std::runtime_error("istringstrream to size_t failed. Number does not fit in size_t probably");
 	}
 	return sizeTValue;
@@ -124,8 +124,10 @@ bool ParsingUtils::isStringEnd(const std::string toCheck,const std::string expec
 		return false;
 	size_t posToStart = toCheck.size() - expectedEnd.size();
 	std::string end = toCheck.substr(posToStart);
-	std::cout << "End is [" << end.size() << "]" <<std::endl;
-	std::cout << "Expected end is [" << expectedEnd.size() << "]" << std::endl;
+	std::ostringstream oss;
+	oss << "End is [" << end.size() << "]" <<std::endl;
+	oss << "Expected end is [" << expectedEnd.size() << "]" << std::endl;
+	Logger::info("isStringEnd:", oss.str());
 	if(end != expectedEnd)
 		return false;
 	return true;
