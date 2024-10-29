@@ -112,8 +112,6 @@ $(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIRS)
 
 mainandtest: | $(OBJ_DIRS) 
 	@$(CXX) $(CXXFLAGS) -c srcs_new/main.cpp -o  obj/srcs_new/main.o
-	@mkdir -p obj/testers
-	@$(CXX) $(CXXFLAGS) -c testers/unitTestmain.cpp -o obj/testers/unitTestmain.o
 
 $(OBJ_DIRS):
 	@mkdir -p $@
@@ -140,10 +138,7 @@ valgrind:
 					#valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
 		
 
-unitTest : $(OBJ) $(HEADERS) testers/unitTestmain.cpp 
-			@$(MAKE) --no-print-directory mainandtest
-			@$(CXX) $(CXXFLAGS) $(OBJ) obj/testers/unitTestmain.o -o unittest
-			@printf "$(GREEN)unitTest created.$(NC)\n"
+
 
 
 .PHONY:			all clean fclean re valgrind run conf confclean confre

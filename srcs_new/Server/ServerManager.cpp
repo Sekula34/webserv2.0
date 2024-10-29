@@ -37,7 +37,7 @@ void ServerManager::_assignVirtualServer(Client& client)
 		return;
 	}
 	const RequestHeader* reqHeader = static_cast<RequestHeader*>(client.getMsg(Client::REQ_MSG)->getHeader());
-	int port = reqHeader->getHostPort(); //TODO: change getHostPort to return error value when there is no Host Port
+	int port = reqHeader->getHostPort();
 	std::string serverName = reqHeader->getHostName();
 
 	const VirtualServer* server = getServerByPort(port, serverName);

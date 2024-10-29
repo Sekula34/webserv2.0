@@ -1,6 +1,5 @@
 #include "Socket.hpp"
 #include "../Utils/Logger.hpp"
-#include <cstdio>
 #include <cstring>
 #include <stdexcept>
 #include <unistd.h>
