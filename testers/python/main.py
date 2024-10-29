@@ -12,7 +12,7 @@ def tester_intro():
 	input(inputText)
 
 def config_tester():
-	inputText = Colors.color_text("Do you want to test config files?\n 0 - NO\n 1 - YES", Colors.BOLD)
+	inputText = Colors.color_text("Do you want to test config files?\n\t0 - NO\n\t1 - YES\n Answer: ", Colors.BOLD)
 	if input(inputText) == "1":
 		return True
 	return False
@@ -42,6 +42,9 @@ def spammerInput(testInstance, url):
 
 def big_main():
 	tester_intro()
+	if(config_tester() == True):
+		tester.TestMyWebServer.print_test_title("Different config files")
+		configTester.test_multiple_folder()
 	loader = unittest.TestLoader()
 	suite = loader.loadTestsFromModule(tester)
 
@@ -50,8 +53,6 @@ def big_main():
 
 	testInstance = tester.TestMyWebServer()
 	spammer(testInstance=testInstance)
-	if(config_tester() == True):
-		configTester.test_multiple_folder()
 
 if __name__ == "__main__":
 	big_main()

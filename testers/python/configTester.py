@@ -1,6 +1,7 @@
 import subprocess
 import os
 from colors import Colors
+
 def test_executable(config_path = "configuration_files/default.conf", expected_return = 0, exec_name = "webserv"):
     # Define the root directory explicitly (two levels up from TestScript.py)
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
@@ -55,27 +56,14 @@ def test_config_folder(folder_name, expected_return):
        test_executable(file_name, expected_return)
 
 def test_multiple_folder():
+    test_config_folder("../../configuration_files/invalid", 1)
     test_config_folder("../../configuration_files", 0)
     test_config_folder("../../configuration_files/valid", 0)
-    test_config_folder("../../configuration_files/invalid", 1)
 
 def list_files(folder_name):
     # Get absolute paths of all files in the specified folder
     files = [f for f in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, f))]
     return files
 
-# Usage example:
-# files_in_folder = list_files("your_folder_name")
-# print(files_in_folder)
-
-
-
-# Usage example:
-# Run `webserv` with `configuration_files/default.conf` as an argument
 if __name__ == "__main__":
-    #test_executable("configuration_files/invalid/bulshit", 1)
-    #test_executable()
     test_multiple_folder()
-    #test_config_folder("../../configuration_files", 0)
-    # files = list_files("../../configuration_files")
-    # print(files)
