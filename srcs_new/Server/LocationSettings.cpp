@@ -5,9 +5,11 @@
 #include "../Parsing/Token.hpp"
 #include <cstddef>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "../Utils/Logger.hpp"
+#include "../Parsing/Configuration.hpp"
 
 
 
@@ -49,6 +51,13 @@ DefaultSettings(settings),_locationToken(locationToken)
 {
 	_parentServerTokens = serverTokens;
 	_uri = _getUriFromToken(locationToken);
+	if(_uri == "")
+	{
+		std::ostringstream oss; 
+		oss <<"Found location that have no _uri in line " << _locationToken.getTokenLineNumber();
+		Logger::error("Location error: ", oss.str());
+		throw Configuration::InvalidConfigFileException();
+	}
 	_locationDirectives = _setLocationDirectives();
 	checkDuplicateDirectives(_locationDirectives);
 	Directive::applyAllDirectives(_locationDirectives, (*this));
