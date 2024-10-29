@@ -41,7 +41,7 @@ def test_executable(config_path = "configuration_files/default.conf", expected_r
                 message = f"Executable is still running after {my_timeout} second. {config_path} is valid Config."
                 Colors.test_passed(message)
             else:
-                Colors.test_failed("Executable is still runnig but return code is not 0")
+                Colors.test_failed(f"Executable is still runnig but return code is not 0 in {config_path}")
 
     except Exception as e:
         print(f"Error running executable: {e}")
