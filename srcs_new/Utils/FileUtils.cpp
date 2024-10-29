@@ -56,7 +56,7 @@ bool FileUtils::isPathValid(const std::string relativeFilePath)
 	Logger::info("Trying to open ", relativeFilePath);
 	if(file.good() == false)
 	{
-		Logger::error("Opening file failed. Check if file exist (maybe typo) and if you have reading permmision.", true);
+		Logger::error("Opening file failed. Check if file exist (maybe typo) and if you have reading permmision.", "");
 		return false;
 	}
 	struct stat fileStat;
@@ -166,24 +166,25 @@ int FileUtils::isPathFileOrFolder(const std::string &serverFilePath, int& httpSt
 	}
 	if(statBuf.st_mode & S_IFREG)
 	{
-		Logger::info("It is file", true);
+		Logger::info("It is file", "");
 		return 1;
 	}
 	else if(statBuf.st_mode & S_IFDIR)
 	{
-		Logger::info("It is directory", true);
+		Logger::info("It is directory", "");
 		return 2;
 	}
 	else
 	{
-		Logger::info("Only God knows", true);
+		Logger::info("Only God knows", "");
 		return 0;
 	}
 }
 
 void FileUtils::_setFileOrFolderStatusCode(int errnoNum, int& httpStatusCode)
 {
-	perror("File or Folder fail: "); //FIXME: delete for eval
+	// perror("File or Folder fail: "); //FIXME: delete for eval
+	Logger::error("File or Folder fail", "");
 	if(errnoNum == EACCES)
 		httpStatusCode = 403;
 	else if(errnoNum == EBADF || errnoNum == ENONET || errnoNum == 2)

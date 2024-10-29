@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdexcept>
 // #include <iostream>
+#include <stdexcept>
 
 /******************************************************************************/
 /*                               Constructors                                 */
