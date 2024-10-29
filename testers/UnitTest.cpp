@@ -134,8 +134,6 @@ void UnitTest::testingOpeninDirBlock()
 	testOpeningDirCase("configuration_files", 0);
 	testOpeningDirCase("./configuration_files/", 0);
 	testOpeningDirCase("html/403.html", 404);
-	//TODO: not sure how to test 403 anymore
-	//testOpeningDirCase("configuration_files/", 403);
 	testOpeningDirCase("testers/EmptyFolder/", 0);
 }
 

@@ -43,8 +43,6 @@ class ServerManager
 		 * @param client for which you are looking for server
 		 * @return VirtualServer* for client or NULL if there is no Server for that client (400 bad request usually)
 		 */
-		// TODO: This is an importnt function
-		//const VirtualServer* getClientServer(const Client& client) const;
 
 		/**
 		 * @brief Get the Unique Ports number for creating listeningSockets

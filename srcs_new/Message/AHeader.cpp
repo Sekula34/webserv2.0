@@ -109,7 +109,7 @@ const int& AHeader::getHttpStatusCode(void) const
 
 bool AHeader::isBodyExpected() const
 {
-	std::string s = "chunked"; //FIXME: what is this s used for?
+	// std::string s = "chunked";
 	if(m_headerFields.find("Content-Length") != m_headerFields.end()
 	|| (m_headerFields.find("Transfer-Encoding") != m_headerFields.end()
 		&& m_headerFields.at("Transfer-Encoding") == "chunked"))

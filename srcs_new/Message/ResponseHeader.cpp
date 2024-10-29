@@ -80,7 +80,7 @@ static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, 
 		// Logger::chars(httpDelimiter, true);
 		std::string aHeaderStr = ParsingUtils::replaceAllCharsInString(cgiHeaderStr, toReplace, httpDelimiter);
 		// throw std::bad_alloc();
-		return (new ResponseHeader(aHeaderStr, clientError));//FIXME: this is the one that i cause a lot of problems when throwing bad alloc and setting it to NULL
+		return (new ResponseHeader(aHeaderStr, clientError));
 		// Logger::chars(aHeaderStr, true);
 	}
 	return (NULL);

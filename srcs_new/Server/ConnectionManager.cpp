@@ -131,7 +131,6 @@ static Client*		isClient(int fd, std::map<int, Client*>& clients)
 	return (it->second);
 }
 
-// TODO: Declare an enum to be more verbose for idx of clientFds
 static void	updateClientFds(Client& client, const int& epollIdx, const struct epoll_event* events)
 {
 	const int fd = events[epollIdx].data.fd;
@@ -215,8 +214,6 @@ void	ConnectionManager::_handleClient(Client& client, const int& idx)
 			kill(client.getChildPid(), SIGKILL);
 		client.setClientState(Client::DO_RESPONSE);
 	}
-
-	// TODO: reset Messages and Flags and state in Client if Keep Alive	
 
 	if (safeToDelete(client))
 	{
