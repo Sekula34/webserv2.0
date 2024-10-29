@@ -1,4 +1,5 @@
 #include "Configuration.hpp"
+#include "ParsingUtils.hpp"
 #include "Token.hpp"
 #include <cstddef>
 #include <iostream>
@@ -97,6 +98,17 @@ void Configuration::_checkFileAccessType() const
 
 
 
+void Configuration::_checkNonAscii(const std::string& lineToCheck, const size_t& lineNumber) const
+{
+	if(ParsingUtils::isStringAscii(lineToCheck) == false)
+	{
+		std::ostringstream oss;
+		oss<< lineToCheck << " line number " << lineNumber << std::endl; 
+		Logger::error("Non ascii string found: ", oss.str());
+		throw Configuration::InvalidConfigFileException();
+	}
+}
+
 //Read config file at location _file path line by line
 //call function to cleanLine (line without comments and leading and trailing spaces and tabs)
 //store line in vector _fileLine as pair of cleanLine and sizeT absolute line number
@@ -111,6 +123,7 @@ void Configuration::_copyFileInVector(void)
 	while(std::getline(file, oneLine))
 	{
 		oneLine = _getCleanConfLine(oneLine);
+		_checkNonAscii(oneLine, lineNumber);
 		if(oneLine.empty() == false)
 		{	
 			//std::cout << "One clean string in line "<<lineNumber << " is [" << oneLine <<"]" << std::endl;

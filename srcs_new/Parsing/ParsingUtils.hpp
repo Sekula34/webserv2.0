@@ -36,6 +36,8 @@ class ParsingUtils
 		static std::vector<std::string>	splitString(std::string fullString, std::string delimiter);
 		static std::string				getStringOutOfVector(const std::vector<std::string> stringVector);		
 		static bool						isStringValid(std::string toCheck, const std::string ValidValues[], size_t numberOfValids);
+		static bool						isCharAscii(const char ch);
+		static bool 					isStringAscii(const std::string& stringToCheck);
 		static bool						isStringNumber(std::string toCheck);
 		static std::string				getBaseName(const std::string& fullUrl, const std::string& ServerLocationString);
 		static size_t					stringToSizeT(std::string string);

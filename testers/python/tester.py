@@ -52,7 +52,7 @@ class TestMyWebServer(unittest.TestCase):
 	
 	@staticmethod
 	def cgi_prompt():
-		question = Colors.color_text("Do you want to run cgi tester. Some test cases take 15 seconds because of timeout. \n\t 1 - Yes \n\t 2 - No\nAnswer: ", Colors.BOLD)
+		question = Colors.color_text("Do you want to run cgi tester. Some test cases take 15 seconds because of timeout. \n\t 1 - Yes \n\t 0 - No\nAnswer: ", Colors.BOLD)
 		answer = input(question)
 		return answer
 
@@ -231,7 +231,7 @@ class TestMyWebServer(unittest.TestCase):
 ### CGI test with test_2_XX_name
 	def test_2_01_all_cgi_scripts(self):
 		TestMyWebServer.print_test_title("Testing cgi")
-		if(TestMyWebServer.cgi_prompt() == "2"):
+		if(TestMyWebServer.cgi_prompt() == "0"):
 			Colors.print_warning("Cgi testing is skipped")
 			return
 		utils.create_python_test_files()

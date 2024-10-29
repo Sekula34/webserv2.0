@@ -218,8 +218,8 @@ int Directive::_stringToInt(std::string stringValue) const
 	if(!(iss >> value))
 	{
 		std::ostringstream oss;
-		oss <<"In line " << _dirLineNumber << " \"" << stringValue<< "\"";
-		Logger::error("Directive: ", oss.str());
+		oss <<"In line " << _dirLineNumber << " \"" << stringValue<< "\"" <<std::endl;
+		Logger::error("iss failed: ", oss.str());
 		throw std::runtime_error("isstringstream to int failed");
 	}
 	return (value);
@@ -456,7 +456,7 @@ void Directive::_applyListen(DefaultSettings& settings)
 {
 	_applyListenFirstTime(settings);
 	int portNumber = _stringToInt(_directiveValue);
-	if(portNumber < 0 || portNumber > 65535)
+	if(portNumber <= 0 || portNumber > 65535)
 	{
 		Logger::error("Invalid port Number in line ", _dirLineNumber);
 		throw InvalidDirectiveException();
