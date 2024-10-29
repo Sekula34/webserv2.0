@@ -147,11 +147,11 @@ int main(int argc, char** argv, char** envp)
 			delete Client::clients.begin()->second;
 		close (ConnectionManager::getEpollFd());
 		Socket::closeSockets();
-		Logger::error("Exception Happened", "");
-		std::cerr << e.what() << std::endl;
-		return 1;
+		Logger::error("Exception Happened", e.what());
+		// std::cerr << e.what() << std::endl;
+		return (1);
 	}
 	Socket::closeSockets();
 	close (ConnectionManager::getEpollFd());
-	return 0;
+	return (0);
 }

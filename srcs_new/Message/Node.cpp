@@ -1,4 +1,5 @@
 #include "Node.hpp"
+#include "../Utils/Logger.hpp"
 // #include "../Client/Client.hpp"
 #include "../Io/Io.hpp"
 #include <sstream>
@@ -202,7 +203,10 @@ std::string	Node::_chunk()
 std::string	Node::_unChunk()
 {
 	if (_str.size() == 0)
-		return (std::cout << "can't unchunk empty string", "");
+	{
+		Logger::warning("can't unchunk empty string", "");
+		return ("");
+	}
 	std::string uc_str;
 	std::string del = ("\r\n");
 	std::size_t found = 0;

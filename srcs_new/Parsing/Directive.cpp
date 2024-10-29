@@ -1,5 +1,6 @@
 #include "Directive.hpp"
 #include "../Server/DefaultSettings.hpp"
+#include "../Utils/Logger.hpp"
 #include "ParsingUtils.hpp"
 #include "Token.hpp"
 #include <algorithm>
@@ -90,7 +91,7 @@ void Directive::printAllDirectives(const std::vector<Directive> &allDirectives)
 {
 	for(size_t i = 0; i < allDirectives.size(); i++)
 	{
-		std::cout << allDirectives[i] << std::endl;
+		// std::cout << allDirectives[i] << std::endl;
 	}
 }
 
@@ -196,7 +197,7 @@ bool Directive::_isNameValid(const std::string& name, const std::string validLis
 		}
 		default:
 		{
-			std::cerr<<"_isNameValid function should not be printed ever " << std::endl;
+			Logger::error("_isNameValid function should not be printed ever ", "");
 			throw std::runtime_error("Unexpected to be here");
 		}
 	}
@@ -216,7 +217,9 @@ int Directive::_stringToInt(std::string stringValue) const
 	int value;
 	if(!(iss >> value))
 	{
-		std::cerr <<"In line " << _dirLineNumber << " \"" << stringValue<< "\"" <<std::endl;
+		std::ostringstream oss;
+		oss <<"In line " << _dirLineNumber << " \"" << stringValue<< "\"";
+		Logger::error("Directive: ", oss.str());
 		throw std::runtime_error("isstringstream to int failed");
 	}
 	return (value);
@@ -240,7 +243,9 @@ std::string Directive::_getNameFromToken(const Token& token) const
 	std::vector<Token> path (token.getTokenPath());
 	if(path.empty() == true)
 	{
-		std::cout << "Directive is not inside any context " << _directiveName << " in line " << token.getTokenLineNumber() << std::endl;
+		std::ostringstream oss;
+		oss << _directiveName << " in line " << token.getTokenLineNumber() << std::endl;
+		Logger::error("Directive is not inside any context ", oss.str());
 		throw InvalidDirectiveException();
 	}
 	Token parent = path.back();
@@ -453,7 +458,7 @@ void Directive::_applyListen(DefaultSettings& settings)
 	int portNumber = _stringToInt(_directiveValue);
 	if(portNumber < 0 || portNumber > 65535)
 	{
-		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
+		Logger::error("Invalid port Number in line ", _dirLineNumber);
 		throw InvalidDirectiveException();
 	}
 	if(settings.isListeningToPort(portNumber) == true)

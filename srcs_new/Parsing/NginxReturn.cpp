@@ -19,15 +19,15 @@ const std::string& NginnxReturn::getRedirectPath() const
 	return (_redirectPath);
 }
 
-void NginnxReturn::printNginxReturnInfo(void) const 
-{
-	std::cout << "Nginx Return is: " << _flag << std::endl;
-	if(_flag)
-	{
-		std::cout << "Redirect code is " << _status << std::endl;
-		std::cout << "Redirect page is " << _redirectPath << std::endl;
-	} 
-}
+// void NginnxReturn::printNginxReturnInfo(void) const 
+// {
+// 	std::cout << "Nginx Return is: " << _flag << std::endl;
+// 	if(_flag)
+// 	{
+// 		std::cout << "Redirect code is " << _status << std::endl;
+// 		std::cout << "Redirect page is " << _redirectPath << std::endl;
+// 	} 
+// }
 
 void NginnxReturn::setFlag(bool state)
 {
