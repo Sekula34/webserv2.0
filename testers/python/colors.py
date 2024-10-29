@@ -22,8 +22,12 @@ class Colors:
 		return(f"{Colors.OKBLUE}{text}{Colors.ENDC}")
 	
 	@staticmethod
-	def test_passed():
-		print(f"{Colors.OKGREEN}Test passed ✅ {Colors.ENDC}")
+	def test_passed(message = ""):
+		print(f"{Colors.OKGREEN}Test passed ✅ {Colors.ENDC}{message}")
+	
+	@staticmethod
+	def test_failed(message = ""):
+		print(f"{Colors.FAIL}Test failed ❌ {Colors.ENDC}{message}")
 
 	@staticmethod 
 	def print_warning(text):

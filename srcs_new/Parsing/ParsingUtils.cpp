@@ -222,6 +222,19 @@ std::string	ParsingUtils::uriEncode(bool encodeSpaceAsPlus, const std::string& i
 	}
 	return (encoded.str());
 }
+bool ParsingUtils::isCharAscii(const char ch)
+{
+	return static_cast<unsigned char>(ch) <= 127;
+}
+bool ParsingUtils::isStringAscii(const std::string &stringToCheck)
+{
+	for (std::string::const_iterator it = stringToCheck.begin(); it != stringToCheck.end(); ++it)
+	{
+        if (isCharAscii(*it) == false)
+            return false;
+    }
+    return true;  
+}
 
 std::string	ParsingUtils::uriDecode(bool decodePlusAsSpace, const std::string& input)
 {
