@@ -453,7 +453,7 @@ void Directive::_applyListen(DefaultSettings& settings)
 {
 	_applyListenFirstTime(settings);
 	int portNumber = _stringToInt(_directiveValue);
-	if(portNumber < 0 || portNumber > 65535)
+	if(portNumber <= 0 || portNumber > 65535)
 	{
 		std::cerr << "Invalid port Number in line " << _dirLineNumber << std::endl;
 		throw InvalidDirectiveException();
