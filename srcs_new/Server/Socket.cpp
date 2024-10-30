@@ -67,6 +67,7 @@ Socket::Socket(int portNumber) : _port(portNumber)
 	if(retVal == -1)
 	{
 		Logger::error("Bind function in Socket constructor failed ", "");
+		close(_socketFD);
 		throw std::runtime_error("System call bind failed");
 	}
 	retVal = listen(_socketFD, backlog);
