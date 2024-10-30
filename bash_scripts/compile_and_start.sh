@@ -20,4 +20,11 @@ if [ $? -ne 0 ]; then
 fi
 
 # Call the start_webserv.sh script with the generated shared object file
-./$SCRIPT_DIR/preload.sh "$filename.so"
+# Determine which preload script to use
+if [ -z "$2" ]; then
+  # No extra argument, use preload.sh
+  "$SCRIPT_DIR/preload.sh" "$filename.so"
+else
+  # Extra argument provided, use preload_valgrind.sh
+  "$SCRIPT_DIR/preload_valgrind.sh" "$filename.so"
+fi
