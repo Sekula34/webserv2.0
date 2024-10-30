@@ -265,7 +265,10 @@ void	Io::_ioClient(Client& client)
 
 	// if (!message || (fdType == FdData::TOCHILD_FD || fdType == FdData::FROMCHILD_FD)
 	if (!message)
-		return ; // TODO: Stop Loop / delete client, panic?
+	{
+		client.setClientState(Client::DELETEME);
+		return ;
+	}
 	
 	// SELECTING CORRECT FDDATA INSTANCE IN CLIENT
 	FdData& fdData = client.getFdDataByType(fdType);
