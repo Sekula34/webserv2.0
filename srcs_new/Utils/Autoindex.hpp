@@ -1,5 +1,5 @@
-#ifndef AUTOINDEX
-# define AUTOINDEX
+#ifndef AUTOINDEX_HPP
+# define AUTOINDEX_HPP
 #include <string>
 #include <vector>
 #include <dirent.h>

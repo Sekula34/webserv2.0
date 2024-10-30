@@ -107,7 +107,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	ConnectionManager manager;
 	Io io;
 	Cgi cgi;
-	Logger::info("my pid is: ", getpid());
+	Logger::info("my pid is: ", getpid()); // FIXME: MR: Remove this since getpid() is not allowed.
 	// initVars(envp, configFilePath);
 	// Main Loop
 	while (true)
