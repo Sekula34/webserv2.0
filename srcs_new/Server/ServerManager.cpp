@@ -52,7 +52,6 @@ void ServerManager::_assignVirtualServer(Client& client)
 	unsigned short clientPort = client.getClientPort(); // MR: Proposed changes
 	if(server->isListeningToPort(clientPort) == false || clientPort == 0) // MR: Proposed changes
 	{
-		Logger::error("Catched error in _assignVirtualServer. Client is jumping ports? errno is: ", errno);
 		// client.setErrorCode(400);
 		// MR: START Proposed changes
 		if (clientPort != 0)
