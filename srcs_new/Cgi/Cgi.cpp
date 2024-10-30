@@ -467,7 +467,7 @@ void	Cgi::_stopCgiSetErrorCode(Client& client, int code)
 
 bool	Cgi::_createSockets(int* socketsToChild, int* socketsFromChild)
 {
-	(void)socketsFromChild;
+	// (void)socketsFromChild;
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsToChild) < 0)
 		return (false);
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketsFromChild) < 0)

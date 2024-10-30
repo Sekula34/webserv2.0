@@ -143,8 +143,8 @@ int main(int argc, char** argv, char** envp)
 	}
 	catch(std::exception& e)
 	{
-		// while (Client::clients.size() > 0)
-		// 	delete Client::clients.begin()->second;
+		while (Client::clients.size() > 0)
+			delete Client::clients.begin()->second;
 		close (ConnectionManager::getEpollFd());
 		Socket::closeSockets();
 		Logger::error("Exception Happened", e.what());
