@@ -47,10 +47,18 @@ void ServerManager::_assignVirtualServer(Client& client)
 		client.setVirtualServer(getServerById(1)); 
 		return;
 	}
-	if(server->isListeningToPort(client.getClientPort()) == false) 
+	// FIXME: MR: If getClientPort() fails NOT because client tries to jump to other port, error code was overwritten to 400 here
+	// if(server->isListeningToPort(client.getClientPort()) == false)
+	unsigned short clientPort = client.getClientPort(); // MR: Proposed changes
+	if(server->isListeningToPort(clientPort) == false || clientPort == 0) // MR: Proposed changes
 	{
-		client.setErrorCode(400);
-		client.setVirtualServer(getServerById(1)); 
+		Logger::error("Catched error in _assignVirtualServer. Client is jumping ports? errno is: ", errno);
+		// client.setErrorCode(400);
+		// MR: START Proposed changes
+		if (clientPort != 0)
+			client.setErrorCode(400);
+		// END Proposed changes
+		client.setVirtualServer(getServerById(1));
 		return;
 	}
 	client.setVirtualServer(*server);
