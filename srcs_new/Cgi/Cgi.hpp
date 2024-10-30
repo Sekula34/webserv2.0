@@ -1,5 +1,5 @@
-#ifndef CGIPROCESSOR_HPP
-# define CGIPROCESSOR_HPP
+#ifndef CGI_HPP
+# define CGI_HPP
 
 # include "../Client/Client.hpp"
 # include <fcntl.h>

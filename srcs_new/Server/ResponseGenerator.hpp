@@ -1,5 +1,5 @@
-#ifndef RESPONSE_GENERATOR
-# define RESPONSE_GENERATOR
+#ifndef RESPONSEGENERATOR_HPP
+# define RESPONSEGENERATOR_HPP
 #include "../Client/Client.hpp"
 #include "../Utils/FileUtils.hpp"
 #include "LocationSettings.hpp"

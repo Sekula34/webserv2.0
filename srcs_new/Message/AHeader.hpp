@@ -1,5 +1,5 @@
-#ifndef AHEDER_HPP
-# define AHEDER_HPP
+#ifndef AHEADER_HPP
+# define AHEADER_HPP
 #include <ostream>
 #include <string>
 #include <map>
