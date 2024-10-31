@@ -535,11 +535,13 @@ void Cgi::_cgiClient(Client& client)
 	if (isAllowedCgi(client) == false)
 		return ;
 	// CREATE CHILD SOCKETS AND FORK ONCE
+	char** args = NULL;
+	char** env = NULL;
 	if (client.getClientFds().size() == 1)
 	{
 		int	socketsToChild[2];
 		int	socketsFromChild[2];
-		char** args = _argumentList(client);
+		args = _argumentList(client);
 		if (!args)
 		{
 			_stopCgiSetErrorCode(client);
@@ -547,7 +549,7 @@ void Cgi::_cgiClient(Client& client)
 			_deleteChararr(_tmp);
 			return ;
 		}
-		char** env = _metaVariables(client, args); 
+		env = _metaVariables(client, args); 
 		if (!env)
 		{
 			_stopCgiSetErrorCode(client);
