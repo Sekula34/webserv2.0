@@ -145,13 +145,17 @@ int main(int argc, char** argv, char** envp)
 	{
 		// while (Client::clients.size() > 0)
 		// 	delete Client::clients.begin()->second;
-		close (ConnectionManager::getEpollFd());
+		// close (ConnectionManager::getEpollFd());
+		if (ConnectionManager::getEpollFd() > -1)
+			close (ConnectionManager::getEpollFd());
 		Socket::closeSockets();
 		Logger::error("Exception Happened", e.what());
 		// std::cerr << e.what() << std::endl;
 		return (1);
 	}
 	Socket::closeSockets();
-	close (ConnectionManager::getEpollFd());
+	// close (ConnectionManager::getEpollFd());
+	if (ConnectionManager::getEpollFd() > -1)
+		close (ConnectionManager::getEpollFd());
 	return (0);
 }
