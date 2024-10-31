@@ -12,10 +12,7 @@
 #include <stdexcept>
 #include <stdexcept>
 #include <sys/socket.h>
-#include <unistd.h>
 #define MAX_UNIQUE_PORTS 20
-// #include <map>
-// #include <list>
 //
 
 // void	initVars(char** envp, const std::string& configFilePath)

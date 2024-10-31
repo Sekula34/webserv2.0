@@ -1,5 +1,4 @@
 #include "FileUtils.hpp"
-#include <asm-generic/errno.h>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -10,7 +9,6 @@
 #include <sstream>
 #include <string>
 #include <sys/stat.h> 
-#include <sys/types.h>
 #include <dirent.h>
 
 

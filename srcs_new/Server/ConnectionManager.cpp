@@ -2,11 +2,8 @@
 #include "../Utils/Logger.hpp"
 #include "Socket.hpp"
 #include "../Client/Client.hpp"
-// #include <csignal>
 #include <exception>
 #include <map>
-#include <sys/epoll.h>
-#include <unistd.h> // FIXME. Used by Logger for getpid()
 #include <vector>
 #include <csignal>
 

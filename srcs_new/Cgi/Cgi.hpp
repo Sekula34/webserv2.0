@@ -2,8 +2,6 @@
 # define CGI_HPP
 
 # include "../Client/Client.hpp"
-// # include <fcntl.h>
-# include <unistd.h>
 # include <sys/wait.h>
 # include <vector>
 

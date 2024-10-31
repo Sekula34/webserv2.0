@@ -5,10 +5,6 @@
 # include <string>
 # include <ctime>
 # include <unistd.h>
-# include <sys/types.h>
-# include <sys/socket.h>
-# include <netdb.h>
-# include <netinet/in.h>
 # include <arpa/inet.h>
 # include <vector>
 # include <map>

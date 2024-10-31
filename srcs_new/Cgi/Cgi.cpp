@@ -8,11 +8,7 @@
 #include "../Message/RequestHeader.hpp"
 #include "Cgi.hpp"
 #include <exception>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <stdlib.h>
-
 #include "../Server/VirtualServer.hpp" // For constructing DOCUMENT_ROOT
 
 extern volatile sig_atomic_t flag;

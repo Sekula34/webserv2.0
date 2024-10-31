@@ -2,7 +2,6 @@
 # define CONNECTIONMANAGER_HPP
 
 # include <sys/epoll.h>
-// # include <list>
 #include <map>
 
 #define MAX_EVENTS		40 // what happens if we exceed this?
