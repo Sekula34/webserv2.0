@@ -92,7 +92,7 @@ OBJ = $(SRCS:%.cpp=$(OBJ_DIR)/%.o)
 OBJ_DIRS := $(sort $(dir $(OBJ)))
 
 #------------------------------------ CODE ------------------------------------#
-.PHONY: all clean fclean re bonus generate_test test unitTest
+.PHONY: all clean fclean re
 
 all: $(NAME)
 
@@ -130,18 +130,6 @@ re:
 	@$(MAKE) --no-print-directory fclean
 	@$(MAKE) --no-print-directory all
 
-bonus: all
-
-
-valgrind:		
-					valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
-					#valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --track-origins=yes --trace-children=yes ./$(NAME)
-		
-
-
-
-
-.PHONY:			all clean fclean re valgrind run conf confclean confre
 
 #-------------------------------- LOADING BAR ---------------------------------#
 COUNT = 1
