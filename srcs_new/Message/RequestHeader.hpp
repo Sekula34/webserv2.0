@@ -1,5 +1,5 @@
-#ifndef REQUESTHEADER 
-# define REQUESTHEADER
+#ifndef REQUESTHEADER_HPP
+# define REQUESTHEADER_HPP
 #include "AHeader.hpp"
 #include <string>
 #include "../Utils/UrlSuffix.hpp"

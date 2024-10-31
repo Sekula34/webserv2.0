@@ -1,5 +1,5 @@
-#ifndef NGINXRETUNR_HPP
-# define NGINXRETUNR_HPP
+#ifndef NGINXRETURN_HPP
+# define NGINXRETURN_HPP
 #include <ostream>
 # include <string>
 

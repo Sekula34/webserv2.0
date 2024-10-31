@@ -61,18 +61,21 @@ Socket::Socket(int portNumber) : _port(portNumber)
 	if(retVal == -1)
 	{
 		Logger::error("setsockopt systemcall in socket constructor failed", "");
+		close(_socketFD);
 		throw std::runtime_error("System call setsockopt failed");
 	}
 	retVal = bind(_socketFD, (struct sockaddr*) &_adress, _addrlen);
 	if(retVal == -1)
 	{
 		Logger::error("Bind function in Socket constructor failed ", "");
+		close(_socketFD);
 		throw std::runtime_error("System call bind failed");
 	}
 	retVal = listen(_socketFD, backlog);
 	if(retVal == -1)
 	{
 		Logger::error("listen systemcall failed", "");
+		close(_socketFD);
 		throw std::runtime_error("System call listen failed");
 	}
 	_allSockets.push_back(*this); // Adding socket to _allsockets vector.
