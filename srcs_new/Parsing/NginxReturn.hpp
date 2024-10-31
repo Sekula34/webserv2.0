@@ -12,7 +12,6 @@ class NginnxReturn
 		void 				setFlag(bool state);
 		void				setStatus(int status);
 		void				setRedirectPath(std::string uri);
-		// void				printNginxReturnInfo(void) const;
 
 							NginnxReturn();
 							NginnxReturn(bool flag, int status, std::string _redirectPath);

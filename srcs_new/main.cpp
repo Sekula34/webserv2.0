@@ -13,29 +13,6 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #define MAX_UNIQUE_PORTS 20
-//
-
-// void	initVars(char** envp, const std::string& configFilePath)
-// {
-// 	Data::setAllCgiLang();
-// 	ServerManager serverInfo(configFilePath);
-// 	Logger::info("SERVER IS TURNED ON", "");
-// 	Data::setEnvp(envp);
-// 	// SocketManager sockets(serverInfo.getUniquePorts());
-
-// 	// Save all sockets Fds
-// 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
-// 	for (std::vector<int>::const_iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
-// 		Socket currSocket(*it);
-
-// 	// Initialize epoll
-// 	int epollFd = epoll_create(1);
-// 	if (epollFd == -1)
-// 		throw (std::runtime_error("epoll_create failed"));
-
-// 	// Create manager instance
-// 	ConnectionManager manager(epollFd);
-// }
 
 volatile sig_atomic_t flag = 0 ;
 
@@ -70,7 +47,7 @@ bool	shutdownServer()
 	return (false);
 }
 
-void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
+void	launchWebServer(char** envp, const std::string& configFilePath)
 {
 	signal(SIGINT, handle_sigint);
 
@@ -79,14 +56,6 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	Data::setEnvp(envp);
 	ServerManager serverInfo(configFilePath);
 	Logger::info("SERVER IS TURNED ON", "");
-	// Data::setEnvp(envp);
-	// SocketManager sockets(serverInfo.getUniquePorts());
-	
-	// Initialize epoll
-	// int epollFd = epoll_create(1);
-	// Logger::info("EPOLL Fd: ", epollFd);
-	// if (epollFd == -1)
-	// 	throw (std::runtime_error("epoll_create failed"));
 
 	// Save all sockets Fds
 	std::vector<int> serverSockets = serverInfo.getUniquePorts();
@@ -103,7 +72,7 @@ void	ConnectionDispatcherTest(char** envp, const std::string& configFilePath)
 	ConnectionManager manager;
 	Io io;
 	Cgi cgi;
-	Logger::info("my pid is: ", getpid()); // FIXME: MR: Remove this since getpid() is not allowed.
+	//Logger::info("my pid is: ", getpid()); // FIXME: MR: Remove this since getpid() is not allowed.
 	// initVars(envp, configFilePath);
 	// Main Loop
 	while (true)
@@ -134,8 +103,7 @@ int main(int argc, char** argv, char** envp)
 	{
 		std::string configFilePath = getConfigFilePath(argc, argv);
 		FileUtils::setConfigFilePath(configFilePath);
-		//const std::string filePath = getConfigFilePath(argc, argv);
-		ConnectionDispatcherTest(envp, configFilePath);
+		launchWebServer(envp, configFilePath);
 	}
 	catch(std::exception& e)
 	{
