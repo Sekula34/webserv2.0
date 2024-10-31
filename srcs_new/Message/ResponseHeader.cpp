@@ -79,7 +79,6 @@ static ResponseHeader*	cgiDelimitersToHttpDelimiters(std::string& cgiHeaderStr, 
 		// Logger::chars(toReplace, true);
 		// Logger::chars(httpDelimiter, true);
 		std::string aHeaderStr = ParsingUtils::replaceAllCharsInString(cgiHeaderStr, toReplace, httpDelimiter);
-		// throw std::bad_alloc();
 		return (new ResponseHeader(aHeaderStr, clientError));
 		// Logger::chars(aHeaderStr, true);
 	}

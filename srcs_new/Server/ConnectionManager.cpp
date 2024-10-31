@@ -3,6 +3,7 @@
 #include "Socket.hpp"
 #include "../Client/Client.hpp"
 // #include <csignal>
+#include <exception>
 #include <map>
 #include <sys/epoll.h>
 #include <unistd.h> // FIXME. Used by Logger for getpid()
@@ -83,6 +84,7 @@ void	ConnectionManager::_acceptNewClient(int listen_socket)
 	}
 	catch (std::exception& e)
 	{
+		close(clientFd);
 		Logger::error("Failed newClient: ", e.what());
 		return ;
 	}

@@ -248,8 +248,18 @@ void Client::_initVars(int fd)
 	_initClientIp();
 	_errorCode = 0;
 	// _clockstop = 1000;
-	_requestMsg = new Message(true, _errorCode);
-	_responseMsg = new Message(false, _errorCode);
+	_requestMsg = NULL;
+	_responseMsg = NULL;
+	try
+	{
+		_requestMsg = new Message(true, _errorCode);
+		_responseMsg = new Message(false, _errorCode);
+	}
+	catch (std::bad_alloc& b)
+	{
+		Logger::error("alloc fail in initVars, Client: ", _id);
+		_clientState = DELETEME;
+	}
 	// _cgiResponseMsg = NULL;
 	clients[fd] = this;
 	_isRequestChecked = false;
