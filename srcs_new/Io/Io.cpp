@@ -179,7 +179,7 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	int 	recValue = 0;
 
 	clearBuffer(_buffer);
-	recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
+		recValue = recv(fdData.fd, _buffer, MAXLINE, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 	// START TESTING
 	// std::string whichFd;
@@ -226,7 +226,10 @@ void	Io::_receiveMsg(Client& client, FdData& fdData, Message* message)
 	{
 		// Logger::warning("stopping receiving with recValue: ", recValue);
 		if (recValue < 0)
-			client.setErrorCode(500);
+		{
+			// client.setErrorCode(500);
+			client.setClientState(Client::DELETEME);
+		}
 		setFinishedReceiving(client, fdData, message);
 	}
 }
