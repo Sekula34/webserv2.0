@@ -1,7 +1,0 @@
-Starting : sudo systemctl start nginx 
-
-status : sudo systemctl status nginx 
-
-check configuration : sudo nginx -t
-
-restart : sudo systemctl restart nginx
