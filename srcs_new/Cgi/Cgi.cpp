@@ -312,12 +312,6 @@ char**	Cgi::_vecToChararr(std::vector<std::string> list)
 	for (; it != list.end(); it++)
 	{
 		char* line = new char[it->size() + 1]();
-		// if (i == 3)
-		// {
-		// 	delete [] line;
-		// 	line = NULL;
-		// 	throw std::bad_alloc();
-		// }
 		for (size_t j = 0; j < it->size(); j++)
 			line[j] = it->c_str()[j];
 		_tmp[i] = line;
@@ -549,6 +543,8 @@ void Cgi::_cgiClient(Client& client)
 		if (!args)
 		{
 			_stopCgiSetErrorCode(client);
+			_deleteChararr(args);
+			_deleteChararr(_tmp);
 			return ;
 		}
 		char** env = _metaVariables(client, args); 
@@ -556,6 +552,8 @@ void Cgi::_cgiClient(Client& client)
 		{
 			_stopCgiSetErrorCode(client);
 			_deleteChararr(args);
+			_deleteChararr(env);
+			_deleteChararr(_tmp);
 			return ;
 		}
 		// CREATES TWO SOCKETPAIRS IN ORDER TO COMMUNICATE WITH CHILD PROCESS
