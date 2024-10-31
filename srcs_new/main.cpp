@@ -10,7 +10,6 @@
 #include <csignal>
 #include <exception>
 #include <stdexcept>
-#include <iostream>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
