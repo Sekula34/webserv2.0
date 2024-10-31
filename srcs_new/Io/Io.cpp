@@ -166,7 +166,13 @@ void	Io::_sendMsg(Client& client, FdData& fdData, Message* message)
 	if (sendValue < 0 || (it != message->getChain().end() && sendValue == 0))
 	{
 		Logger::error("failed to send message String in Client with ID:", client.getId());
-		client.setErrorCode(500);
+		if (sendValue == 0)
+			client.setErrorCode(500);
+		else
+		{
+			client.setClientState(Client::DELETEME);
+			return ;
+		}
 	}
 	// PRINT THE MESSAGE THAT WE ARE SENDING TO THE CLIENT
 	message->printChain();	
