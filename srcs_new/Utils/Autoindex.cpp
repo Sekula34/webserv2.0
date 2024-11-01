@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <ostream>
 #include <sstream>
-#include <sys/types.h>
+
 
 
 Autoindex::Autoindex(const std::string folderPath, int& statusCode, const std::string linkBase)

@@ -17,7 +17,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <cstdio>
-// #include <iostream>
+
 
 // Static function
 void ResponseGenerator::generateClientResponse(Client &client)

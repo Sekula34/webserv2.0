@@ -22,17 +22,6 @@ ResponseHeader::ResponseHeader(std::string headerSection, int& errorCode)
 	_fillStatusLineElements();
 }
 
-// ResponseHeader::ResponseHeader(int& httpCode, size_t contentLength)
-// :_httpCode(httpCode)
-// {
-// 	_fillStatusLineElements();
-// 	m_headerFields["Connection"] = "close";
-// 	if(contentLength != 0)
-// 	{
-// 		m_headerFields["Content-Length"] = ParsingUtils::toString(contentLength);
-// 		m_headerFields["Content-Language"] = "en";
-// 	}
-// }
 
 ResponseHeader::ResponseHeader(const ResponseHeader& source)
 :AHeader(source.m_errorCode),

@@ -23,9 +23,6 @@
 #include <cerrno> // For errno.
 #include <new> // For std::bad_alloc
 
-// #include "../Utils/Logger.hpp"
-// #include "../Utils/HttpStatusCode.hpp"
-// #include "../Message/Message.hpp"
 
 void ServerManager::_assignVirtualServer(Client& client)
 {

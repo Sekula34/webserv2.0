@@ -5,7 +5,6 @@
 # include<string> 
 # include <map>
 # include <vector>
-# include <sys/epoll.h>
 // # define MAX_EVENTS		40 // what happens if we exceed this?
 
 class Client;
