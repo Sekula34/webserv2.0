@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 # ifndef PRINT 
-#  define PRINT 1
+#  define PRINT 0
 # endif
 
 #include <string>
