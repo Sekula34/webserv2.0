@@ -3,7 +3,7 @@ NAME =		webserv
 
 #--------------------------------- COMPILER -----------------------------------#
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 # CC = clang-12
 # CFLAGS = -Wall -Wextra -Werror -gdwarf-4 -g3
 # COMPILER_FLAGS = -Wall -Wextra -Werror -g -fsanitize=address,leak,undefined
