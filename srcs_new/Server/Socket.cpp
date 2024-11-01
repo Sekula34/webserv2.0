@@ -53,17 +53,17 @@ Socket::Socket(int portNumber) : _port(portNumber)
 	_adress.sin_addr.s_addr = htonl(INADDR_ANY);
 	_adress.sin_port = htons(_port);
 
-	int opt(1);
+	//int opt(1);
 	int retVal;
 
 	// TODO: check if this is ok with subject. Reuseaddr is to make bind not fail if restart is quick.
-	retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
-	if(retVal == -1)
-	{
-		Logger::error("setsockopt systemcall in socket constructor failed", "");
-		close(_socketFD);
-		throw std::runtime_error("System call setsockopt failed");
-	}
+	// retVal = setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)); 
+	// if(retVal == -1)
+	// {
+	// 	Logger::error("setsockopt systemcall in socket constructor failed", "");
+	// 	close(_socketFD);
+	// 	throw std::runtime_error("System call setsockopt failed");
+	// }
 	retVal = bind(_socketFD, (struct sockaddr*) &_adress, _addrlen);
 	if(retVal == -1)
 	{
