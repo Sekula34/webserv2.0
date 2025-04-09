@@ -1,0 +1,12 @@
+services:
+  webserver:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8989:8989
+      - 9090:9090
+      #- 9494:9494
+    container_name: webserv-container
+    image: webserv-img
+    command: ["./webserv", "configuration_files/default.conf"]
